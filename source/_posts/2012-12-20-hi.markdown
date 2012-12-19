@@ -1,0 +1,9 @@
+---
+layout: post
+title: "Hi"
+date: 2012-12-20 00:57
+comments: true
+categories: Life 
+---
+
+Hello World.This is my first post
