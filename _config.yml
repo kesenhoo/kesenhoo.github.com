@@ -3,8 +3,8 @@
 # ----------------------- #
 
 url: http://kesenhoo.github.com
-title: Kesen
-subtitle: Hi,I'm programmer from Shanghai,China.
+title: 四方城
+subtitle: Hi,I'm a programmer from Shanghai,China.
 author: Kesen Hoo
 simple_search: http://google.com/search
 description: The Personal Site.
@@ -62,6 +62,9 @@ github_user: kesenhoo
 github_repo_count: 3
 github_show_profile_link: true
 github_skip_forks: true
+
+# Share
+weibo_share: true
 
 # Twitter
 twitter_user: kesenhoo
