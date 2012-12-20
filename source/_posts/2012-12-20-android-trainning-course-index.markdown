@@ -10,7 +10,7 @@ categories: Android
     </strong>
 </p>
 <p>
-    <strong>下面是<a href="http://blog.csdn.net/kesenhoo" target="_blank">我在CSDN博客</a>中开的专栏，最近想放到点点上分享下，希望大家支持！欢迎同行一起交流！</strong><br />
+    <strong>下面是<a href="http://blog.csdn.net/kesenhoo" target="_blank">我在CSDN博客</a>中开的专栏，分享一下！欢迎交流！</strong><br />
 </p>
 <p>
     学习了Android有段时间了，感觉还是官方的英文资料学习起来收获最大。之前看了很多Android Dev Guide里面的文章，也写过几篇文章，可惜没有坚持下去。这次学习官方培训课程，决定把自己所学与大家一起分享，写的不好的地方还请多多指教，多多支持，谢谢！<br />
@@ -78,6 +78,7 @@ categories: Android
 <p>
     <a href="http://blog.csdn.net/kesenhoo/article/details/8235686" target="_blank" style="text-decoration :none ;">【Android Training - 03】使用Fragments建立动态的UI [ Lesson 4 - Fragment之间的通信 ]</a>
 </p>
+<!--more-->
 <h2>
     (04)Saving Data
 </h2>
