@@ -63,8 +63,8 @@ github_repo_count: 3
 github_show_profile_link: true
 github_skip_forks: true
 
-# Share
-weibo_share: true
+# Share Function
+share_function: true
 
 # Twitter
 twitter_user: 
