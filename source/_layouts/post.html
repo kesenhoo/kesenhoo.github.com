@@ -15,6 +15,9 @@ single: true
     {% unless page.sharing == false %}
       {% include post/sharing.html %}
     {% endunless %}
+    <!-- Begin: Add By @kesen -->    
+    <br></br>
+    <!-- End: Add By @kesen -->
     <p class="meta">
       {% if page.previous.url %}
         <a class="basic-alignment left" href="{{page.previous.url}}" title="Previous Post: {{page.previous.title}}">&laquo; {{page.previous.title}}</a>
@@ -31,6 +34,14 @@ single: true
     <div id="disqus_thread" aria-live="polite">{% include post/disqus_thread.html %}</div>
   </section>
 {% endif %}
+
+<!-- Begin: Add By @kesen For Comment -->
+<section>
+  <h1>Comments</h1>
+  {% include post/comment_uyan.html %}
+</section>
+<!-- End: Add By @kesen For Comment -->
+
 </div>
 {% unless page.sidebar == false %}
 <aside class="sidebar">
