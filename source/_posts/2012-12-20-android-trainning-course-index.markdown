@@ -57,6 +57,7 @@ categories: Android
 <p>
     <a href="http://blog.csdn.net/kesenhoo/article/details/7377610" target="_blank" style="text-decoration :none ;">【Android Training - 02】适配不同的屏幕[Lesson 3 - 实现可适配的UI流程]</a>
 </p>
+<!-- more -->
 <h2>
     (03)Building a Dynamic UI with Fragments
 </h2>
@@ -78,7 +79,6 @@ categories: Android
 <p>
     <a href="http://blog.csdn.net/kesenhoo/article/details/8235686" target="_blank" style="text-decoration :none ;">【Android Training - 03】使用Fragments建立动态的UI [ Lesson 4 - Fragment之间的通信 ]</a>
 </p>
-<!--more-->
 <h2>
     (04)Saving Data
 </h2>
