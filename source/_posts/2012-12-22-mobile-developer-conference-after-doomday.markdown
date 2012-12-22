@@ -17,7 +17,6 @@ categories: Life
 与自己预期有较大落差，开发者之间并没有很多的交流，上台的嘉宾也都是为自己的业务各自吆喝。也许我根本就不应该参加这样的大会，想要与同行之间有更多的交流，认识更多的同行，还是小型的沙龙比较合适。
 </p>
 <p>
-最后附上两张活动现场图片:
+最后附上一张活动现场图片:
 </p>
-{% img left /images/articles/eoe_conference_sh_00.jpg %}
-{% img right /images/articles/eoe_conference_sh_01.jpg %}
+{% img /images/articles/eoe_conference_sh_01.jpg %}
