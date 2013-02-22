@@ -12,10 +12,14 @@ single: true
       {% include post/date.html %}{% if updated %}{{ updated }}{% else %}{{ time }}{% endif %}
       {% include post/categories.html %}
     </p>
+    <!-- Begin: Add By @kesen --> 
+    {% unless page.ujian == false %}
+      {% include post/ujian.html %}
+    {% endunless %}
+    
     {% unless page.sharing == false %}
       {% include post/sharing.html %}
     {% endunless %}
-    <!-- Begin: Add By @kesen -->    
     <br></br>
     <!-- End: Add By @kesen -->
     <p class="meta">
