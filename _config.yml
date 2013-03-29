@@ -4,7 +4,7 @@
 
 url: http://kesenhoo.github.com
 title: 四方城
-subtitle: I am who i am, simply because i am not and can not be anyone else.
+subtitle: 不乱于心，不困于情。不畏将来，不念过往。如此，安好！
 author: Kesen Hoo
 simple_search: http://google.com/search
 description: The Personal Site.
@@ -46,8 +46,8 @@ titlecase: true       # Converts page and post titles to titlecase
 # list each of the sidebar modules you want to include, in the order you want them to appear.
 # To add custom asides, create files in /source/_includes/custom/asides/ and add them to the list like 'custom/asides/custom_aside_name.html'
 # default_asides: [asides/recent_posts.html, custom/asides/top_post.html, custom/asides/top_post.html, asides/github.html, asides/twitter.html, asides/delicious.html, asides/googleplus.html]
-# default_asides: [asides/recent_posts.html, asides/github.html]
-default_asides: [custom/asides/about.html, custom/asides/recently_post.html, custom/asides/top_post.html, custom/asides/recently_comment.html]
+default_asides: [asides/recent_posts.html, asides/github.html, custom/asides/recently_comment.html]
+# default_asides: [custom/asides/recently_post.html, custom/asides/top_post.html, custom/asides/recently_comment.html]
 
 # Each layout uses the default asides, but they can have their own asides instead. Simply uncomment the lines below
 # and add an array with the asides you want to use.
@@ -61,7 +61,7 @@ default_asides: [custom/asides/about.html, custom/asides/recently_post.html, cus
 
 # Github repositories
 github_user: kesenhoo
-github_repo_count: 3
+github_repo_count: 6
 github_show_profile_link: true
 github_skip_forks: true
 
@@ -94,7 +94,7 @@ delicious_user:
 delicious_count: 3
 
 # Disqus Comments
-disqus_short_name: 
+disqus_short_name: kesenhoo
 disqus_show_comment_count: false
 
 # Google Analytics

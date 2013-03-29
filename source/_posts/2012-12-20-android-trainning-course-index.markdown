@@ -1,9 +1,11 @@
 ---
-layout: post
+layout: page
 title: "Android Trainning Course Index"
 date: 2012-12-20 01:04
 comments: true
-categories: Android 
+footer: true
+sidebar: false
+categories: Android
 ---
 <p>
     <strong><br />
@@ -42,6 +44,7 @@ categories: Android
 <p>
     <a href="http://blog.csdn.net/kesenhoo/article/details/7524011" target="_blank" style="text-decoration :none ;">【Android Training - 01】详解Activity生命周期 [ Lesson 4 - 重建销毁的Activity ]</a>
 </p>
+<!-- more -->
 <h2>
     (02)Supporting Different Devices
 </h2>
@@ -57,7 +60,6 @@ categories: Android
 <p>
     <a href="http://blog.csdn.net/kesenhoo/article/details/7377610" target="_blank" style="text-decoration :none ;">【Android Training - 02】适配不同的屏幕[Lesson 3 - 实现可适配的UI流程]</a>
 </p>
-<!-- more -->
 <h2>
     (03)Building a Dynamic UI with Fragments
 </h2>
