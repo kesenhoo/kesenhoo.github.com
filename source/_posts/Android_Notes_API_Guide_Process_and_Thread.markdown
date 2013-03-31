@@ -132,4 +132,4 @@ Android提供了为远程过程调用（RPC）提供了一种进程间通信（I
 
 *****************
 **文章学习自http://developer.android.com/guide/components/processes-and-threads.html**  
-**转载请注明出处，谢谢**
+**转载请注明出自[Kesenhoo](kesenhoo.github.com)处，谢谢**
