@@ -6,11 +6,13 @@ comments: true
 categories: Android
 ---
 
-# Processes and Threads：进程与线程
+# 进程与线程
 当程序的第一个组件开始启动时，Android系统会为这个程序启动一个新的Linux进程。默认的，程序中的后续其他组件都是运行在这个进程的线程中(这个线程被成为"主"线程:main thread)。如果程序的组件在启动时发现已经存在这个程序的进程了(因为其他组件正在运行)， 那么这个组件将启动在该进程中，并使用同一线程。然而，你可以安排程序中的不同组件运行在另外一个进程中，而且你可以为任何进程创建其它的线程。
 
 ## Process：进程
 默认的，同一程序的所有组件都是运行在一个Proces里面的，并且大多数程序都不应该去改变这一规则。然而，如果你需要控制某一确定的组件的Proces，你可以在manifest文件中做特殊设置。*Music播放器的Playback Service就可以这样做*
+
+<!-- more -->
 
 manifest中的activity，service，receiver与provider的标签都可以支持**android:process**的属性，它可以为这个组件的运行指定一个特定的进程。这样你可以为某些组件设置运行的进程而其他组件共享一个进程。你还可以通过设置进程属性使得不同程序的运行在同一个进程，共享同一个Linux ID，并且签有同样的签名。
 
@@ -140,4 +142,4 @@ Android提供了为远程过程调用（RPC）提供了一种进程间通信（I
 
 *****************
 **文章学习自http://developer.android.com/guide/components/processes-and-threads.html**  
-**转载请注明出自**[Kesenhoo](kesenhoo.github.com)**处，谢谢**
+**转载请注明出自**[Kesenhoo]**处，谢谢**
