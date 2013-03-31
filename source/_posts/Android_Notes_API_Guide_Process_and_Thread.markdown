@@ -1,3 +1,11 @@
+---
+layout: post
+title: "[Android Notes - API Guides]进程与线程"
+date: 2013-03-31 16:27
+comments: true
+categories: Android
+---
+
 # Processes and Threads：进程与线程
 当程序的第一个组件开始启动时，Android系统会为这个程序启动一个新的Linux进程。默认的，程序中的后续其他组件都是运行在这个进程的线程中(这个线程被成为"主"线程:main thread)。如果程序的组件在启动时发现已经存在这个程序的进程了(因为其他组件正在运行)， 那么这个组件将启动在该进程中，并使用同一线程。然而，你可以安排程序中的不同组件运行在另外一个进程中，而且你可以为任何进程创建其它的线程。
 
