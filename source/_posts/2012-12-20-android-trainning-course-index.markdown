@@ -1,146 +1,65 @@
 ---
-layout: page
+layout: post
 title: "Android Trainning Course Index"
 date: 2012-12-20 01:04
 comments: true
-footer: true
-sidebar: false
 categories: Android
 ---
-<p>
-    <strong><br />
-    </strong>
-</p>
-<p>
-    <strong>下面是<a href="http://blog.csdn.net/kesenhoo" target="_blank">我在CSDN博客</a>中开的专栏，分享一下！欢迎交流！</strong><br />
-</p>
-<p>
-    学习了Android有段时间了，感觉还是官方的英文资料学习起来收获最大。之前看了很多Android Dev Guide里面的文章，也写过几篇文章，可惜没有坚持下去。这次学习官方培训课程，决定把自己所学与大家一起分享，写的不好的地方还请多多指教，多多支持，谢谢！<br />
-</p>
-<h1>
-    <strong>基础部分：</strong>
-</h1>
-<h2>
-    (00)Building Your First App
-</h2>
-<p>
-    这部分相对简单，翻译起来又比较繁琐，需要的请<a href="http://developer.android.com/training/basics/firstapp/index.html" style="text-decoration :none ;">点击这里</a>查看原文。<br />
-</p>
-<h2>
-    (01)Managing the Activity Lifecycle
-</h2>
-<p>
-    <a href="http://blog.csdn.net/kesenhoo/article/details/7517971" target="_blank" style="text-decoration :none ;">【Android Training - 01】详解Activity生命周期 [ Lesson 0 - 章节概览 ]</a>
-</p>
-<p>
-    <a href="http://blog.csdn.net/kesenhoo/article/details/7519270" target="_blank" style="text-decoration :none ;">【Android Training - 01】详解Activity生命周期 [ Lesson 1 - 启动与销毁Activity ]</a>
-</p>
-<p>
-    <a href="http://blog.csdn.net/kesenhoo/article/details/7519985" target="_blank" style="text-decoration :none ;">【Android Training - 01】详解Activity生命周期 [ Lesson 2 - 暂停与恢复Activity ]</a>
-</p>
-<p>
-    <a href="http://blog.csdn.net/kesenhoo/article/details/7520679" target="_blank" style="text-decoration :none ;">【Android Training - 01】详解Activity生命周期 [ Lesson 3 - 停止与重启Activity ]</a>
-</p>
-<p>
-    <a href="http://blog.csdn.net/kesenhoo/article/details/7524011" target="_blank" style="text-decoration :none ;">【Android Training - 01】详解Activity生命周期 [ Lesson 4 - 重建销毁的Activity ]</a>
-</p>
+
+下面是我在[CSDN博客](http://blog.csdn.net/kesenhoo)中开的专栏，分享一下！欢迎交流!  
+学习了Android有段时间了，感觉还是官方的英文资料学习起来收获最大。之前看了很多Android Dev Guide里面的文章，也写过几篇文章，可惜没有坚持下去。这次学习官方培训课程，决定把自己所学与大家一起分享，写的不好的地方还请多多指教，多多支持，谢谢！  
+
+# 基础部分
+## (00)Building Your First App  
+这部分相对简单，翻译起来又比较繁琐，需要的请[点击这里](http://developer.android.com/training/basics/firstapp/index.html)查看原文。
+## (01)Managing the Activity Lifecycle
+* 【Android Training - 01】详解Activity生命周期[Lesson 0 - 章节概览](http://blog.csdn.net/kesenhoo/article/details/7517971)
+* 【Android Training - 01】详解Activity生命周期[Lesson 1 - 启动与销毁Activity](http://blog.csdn.net/kesenhoo/article/details/7519270)
+* 【Android Training - 01】详解Activity生命周期[Lesson 2 - 暂停与恢复Activity](http://blog.csdn.net/kesenhoo/article/details/7519985)
+* 【Android Training - 01】详解Activity生命周期[Lesson 3 - 停止与重启Activity](http://blog.csdn.net/kesenhoo/article/details/7524011)
+* 【Android Training - 01】详解Activity生命周期[Lesson 4 - 重建销毁的Activity](http://blog.csdn.net/kesenhoo/article/details/7524011)
+
 <!-- more -->
-<h2>
-    (02)Supporting Different Devices
-</h2>
-<p>
-    How to build your app with alternative resources that provide an optimized user experience on multiple device form factors using a single APK.
-</p>
-<p>
-    <a href="http://blog.csdn.net/kesenhoo/article/details/7362575" target="_blank" style="text-decoration :none ;">【Android Training - 02】适配不同的屏幕[Lesson 1 - 支持不同的屏幕大小]</a>
-</p>
-<p>
-    <a href="http://blog.csdn.net/kesenhoo/article/details/7374185" target="_blank" style="text-decoration :none ;">【Android Training - 02】适配不同的屏幕[Lesson 2 - 适配不同屏幕密度]</a>
-</p>
-<p>
-    <a href="http://blog.csdn.net/kesenhoo/article/details/7377610" target="_blank" style="text-decoration :none ;">【Android Training - 02】适配不同的屏幕[Lesson 3 - 实现可适配的UI流程]</a>
-</p>
-<h2>
-    (03)Building a Dynamic UI with Fragments
-</h2>
-<p>
-    How to build a user interface for your app that is flexible enough to present multiple UI components on large screens and a more constrained set of UI components on smaller screens—essential for building a single APK for both phones and tablets.
-</p>
-<p>
-    <a href="http://blog.csdn.net/kesenhoo/article/details/8229800" target="_blank" style="text-decoration :none ;">【Android Training - 03】使用Fragments建立动态的UI [ Lesson 0 - 章节概览 ]</a>
-</p>
-<p>
-    <a href="http://blog.csdn.net/kesenhoo/article/details/8230064" target="_blank" style="text-decoration :none ;">【Android Training - 03】使用Fragments建立动态的UI [ Lesson 1 - 使用Support Library ]</a>
-</p>
-<p>
-    <a href="http://blog.csdn.net/kesenhoo/article/details/8230421" target="_blank" style="text-decoration :none ;">【Android Training - 03】使用Fragments建立动态的UI [ Lesson 2 - 新建一个Fragment ]</a>
-</p>
-<p>
-    <a href="http://blog.csdn.net/kesenhoo/article/details/8235358" target="_blank" style="text-decoration :none ;">【Android Training - 03】使用Fragments建立动态的UI [ Lesson 3 - 创建灵活可变的UI ]</a>
-</p>
-<p>
-    <a href="http://blog.csdn.net/kesenhoo/article/details/8235686" target="_blank" style="text-decoration :none ;">【Android Training - 03】使用Fragments建立动态的UI [ Lesson 4 - Fragment之间的通信 ]</a>
-</p>
-<h2>
-    (04)Saving Data
-</h2>
-<p>
-    How to save data on the device, whether it&#39;s temporary files, downloaded app assets, user media, structured data, or something else.<br />
-</p>
-<p>
-    <a href="http://blog.csdn.net/kesenhoo/article/details/8237930" target="_blank" style="text-decoration :none ;">【Android Training - 04】保存数据 [ Lesson 0 - 章节概览 ]</a>
-</p>
-<p>
-    <a href="http://blog.csdn.net/kesenhoo/article/details/8238014" target="_blank" style="text-decoration :none ;">【Android Training - 04】保存数据 [ Lesson 1 - 保存Key-Value]</a>
-</p>
-<p>
-    <a href="http://blog.csdn.net/kesenhoo/article/details/8238610" target="_blank" style="text-decoration :none ;">【Android Training - 04】保存数据 [ Lesson 2 - 保存文件]</a>
-</p>
-<p>
-    <a href="http://blog.csdn.net/kesenhoo/article/details/8240637" target="_blank" style="text-decoration :none ;">【Android Training - 04】保存数据 [ Lesson 3 - 保存数据到SQLite]</a>
-</p>
-<h2>
-    (05)Interacting with Other Apps
-</h2>
-<p>
-    How to build a user experience that leverages other apps available on the device to perform advanced user tasks, such as capture a photo or view an address on a map.
-</p>
-<p>
-    <a href="http://blog.csdn.net/kesenhoo/article/details/8246638" target="_blank" style="text-decoration :none ;">【Android Training - 05】与其他Apps进行交互 [ Lesson 0 - 章节概览 ]</a>
-</p>
-<p>
-    <a href="http://blog.csdn.net/kesenhoo/article/details/8246830" target="_blank" style="text-decoration :none ;">【Android Training - 05】与其他Apps进行交互 [ Lesson 1 - 启动到另外一个app ]</a>
-</p>
-<p>
-    <a href="http://blog.csdn.net/kesenhoo/article/details/8251061" target="_blank" style="text-decoration :none ;">【Android Training - 05】与其他Apps进行交互 [ Lesson 2 - 从activity获取Result ]</a>
-</p>
-<p>
-    <a href="http://blog.csdn.net/kesenhoo/article/details/8251585" target="_blank" style="text-decoration :none ;">【Android Training - 05】与其他Apps进行交互 [ Lesson 3 - 允许其他app启动你的activity ]</a>
-</p>
-<h2>
-    (06)Sharing Content
-</h2>
-<p>
-    How to take your app interaction to the next level by sharing information with other apps, receive information back, and provide a simple and scalable way to perform Share actions with user content.
-</p>
-<p>
-    <a href="http://blog.csdn.net/kesenhoo/article/details/7410189" target="_blank" style="text-decoration :none ;"></a>
-</p>
-<p>
-    <a href="http://blog.csdn.net/kesenhoo/article/details/7410189" target="_blank" style="text-decoration :none ;">【Android Training - 06】分享数据内容 [Lesson 0 - 章节概览]</a>
-</p>
-<p>
-    <a href="http://blog.csdn.net/kesenhoo/article/details/7413470" target="_blank" style="text-decoration :none ;">【Android Training - 06】分享数据内容 [Lesson 1 - 发送分享的数据到其他App]</a>
-</p>
-<p>
-    <a href="http://blog.csdn.net/kesenhoo/article/details/7416767" target="_blank" style="text-decoration :none ;">【Android Training - 06】分享数据内容 [Lesson 2 - 从其它app接收分享的内容]</a>
-</p>
-<p>
-    <a href="http://blog.csdn.net/kesenhoo/article/details/7416861" target="_blank" style="text-decoration :none ;">【Android Training - 06】分享数据内容 [Lesson 3 - 在ActionBar上添加Share Action]</a>
-</p>
-<h1>
-    <strong>高级部分：</strong>
-</h1>
+
+## (02)Supporting Different Devices
+How to build your app with alternative resources that provide an optimized user experience on multiple device form factors using a single APK.
+
+* 【Android Training - 02】适配不同的屏幕[Lesson 1 - 支持不同的屏幕大小](http://blog.csdn.net/kesenhoo/article/details/7362575)
+* 【Android Training - 02】适配不同的屏幕[Lesson 2 - 适配不同屏幕密度](http://blog.csdn.net/kesenhoo/article/details/7374185)
+* 【Android Training - 02】适配不同的屏幕[Lesson 3 - 实现可适配的UI流程](http://blog.csdn.net/kesenhoo/article/details/7377610)
+
+
+## (03)Building a Dynamic UI with Fragments
+How to build a user interface for your app that is flexible enough to present multiple UI components on large screens and a more constrained set of UI components on smaller screens—essential for building a single APK for both phones and tablets.
+
+* 【Android Training - 03】使用Fragments建立动态的UI[Lesson 0 - 章节概览 ](http://blog.csdn.net/kesenhoo/article/details/8229800)
+* 【Android Training - 03】使用Fragments建立动态的UI[Lesson 1 - 使用Support Library](http://blog.csdn.net/kesenhoo/article/details/8230064)
+* 【Android Training - 03】使用Fragments建立动态的UI[Lesson 2 - 新建一个Fragment](http://blog.csdn.net/kesenhoo/article/details/8230421)
+* 【Android Training - 03】使用Fragments建立动态的UI[Lesson 3 - 创建灵活可变的UI](http://blog.csdn.net/kesenhoo/article/details/8235358)
+* 【Android Training - 03】使用Fragments建立动态的UI[Lesson 4 - Fragment之间的通信](http://blog.csdn.net/kesenhoo/article/details/8235686)
+
+## (04)Saving Data
+How to save data on the device, whether it&#39;s temporary files, downloaded app assets, user media, structured data, or something else.
+* 【Android Training - 04】保存数据[Lesson 0 - 章节概览](http://blog.csdn.net/kesenhoo/article/details/8237930)
+* 【Android Training - 04】保存数据[Lesson 1 - 保存Key-Value](http://blog.csdn.net/kesenhoo/article/details/8238014)
+* 【Android Training - 04】保存数据[Lesson 2 - 保存文件](http://blog.csdn.net/kesenhoo/article/details/8238610)
+* 【Android Training - 04】保存数据[Lesson 3 - 保存数据到SQLite](http://blog.csdn.net/kesenhoo/article/details/8240637)
+
+## (05)Interacting with Other Apps
+How to build a user experience that leverages other apps available on the device to perform advanced user tasks, such as capture a photo or view an address on a map.
+* 【Android Training - 05】与其他Apps进行交互[Lesson 0 - 章节概览](http://blog.csdn.net/kesenhoo/article/details/8246638)
+* 【Android Training - 05】与其他Apps进行交互[Lesson 1 - 启动到另外一个app](http://blog.csdn.net/kesenhoo/article/details/8246830)
+* 【Android Training - 05】与其他Apps进行交互[Lesson 2 - 从activity获取Result](http://blog.csdn.net/kesenhoo/article/details/8251061)
+* 【Android Training - 05】与其他Apps进行交互[Lesson 3 - 允许其他app启动你的activity](http://blog.csdn.net/kesenhoo/article/details/8251585)
+
+## (06)Sharing Content
+How to take your app interaction to the next level by sharing information with other apps, receive information back, and provide a simple and scalable way to perform Share actions with user content.
+* 【Android Training - 06】分享数据内容[Lesson 0 - 章节概览](http://blog.csdn.net/kesenhoo/article/details/7410189)
+* 【Android Training - 06】分享数据内容[Lesson 1 - 发送分享的数据到其他App](http://blog.csdn.net/kesenhoo/article/details/7413470)
+* 【Android Training - 06】分享数据内容[Lesson 2 - 从其它app接收分享的内容](http://blog.csdn.net/kesenhoo/article/details/7416767)
+* 【Android Training - 06】分享数据内容[Lesson 3 - 在ActionBar上添加Share Action](http://blog.csdn.net/kesenhoo/article/details/7416861)
+
+# 高级部分
 <h1>
     Building Apps with Multimedia
 </h1>
