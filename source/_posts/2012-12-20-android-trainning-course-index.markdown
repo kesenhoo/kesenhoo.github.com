@@ -40,6 +40,7 @@ How to build a user interface for your app that is flexible enough to present mu
 
 ## (04)Saving Data
 How to save data on the device, whether it&#39;s temporary files, downloaded app assets, user media, structured data, or something else.
+
 * 【Android Training - 04】保存数据[Lesson 0 - 章节概览](http://blog.csdn.net/kesenhoo/article/details/8237930)
 * 【Android Training - 04】保存数据[Lesson 1 - 保存Key-Value](http://blog.csdn.net/kesenhoo/article/details/8238014)
 * 【Android Training - 04】保存数据[Lesson 2 - 保存文件](http://blog.csdn.net/kesenhoo/article/details/8238610)
@@ -47,6 +48,7 @@ How to save data on the device, whether it&#39;s temporary files, downloaded app
 
 ## (05)Interacting with Other Apps
 How to build a user experience that leverages other apps available on the device to perform advanced user tasks, such as capture a photo or view an address on a map.
+
 * 【Android Training - 05】与其他Apps进行交互[Lesson 0 - 章节概览](http://blog.csdn.net/kesenhoo/article/details/8246638)
 * 【Android Training - 05】与其他Apps进行交互[Lesson 1 - 启动到另外一个app](http://blog.csdn.net/kesenhoo/article/details/8246830)
 * 【Android Training - 05】与其他Apps进行交互[Lesson 2 - 从activity获取Result](http://blog.csdn.net/kesenhoo/article/details/8251061)
@@ -54,6 +56,7 @@ How to build a user experience that leverages other apps available on the device
 
 ## (06)Sharing Content
 How to take your app interaction to the next level by sharing information with other apps, receive information back, and provide a simple and scalable way to perform Share actions with user content.
+
 * 【Android Training - 06】分享数据内容[Lesson 0 - 章节概览](http://blog.csdn.net/kesenhoo/article/details/7410189)
 * 【Android Training - 06】分享数据内容[Lesson 1 - 发送分享的数据到其他App](http://blog.csdn.net/kesenhoo/article/details/7413470)
 * 【Android Training - 06】分享数据内容[Lesson 2 - 从其它app接收分享的内容](http://blog.csdn.net/kesenhoo/article/details/7416767)
