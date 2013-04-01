@@ -141,5 +141,6 @@ Android提供了为远程过程调用（RPC）提供了一种进程间通信（I
 为了执行IPC，你的程序必须通过bindService()方法绑定到service上，更多细节，请查看[Services](http://developer.android.com/guide/components/services.html)开发指南。
 
 *****************
-**文章学习自http://developer.android.com/guide/components/processes-and-threads.html**  
-**转载请注明出自**[Kesenhoo]**处，谢谢**
+** 文章学习自http://developer.android.com/guide/components/processes-and-threads.html**  
+** 转载请注明出自[四方城](http:://kesenhoo.github.com)，谢谢**
+
