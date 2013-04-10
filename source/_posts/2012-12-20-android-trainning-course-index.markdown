@@ -7,6 +7,7 @@ categories: Android
 ---
 
 {% img /images/articles/android_trainning.jpg %}
+
 下面是我在[CSDN博客](http://blog.csdn.net/kesenhoo)中开的专栏，分享一下！欢迎交流!  
 学习了Android有段时间了，感觉还是官方的英文资料学习起来收获最大。之前看了很多Android Dev Guide里面的文章，也写过几篇文章，可惜没有坚持下去。这次学习官方培训课程，决定把自己所学与大家一起分享，写的不好的地方还请多多指教，多多支持，谢谢！  
 
