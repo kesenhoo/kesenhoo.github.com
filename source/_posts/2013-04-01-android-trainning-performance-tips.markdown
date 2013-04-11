@@ -7,6 +7,8 @@ categories: Android
 ---
 
 ## 性能优化小技巧
+{% img /images/articles/performance_improve.jpg %}
+
 这篇文章主要是介绍了一些小细节的优化技巧，当这些小技巧综合使用起来的时候，对于整个App的性能提升还是有作用的，只是不能较大幅度的提升性能而已。选择合适的算法与数据结构才应该是你首要考虑的因素，在这篇文章中不会涉及这方面。你应该使用这篇文章中的小技巧作为平时写代码的习惯，这样能够提升代码的效率。  
 
 <!-- more -->
@@ -94,10 +96,11 @@ public void two() {
 * one()稍微快些。  
 * two() 在没有做JIT时是最快的，可是如果经过JIT之后，与方法one()是差不多一样快的。它使用了增强的循环方法for-each。
 
-所以请尽量使用for-each的方法，但是对于ArrayList<Object>，请使用方法one()。
+所以请尽量使用for-each的方法，但是对于ArrayList，请使用方法one()。
 
 ### 使用包级访问而不是内部类的私有访问
-参考下面一段代码  
+参考下面一段代码
+
 ```java
 public class Foo {
     private class Inner {
