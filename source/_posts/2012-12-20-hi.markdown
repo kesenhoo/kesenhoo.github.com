@@ -6,4 +6,5 @@ comments: true
 categories: Life 
 ---
 
-Hi.This is my first post. **By markdown.**
+Hi.This is my first post. **By markdown.**  
+{% img /images/articles/hello_world.png %}
