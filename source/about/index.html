@@ -1,17 +1,29 @@
 ---
 layout: page
-title: About Me
 footer: false
+sidebar: false
 comments: true
 ---
 
 <div id="about_page">
-  <h2>About Me</h2>
+<article role="article">
+  <section>
+    <h1>About Me</h1>
 	<br>Hi,I'm Kesen. A programmer from Shanghai, China.</br>
 	<br>If you want to get in touch with me, <a href="mailto::kesenhoo@gmail.com">email</a> is best.</br>
-	<br>I'm also on <a href="https://github.com/kesenhoo" target="_blank">GitHub</a>,<a href="http://blog.csdn.net/kesenhoo" target="_blank">CSDN</a></br>
+	<br>I'm also on <a href="https://github.com/kesenhoo" target="_blank">GitHub</a>,<a href="http://blog.csdn.net/kesenhoo" target="_blank">CSDN.</a></br>
+  </section>
 	<br></br>
-  <h2>About Blog</h2>
+  <section>
+   <h1>About Blog</h1>
 	<br>Powered by <a herf="https://github.com" target="_blank">Github</a> & <a herf="http://octopress.org/" target="_blank">Octopress</br>
+  </section>
+</article>
+{% if site.disqus_short_name %}
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite">{% include post/disqus_thread.html %}</div>
+  </section>
+{% endif %}
 </div>
 
