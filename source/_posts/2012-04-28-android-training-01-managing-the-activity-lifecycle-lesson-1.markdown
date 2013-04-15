@@ -90,7 +90,7 @@ public void onDestroy() {
 * **Note:** 系统通常是在执行了 onPause() and onStop() 之后再调用onDestroy() ，除非你的程序里面再其他地方调用了finish()方法，这样系统会直接就调用onDestory方法，其它生命周期的方法则不会被执行。
 
 
-**学习自：http://developer.android.com/training/basics/activity-lifecycle/starting.html，请多指教，谢谢！**
+**学习自：http://developer.android.com/training/basics/activity-lifecycle/starting.html，请多指教，谢谢！**  
 **转载请注明出自[四方城](http://kesenhoo.github.com)，谢谢配合！**
 
 
