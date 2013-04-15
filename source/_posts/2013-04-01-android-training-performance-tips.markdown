@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Trainning - Performance Tips"
+title: "Android Training - Performance Tips"
 date: 2013-04-06 18:27
 comments: true
 categories: Android

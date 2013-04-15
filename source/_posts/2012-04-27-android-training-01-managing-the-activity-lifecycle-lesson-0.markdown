@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training 01:Managing the Activity Lifecycle[Lesson 0 - Outline]"
+title: "Android Training 01 - Managing the Activity Lifecycle[Lesson 0 - Outline]"
 date: 2012-04-27 18:34
 comments: true
 categories: Android
@@ -14,12 +14,14 @@ categories: Android
 * 这一章会介绍一些[Activity](http://developer.android.com/reference/android/app/Activity.html)中重要的生命周期回调方法，如何使用那些方法使得程序符合用户的期望且在activity不需要的时候不会导致系统资源的浪费。
 * 完整的Demo示例：[ActivityLifecycle.zip](http://developer.android.com/shareables/training/ActivityLifecycle.zip)
 
+<!-- more -->
+
 ### Lessons 
 这一章我们将学习下面4个内容:
 #### [Starting an Activity](http://developer.android.com/training/basics/activity-lifecycle/starting.html)
 [Android Training - 01:详解Activity生命周期[Lesson 1 - 启动与销毁Activity]](http://blog.csdn.net/kesenhoo/article/details/7519270)
 
-#### [Pausing and Resuming an Activit](http://developer.android.com/training/basics/activity-lifecycle/pausing.html)
+#### [Pausing and Resuming an Activity](http://developer.android.com/training/basics/activity-lifecycle/pausing.html)
 [Android Training - 01:详解Activity生命周期[Lesson 2 - 暂停与恢复Activity]](http://blog.csdn.net/kesenhoo/article/details/7519985)]
 
 #### [Stopping and Restarting an Activity](http://developer.android.com/training/basics/activity-lifecycle/stopping.html)

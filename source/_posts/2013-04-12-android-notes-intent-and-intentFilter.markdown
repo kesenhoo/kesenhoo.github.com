@@ -7,7 +7,6 @@ categories: Android
 ---
 
 ## Intent与Intent Filter
-{% img /images/articles/performance_improve.jpg %}
 
 Android其中的三大组件，Activity,Service与broadcast receivers是通过Intent来触发彼此的。Intent本身会携带一些信息，它是一种组件内部或者组件间进行交互的中介。  
 对于不同的组件之间有着不同的机制：
