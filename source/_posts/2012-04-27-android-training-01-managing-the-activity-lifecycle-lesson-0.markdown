@@ -3,6 +3,7 @@ layout: post
 title: "Android Training 01 - Managing the Activity Lifecycle[Lesson 0 - Outline]"
 date: 2012-04-27 18:34
 comments: true
+sidebar: false
 categories: Android
 ---
 

@@ -3,6 +3,7 @@ layout: post
 title: "Android Notes - Process and Thread"
 date: 2013-03-31 16:27
 comments: true
+sidebar: false
 categories: Android
 ---
 

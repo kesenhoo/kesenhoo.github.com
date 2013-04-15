@@ -3,6 +3,7 @@ layout: post
 title: "Android Notes - Intents and Intent Filters"
 date: 2013-04-12 18:27
 comments: true
+sidebar: false
 categories: Android
 ---
 

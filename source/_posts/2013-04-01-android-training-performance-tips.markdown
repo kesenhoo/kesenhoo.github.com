@@ -3,6 +3,7 @@ layout: post
 title: "Android Training - Performance Tips"
 date: 2013-04-06 18:27
 comments: true
+sidebar: false
 categories: Android
 ---
 

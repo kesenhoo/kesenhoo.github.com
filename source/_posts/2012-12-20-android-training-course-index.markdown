@@ -3,6 +3,7 @@ layout: post
 title: "Android Training Course Index"
 date: 2012-12-20 01:04
 comments: true
+sidebar: false
 categories: Android
 ---
 
