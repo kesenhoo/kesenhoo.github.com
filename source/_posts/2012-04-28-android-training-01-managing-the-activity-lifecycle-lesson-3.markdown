@@ -78,7 +78,7 @@ protected void onRestart() {
 
 
 **学习自：[http://developer.android.com/training/basics/activity-lifecycle/stopping.html](http://developer.android.com/training/basics/activity-lifecycle/stopping.html)，请多指教，谢谢！**  
-**转载请注明出自[四方城](http://kesenhoo.github.com)，谢谢配合！**
+**转载请注明出自[http://kesenhoo.github.com](http://kesenhoo.github.com)，谢谢配合！**
 
 
 

@@ -24,6 +24,6 @@ Android其中的三大组件，Activity,Service与broadcast receivers是通过In
 
 
 *****************
-** 文章学习自http://developer.android.com/guide/components/processes-and-threads.html**  
-** 转载请注明出自[四方城](http:://kesenhoo.github.com)，谢谢**
+**文章学习自http://developer.android.com/guide/components/processes-and-threads.html**  
+**转载请注明出自[http://kesenhoo.github.com](http:://kesenhoo.github.com)，谢谢**
 

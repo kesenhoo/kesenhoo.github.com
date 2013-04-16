@@ -34,4 +34,4 @@ categories: Android
 **最后闲扯：**好吧，又是Activity的生命周期这个基本概念，感觉我是在做重新发明轮子的事情，因为网上关于这个概念的文章太多了，既然这次官方的基础训练课程又有涉及，就当是重温下好了，看看有没有新的观点与体会。
 
 **学习自：[http://developer.android.com/training/basics/activity-lifecycle/index.html](http://developer.android.com/training/basics/activity-lifecycle/index.html)，请多指教，谢谢！**  
-**转载请注明出自:[四方城](http://kesenhoo.github.com)，谢谢配合！**
+**转载请注明出自:[http://kesenhoo.github.com](http://kesenhoo.github.com)，谢谢配合！**

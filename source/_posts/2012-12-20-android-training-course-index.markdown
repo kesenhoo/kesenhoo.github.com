@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training Course Index"
+title: "Android Training系列课程索引"
 date: 2012-12-20 01:04
 comments: true
 sidebar: false

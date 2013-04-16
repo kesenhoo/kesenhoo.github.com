@@ -149,6 +149,6 @@ Android系统中float类型的数据存取速度是int类型的一半，尽量�
 
 
 *****************
-** 文章学习自http://developer.android.com/guide/components/processes-and-threads.html**  
-** 转载请注明出自[四方城](http:://kesenhoo.github.com)，谢谢**
+**文章学习自http://developer.android.com/guide/components/processes-and-threads.html**  
+**转载请注明出自[http://kesenhoo.github.com](http:://kesenhoo.github.com)，谢谢**
 
