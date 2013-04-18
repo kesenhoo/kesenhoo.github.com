@@ -10,6 +10,8 @@ categories: Android
 * 你可以把fragment当作activity的一部分，它有自己的lifecycle,它会接受自己的输入事件。你可以在activity运行的时候增加或者拿掉fragment。（类似子activity，你可以在不同的activity中重用fragment）。这节课演示如何使用support library来创建一个继承自 Fragment 的类。  
 * Note: 如果你的app决定跑在Level 11或者更高的系统上，你不需要添加这个support library,你可以使用那个版本的系统自带的API来实现。请注意这节课是专注于使用support library里面的API，这里面的API名称与那些本身就包含这些功能的平台上的名称有可能不一样。
 
+<!-- more -->
+
 ## Create a Fragment Class[创建一个fragment类]
 * 为了新建一个fragment,需要继承 Fragment 类，然后重写关键的lifecycle中的callback方法，类似Activity的写法。  
 * 创建fragment，其中一个不同的地方是你必须使用 onCreateView() 的回调来定义Layout。实际上，这是使得fragment开始运行的唯一的callback。如下:

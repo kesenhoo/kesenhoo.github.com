@@ -18,8 +18,8 @@ categories: Android
 * DEMO:
 [FragmentBasics.zip](http://developer.android.com/shareables/training/FragmentBasics.zip)
 
+<!-- more -->
 **********************************
-
 为了在Android上创建一个动态并适配multi-pane的用户界面，你需要封装（encapsulate）界面的组件与activity的行为到一个模块中，这样你可以用这个模块与父activity进行交互：载入与换出。你可以使用Fragment创建那些模块。Fragment像是一个嵌套的activity，你可以定义它的layout并且管理它自己的生命周期。
 
 当一个fragment定义了他自己的layout,它可以在一个activity内与其他有关系的fragment一起，为不同的屏幕大小显示不同的布局或者行为。(一个小的屏幕可能会一次显示一个fragment，但是在大的屏幕上可以一次显示两个或者更多个）。

@@ -13,6 +13,8 @@ categories: Android
 
 ![fragments-screen-mock.png](/images/articles/fragments-screen-mock.png)
 
+<!-- more -->
+
 [FragmentManager](https://developer.android.com/reference/android/support/v4/app/FragmentManager.html)类提供了运行时进行添加，移除，替换fragment的方法，这样就创建了一个动态的体验。
 
 ## Add a Fragment to an Activity at Runtime[运行时添加fragment]

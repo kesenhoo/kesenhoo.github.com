@@ -14,6 +14,8 @@ categories: Android
 ## Define an Interface[定义接口]
 为了允许fragment与activity进行交互，你可以在fragment中定义一个interface，然后在activity中去implement它。Fragment在它的onAttach()方法里面捕获接口的实现，然后call接口的方法来与activity进行交互。
 
+<!-- more -->
+
 下面是一个fragment与activity进行交互的例子：
 ```java
 public class HeadlinesFragment extends ListFragment {
