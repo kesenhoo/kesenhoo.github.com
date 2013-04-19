@@ -12,12 +12,12 @@ categories: Android Android:Note
 	* Service可以跑在后台进行工作，即使用户在切换到另外一个程序。
 	* Service可以允许其他组件与它进行Bind，从而进行IPC操作。
 	* Service默认是跑在host程序的main thread。
-* 两种形式:
-	* **Started:** 当程序的某个组件（例如一个activity）通过执行startService()来启动某个Service时，我们认为这个Service是"Started"的。一旦被started,这个Service可以在后台执行，但是却不确定它的状态，即使启动这个Service的组件已经被销毁了，Service的状态还是无法确定（有可能存在，也有可能已经消失了）。通常情况下，一个started的Service执行单一操作，并且不会给叫起它的组件返回任何结果。例如，它可能是做通过网络执行上传或者下载一个文件的动作。当操作结束后，这个service应该自动结束自己。
-	* **Bound:** 当某个程序组件通过执行bindService()来bind到一个service时，我们认为这个service是"Bound"的。一个bound的service提供一个client-server的界面来允许这个组件与service进行交互。发送请求，获取结果，甚至是IPC操作。一个bound的service，只要是还有组件是bind状态的，它就会一直运作。Service允许多个组件同时bind到它。只要所有的bind对象都unbind之后，这个service就会被销毁掉。
 
 <!-- more -->
 
+* 两种形式:
+	* **Started:** 当程序的某个组件（例如一个activity）通过执行startService()来启动某个Service时，我们认为这个Service是"Started"的。一旦被started,这个Service可以在后台执行，但是却不确定它的状态，即使启动这个Service的组件已经被销毁了，Service的状态还是无法确定（有可能存在，也有可能已经消失了）。通常情况下，一个started的Service执行单一操作，并且不会给叫起它的组件返回任何结果。例如，它可能是做通过网络执行上传或者下载一个文件的动作。当操作结束后，这个service应该自动结束自己。
+	* **Bound:** 当某个程序组件通过执行bindService()来bind到一个service时，我们认为这个service是"Bound"的。一个bound的service提供一个client-server的界面来允许这个组件与service进行交互。发送请求，获取结果，甚至是IPC操作。一个bound的service，只要是还有组件是bind状态的，它就会一直运作。Service允许多个组件同时bind到它。只要所有的bind对象都unbind之后，这个service就会被销毁掉。
 	* 尽管这是两种不同的type的Service，但是我们还是可以同时使用它的，也就是可以允许做started的同时进行bind的操作。这取决与你的实现方式：通过startCommand()方法来start一个service,通过onBind()的回调来设置允许bind动作。
 	* 无论这个service是哪种形式的，它都可以被任何组件(即使是另外一个Process)所使用，就像任何组件都可以使用activity一样。当然，你也可以把一个service声明为private的，这样可以阻止其他程序的访问。
 * **注意：**Service默认是跑在host程序的main thread里面的，它既不会主动创建它自己的Thread，也不会跑在另外一个Process(除非你特别指定)。这就意味着，假如你要在service里面做一些很耗CPU的操作(例如播放音乐，网络下载等)，你应该在service里面创建另外一个thread来做那些操作，从而避免ANR。

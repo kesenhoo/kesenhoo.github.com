@@ -4,7 +4,7 @@
 
 url: http://kesenhoo.github.com
 title: 四方城
-subtitle: 不乱于心,不困于情.不畏将来,不念过往.
+subtitle: 
 author: Kesen Hoo
 simple_search: http://google.com/search
 description: The Personal Site.
@@ -36,9 +36,9 @@ category_dir: blog/categories
 markdown: rdiscount
 pygments: false # default python pygments have been replaced by pygments.rb
 
-paginate: 10          # Posts per page on the blog index
+paginate: 5          # Posts per page on the blog index
 pagination_dir: blog  # Directory base for pagination URLs eg. /blog/page/2/
-recent_posts: 11       # Posts in the sidebar Recent Posts section
+recent_posts: 10       # Posts in the sidebar Recent Posts section
 excerpt_link: "Read on &rarr;"  # "Continue reading" link text at the bottom of excerpted articles
 
 titlecase: true       # Converts page and post titles to titlecase
@@ -69,8 +69,8 @@ github_skip_forks: true
 share_function: true
 
 # Twitter
-twitter_user: 
-twitter_tweet_count: 0
+twitter_user: kesenhoo
+twitter_tweet_count: 3
 twitter_show_replies: false
 twitter_follow_button: false
 twitter_show_follower_count: false
