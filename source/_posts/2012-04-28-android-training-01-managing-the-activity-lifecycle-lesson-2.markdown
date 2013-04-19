@@ -4,7 +4,7 @@ title: "Android Training 01 - 详解Activity生命周期[Lesson 2 - 暂停与恢
 date: 2012-04-28 15:58
 comments: true
 sidebar: false
-categories: Android
+categories: Android Android:Training
 ---
 
 * 在使用通常的app时，前端的activity有时候会被其他可见的组件而阻塞(obstructed)，这样会导致当前的activity进入Pause状态。例如，当打开一个半透明的activity时(such as one in the style of a dialog) ，之前的activity会被暂停. 只要这个activity仍然被部分可见，之前的activity则一直处于Paused状态。

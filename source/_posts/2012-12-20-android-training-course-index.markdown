@@ -4,7 +4,7 @@ title: "Android Training系列课程索引"
 date: 2012-12-20 01:04
 comments: true
 sidebar: false
-categories: Android
+categories: Android Android:Training
 ---
 
 {% img /images/articles/android_trainning.jpg %}

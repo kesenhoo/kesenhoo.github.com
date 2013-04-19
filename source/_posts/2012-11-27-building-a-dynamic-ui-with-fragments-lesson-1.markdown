@@ -4,7 +4,7 @@ title: "Android Training 03 - 使用Fragments建立动态的UI[Lesson 1 - 使用
 date: 2012-11-27 15:08
 comments: true
 sidebar: false
-categories: Android
+categories: Android Android:Training
 ---
 
 # Using the Support Library

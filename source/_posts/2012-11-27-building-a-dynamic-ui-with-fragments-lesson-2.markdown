@@ -4,7 +4,7 @@ title: "Android Training 03 - 使用Fragments建立动态的UI[Lesson 2 - 新建
 date: 2012-11-27 16:48
 comments: true
 sidebar: false
-categories: Android
+categories: Android Android:Training
 ---
 
 * 你可以把fragment当作activity的一部分，它有自己的lifecycle,它会接受自己的输入事件。你可以在activity运行的时候增加或者拿掉fragment。（类似子activity，你可以在不同的activity中重用fragment）。这节课演示如何使用support library来创建一个继承自 Fragment 的类。  

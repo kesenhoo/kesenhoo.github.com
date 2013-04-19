@@ -4,7 +4,7 @@ title: "Android Training 02 - 适配不同的屏幕[Lesson 2 - 适配不同屏�
 date: 2012-03-20 20:32
 comments: true
 sidebar: false
-categories: Android
+categories: Android Android:Training
 ---
 
 # Supporting Different Densities

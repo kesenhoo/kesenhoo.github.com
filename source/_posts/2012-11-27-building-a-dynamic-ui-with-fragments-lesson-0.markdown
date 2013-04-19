@@ -4,7 +4,7 @@ title: "Android Training 03 - 使用Fragments建立动态的UI[Lesson 0 - 章节
 date: 2012-11-27 14:38
 comments: true
 sidebar: false
-categories: Android
+categories: Android Android:Training
 ---
 
 # Building a Dynamic UI with Fragments

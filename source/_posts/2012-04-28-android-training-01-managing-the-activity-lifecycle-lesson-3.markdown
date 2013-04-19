@@ -4,7 +4,7 @@ title: "Android Training 01 - 详解Activity生命周期[Lesson 3 - 停止与重
 date: 2012-04-28 18:27
 comments: true
 sidebar: false
-categories: Android
+categories: Android Android:Training
 ---
 
 * 恰当的停止与重启你的activity是很重要的，在activity生命周期中，他们能确保用户感知到程序的存在并不会丢失他们的进度。在下面一些关键的场景中会涉及到停止与重启：

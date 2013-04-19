@@ -4,7 +4,7 @@ title: "Android Training 02 - 适配不同的屏幕[Lesson 3 - 实现可适配�
 date: 2012-03-21 14:38
 comments: true
 sidebar: false
-categories: Android
+categories: Android Android:Training
 ---
 # Implementing Adaptative UI Flows
 根据显示不同的layout，我们需要设计不同的UI flow。比如如果你的AP是dual-pane的模式，点击左边list的item的时候，会在右边直接显示对应的内容，如果是single-pane的模式，那么需要跳转到另外一个Activity来显示对于的内容

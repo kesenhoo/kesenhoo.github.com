@@ -4,7 +4,7 @@ title: "Android Training 01 - 详解Activity生命周期[Lesson 1 - 启动与销
 date: 2012-04-28 13:53
 comments: true
 sidebar: false
-categories: Android
+categories: Android Android:Training
 ---
 
 * 不像其他编程范式一样：程序从main()方法开始启动。Android系统根据生命周期的不同阶段唤起对应的回调函数来执行代码。系统存在启动与销毁一个activity的一套有序的回调函数。

@@ -4,7 +4,7 @@ title: "Android Training 01 - 详解Activity生命周期[Lesson 4 - 重新创建
 date: 2012-04-30 16:51
 comments: true
 sidebar: false
-categories: Android
+categories: Android Android:Training
 ---
 
 * 有几个场景中,Activity是由于正常的程序行为而被Destory的，例如当用户点击返回按钮或者是你的Activity通过调用finish()来发出停止信号。系统也有可能会在你的Activity处于stop状态且长时间不被使用，或者是在前台activity需要更多系统资源的时候把关闭后台进程，这样来获取更多的内存。

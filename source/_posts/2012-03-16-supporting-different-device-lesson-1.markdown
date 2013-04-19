@@ -4,7 +4,7 @@ title: "Android Training 02 - 适配不同的屏幕[Lesson 1 - 支持不同的�
 date: 2012-03-16 21:09
 comments: true
 sidebar: false
-categories: Android
+categories: Android Android:Training
 ---
 
 **Android设备屏幕不一，为了更好的用户体验，我们必须做适配不同屏幕的操作**

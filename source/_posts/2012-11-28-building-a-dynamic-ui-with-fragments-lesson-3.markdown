@@ -4,7 +4,7 @@ title: "Android Training 03 - 使用Fragments建立动态的UI[Lesson 4 - Fragme
 date: 2012-11-28 18:33
 comments: true
 sidebar: false
-categories: Android
+categories: Android Android:Training
 ---
 
 为了重用fragment的UI组件，你必须为每个fragment建立自己的container，模块化自己的layout与行为。一旦你定义了那些可重用的fragment，你可以使用activity与他们建立联系，对那些UI组件做组合动作等。
