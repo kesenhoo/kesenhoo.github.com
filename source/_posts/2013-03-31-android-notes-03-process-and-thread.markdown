@@ -1,18 +1,17 @@
 ---
 layout: post
-title: "Android Notes 03 - 进程与线程"
+title: "Android Notes 03 - Process and Thread"
 date: 2013-03-31 16:27
 comments: true
 sidebar: false
 categories: Android Android:Note
 ---
 
-# Process and Thread
 {% img /images/articles/process_and_thread.jpg %}
 
 当程序的第一个组件开始启动时，Android系统会为这个程序启动一个新的Linux进程。默认的，程序中的后续其他组件都是运行在这个进程的线程中(这个线程被成为"主"线程:main thread)。如果程序的组件在启动时发现已经存在这个程序的进程了(因为其他组件正在运行)， 那么这个组件将启动在该进程中，并使用同一线程。然而，你可以安排程序中的不同组件运行在另外一个进程中，而且你可以为任何进程创建其它的线程。
 
-## Process：进程
+# Process：进程
 默认的，同一程序的所有组件都是运行在一个Proces里面的，并且大多数程序都不应该去改变这一规则。然而，如果你需要控制某一确定的组件的Proces，你可以在manifest文件中做特殊设置。*Music播放器的Playback Service就可以这样做*
 
 <!-- more -->
@@ -25,7 +24,7 @@ Android会在系统内存紧张时决定关闭某些进程。那么程序中的�
 
 当决定杀掉哪一个进程时，Android系统会自动衡量进程的重要性。例如，一个在屏幕上不再可见的进程相对于那些有组件正在被显示的进程更容易被杀掉是显得合理的。那么衡量的权重后面会讲到。
 
-## Process lifecycle：进程生命周期
+# Process lifecycle：进程生命周期
 Android系统会尝试尽可能的维持程序的存在。但是当需要为新的或者更重要的进程开辟内存空间的时候，最终某些程序是会要被拿掉。为了决定存活当中的程序哪些该拿掉，哪些该留下，系统会根据每一个进程的组件与组件运行状态来生成一个"importance hierarchy"（权重层级）。那些权重低的进程将依次被移除，直到系统恢复了足够的资源。
 
 在权重层级中，一个有5个层次。下面列出了不同类型进程的权重：
@@ -56,7 +55,7 @@ Android系统会尝试尽可能的维持程序的存在。但是当需要为新�
 
 因为一个执行service的进程的排名比一个后台activity的进程排名要高，所以，如果一个activity启动时要执行一段长时间的操作，应该选择使用Service而不是创建一个worker thread。例如，一个activity做上传图片的操作，应该选择启动一个Service做上传的动作。使用service能确保这个操作会至少有"service process"的优先级。
 
-## Thread
+# Thread
 当一个程序首次启动，系统会为这个程序创建一个**"main thread"**。这个线程非常重要，因为它将肩负起UI的控制调度，还包含绘制图像的事件。同时，它还是与UI相关的组件（来自android.widget与android.view下的组件）进行交互的中介。因此，有些时候main thread 也被成为**"UI thread"**.
 
 系统不会为每一个组件的实例创建单独的线程。所有运行在同一个进程中的组件都会在UI Thread中被实例化。系统调用组件与他们自身的回调函数都是运行在UI Thread的。
@@ -69,7 +68,7 @@ Android系统会尝试尽可能的维持程序的存在。但是当需要为新�
 * 不要阻塞UI线程。  
 * 不要在UI线程之外访问UI组件。
 
-### Worker threads
+## Worker threads
 为了实现执行耗时的操作，你应该确保那些动作执行在另外一个线程("background" or "worker" threads)。
 
 例如，下面的代码演示了点击事件后开启另外一个线程来下载并显示图片的操作：  
@@ -107,7 +106,7 @@ Android提供了下面三个方法来解决这个问题：
 ```java
 上面的代码虽然实现了功能，可是当系统变复杂时，会显得不好处理。也许我们可以考虑使用Handler，但是更好的方案也许是使用AsyncTask。
 
-### Using AsyncTask
+## Using AsyncTask
 关于什么是AsyncTask与如何使用[AsyncTask](http://developer.android.com/reference/android/os/AsyncTask.html)，不再赘述。
 下面是使用AsyncTask来实现上面的例子：
 ```java
@@ -130,14 +129,14 @@ Android提供了下面三个方法来解决这个问题：
     }
 ```java
 
-### Thread-safe methods
+## Thread-safe methods
 在某些情况下，你实现的一些方法有可能会被不止一个线程中执行到，因此这些方法必须是线程安全的。
 
 **在bound service的情况下，回调函数通常都需要是线程安全的。如果IBinder的Client与Server是在同一进程的话，那么被Client调用的方法是执行在Client的线程当中的。然而如果Client是在另外一个进程的话，被调用的方法则是执行在来自系统为Server端维护的一个线程池当中的某个线程中（非UI Thread）。例如，既然Service的onBind()的方法可以被service进程的UI线程所调用执行，那么onBind所返回的对象（Client端）所实现的方法则可以被线程池中的线程所调用执行。因为一个service可以拥有多个client，那么在同一时刻可以有不止一个线程可以占用同一个IBinder的回调函数。所以IBinder的方法必须是线程安全的。**
 
 同样的，一个content provider可以接受来自另外一个进程的数据请求。尽管ContentResolver与ContentProvider类隐藏了实现细节，但是ContentProvider所提供的query()，insert()，delete()，update()与getType()都是在content provider进程的线程池中被调用执行的，而不是进程的主线程中。因为那些方法可能同时被多个线程所调用，所以他们都应该是线程安全的。
 
-## Interprocess Communication
+# Interprocess Communication
 Android提供了为远程过程调用（RPC）提供了一种进程间通信（IPC）的机制。调用发生在activity或者其他组件中，执行却在另外一个进程，最后再把结果返回给调用者。这需要把调用的数据解析成操作系统能够识别的格式，解码，传递，再编码返回。Android提供了IPC交互的实现细节，因此我们只需要专注于定义与实现RPC接口。
 
 为了执行IPC，你的程序必须通过bindService()方法绑定到service上，更多细节，请查看[Services](http://developer.android.com/guide/components/services.html)开发指南。
