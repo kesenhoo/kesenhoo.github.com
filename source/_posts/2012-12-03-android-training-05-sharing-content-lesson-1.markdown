@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "Android Training 05 - 与其他Apps进行交互[Lesson 1 - 启动到另外一个app]"
-date: 2012-12-03 11:55
+title: "Android Training 05 - 与其他Apps进行交互(Lesson 1 - 启动到另外一个app)"
+date: 2012-12-03 20:55
 comments: true
 sidebar: false
 categories: Android Android:Training
