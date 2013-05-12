@@ -15,7 +15,6 @@ Android程序中很炫的一个功能是程序之间可以互相通信。为什�
 
 <!-- more -->
 
-# 第1课:Sending Content to Other Apps
 当你构建一个intent，你必须指定这个intent需要触发的actions。Android定义了一些actions，包括ACTION_SEND，这个action表明着这个intent是用来从一个activity发送数据到另外一个activity的，甚至是跨进程之间的。
 
 为了发送数据到另外一个activity，你需要做的是指定数据与数据的类型，系统会识别出能够兼容接受的这些数据的activity并且把这些activity显示给用户进行选择(如果有多个选择)，或者是立即启动Activity(只有一个兼容的选择)。同样的，你可以在manifest文件的Activity描述中添加接受哪些数据类型。
@@ -33,7 +32,8 @@ sendIntent.putExtra(Intent.EXTRA_TEXT, "This is my text to send.");
 sendIntent.setType("text/plain");
 startActivity(sendIntent);
 ```
-如果设备上有安装某个能够匹配ACTION_SEND与MIME类型为text/plain程序，那么Android系统会自动把他们都给筛选出来，并呈现Dialog给用户进行选择。如果你为intent调用了Intent.createChooser()，那么Android总是会显示可供选择。这样有一些好处：  
+如果设备上有安装某个能够匹配ACTION_SEND与MIME类型为text/plain程序，那么Android系统会自动把他们都给筛选出来，并呈现Dialog给用户进行选择。如果你为intent调用了Intent.createChooser()，那么Android总是会显示可供选择。这样有一些好处：
+
 * 即使用户之前为这个intent设置了默认的action，选择界面还是会被显示。
 * 如果没有匹配的程序，Android会显示系统信息。
 * 你可以指定选择界面的标题。
