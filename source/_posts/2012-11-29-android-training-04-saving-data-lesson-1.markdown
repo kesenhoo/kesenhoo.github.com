@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training 04 - 保存数据[Lesson 1 - 保存Key-Value]"
+title: "Android Training 04 - 保存数据(Lesson 1 - 保存Key-Value)"
 date: 2012-11-29 13:59
 comments: true
 sidebar: false

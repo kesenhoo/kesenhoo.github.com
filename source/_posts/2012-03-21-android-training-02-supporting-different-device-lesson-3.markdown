@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training 02 - 适配不同的屏幕[Lesson 3 - 实现可适配的UI流程]"
+title: "Android Training 02 - 适配不同的屏幕(Lesson 3 - 实现可适配的UI流程)"
 date: 2012-03-21 14:38
 comments: true
 sidebar: false

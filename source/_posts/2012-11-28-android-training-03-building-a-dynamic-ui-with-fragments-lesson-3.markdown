@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training 03 - 使用Fragments建立动态的UI[Lesson 4 - Fragment之间的通信]"
+title: "Android Training 03 - 使用Fragments建立动态的UI(Lesson 4 - Fragment之间的通信)"
 date: 2012-11-28 18:33
 comments: true
 sidebar: false

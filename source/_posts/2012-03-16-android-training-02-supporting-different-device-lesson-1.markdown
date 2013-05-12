@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training 02 - 适配不同的屏幕[Lesson 1 - 支持不同的屏幕大小]"
+title: "Android Training 02 - 适配不同的屏幕(Lesson 1 - 支持不同的屏幕大小)"
 date: 2012-03-16 21:09
 comments: true
 sidebar: false

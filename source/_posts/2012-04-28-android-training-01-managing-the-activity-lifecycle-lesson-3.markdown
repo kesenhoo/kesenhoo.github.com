@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training 01 - 详解Activity生命周期[Lesson 3 - 停止与重启activity]"
+title: "Android Training 01 - 详解Activity生命周期(Lesson 3 - 停止与重启activity)"
 date: 2012-04-28 18:27
 comments: true
 sidebar: false

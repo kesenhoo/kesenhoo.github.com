@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training 04 - 保存数据[Lesson 2 - 保存到文件]"
+title: "Android Training 04 - 保存数据(Lesson 2 - 保存到文件)"
 date: 2012-11-29 20:37
 comments: true
 sidebar: false

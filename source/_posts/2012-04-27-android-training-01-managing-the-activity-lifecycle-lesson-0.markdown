@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training 01 - 详解Activity声明周期[Lesson 0 - 章节概要]"
+title: "Android Training 01 - 详解Activity声明周期(Lesson 0 - 章节概要)"
 date: 2012-04-27 18:34
 comments: true
 sidebar: false

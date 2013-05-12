@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training 04 - 保存数据[Lesson 3 - 保存到SQLite]"
+title: "Android Training 04 - 保存数据(Lesson 3 - 保存到SQLite)"
 date: 2012-11-30 21:46
 comments: true
 sidebar: false

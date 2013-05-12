@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training 03 - 使用Fragments建立动态的UI[Lesson 2 - 新建一个Fragment]"
+title: "Android Training 03 - 使用Fragments建立动态的UI(Lesson 2 - 新建一个Fragment)"
 date: 2012-11-27 16:48
 comments: true
 sidebar: false

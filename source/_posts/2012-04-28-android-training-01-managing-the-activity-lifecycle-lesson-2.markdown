@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training 01 - 详解Activity生命周期[Lesson 2 - 暂停与恢复activity]"
+title: "Android Training 01 - 详解Activity生命周期(Lesson 2 - 暂停与恢复activity)"
 date: 2012-04-28 15:58
 comments: true
 sidebar: false

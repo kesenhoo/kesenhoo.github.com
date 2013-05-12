@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training 01 - 详解Activity生命周期[Lesson 4 - 重新创建销毁的activity]"
+title: "Android Training 01 - 详解Activity生命周期(Lesson 4 - 重新创建销毁的activity)"
 date: 2012-04-30 16:51
 comments: true
 sidebar: false
