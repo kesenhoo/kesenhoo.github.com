@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "Android Training 07 - 管理音频播放(Lesson 2 - 管理音频焦点Audio Focus)"
+title: "Android Training Multimedia - 音频播放(Lesson 2 - 管理音频焦点Audio Focus)"
 date: 2012-03-22 23:16
 comments: true
 sidebar: false
-categories: Android Android:Training
+categories: Android Android:Training Android:Training:Multimedia
 ---
 
 很多App都可以播放音频，因此在播放前如何获取到音频焦点就显得很重要了，这样可以避免同时出现多个声音，Android使用audio focus来节制音频的播放，仅仅是获取到audio focus的App才能够播放音频。

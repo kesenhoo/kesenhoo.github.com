@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "Android Training 07 - 管理音频播放(Lesson 1 - 控制app的音量与播放)"
+title: "Android Training Multimedia - 音频播放(Lesson 1 - 控制app的音量与播放)"
 date: 2012-03-21 23:27
 comments: true
 sidebar: false
-categories: Android Android:Training
+categories: Android Android:Training Android:Training:Multimedia
 ---
 
 如果你的App在播放音频，显然用户能够以预期的方式来控制音频是很重要的。为了保证好的用户体验，同样App能够获取音频焦点是很重要的，这样才能确保不会在同一时刻出现多个App的声音。在学习这个课程后，你将能够创建对硬件音量按钮进行响应的App，当按下音量按钮的时候需要获取到当前音频的焦点，然后以适当的方式改变音量从而进行响应用户的行为。
