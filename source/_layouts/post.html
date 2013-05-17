@@ -12,10 +12,6 @@ single: true
       {% include post/date.html %}{% if updated %}{{ updated }}{% else %}{{ time }}{% endif %}
       {% include post/categories.html %}
     </p>
-    <!-- Begin: Add By @kesen --> 
-    {% unless page.ujian == true %}
-      {% include post/ujian.html %}
-    {% endunless %}
     
     {% unless page.sharing == false %}
       {% include post/sharing.html %}
