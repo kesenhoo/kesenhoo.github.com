@@ -57,7 +57,7 @@ public void myClickHandler(View view) {
 * [doInBackground()](http://developer.android.com/reference/android/os/AsyncTask.html#doInBackground(Params...)) 执行 downloadUrl()方法。Web URL作为参数，方法downloadUrl() 获取并处理网页返回的数据，执行完毕后，传递结果到onPostExecute()。参数类型为String.
 * [onPostExecute()](http://developer.android.com/reference/android/os/AsyncTask.html#onPostExecute(Result)) 获取到返回数据并显示到UI上。
 
-```java 
+```java
 public class HttpExampleActivity extends Activity {
     private static final String DEBUG_TAG = "HttpExample";
     private EditText urlText;
@@ -110,6 +110,7 @@ public class HttpExampleActivity extends Activity {
     }
     ...
 }
+```
 
 关于上面那段代码的示例详解，请参考下面:
 
