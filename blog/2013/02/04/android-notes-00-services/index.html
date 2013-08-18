@@ -1,0 +1,711 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Android Notes 00 - Services - 四方城</title>
+  <meta name="author" content="Kesen Hoo">
+
+  
+  <meta name="description" content="概要 Service是一个可以在后台长时间进行工作的一个程序组件。这个组件并没有提供UI。其他的程序组件可以Start一个Service，并且可以在用户切换到另外一个程序的时候继续工作。另外，某个组件可以Bind到一个Service上，并与他进行交互，甚至是进行IPC操作。例如， &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://kesenhoo.github.com/blog/2013/02/04/android-notes-00-services/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="四方城" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-37679268-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   class="no-sidebar"  >
+  <header role="banner"><hgroup>
+  <h1><a href="/">四方城</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:kesenhoo.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Android Notes 00 - Services</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-04T18:37:00+08:00" pubdate data-updated="true">Feb 4<span>th</span>, 2013</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h2>概要</h2>
+
+<ul>
+<li>Service是一个可以在后台长时间进行工作的一个程序组件。这个组件并没有提供UI。其他的程序组件可以Start一个Service，并且可以在用户切换到另外一个程序的时候继续工作。另外，某个组件可以Bind到一个Service上，并与他进行交互，甚至是进行IPC操作。例如，一个Service可以处理网络交互，播放音乐，执行I/O操作，或者与Content Provider进行交互，他们都是在后台的。
+
+<ul>
+<li>Service可以跑在后台进行工作，即使用户在切换到另外一个程序。</li>
+<li>Service可以允许其他组件与它进行Bind，从而进行IPC操作。</li>
+<li>Service默认是跑在host程序的main thread。</li>
+</ul>
+</li>
+</ul>
+
+
+<!-- more -->
+
+
+<ul>
+<li>两种形式:
+
+<ul>
+<li><strong>Started:</strong> 当程序的某个组件（例如一个activity）通过执行startService()来启动某个Service时，我们认为这个Service是&#8221;Started&#8221;的。一旦被started,这个Service可以在后台执行，但是却不确定它的状态，即使启动这个Service的组件已经被销毁了，Service的状态还是无法确定（有可能存在，也有可能已经消失了）。通常情况下，一个started的Service执行单一操作，并且不会给叫起它的组件返回任何结果。例如，它可能是做通过网络执行上传或者下载一个文件的动作。当操作结束后，这个service应该自动结束自己。</li>
+<li><strong>Bound:</strong> 当某个程序组件通过执行bindService()来bind到一个service时，我们认为这个service是&#8221;Bound&#8221;的。一个bound的service提供一个client-server的界面来允许这个组件与service进行交互。发送请求，获取结果，甚至是IPC操作。一个bound的service，只要是还有组件是bind状态的，它就会一直运作。Service允许多个组件同时bind到它。只要所有的bind对象都unbind之后，这个service就会被销毁掉。</li>
+<li>尽管这是两种不同的type的Service，但是我们还是可以同时使用它的，也就是可以允许做started的同时进行bind的操作。这取决与你的实现方式：通过startCommand()方法来start一个service,通过onBind()的回调来设置允许bind动作。</li>
+<li>无论这个service是哪种形式的，它都可以被任何组件(即使是另外一个Process)所使用，就像任何组件都可以使用activity一样。当然，你也可以把一个service声明为private的，这样可以阻止其他程序的访问。</li>
+</ul>
+</li>
+<li><strong>注意：</strong>Service默认是跑在host程序的main thread里面的，它既不会主动创建它自己的Thread，也不会跑在另外一个Process(除非你特别指定)。这就意味着，假如你要在service里面做一些很耗CPU的操作(例如播放音乐，网络下载等)，你应该在service里面创建另外一个thread来做那些操作，从而避免ANR。</li>
+</ul>
+
+
+<h2>基础</h2>
+
+<ul>
+<li>为了创建一个service，我们需要创建一个继承自Service的类。并override一些callback方法。最重要的一些方法如下：当系统资源不足时，会强制停止service，并在用户重新回到activity时，系统对其进行恢复。如果一个service是bind到一个活动的activity上，则不容易被kill掉。假设service被声明为run in the foreground，那就几乎不会被kill掉。随着service被不断执行，它会被慢慢降低优先级，当系统资源不足时，会先stop这些优先级低的service,假设这个service被kill掉，那么会在资源足够时马上恢复它。
+
+<ul>
+<li>onStartCommand()： 通过call startService()的方式，需要handle这个callback。service需要通过stopSelf()或者是其他组件通过call stopService（）来stop这个service。 如果你只想提供bind service的方式，那么这个function就不需要实现了。</li>
+<li>onBind()： 通过call bindService() 的方式，需要handle这个callback。返回一个IBinder对象。</li>
+<li>onCreate()： Service第一次被创建是才会执行。</li>
+<li>onDestroy()： Service最后被销毁时才会执行。</li>
+</ul>
+</li>
+</ul>
+
+
+<h4>在manifest文件中声明service</h4>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;manifest</span> <span class="err">...</span> <span class="nt">&gt;</span>
+</span><span class='line'>  ...
+</span><span class='line'>  <span class="nt">&lt;application</span> <span class="err">...</span> <span class="nt">&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;service</span> <span class="na">android:name=</span><span class="s">&quot;.ExampleService&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>      ...
+</span><span class='line'>  <span class="nt">&lt;/application&gt;</span>
+</span><span class='line'><span class="nt">&lt;/manifest&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<h2>创建一个started的Service</h2>
+
+<ul>
+<li>Service在 onStartCommand() 方法里面接收Intent。我们有两个类可以继承用来实现一个service
+
+<ul>
+<li><a href="http://developer.android.com/reference/android/app/Service.html">Service</a>：跑在main thread</li>
+<li><a href="http://developer.android.com/reference/android/app/IntentService.html">IntentService</a>： 会在Service里面new 一个worker thread。我们需要做的只是实现onHandleIntent()，在这里接受每次启动service的参数。<strong>注意</strong>:这适合没有多线程并发的情况使用。每次start都是独立的操作。</li>
+</ul>
+</li>
+</ul>
+
+
+<h4>继承自IntentService (适合于不会有同时发出请求的情况)</h4>
+
+<ul>
+<li>Creates a default worker thread that executes all intents delivered to onStartCommand() separate from your application&#8217;s main thread.</li>
+<li>Creates a work queue that passes one intent at a time to your onHandleIntent() implementation, so you never have to worry about multi-threading.</li>
+<li>Stops the service after all start requests have been handled, so you never have to call stopSelf().</li>
+<li>Provides default implementation of onBind() that returns null.</li>
+<li>Provides a default implementation of onStartCommand() that sends the intent to the work queue and then to your onHandleIntent() implementation.</li>
+<li>要做的只是提供constructor并实现 onHandleIntent().</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">HelloIntentService</span> <span class="kd">extends</span> <span class="n">IntentService</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="cm">/** </span>
+</span><span class='line'><span class="cm">   * A constructor is required, and must call the super IntentService(String)</span>
+</span><span class='line'><span class="cm">   * constructor with a name for the worker thread.</span>
+</span><span class='line'><span class="cm">   */</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="nf">HelloIntentService</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="kd">super</span><span class="o">(</span><span class="s">&quot;HelloIntentService&quot;</span><span class="o">);</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="cm">/**</span>
+</span><span class='line'><span class="cm">   * The IntentService calls this method from the default worker thread with</span>
+</span><span class='line'><span class="cm">   * the intent that started the service. When this method returns, IntentService</span>
+</span><span class='line'><span class="cm">   * stops the service, as appropriate.</span>
+</span><span class='line'><span class="cm">   */</span>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onHandleIntent</span><span class="o">(</span><span class="n">Intent</span> <span class="n">intent</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="c1">// Normally we would do some work here, like download a file.</span>
+</span><span class='line'>      <span class="c1">// For our sample, we just sleep for 5 seconds.</span>
+</span><span class='line'>      <span class="kt">long</span> <span class="n">endTime</span> <span class="o">=</span> <span class="n">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">()</span> <span class="o">+</span> <span class="mi">5</span><span class="o">*</span><span class="mi">1000</span><span class="o">;</span>
+</span><span class='line'>      <span class="k">while</span> <span class="o">(</span><span class="n">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">()</span> <span class="o">&lt;</span> <span class="n">endTime</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>          <span class="kd">synchronized</span> <span class="o">(</span><span class="k">this</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>              <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>                  <span class="n">wait</span><span class="o">(</span><span class="n">endTime</span> <span class="o">-</span> <span class="n">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">());</span>
+</span><span class='line'>              <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>              <span class="o">}</span>
+</span><span class='line'>          <span class="o">}</span>
+</span><span class='line'>      <span class="o">}</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>继承自Service（适合于可能会有同时发出请求的情况）</h4>
+
+<ul>
+<li>使用一个work queue（handler）来处理同时发出的请求，一次执行一个job。当然，也可以在接受到消息的时候，立即启动一个thread来做这个job，那么就会出现并发的情况。</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">HelloService</span> <span class="kd">extends</span> <span class="n">Service</span> <span class="o">{</span>
+</span><span class='line'>  <span class="kd">private</span> <span class="n">Looper</span> <span class="n">mServiceLooper</span><span class="o">;</span>
+</span><span class='line'>  <span class="kd">private</span> <span class="n">ServiceHandler</span> <span class="n">mServiceHandler</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">// Handler that receives messages from the thread</span>
+</span><span class='line'>  <span class="kd">private</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">ServiceHandler</span> <span class="kd">extends</span> <span class="n">Handler</span> <span class="o">{</span>
+</span><span class='line'>      <span class="kd">public</span> <span class="nf">ServiceHandler</span><span class="o">(</span><span class="n">Looper</span> <span class="n">looper</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>          <span class="kd">super</span><span class="o">(</span><span class="n">looper</span><span class="o">);</span>
+</span><span class='line'>      <span class="o">}</span>
+</span><span class='line'>      <span class="nd">@Override</span>
+</span><span class='line'>      <span class="kd">public</span> <span class="kt">void</span> <span class="nf">handleMessage</span><span class="o">(</span><span class="n">Message</span> <span class="n">msg</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>          <span class="c1">// Normally we would do some work here, like download a file.</span>
+</span><span class='line'>          <span class="c1">// For our sample, we just sleep for 5 seconds.</span>
+</span><span class='line'>          <span class="kt">long</span> <span class="n">endTime</span> <span class="o">=</span> <span class="n">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">()</span> <span class="o">+</span> <span class="mi">5</span><span class="o">*</span><span class="mi">1000</span><span class="o">;</span>
+</span><span class='line'>          <span class="k">while</span> <span class="o">(</span><span class="n">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">()</span> <span class="o">&lt;</span> <span class="n">endTime</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>              <span class="kd">synchronized</span> <span class="o">(</span><span class="k">this</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                  <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>                      <span class="n">wait</span><span class="o">(</span><span class="n">endTime</span> <span class="o">-</span> <span class="n">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">());</span>
+</span><span class='line'>                  <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                  <span class="o">}</span>
+</span><span class='line'>              <span class="o">}</span>
+</span><span class='line'>          <span class="o">}</span>
+</span><span class='line'>          <span class="c1">// Stop the service using the startId, so that we don&#39;t stop</span>
+</span><span class='line'>          <span class="c1">// the service in the middle of handling another job</span>
+</span><span class='line'>          <span class="n">stopSelf</span><span class="o">(</span><span class="n">msg</span><span class="o">.</span><span class="na">arg1</span><span class="o">);</span>
+</span><span class='line'>      <span class="o">}</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="c1">// Start up the thread running the service.  Note that we create a</span>
+</span><span class='line'>    <span class="c1">// separate thread because the service normally runs in the process&#39;s</span>
+</span><span class='line'>    <span class="c1">// main thread, which we don&#39;t want to block.  We also make it</span>
+</span><span class='line'>    <span class="c1">// background priority so CPU-intensive work will not disrupt our UI.</span>
+</span><span class='line'>    <span class="n">HandlerThread</span> <span class="n">thread</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HandlerThread</span><span class="o">(</span><span class="s">&quot;ServiceStartArguments&quot;</span><span class="o">,</span>
+</span><span class='line'>            <span class="n">Process</span><span class="o">.</span><span class="na">THREAD_PRIORITY_BACKGROUND</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">thread</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Get the HandlerThread&#39;s Looper and use it for our Handler </span>
+</span><span class='line'>    <span class="n">mServiceLooper</span> <span class="o">=</span> <span class="n">thread</span><span class="o">.</span><span class="na">getLooper</span><span class="o">();</span>
+</span><span class='line'>    <span class="n">mServiceHandler</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ServiceHandler</span><span class="o">(</span><span class="n">mServiceLooper</span><span class="o">);</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="kt">int</span> <span class="nf">onStartCommand</span><span class="o">(</span><span class="n">Intent</span> <span class="n">intent</span><span class="o">,</span> <span class="kt">int</span> <span class="n">flags</span><span class="o">,</span> <span class="kt">int</span> <span class="n">startId</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="n">Toast</span><span class="o">.</span><span class="na">makeText</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="s">&quot;service starting&quot;</span><span class="o">,</span> <span class="n">Toast</span><span class="o">.</span><span class="na">LENGTH_SHORT</span><span class="o">).</span><span class="na">show</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="c1">// For each start request, send a message to start a job and deliver the</span>
+</span><span class='line'>      <span class="c1">// start ID so we know which request we&#39;re stopping when we finish the job</span>
+</span><span class='line'>      <span class="n">Message</span> <span class="n">msg</span> <span class="o">=</span> <span class="n">mServiceHandler</span><span class="o">.</span><span class="na">obtainMessage</span><span class="o">();</span>
+</span><span class='line'>      <span class="n">msg</span><span class="o">.</span><span class="na">arg1</span> <span class="o">=</span> <span class="n">startId</span><span class="o">;</span>
+</span><span class='line'>      <span class="n">mServiceHandler</span><span class="o">.</span><span class="na">sendMessage</span><span class="o">(</span><span class="n">msg</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="c1">// If we get killed, after returning from here, restart</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">START_STICKY</span><span class="o">;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="n">IBinder</span> <span class="nf">onBind</span><span class="o">(</span><span class="n">Intent</span> <span class="n">intent</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="c1">// We don&#39;t provide binding, so return null</span>
+</span><span class='line'>      <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onDestroy</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">Toast</span><span class="o">.</span><span class="na">makeText</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="s">&quot;service done&quot;</span><span class="o">,</span> <span class="n">Toast</span><span class="o">.</span><span class="na">LENGTH_SHORT</span><span class="o">).</span><span class="na">show</span><span class="o">();</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>关于onStartCommand()的返回值：在系统因资源不足时杀死这个service,之后以何种方式restart与这里的返回值有关
+
+<ul>
+<li>START_NOT_STICKY： If the system kills the service after onStartCommand() returns, do not recreate the service, unless there are pending intents to deliver.</li>
+<li>START_STICKY： recreate the service and call onStartCommand(), but do not redeliver the last intent.除非系统有pending的intent，否则会丢给onstartCommand()一个null的intent。这适合于media player一类的service。（This is suitable for media players (or similar services) that are not executing commands, but running indefinitely and waiting for a job.）</li>
+<li>START_REDELIVER_INTENT： recreate the service and call onStartCommand() with the last intent that was delivered to the service. This is suitable for services that are actively performing a job that should be immediately resumed, such as downloading a file. 适合于下载等需要立即恢复的工作。</li>
+</ul>
+</li>
+</ul>
+
+
+<h4>启动Service</h4>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="n">newIntent</span><span class="o">(</span><span class="k">this</span><span class="o">,</span><span class="n">HelloService</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span><span class='line'><span class="n">startService</span><span class="o">(</span><span class="n">intent</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>若这个service没有启动过，这先执行onCreate()，然后才是onStartCommand()。 否则，若这个service已经启动了，则会直接执行onStartComand()。</li>
+<li>默认的startService方式是无法返回数据给叫起它的对象的，若是需要返回数据，可以使用pendingIntent的getBoardcast方式发送给service，然后service再使用这个broadcast进行return value。</li>
+</ul>
+
+
+<h4>停止Service</h4>
+
+<ul>
+<li>一个started类型的service必须自己来manage own lifecycle。一旦执行下面的方法，系统会立即停止这个service.
+
+<ul>
+<li>自己执行stopSelf()</li>
+<li>其他组件执行stopService()</li>
+</ul>
+</li>
+<li>当多个并发时，需要通过执行stopSelf(int)来避免其他正在执行的动作也被一起杀掉，这个int id是onStartCommand()里面的参数。</li>
+<li>请注意，在任务执行完毕时，请及时关闭service，以避免电量的浪费。</li>
+</ul>
+
+
+<h2>创建一个Bound的Service</h2>
+
+<ul>
+<li>通过bindService（）的方式创建的service。</li>
+<li>通常来说，当你需要这个Service提供一些与其他程序组件进行IPC交互的功能时，会使用这种方式。</li>
+<li>这种方式启动的service，并不需要自己去停止service。当没有组件再bind上的时候，系统会kill掉它。</li>
+<li>创建bound方式的service的第一件事情是，定义客户端与Service交互的接口。这些接口通过onBind()里面的IBinder对象来进行操作。</li>
+<li>可以有多个客户端同时bind到Service,当客户端做完事情之后，会执行unbindService()来进行解绑。</li>
+</ul>
+
+
+<h2>发送通知给用户</h2>
+
+<ul>
+<li>Service可以通过<a href="http://developer.android.com/guide/topics/ui/notifiers/toasts.html">Toast Notifications</a> or <a href="http://developer.android.com/guide/topics/ui/notifiers/notifications.html">Status Bar Notifications</a>来通知用户。</li>
+<li>最好的方式是通过Status Bar Notification来通知用户，例如下载完成等操作，用户可以拉开notification，再进行其他操作。</li>
+</ul>
+
+
+<h2>使得Service跑在foregound</h2>
+
+<ul>
+<li>A foreground service: 一个即使在系统资源低的情况下，也不会杀掉的service。可以认为这个Service是与用户正在交互的。它会在status bar上显示一个ongoing的notification，除非这个service的工作已经被停止或者是不再是foreground的了。例如，播放音乐是一个foreground的service，需要在status bar上一直显示正在播放的歌曲。用户可以点击notification再launch起music或者做切歌等动作。</li>
+<li>startForeground()：为了使得service跑在foreground,需要执行这个方法。</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">Notification</span> <span class="n">notification</span> <span class="o">=</span><span class="k">new</span> <span class="n">Notification</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">icon</span><span class="o">,</span> <span class="n">getText</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">string</span><span class="o">.</span><span class="na">ticker_text</span><span class="o">),</span>
+</span><span class='line'>        <span class="n">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">());</span>
+</span><span class='line'><span class="n">Intent</span> <span class="n">notificationIntent</span> <span class="o">=</span><span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="k">this</span><span class="o">,</span><span class="n">ExampleActivity</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span><span class='line'><span class="n">PendingIntent</span> <span class="n">pendingIntent</span> <span class="o">=</span><span class="n">PendingIntent</span><span class="o">.</span><span class="na">getActivity</span><span class="o">(</span><span class="k">this</span><span class="o">,</span><span class="mi">0</span><span class="o">,</span> <span class="n">notificationIntent</span><span class="o">,</span><span class="mi">0</span><span class="o">);</span>
+</span><span class='line'><span class="n">notification</span><span class="o">.</span><span class="na">setLatestEventInfo</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">getText</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">string</span><span class="o">.</span><span class="na">notification_title</span><span class="o">),</span>
+</span><span class='line'>        <span class="n">getText</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">string</span><span class="o">.</span><span class="na">notification_message</span><span class="o">),</span> <span class="n">pendingIntent</span><span class="o">);</span>
+</span><span class='line'><span class="n">startForeground</span><span class="o">(</span><span class="n">ONGOING_NOTIFICATION</span><span class="o">,</span> <span class="n">notification</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>stopForeground(boolean)： 使用这个方法把service从foreground移除（变成background）</li>
+</ul>
+
+
+<h2>管理Service的Lifecycle</h2>
+
+<ul>
+<li>A started service 与 A bound service：</li>
+<li>上面两种方式并不总是独立存在的。你也可以在一个Start的service做bind的动作。例如，播放音乐的Service可以由start的方式来启动，之后还可以做bind的操作，这个时候，执行stopService并不会使得Service立即停止，除非所有bind的对象都解绑，Service才会停止。</li>
+<li><strong>如果一个service既可以started与bound。当一个service是started的，系统并不会在所有的Client都unbind之后去杀死这个service，我们需要显示的去停止这个service，通过stopSelf或者stopService的方式。</strong></li>
+</ul>
+
+
+<h4>实现生命周期的一些callback方法</h4>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ExampleService</span> <span class="kd">extends</span> <span class="n">Service</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">mStartMode</span><span class="o">;</span>       <span class="c1">// indicates how to behave if the service is killed</span>
+</span><span class='line'>    <span class="n">IBinder</span> <span class="n">mBinder</span><span class="o">;</span>      <span class="c1">// interface for clients that bind</span>
+</span><span class='line'>    <span class="kt">boolean</span> <span class="n">mAllowRebind</span><span class="o">;</span> <span class="c1">// indicates whether onRebind should be used</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// The service is being created</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">onStartCommand</span><span class="o">(</span><span class="n">Intent</span> <span class="n">intent</span><span class="o">,</span> <span class="kt">int</span> <span class="n">flags</span><span class="o">,</span> <span class="kt">int</span> <span class="n">startId</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// The service is starting, due to a call to startService()</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">mStartMode</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">IBinder</span> <span class="nf">onBind</span><span class="o">(</span><span class="n">Intent</span> <span class="n">intent</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// A client is binding to the service with bindService()</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">mBinder</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">onUnbind</span><span class="o">(</span><span class="n">Intent</span> <span class="n">intent</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// All clients have unbound with unbindService()</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">mAllowRebind</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onRebind</span><span class="o">(</span><span class="n">Intent</span> <span class="n">intent</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// A client is binding to the service with bindService(),</span>
+</span><span class='line'>        <span class="c1">// after onUnbind() has already been called</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onDestroy</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// The service is no longer used and is being destroyed</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>两种service的lifecycle图示：</h4>
+
+<p><img src="/images/articles/service_lifecycle.png" alt="service_lifecycle.png" /></p>
+
+<p>onCreate与onDestory负责创建与释放一些资源。例如开的线程等。</p>
+
+<hr />
+
+<p><strong>文章学习自<a href="http://developer.android.com/guide/components/services.html">http://developer.android.com/guide/components/services.html</a></strong><br/>
+<strong>转载请注明出自<a href="http:://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢</strong></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Kesen Hoo</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-04T18:37:00+08:00" pubdate data-updated="true">Feb 4<span>th</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/android/'>Android</a>, <a class='category' href='/blog/categories/android-note/'>Android:Note</a>
+  
+</span>
+
+
+    </p>
+    
+    
+      <div class="sharing">
+  
+  
+  
+  
+	<!--JiaThis Button BEGIN -->
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_renren"></a>
+	<a class="jiathis_button_douban"></a>
+	<a class="jiathis_button_xiaoyou"></a>
+	<a class="jiathis_button_fb"></a>
+	<a class="jiathis_button_twitter"></a>
+	<a class="jiathis_button_linkedin"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1342501457879302" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+  
+</div>
+
+    
+    <br></br>
+    <!-- End: Add By @kesen -->
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/12/20/android-training-course-index/" title="Previous Post: Android Training系列课程索引">&laquo; Android Training系列课程索引</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2013/02/18/android-notes-01-bound-services/" title="Next Post: Android Notes 01 - Bound Services">Android Notes 01 - Bound Services &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - Kesen Hoo -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'kesenhoo';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://kesenhoo.github.com/blog/2013/02/04/android-notes-00-services/';
+        var disqus_url = 'http://kesenhoo.github.com/blog/2013/02/04/android-notes-00-services/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

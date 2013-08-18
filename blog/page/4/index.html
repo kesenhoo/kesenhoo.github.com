@@ -1,0 +1,428 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>四方城</title>
+  <meta name="author" content="Kesen Hoo">
+
+  
+  <meta name="description" content="在这一节课，我们会讨论如何通过使用framework的APIs来直接控制相机的硬件。直接控制设备的相机，相比起拍照与录像来说，要复杂一些。然而，如果你想要创建一个专业的特殊的相机程序，这节课会演示这部分内容。 Open the Camera Object(打开相机对象) 获取到 Camera &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://kesenhoo.github.com/blog/page/4/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="四方城" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-37679268-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">四方城</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:kesenhoo.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div class="blog-index">
+  
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/12/18/android-training-capturing-photos-lesson-3/">Android Training Multimedia - 捕获照片(Lesson 3 - 直接操控相机)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-18T23:59:00+08:00" pubdate data-updated="true">Dec 18<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/12/18/android-training-capturing-photos-lesson-3/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>在这一节课，我们会讨论如何通过使用framework的APIs来直接控制相机的硬件。直接控制设备的相机，相比起拍照与录像来说，要复杂一些。然而，如果你想要创建一个专业的特殊的相机程序，这节课会演示这部分内容。</p>
+
+<h2>Open the Camera Object(打开相机对象)</h2>
+
+<p>获取到 Camera 对象是直接控制Camera的第一步。正如Android自带的相机程序一样，推荐访问Camera的方式是在onCreate方法里面另起一个Thread来打开Camera。这个方法可以避免因为打开工作比较费时而引起ANR。在一个更加基础的实现方法里面，打开Camera的动作被延迟到onResume()方法里面去执行，这样使得代码能够更好的重用，并且保持控制流程不会复杂化。(原文是：In a more basic implementation, opening the camera can be deferred to the onResume() method to facilitate code reuse and keep the flow of control simple.)</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/12/18/android-training-capturing-photos-lesson-3/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/12/18/android-training-capturing-photos-lesson-2/">Android Training Multimedia - 捕获照片(Lesson 2 - 简单的录像动作)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-18T23:21:00+08:00" pubdate data-updated="true">Dec 18<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/12/18/android-training-capturing-photos-lesson-2/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>这节课会介绍如何使用现有的Camera程序来录制一个视频。和拍照一样，我们没有必要去重新发明录像程序。大多数的Android程序都有自带Camera来进行录像。(<em>这一课的内容大多数与前面一课类似，简要带过，一些细节不赘述了</em>)</p>
+
+<h2>Request Camera Permission [请求权限]</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;manifest</span> <span class="err">...</span> <span class="nt">&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;uses-feature</span> <span class="na">android:name=</span><span class="s">&quot;android.hardware.camera&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>    ...
+</span><span class='line'><span class="err">&lt;</span>/manifest ... &gt;
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>与上一课的拍照一样，你可以在启动Camera之前，使用hasSystemFeature(PackageManager.FEATURE_CAMERA).来检查是否存在Camera。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/12/18/android-training-capturing-photos-lesson-2/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/12/18/android-training-capturing-photos-lesson-1/">Android Training Multimedia - 捕获照片(Lesson 1 - 简单的拍照动作)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-18T22:21:00+08:00" pubdate data-updated="true">Dec 18<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/12/18/android-training-capturing-photos-lesson-1/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>在多媒体流行之前，世界是沉闷(dismal)并且特色稀少(featureless)的。还记得Gopher? (<em>Gopher是计算机上的一个工具软件，是Internet提供的一种由菜单式驱动的信息查询工具，采用客户机/服务器模式</em>)。因为你的app将要成为你的用户的生活的一部分，请赋予你的app能够把用户生活装进去的功能。使用内置的Camera，你的程序可以使得用户扩展（augment）他们所看的事物，生成唯一的头像，查找角落的人偶（zombies）,或者仅仅是分享他们的经验。</p>
+
+<p>这一章节，会教你如何简单的使用已经存在的Camera程序。在后面的课程中，你会更加深入的（ dive deeper ）学习如何直接控制Camera的硬件。</p>
+
+<p><strong>试试下面的例子程序</strong>
+<a href="http://developer.android.com/shareables/training/PhotoIntentActivity.zip">PhotoIntentActivity.zip</a></p>
+
+<hr />
+
+<p>假设你想通过你的客户端程序实现一个聚合全球天气的地图，上面会有各地的当前天气图片。那么集合图片只是你程序的一部分。你想要最简单的动作来获取图片，而不是重新发明（reinvent）一个camera。幸运的是，大多数Android设备都已经至少安装了一款相机程序。在这节课中，你会学习，如何拍照。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/12/18/android-training-capturing-photos-lesson-1/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/12/04/android-training-05-interacting-with-other-apps-lesson-3/">Android Training 05 - 与其他Apps进行交互(Lesson 3 - 允许其他app启动你的activity)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-04T22:12:00+08:00" pubdate data-updated="true">Dec 4<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/12/04/android-training-05-interacting-with-other-apps-lesson-3/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>前两节课主要讲了从你的app启动另外一个app。但是如果你的app可以响应前面发出的action，那么你的app应该做好响应的准备。例如，如果你创建了一个social app，它可以分享messages 或者 photos 给好友，那么最好你的app能够接收ACTION_SEND 的intent,这样当用户在其他app触发分享功能的时候，你的app能够出现在待选对话框。</p>
+
+<p>为了使得其他的app能够启动你的activity，你需要在你的manifest文件的<activity> 标签下添加<intent-filter> 的属性。</p>
+
+<p>当你的app被安装到设备上时，系统可以识别你的intent filter并把这些信息记录下来。当其他app通过执行 startActivity() 或者 startActivityForResult()方法，并使用implicit intent时，系统可以自动查找出那些可以响应这个intent的activity。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/12/04/android-training-05-interacting-with-other-apps-lesson-3/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/12/03/android-training-05-interacting-with-other-apps-lesson-2/">Android Training 05 - 与其他Apps进行交互(Lesson 2 - 从activity获取Result)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-03T22:39:00+08:00" pubdate data-updated="true">Dec 3<span>rd</span>, 2012</time>
+        
+         | <a href="/blog/2012/12/03/android-training-05-interacting-with-other-apps-lesson-2/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>启动另外一个activity并不一定是单向的。你也可以启动另外一个activity然后接受一个result回来。为了接受这个result,你需要使用<a href="http://developer.android.com/reference/android/app/Activity.html#startActivityForResult(android.content.Intent,%20int">startActivityForResult()</a>) (而不是<a href="http://developer.android.com/reference/android/app/Activity.html#startActivity(android.content.Intent">startActivity()</a>))。</p>
+
+<p>例如，你的app可以启动一个camera程序并接受拍的照片作为result。或者你可以启动People程序并获取其中联系的人的详情作为result。</p>
+
+<p>当然，被启动的activity需要指定返回的result。它需要把这个result作为另外一个intent对象返回，你的activity需要在<a href="http://developer.android.com/reference/android/app/Activity.html#onActivityResult(int,%20int,%20android.content.Intent">onActivityResult()</a>)的回调方法里面去接收result。</p>
+
+<p><strong>Note:</strong>在执行 startActivityForResult()时，你可以使用explicit 或者 implicit 的intent。当你启动另外一个位于你的程序中的activity时，你应该使用explicit intent来确保你可以接收到期待的结果。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/12/03/android-training-05-interacting-with-other-apps-lesson-2/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  <div class="pagination">
+    
+      <a class="prev" href="/blog/page/5/">&larr; Older</a>
+    
+    <a href="/blog/archives">Blog Archives</a>
+    
+    <a class="next" href="/blog/page/3/">Newer &rarr;</a>
+    
+  </div>
+</div>
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-4/">Android Training UI - 创建自定义的Views(Lesson 4 - 优化Views)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-3/">Android Training UI - 创建自定义的Views(Lesson 3 - 处理View的交互性)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-2/">Android Training UI - 创建自定义的Views(Lesson 2 - 自定义Drawing)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-1/">Android Training UI - 创建自定义的Views(Lesson 1 - 创建一个View类)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-0/">Android Training UI - 创建自定义的Views(Lesson 0 - 章节概览)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/05/19/android-training-displaying-bitmaps-efficiently-lesson-4/">Android Training Graphics - 高效地显示Bitmap(Lesson 4 - 优化Bitmap的内存使用)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/04/20/android-notes-05-task-and-back-stack/">Android Notes 05 - Tasks and Back Stack</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/04/12/android-notes-04-intent-and-intentFilter/">Android Notes 04 - Intents and Intent Filters</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/04/06/android-training-performance-tips/">Android Training Performance - 性能优化小技巧</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/03/31/android-notes-03-process-and-thread/">Android Notes 03 - Process and Thread</a>
+      </li>
+    
+  </ul>
+</section>
+
+  
+</aside>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - Kesen Hoo -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'kesenhoo';
+      
+        
+        var disqus_script = 'count.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

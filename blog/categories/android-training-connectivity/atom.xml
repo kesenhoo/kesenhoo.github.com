@@ -1,0 +1,1006 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Android:Training:Connectivity | 四方城]]></title>
+  <link href="http://kesenhoo.github.com/blog/categories/android-training-connectivity/atom.xml" rel="self"/>
+  <link href="http://kesenhoo.github.com/"/>
+  <updated>2013-08-18T18:16:00+08:00</updated>
+  <id>http://kesenhoo.github.com/</id>
+  <author>
+    <name><![CDATA[Kesen Hoo]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training Connectivity - 执行网络操作(Lesson 3 - 解析XML数据)]]></title>
+    <link href="http://kesenhoo.github.com/blog/2012/05/07/android-training-performing-network-operations-lesson-3/"/>
+    <updated>2012-05-07T17:05:00+08:00</updated>
+    <id>http://kesenhoo.github.com/blog/2012/05/07/android-training-performing-network-operations-lesson-3</id>
+    <content type="html"><![CDATA[<p><strong>第3课:Parsing XML Data</strong>
+Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来记录更新的信息，以便用户进行订阅读取。</p>
+
+<p>那么上传[?]与解析XML数据就成了app的一个常见的功能。 这一课会介绍如何解析XML文档并使用他们的数据。</p>
+
+<p><em>([?]这里很奇怪，为什么是Upload，看文章最后一段代码示例的注释，应该是Download才对)</em></p>
+
+<h2>Choose a Parser(选择一个解析器)</h2>
+
+<p>我们推荐<a href="http://developer.android.com/reference/org/xmlpull/v1/XmlPullParser.html">XmlPullParser</a>, 它是在Android上一个高效且可维护的解析XML方法。 Android 上有这个接口的两种实现方式：</p>
+
+<ul>
+<li><a href="http://kxml.sourceforge.net/">KXmlParser</a> via <a href="http://developer.android.com/reference/org/xmlpull/v1/XmlPullParserFactory.html#newPullParser(">XmlPullParserFactory.newPullParser()</a>).</li>
+<li>ExpatPullParser, via <a href="http://developer.android.com/reference/android/util/Xml.html#newPullParser(">Xml.newPullParser()</a>).</li>
+</ul>
+
+
+<p>两个选择都是比较好的。下面的示例中是使用ExpatPullParser, via Xml.newPullParser().</p>
+
+<!-- more -->
+
+
+<h2>Analyze the Feed(分析Feed)</h2>
+
+<p>解析一个feed的第一步是决定需要获取哪些字段。这样解析器才去抽取出那些需要的字段而忽视剩下的。
+下面一段章节概览Sample app中截取的一段代码示例.
+```xml
+&lt;?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:creativeCommons="http://backend.userland.com/creativeCommonsRssModule" ...">
+<title type="text">newest questions tagged android - Stack Overflow</title>
+...</p>
+
+<pre><code>&lt;entry&gt;
+...
+&lt;/entry&gt;
+&lt;entry&gt;
+    &lt;id&gt;http://stackoverflow.com/q/9439999&lt;/id&gt;
+    &lt;re:rank scheme="http://stackoverflow.com"&gt;0&lt;/re:rank&gt;
+    &lt;title type="text"&gt;Where is my data file?&lt;/title&gt;
+    &lt;category scheme="http://stackoverflow.com/feeds/tag?tagnames=android&amp;sort=newest/tags" term="android"/&gt;
+    &lt;category scheme="http://stackoverflow.com/feeds/tag?tagnames=android&amp;sort=newest/tags" term="file"/&gt;
+    &lt;author&gt;
+        &lt;name&gt;cliff2310&lt;/name&gt;
+        &lt;uri&gt;http://stackoverflow.com/users/1128925&lt;/uri&gt;
+    &lt;/author&gt;
+    &lt;link rel="alternate" href="http://stackoverflow.com/questions/9439999/where-is-my-data-file" /&gt;
+    &lt;published&gt;2012-02-25T00:30:54Z&lt;/published&gt;
+    &lt;updated&gt;2012-02-25T00:30:54Z&lt;/updated&gt;
+    &lt;summary type="html"&gt;
+        &lt;p&gt;I have an Application that requires a data file...&lt;/p&gt;
+
+    &lt;/summary&gt;
+&lt;/entry&gt;
+&lt;entry&gt;
+...
+&lt;/entry&gt;
+</code></pre>
+
+<p>...
+</feed>
+```
+在sample app中抽取了entry 标签与它的子标签 title, link,summary.</p>
+
+<h2>Instantiate the Parser(实例化解析器)</h2>
+
+<p>下一步就是实例化一个parser并开始解析的操作。请看下面的示例：
+```java
+public class StackOverflowXmlParser {</p>
+
+<pre><code>// We don't use namespaces
+private static final String ns = null;
+
+public List parse(InputStream in) throws XmlPullParserException, IOException {
+    try {
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+        parser.setInput(in, null);
+        parser.nextTag();
+        return readFeed(parser);
+    } finally {
+        in.close();
+    }
+}
+</code></pre>
+
+<p> ...
+}
+```</p>
+
+<h2>Read the Feed(读取Feed)</h2>
+
+<p>The readFeed() 实际上并没有处理feed的内容。它只是在寻找一个 "entry" 的标签作为递归（recursively）处理整个feed的起点。如果一个标签它不是"entry", readFeed()方法会跳过它. 当整个feed都被递归处理后，readFeed() 会返回一个包含了entry标签（包括里面的数据成员）的 List 。</p>
+
+<p>```java
+private List readFeed(XmlPullParser parser) throws XmlPullParserException, IOException {</p>
+
+<pre><code>List entries = new ArrayList();
+
+parser.require(XmlPullParser.START_TAG, ns, "feed");
+while (parser.next() != XmlPullParser.END_TAG) {
+    if (parser.getEventType() != XmlPullParser.START_TAG) {
+        continue;
+    }
+    String name = parser.getName();
+    // Starts by looking for the entry tag
+    if (name.equals("entry")) {
+        entries.add(readEntry(parser));
+    } else {
+        skip(parser);
+    }
+}
+return entries;
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>Parse XML(解析XML)</h2>
+
+<p>解析步骤如下：</p>
+
+<ul>
+<li>正如在上面“ 分析Feed”所说的, 判断出你想要的tag。这个example抽取了 entry 标签与它的内部标签 title, link,summary.</li>
+<li>创建下面的方法:
+
+<ul>
+<li>为每一个你想要获取的标签创建一个 "read" 方法。例如 readEntry(), readTitle() 等等. 解析器从input stream中读取tag . 当读取到 entry, title, link 或者 summary 标签时，它会为那些标签调用相应的方法，否则，跳过这个标签。</li>
+<li>为每一个不同的标签的提取数据方法进行优化，例如：
+
+<ul>
+<li>对于 title and summary tags, 解析器调用 readText(). 通过调用parser.getText().来获取返回数据。</li>
+<li>对于 link tag,解析器先判断这个link是否是我们想要的类型，然后再读取数据。可以使用 parser.getAttributeValue() 来获取返回数据。</li>
+<li>对于 entry tag, 解析起调用 readEntry(). 这个方法解析entry的内部标签并返回一个带有title, link, and summary数据成员的Entry对象。</li>
+</ul>
+</li>
+<li>一个帮助方法： skip() . 关于这部分的讨论，请看下面一部分内容：Skip Tags You Don't Care About</li>
+</ul>
+</li>
+</ul>
+
+
+<p>下面的代码演示了如何解析 entries, titles, links, 与 summaries.
+```java
+public static class Entry {</p>
+
+<pre><code>public final String title;
+public final String link;
+public final String summary;
+
+private Entry(String title, String summary, String link) {
+    this.title = title;
+    this.summary = summary;
+    this.link = link;
+}
+</code></pre>
+
+<p>}</p>
+
+<p>// Parses the contents of an entry. If it encounters a title, summary, or link tag, hands them off
+// to their respective "read" methods for processing. Otherwise, skips the tag.
+private Entry readEntry(XmlPullParser parser) throws XmlPullParserException, IOException {</p>
+
+<pre><code>parser.require(XmlPullParser.START_TAG, ns, "entry");
+String title = null;
+String summary = null;
+String link = null;
+while (parser.next() != XmlPullParser.END_TAG) {
+    if (parser.getEventType() != XmlPullParser.START_TAG) {
+        continue;
+    }
+    String name = parser.getName();
+    if (name.equals("title")) {
+        title = readTitle(parser);
+    } else if (name.equals("summary")) {
+        summary = readSummary(parser);
+    } else if (name.equals("link")) {
+        link = readLink(parser);
+    } else {
+        skip(parser);
+    }
+}
+return new Entry(title, summary, link);
+</code></pre>
+
+<p>}</p>
+
+<p>// Processes title tags in the feed.
+private String readTitle(XmlPullParser parser) throws IOException, XmlPullParserException {</p>
+
+<pre><code>parser.require(XmlPullParser.START_TAG, ns, "title");
+String title = readText(parser);
+parser.require(XmlPullParser.END_TAG, ns, "title");
+return title;
+</code></pre>
+
+<p>}</p>
+
+<p>// Processes link tags in the feed.
+private String readLink(XmlPullParser parser) throws IOException, XmlPullParserException {</p>
+
+<pre><code>String link = "";
+parser.require(XmlPullParser.START_TAG, ns, "link");
+String tag = parser.getName();
+String relType = parser.getAttributeValue(null, "rel");
+if (tag.equals("link")) {
+    if (relType.equals("alternate")){
+        link = parser.getAttributeValue(null, "href");
+        parser.nextTag();
+    } 
+}
+parser.require(XmlPullParser.END_TAG, ns, "link");
+return link;
+</code></pre>
+
+<p>}</p>
+
+<p>// Processes summary tags in the feed.
+private String readSummary(XmlPullParser parser) throws IOException, XmlPullParserException {</p>
+
+<pre><code>parser.require(XmlPullParser.START_TAG, ns, "summary");
+String summary = readText(parser);
+parser.require(XmlPullParser.END_TAG, ns, "summary");
+return summary;
+</code></pre>
+
+<p>}</p>
+
+<p>// For the tags title and summary, extracts their text values.
+private String readText(XmlPullParser parser) throws IOException, XmlPullParserException {</p>
+
+<pre><code>String result = "";
+if (parser.next() == XmlPullParser.TEXT) {
+    result = parser.getText();
+    parser.nextTag();
+}
+return result;
+</code></pre>
+
+<p>}
+  ...
+}
+```</p>
+
+<h2>Skip Tags You Don't Care About(跳过你不在意标签)</h2>
+
+<p>下面演示解析器的 skip() 方法:
+```java
+private void skip(XmlPullParser parser) throws XmlPullParserException, IOException {</p>
+
+<pre><code>if (parser.getEventType() != XmlPullParser.START_TAG) {
+    throw new IllegalStateException();
+}
+int depth = 1;
+while (depth != 0) {
+    switch (parser.next()) {
+    case XmlPullParser.END_TAG:
+        depth--;
+        break;
+    case XmlPullParser.START_TAG:
+        depth++;
+        break;
+    }
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>上面这个方法是如何工作的呢？</p>
+
+<ul>
+<li>It throws an exception if the current event isn't a START_TAG.</li>
+<li>It consumes the START_TAG, and all events up to and including the matching END_TAG.</li>
+<li>To make sure that it stops at the correct END_TAG and not at the first tag it encounters after the original START_TAG, it keeps track of the nesting depth.</li>
+</ul>
+
+
+<p>因此如果目前的标签有子标签, depth 的值就不会为 0，直到解析器已经处理了所有位于START_TAG与END_TAG之间的事件。例如，看解析器如何跳过 <author> 标签，它有2个子标签，<name> 与 <uri>：</p>
+
+<ul>
+<li>The first time through the while loop, the next tag the parser encounters after <author> is the START_TAG for <name>. The value for depth is incremented to 2.</li>
+<li>The second time through the while loop, the next tag the parser encounters is the END_TAG </name>. The value for depth is decremented to 1.</li>
+<li>The third time through the while loop, the next tag the parser encounters is the START_TAG <uri>. The value for depth is incremented to 2.</li>
+<li>The fourth time through the while loop, the next tag the parser encounters is the END_TAG </uri>. The value for depth is decremented to 1.</li>
+<li>The fifth time and final time through the while loop, the next tag the parser encounters is the END_TAG </author>. The value for depth is decremented to 0, indicating that the <author>element has been successfully skipped.</li>
+</ul>
+
+
+<h2>Consume XML Data(使用XML数据)</h2>
+
+<p>示例程序是在 AsyncTask 中获取与解析XML数据的。当获取到数据后，程序会在main activity(NetworkActivity)里面进行更新操作。</p>
+
+<p>在下面示例代码中，loadPage() 方法做了下面的事情：</p>
+
+<ul>
+<li>初始化一个带有URL地址的String变量，用来订阅XML feed。</li>
+<li>如果用户设置与网络连接都允许，会触发 new DownloadXmlTask().execute(url). 这会初始化一个新的 DownloadXmlTask(AsyncTask subclass)  对象并且开始执行它的 execute() 方法。</li>
+</ul>
+
+
+<p>```java
+public class NetworkActivity extends Activity {</p>
+
+<pre><code>public static final String WIFI = "Wi-Fi";
+public static final String ANY = "Any";
+private static final String URL = "http://stackoverflow.com/feeds/tag?tagnames=android&amp;sort=newest";
+
+// Whether there is a Wi-Fi connection.
+private static boolean wifiConnected = false; 
+// Whether there is a mobile connection.
+private static boolean mobileConnected = false;
+// Whether the display should be refreshed.
+public static boolean refreshDisplay = true; 
+public static String sPref = null;
+
+...
+
+// Uses AsyncTask to download the XML feed from stackoverflow.com.
+public void loadPage() {  
+
+    if((sPref.equals(ANY)) &amp;&amp; (wifiConnected || mobileConnected)) {
+        new DownloadXmlTask().execute(URL);
+    }
+    else if ((sPref.equals(WIFI)) &amp;&amp; (wifiConnected)) {
+        new DownloadXmlTask().execute(URL);
+    } else {
+        // show error
+    }  
+}
+</code></pre>
+
+<p>```</p>
+
+<p>下面是DownloadXmlTask是怎么工作的：</p>
+
+<p>```java
+// Implementation of AsyncTask used to download XML feed from stackoverflow.com.
+private class DownloadXmlTask extends AsyncTask&lt;String, Void, String> {</p>
+
+<pre><code>@Override
+protected String doInBackground(String... urls) {
+    try {
+        return loadXmlFromNetwork(urls[0]);
+    } catch (IOException e) {
+        return getResources().getString(R.string.connection_error);
+    } catch (XmlPullParserException e) {
+        return getResources().getString(R.string.xml_error);
+    }
+}
+
+@Override
+protected void onPostExecute(String result) {  
+    setContentView(R.layout.main);
+    // Displays the HTML string in the UI via a WebView
+    WebView myWebView = (WebView) findViewById(R.id.webview);
+    myWebView.loadData(result, "text/html", null);
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>下面是loadXmlFromNetwork是怎么工作的：</p>
+
+<p>```java
+// Uploads XML from stackoverflow.com, parses it, and combines it with
+// HTML markup. Returns HTML string.【这里可以看出应该是Download】
+private String loadXmlFromNetwork(String urlString) throws XmlPullParserException, IOException {</p>
+
+<pre><code>InputStream stream = null;
+// Instantiate the parser
+StackOverflowXmlParser stackOverflowXmlParser = new StackOverflowXmlParser();
+List&lt;Entry&gt; entries = null;
+String title = null;
+String url = null;
+String summary = null;
+Calendar rightNow = Calendar.getInstance(); 
+DateFormat formatter = new SimpleDateFormat("MMM dd h:mmaa");
+
+// Checks whether the user set the preference to include summary text
+SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+boolean pref = sharedPrefs.getBoolean("summaryPref", false);
+
+StringBuilder htmlString = new StringBuilder();
+htmlString.append("&lt;h3&gt;" + getResources().getString(R.string.page_title) + "&lt;/h3&gt;");
+htmlString.append("&lt;em&gt;" + getResources().getString(R.string.updated) + " " + 
+        formatter.format(rightNow.getTime()) + "&lt;/em&gt;");
+
+try {
+    stream = downloadUrl(urlString);        
+    entries = stackOverflowXmlParser.parse(stream);
+// Makes sure that the InputStream is closed after the app is
+// finished using it.
+} finally {
+    if (stream != null) {
+        stream.close();
+    } 
+ }
+
+// StackOverflowXmlParser returns a List (called "entries") of Entry objects.
+// Each Entry object represents a single post in the XML feed.
+// This section processes the entries list to combine each entry with HTML markup.
+// Each entry is displayed in the UI as a link that optionally includes
+// a text summary.
+for (Entry entry : entries) {
+    htmlString.append("&lt;p&gt;&lt;a href='");
+    htmlString.append(entry.link);
+    htmlString.append("'&gt;" + entry.title + "&lt;/a&gt;&lt;/p&gt;");
+    // If the user set the preference to include summary text,
+    // adds it to the display.
+    if (pref) {
+        htmlString.append(entry.summary);
+    }
+}
+return htmlString.toString();
+</code></pre>
+
+<p>}</p>
+
+<p>// Given a string representation of a URL, sets up a connection and gets
+// an input stream.
+【关于Timeout具体应该设置多少，可以借鉴这里的数据，当然前提是一般情况下】
+// Given a string representation of a URL, sets up a connection and gets
+// an input stream.
+private InputStream downloadUrl(String urlString) throws IOException {</p>
+
+<pre><code>URL url = new URL(urlString);
+HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+conn.setReadTimeout(10000 /* milliseconds */);
+conn.setConnectTimeout(15000 /* milliseconds */);
+conn.setRequestMethod("GET");
+conn.setDoInput(true);
+// Starts the query
+conn.connect();
+return conn.getInputStream();
+</code></pre>
+
+<p>}
+```</p>
+
+<hr />
+
+<p><strong>学习自：<a href="http://developer.android.com/training/basics/network-ops/xml.html">http://developer.android.com/training/basics/network-ops/xml.html</a>，请多指教，谢谢！</strong><br/>
+<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training Connectivity - 执行网络操作(Lesson 2 - 管理网络使用方法)]]></title>
+    <link href="http://kesenhoo.github.com/blog/2012/05/07/android-training-performing-network-operations-lesson-2/"/>
+    <updated>2012-05-07T13:43:00+08:00</updated>
+    <id>http://kesenhoo.github.com/blog/2012/05/07/android-training-performing-network-operations-lesson-2</id>
+    <content type="html"><![CDATA[<p><strong>第2课:Managing Network Usage</strong></p>
+
+<p>这一课会介绍如何细化管理使用的网络资源。如果你的程序需要执行很多网络操作，你应该提供用户设置选项来允许用户控制程序的数据偏好。例如，同步数据的频率，是否只在连接到WiFi才进行下载与上传操作，是否在漫游时使用套餐数据流量等等。这样用户才能在快到达流量上限时关闭你的程序获取数据功能。</p>
+
+<p>关于如何编写一个最小化下载与网络操作对电量影响的程序，请参考：</p>
+
+<p><a href="http://developer.android.com/training/monitoring-device-state/index.html">Optimizing Battery Life</a>:
+<a href="http://developer.android.com/training/efficient-downloads/index.html">Transferring Data Without Draining the Battery</a>:</p>
+
+<!-- more -->
+
+
+<h2>Check a Device's Network Connection(检查设备的网络连接信息)</h2>
+
+<p>设备可以有许多种网络连接。关于所有可能的网络连接类型，请看<a href="http://developer.android.com/reference/android/net/ConnectivityManager.html">ConnectivityManager</a>.</p>
+
+<p>通常Wi-Fi是比较快的。移动数据通常都是需要按流量计费，会比较贵. 通常我们会选择让app在连接到WiFi时去获取大量的数据。</p>
+
+<p>那么，我们就需要在执行网络操作之前检查当前连接的网络信息。这样可以防止你的程序不经意连接使用了非意向的网络频道。为了实现这个目的，我们需要使用到下面两个类：</p>
+
+<ul>
+<li><a href="http://developer.android.com/reference/android/net/ConnectivityManager.html">ConnectivityManager</a>: Answers queries about the state of network connectivity. It also notifies applications when network connectivity changes.</li>
+<li><a href="http://developer.android.com/reference/android/net/NetworkInfo.html">NetworkInfo</a>: Describes the status of a network interface of a given type (currently either Mobile or Wi-Fi).</li>
+</ul>
+
+
+<p>下面示例了检查WiFi与Mobile是否连接上(请注意available与isConnected的区别)：
+```java
+private static final String DEBUG_TAG = "NetworkStatusExample";
+...
+ConnectivityManager connMgr = (ConnectivityManager)</p>
+
+<pre><code>    getSystemService(Context.CONNECTIVITY_SERVICE);
+</code></pre>
+
+<p>NetworkInfo networkInfo = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+boolean isWifiConn = networkInfo.isConnected();
+networkInfo = connMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+boolean isMobileConn = networkInfo.isConnected();
+Log.d(DEBUG_TAG, "Wifi connected: " + isWifiConn);
+Log.d(DEBUG_TAG, "Mobile connected: " + isMobileConn);
+```</p>
+
+<p>一个更简单的检查网络是否可用的示例如下：</p>
+
+<p>```java
+public boolean isOnline() {</p>
+
+<pre><code>ConnectivityManager connMgr = (ConnectivityManager) 
+        getSystemService(Context.CONNECTIVITY_SERVICE);
+NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+return (networkInfo != null &amp;&amp; networkInfo.isConnected());
+</code></pre>
+
+<p>}
+```</p>
+
+<p>你可以使用<a href="http://developer.android.com/reference/android/net/NetworkInfo.DetailedState.html">NetworkInfo.DetailedState</a>, 来获取更加详细的网络信息。</p>
+
+<h2>Manage Network Usage(管理网络使用)</h2>
+
+<p>你可以实现一个偏好设置的activity ，来允许用户设置程序的网络资源的使用。例如:</p>
+
+<ul>
+<li>你可以允许用户在仅仅连接到WiFi时上传视频。</li>
+<li>你可以根据诸如网络可用等条件来选择是否做同步的操作。</li>
+</ul>
+
+
+<p>网络操作需要添加下面的权限：</p>
+
+<ul>
+<li><a href="http://developer.android.com/reference/android/Manifest.permission.html#INTERNET">android.permission.INTERNET</a>—Allows applications to open network sockets.</li>
+<li><a href="http://developer.android.com/reference/android/Manifest.permission.html#ACCESS_NETWORK_STATE">android.permission.ACCESS_NETWORK_STATE</a>—Allows applications to access information about networks.</li>
+</ul>
+
+
+<p>你可以为你的设置Activity声明intent filter for the ACTION_MANAGE_NETWORK_USAGE action (introduced in Android 4.0),这样你的这个activity就可以提供数据控制的选项了。在章节概览提供的Sample中，这个action is handled by the class SettingsActivity, 它提供了偏好设置UI来让用户决定何时进行下载。</p>
+
+<p>```xml
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"</p>
+
+<pre><code>package="com.example.android.networkusage"
+...&gt;
+
+&lt;uses-sdk android:minSdkVersion="4" 
+       android:targetSdkVersion="14" /&gt;
+
+&lt;uses-permission android:name="android.permission.INTERNET" /&gt;
+&lt;uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /&gt;
+
+&lt;application
+    ...&gt;
+    ...
+    &lt;activity android:label="SettingsActivity" android:name=".SettingsActivity"&gt;
+         &lt;intent-filter&gt;
+            &lt;action android:name="android.intent.action.MANAGE_NETWORK_USAGE" /&gt;
+            &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+      &lt;/intent-filter&gt;
+    &lt;/activity&gt;
+&lt;/application&gt;
+</code></pre>
+
+<p></manifest>
+```</p>
+
+<h2>Implement a Preferences Activity(实现一个偏好设置activity)</h2>
+
+<p>正如上面看到的那样，SettingsActivity is a subclass ofPreferenceActivity.</p>
+
+<p>所实现的功能见下图：</p>
+
+<p><img src="/images/articles/network-settings1.png" alt="network-settings1.png" />
+<img src="/images/articles/network-settings2.png" alt="network-settings2.png" /></p>
+
+<p>下面是一个 SettingsActivity. 请注意它实现了OnSharedPreferenceChangeListener. 当用户改变了他的偏好，就会触发 onSharedPreferenceChanged(), 这个方法会设置refreshDisplay 为true(这里的变量存在于自己定义的activity，见下一部分的代码示例). 这会使的当用户返回到main activity的时候进行refresh。(请注意，代码中的注释，不得不说，Googler写的Code看起来就是舒服)</p>
+
+<p>```java
+public class SettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {</p>
+
+<pre><code>@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    // Loads the XML preferences file
+    addPreferencesFromResource(R.xml.preferences);
+}
+
+@Override
+protected void onResume() {
+    super.onResume();
+
+    // Registers a listener whenever a key changes            
+    getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+}
+
+@Override
+protected void onPause() {
+    super.onPause();
+
+   // Unregisters the listener set in onResume().
+   // It's best practice to unregister listeners when your app isn't using them to cut down on 
+   // unnecessary system overhead. You do this in onPause().            
+   getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);    
+}
+
+// When the user changes the preferences selection, 
+// onSharedPreferenceChanged() restarts the main activity as a new
+// task. Sets the the refreshDisplay flag to "true" to indicate that 
+// the main activity should update its display.
+// The main activity queries the PreferenceManager to get the latest settings.
+
+@Override
+public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {    
+    // Sets refreshDisplay to true so that when the user returns to the main
+    // activity, the display refreshes to reflect the new settings.
+    NetworkActivity.refreshDisplay = true;
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>Respond to Preference Changes(对偏好改变进行响应)</h2>
+
+<p>当用户在设置界面改变了偏好，它通常都会对app的行为产生影响。
+在下面的代码示例中，app会在onStart(). 方法里面检查偏好设置。如果设置的类型与当前设备的网络连接类型相一致，那么程序就会下载数据并刷新显示。(for example, if the setting is "Wi-Fi" and the device has a Wi-Fi connection)。(这是一个很好的代码示例，如何选择合适的网络类型进行下载操作)
+```java
+public class NetworkActivity extends Activity {</p>
+
+<pre><code>public static final String WIFI = "Wi-Fi";
+public static final String ANY = "Any";
+private static final String URL = "http://stackoverflow.com/feeds/tag?tagnames=android&amp;sort=newest";
+
+// Whether there is a Wi-Fi connection.
+private static boolean wifiConnected = false; 
+// Whether there is a mobile connection.
+private static boolean mobileConnected = false;
+// Whether the display should be refreshed.
+public static boolean refreshDisplay = true;
+
+// The user's current network preference setting.
+public static String sPref = null;
+
+// The BroadcastReceiver that tracks network connectivity changes.
+private NetworkReceiver receiver = new NetworkReceiver();
+
+@Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    // Registers BroadcastReceiver to track network connection changes.
+    IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+    receiver = new NetworkReceiver();
+    this.registerReceiver(receiver, filter);
+}
+
+@Override 
+public void onDestroy() {
+    super.onDestroy();
+    // Unregisters BroadcastReceiver when app is destroyed.
+    if (receiver != null) {
+        this.unregisterReceiver(receiver);
+    }
+}
+
+// Refreshes the display if the network connection and the
+// pref settings allow it.
+
+@Override
+public void onStart () {
+    super.onStart();  
+
+    // Gets the user's network preference settings
+    SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+    // Retrieves a string value for the preferences. The second parameter
+    // is the default value to use if a preference value is not found.
+    sPref = sharedPrefs.getString("listPref", "Wi-Fi");
+
+    updateConnectedFlags(); 
+
+    if(refreshDisplay){
+        loadPage();    
+    }
+}
+
+// Checks the network connection and sets the wifiConnected and mobileConnected
+// variables accordingly. 
+public void updateConnectedFlags() {
+    ConnectivityManager connMgr = (ConnectivityManager) 
+            getSystemService(Context.CONNECTIVITY_SERVICE);
+
+    NetworkInfo activeInfo = connMgr.getActiveNetworkInfo();
+    if (activeInfo != null &amp;&amp; activeInfo.isConnected()) {
+        wifiConnected = activeInfo.getType() == ConnectivityManager.TYPE_WIFI;
+        mobileConnected = activeInfo.getType() == ConnectivityManager.TYPE_MOBILE;
+    } else {
+        wifiConnected = false;
+        mobileConnected = false;
+    }  
+}
+
+// Uses AsyncTask subclass to download the XML feed from stackoverflow.com.
+public void loadPage() {
+    if (((sPref.equals(ANY)) &amp;&amp; (wifiConnected || mobileConnected))
+            || ((sPref.equals(WIFI)) &amp;&amp; (wifiConnected))) {
+        // AsyncTask subclass
+        new DownloadXmlTask().execute(URL);
+    } else {
+        showErrorPage();
+    }
+}
+</code></pre>
+
+<p>...</p>
+
+<p>}
+```</p>
+
+<h2>Detect Connection Changes(监测网络连接的改变)</h2>
+
+<p>最后一部分是关于 BroadcastReceiver 的子类： NetworkReceiver. 当设备网络连接改变时，NetworkReceiver会监听到 CONNECTIVITY_ACTION, 这时需要判断当前网络连接类型并相应的设置好 wifiConnected 与 mobileConnected .</p>
+
+<p>我们需要控制好BroadcastReceiver的使用，不必要的声明注册会浪费系统资源。通常是在 onCreate() 去registers 这个BroadcastReceiver ， 在onPause()或者onDestroy() 时unregisters它。这样做会比直接在manifest里面直接注册 <receiver> 更轻量. 当你在manifest里面注册了一个 <receiver> ，你的程序可以在任何时候被唤醒, 即使你已经好几个星期没有使用这个程序了。而通过前面的办法进行注册，可以确保用户离开你的程序之后，不会因为那个Broadcast而被唤起。如果你确保知道何时需要使用到它，你可以在合适的地方使用 <a href="http://developer.android.com/reference/android/content/pm/PackageManager.html#setComponentEnabledSetting(android.content.ComponentName,%20int,%20int">setComponentEnabledSetting()</a>) 来开启或者关闭它。</p>
+
+<p>```java
+public class NetworkReceiver extends BroadcastReceiver {</p>
+
+<p>@Override
+public void onReceive(Context context, Intent intent) {</p>
+
+<pre><code>ConnectivityManager conn =  (ConnectivityManager)
+    context.getSystemService(Context.CONNECTIVITY_SERVICE);
+NetworkInfo networkInfo = conn.getActiveNetworkInfo();
+
+// Checks the user prefs and the network connection. Based on the result, decides whether
+// to refresh the display or keep the current display.
+// If the userpref is Wi-Fi only, checks to see if the device has a Wi-Fi connection.
+if (WIFI.equals(sPref) &amp;&amp; networkInfo != null &amp;&amp; networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+    // If device has its Wi-Fi connection, sets refreshDisplay
+    // to true. This causes the display to be refreshed when the user
+    // returns to the app.
+    refreshDisplay = true;
+    Toast.makeText(context, R.string.wifi_connected, Toast.LENGTH_SHORT).show();
+
+// If the setting is ANY network and there is a network connection
+// (which by process of elimination would be mobile), sets refreshDisplay to true.
+} else if (ANY.equals(sPref) &amp;&amp; networkInfo != null) {
+    refreshDisplay = true;
+
+// Otherwise, the app can't download content--either because there is no network
+// connection (mobile or Wi-Fi), or because the pref setting is WIFI, and there 
+// is no Wi-Fi connection.
+// Sets refreshDisplay to false.
+} else {
+    refreshDisplay = false;
+    Toast.makeText(context, R.string.lost_connection, Toast.LENGTH_SHORT).show();
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<hr />
+
+<p><strong>学习自：<a href="http://developer.android.com/training/basics/network-ops/managing.html">http://developer.android.com/training/basics/network-ops/managing.html</a>，请多指教，谢谢！</strong><br/>
+<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training Connectivity - 执行网络操作(Lesson 1 - HTTP连接网络)]]></title>
+    <link href="http://kesenhoo.github.com/blog/2012/05/03/android-training-performing-network-operations-lesson-1/"/>
+    <updated>2012-05-03T15:21:00+08:00</updated>
+    <id>http://kesenhoo.github.com/blog/2012/05/03/android-training-performing-network-operations-lesson-1</id>
+    <content type="html"><![CDATA[<p>这一章会介绍一些基本的网络操作，监视网络链接（包括网络改变），让用户来控制app对网络的选择使用。还会介绍如何解析与使用XML数据。</p>
+
+<p><a href="http://developer.android.com/shareables/training/NetworkUsage.zip">NetworkUsage.zip</a></p>
+
+<p>通过学习这章节的课程，你已经会学习一些基础知识，如何在最小化网络阻塞的情况下，创建一个高效的app，用来下载数据与解析数据。</p>
+
+<p>你还可以参考下面文章进阶学习:</p>
+
+<ul>
+<li><a href="http://developer.android.com/training/monitoring-device-state/index.html">Optimizing Battery Life</a></li>
+<li><a href="http://developer.android.com/training/efficient-downloads/index.html">Transferring Data Without Draining the Battery</a></li>
+<li><a href="http://developer.android.com/guide/webapps/index.html">Web Apps Overview</a></li>
+</ul>
+
+
+<!-- more -->
+
+
+<p><strong>第1课:Connecting to the Network</strong></p>
+
+<p>这一课会演示如何实现一个简单的连接到网络的程序。它提供了一些你应该follow的最好示例，用来创建最简单的网络连接程序。请注意，想要执行网络操作首先需要在程序的manifest文件中添加下面的permissions:
+<code>xml
+&lt;uses-permission android:name="android.permission.INTERNET" /&gt;
+&lt;uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /&gt;
+</code></p>
+
+<h2>Choose an HTTP Client(选择一个HTTP Client)</h2>
+
+<p>大多数连接网络的Android app会使用HTTP来发送与接受数据。Android提供了两种HTTP clients: <a href="http://developer.android.com/reference/java/net/HttpURLConnection.html">HttpURLConnection</a> 与Apache <a href="http://developer.android.com/reference/org/apache/http/client/HttpClient.html">HttpClient</a>。他们二者均支持HTTPS ，都以流方式进行上传与下载，都有可配置timeout, IPv6 与连接池（connection pooling）. <strong>推荐从Gingerbread版本开始使用 HttpURLConnection</strong> 。关于这部分的更多详情，请参考 <a href="http://android-developers.blogspot.com/2011/09/androids-http-clients.html">Android's HTTP Clients</a>。</p>
+
+<h2>Check the Network Connection(检测网络连接)</h2>
+
+<p>在你的app尝试进行网络连接之前，需要检测当前是否有可用的网络。请注意，设备可能会不在网络覆盖范围内，或者用户可能关闭Wi-Fi与移动网络连接。关于这方面更多的资料，请参考：Managing Network Usage.(<em>下一课内容</em>)
+```java
+public void myClickHandler(View view) {</p>
+
+<pre><code>...
+ConnectivityManager connMgr = (ConnectivityManager) 
+    getSystemService(Context.CONNECTIVITY_SERVICE);
+NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+if (networkInfo != null &amp;&amp; networkInfo.isConnected()) {
+    // fetch data
+} else {
+    // display error
+}
+...
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>Perform Network Operations on a Separate Thread(在另外一个Thread执行网络操作)</h2>
+
+<p>网络操作会遇到不可预期的延迟。显然为了避免一个不好的用户体验，总是在UI Thread之外去执行网络操作。AsyncTask 类提供了一种简单的方式来处理这个问题。关于更多的详情，请参考： <a href="http://android-developers.blogspot.com/2010/07/multithreading-for-performance.html">Multithreading For Performance</a>.</p>
+
+<p>在下面的代码示例中，myClickHandler() 方法会触发一个新的DownloadWebpageTask().execute(stringUrl). 它继承自AsyncTask，实现了下面两个方法:</p>
+
+<ul>
+<li><a href="http://developer.android.com/reference/android/os/AsyncTask.html#doInBackground(Params...">doInBackground()</a>) 执行 downloadUrl()方法。Web URL作为参数，方法downloadUrl() 获取并处理网页返回的数据，执行完毕后，传递结果到onPostExecute()。参数类型为String.</li>
+<li><a href="http://developer.android.com/reference/android/os/AsyncTask.html#onPostExecute(Result">onPostExecute()</a>) 获取到返回数据并显示到UI上。</li>
+</ul>
+
+
+<p>```java
+public class HttpExampleActivity extends Activity {</p>
+
+<pre><code>private static final String DEBUG_TAG = "HttpExample";
+private EditText urlText;
+private TextView textView;
+
+@Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.main);   
+    urlText = (EditText) findViewById(R.id.myUrl);
+    textView = (TextView) findViewById(R.id.myText);
+}
+
+// When user clicks button, calls AsyncTask.
+// Before attempting to fetch the URL, makes sure that there is a network connection.
+public void myClickHandler(View view) {
+    // Gets the URL from the UI's text field.
+    String stringUrl = urlText.getText().toString();
+    ConnectivityManager connMgr = (ConnectivityManager) 
+        getSystemService(Context.CONNECTIVITY_SERVICE);
+    NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+    if (networkInfo != null &amp;&amp; networkInfo.isConnected()) {
+        new DownloadWebpageText().execute(stringUrl);
+    } else {
+        textView.setText("No network connection available.");
+    }
+}
+
+ // Uses AsyncTask to create a task away from the main UI thread. This task takes a 
+ // URL string and uses it to create an HttpUrlConnection. Once the connection
+ // has been established, the AsyncTask downloads the contents of the webpage as
+ // an InputStream. Finally, the InputStream is converted into a string, which is
+ // displayed in the UI by the AsyncTask's onPostExecute method.
+ private class DownloadWebpageText extends AsyncTask {
+    @Override
+    protected String doInBackground(String... urls) {
+
+        // params comes from the execute() call: params[0] is the url.
+        try {
+            return downloadUrl(urls[0]);
+        } catch (IOException e) {
+            return "Unable to retrieve web page. URL may be invalid.";
+        }
+    }
+    // onPostExecute displays the results of the AsyncTask.
+    @Override
+    protected void onPostExecute(String result) {
+        textView.setText(result);
+   }
+}
+...
+</code></pre>
+
+<p>}
+```</p>
+
+<p>关于上面那段代码的示例详解，请参考下面:</p>
+
+<ul>
+<li>When users click the button that invokes myClickHandler(), the app passes the specified URL to the AsyncTask subclass DownloadWebpageTask.</li>
+<li>The AsyncTask method doInBackground() calls the downloadUrl() method.</li>
+<li>The downloadUrl() method takes a URL string as a parameter and uses it to create a URL object.</li>
+<li>The URL object is used to establish an HttpURLConnection.</li>
+<li>Once the connection has been established, the HttpURLConnection object fetches the web page content as an InputStream.</li>
+<li>The InputStream is passed to the readIt() method, which converts the stream to a string.</li>
+<li>Finally, the AsyncTask's onPostExecute() method displays the string in the main activity's UI.</li>
+</ul>
+
+
+<h2>Connect and Download Data(连接并下载数据)</h2>
+
+<p>在执行网络交互的线程里面，你可以使用 HttpURLConnection 来执行一个 GET 类型的操作并下载数据。在你调用 connect()之后，你可以通过调用getInputStream()来得到一个包含数据的<a href="http://developer.android.com/reference/java/io/InputStream.html">InputStream</a> 对象。</p>
+
+<p>在下面的代码示例中， doInBackground() 方法会调用downloadUrl(). 这个 downloadUrl() 方法使用给予的URL，通过 HttpURLConnection 连接到网络。一旦建立连接，app使用 getInputStream() 来获取数据。</p>
+
+<p>```java
+// Given a URL, establishes an HttpUrlConnection and retrieves
+// the web page content as a InputStream, which it returns as
+// a string.
+private String downloadUrl(String myurl) throws IOException {</p>
+
+<pre><code>InputStream is = null;
+// Only display the first 500 characters of the retrieved
+// web page content.
+int len = 500;
+
+try {
+    URL url = new URL(myurl);
+    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    conn.setReadTimeout(10000 /* milliseconds */);
+    conn.setConnectTimeout(15000 /* milliseconds */);
+    conn.setRequestMethod("GET");
+    conn.setDoInput(true);
+    // Starts the query
+    conn.connect();
+    int response = conn.getResponseCode();
+    Log.d(DEBUG_TAG, "The response is: " + response);
+    is = conn.getInputStream();
+
+    // Convert the InputStream into a string
+    String contentAsString = readIt(is, len);
+    return contentAsString;
+
+// Makes sure that the InputStream is closed after the app is
+// finished using it.
+} finally {
+    if (is != null) {
+        is.close();
+    } 
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>请注意，getResponseCode() 会返回连接状态码( status code). 这是一种获知额外网络连接信息的有效方式。status code 是 200 则意味着连接成功.</p>
+
+<h2>Convert the InputStream to a String(把InputStream的数据转换为String)</h2>
+
+<p>InputStream 是一种可读的byte数据源。如果你获得了一个 InputStream, 通常会进行decode或者转换为制定的数据类型。例如，如果你是在下载一张image数据，你可能需要像下面一下进行decode：
+<code>java
+InputStream is = null;
+...
+Bitmap bitmap = BitmapFactory.decodeStream(is);
+ImageView imageView = (ImageView) findViewById(R.id.image_view);
+imageView.setImageBitmap(bitmap);
+</code></p>
+
+<p>在上面演示的示例中， InputStream 包含的是web页面的文本内容。下面会演示如何把 InputStream 转换为string，以便显示在UI上。</p>
+
+<p>```java
+// Reads an InputStream and converts it to a String.
+public String readIt(InputStream stream, int len) throws IOException, UnsupportedEncodingException {</p>
+
+<pre><code>Reader reader = null;
+reader = new InputStreamReader(stream, "UTF-8");
+char[] buffer = new char[len];
+reader.read(buffer);
+return new String(buffer);
+</code></pre>
+
+<p>}
+```</p>
+
+<hr />
+
+<p><strong>学习自：<a href="http://developer.android.com/training/basics/network-ops/connecting.html">http://developer.android.com/training/basics/network-ops/connecting.html</a>，请多指教，谢谢！</strong><br/>
+<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
+]]></content>
+  </entry>
+  
+</feed>

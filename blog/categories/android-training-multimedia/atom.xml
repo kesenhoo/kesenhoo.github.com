@@ -1,0 +1,687 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Android:Training:Multimedia | 四方城]]></title>
+  <link href="http://kesenhoo.github.com/blog/categories/android-training-multimedia/atom.xml" rel="self"/>
+  <link href="http://kesenhoo.github.com/"/>
+  <updated>2013-08-18T18:16:00+08:00</updated>
+  <id>http://kesenhoo.github.com/</id>
+  <author>
+    <name><![CDATA[Kesen Hoo]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training Multimedia - 捕获照片(Lesson 3 - 直接操控相机)]]></title>
+    <link href="http://kesenhoo.github.com/blog/2012/12/18/android-training-capturing-photos-lesson-3/"/>
+    <updated>2012-12-18T23:59:00+08:00</updated>
+    <id>http://kesenhoo.github.com/blog/2012/12/18/android-training-capturing-photos-lesson-3</id>
+    <content type="html"><![CDATA[<p>在这一节课，我们会讨论如何通过使用framework的APIs来直接控制相机的硬件。直接控制设备的相机，相比起拍照与录像来说，要复杂一些。然而，如果你想要创建一个专业的特殊的相机程序，这节课会演示这部分内容。</p>
+
+<h2>Open the Camera Object(打开相机对象)</h2>
+
+<p>获取到 Camera 对象是直接控制Camera的第一步。正如Android自带的相机程序一样，推荐访问Camera的方式是在onCreate方法里面另起一个Thread来打开Camera。这个方法可以避免因为打开工作比较费时而引起ANR。在一个更加基础的实现方法里面，打开Camera的动作被延迟到onResume()方法里面去执行，这样使得代码能够更好的重用，并且保持控制流程不会复杂化。(原文是：In a more basic implementation, opening the camera can be deferred to the onResume() method to facilitate code reuse and keep the flow of control simple.)</p>
+
+<!-- more -->
+
+
+<p>在camera正在被另外一个程序使用的时候去执行 Camera.open() 会抛出一个exception，所以需要捕获起来。
+```java
+private boolean safeCameraOpen(int id) {</p>
+
+<pre><code>boolean qOpened = false;
+
+try {
+    releaseCameraAndPreview();
+    mCamera = Camera.open(id);
+    qOpened = (mCamera != null);
+} catch (Exception e) {
+    Log.e(getString(R.string.app_name), "failed to open Camera");
+    e.printStackTrace();
+}
+
+return qOpened;
+</code></pre>
+
+<p>}</p>
+
+<p>private void releaseCameraAndPreview() {</p>
+
+<pre><code>mPreview.setCamera(null);
+if (mCamera != null) {
+    mCamera.release();
+    mCamera = null;
+}
+</code></pre>
+
+<p>}
+```
+自从API level 9开始，camera的framework可以支持多个cameras。如果你使用 open() ，你会获取到最后的一个camera。</p>
+
+<h2>Create the Camera Preview(创建相机预览界面)</h2>
+
+<p>拍照通常需要提供一个预览界面来显示待拍的事物。和拍照类似，你需要使用一个 SurfaceView 来展现录制的画面。</p>
+
+<h3>Preview Class</h3>
+
+<p>为了显示一个预览界面，你需要一个Preview类。这个类需要实现android.view.SurfaceHolder.Callback 接口，这个接口用来传递从camera硬件获取的数据到程序。
+```java
+class Preview extends ViewGroup implements SurfaceHolder.Callback {</p>
+
+<pre><code>SurfaceView mSurfaceView;
+SurfaceHolder mHolder;
+
+Preview(Context context) {
+    super(context);
+
+    mSurfaceView = new SurfaceView(context);
+    addView(mSurfaceView);
+
+    // Install a SurfaceHolder.Callback so we get notified when the
+    // underlying surface is created and destroyed.
+    mHolder = mSurfaceView.getHolder();
+    mHolder.addCallback(this);
+    mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+}
+</code></pre>
+
+<p>...
+}
+```
+这个Preview类必须在查看图片之前传递给 Camera 对象。正如下面描述的：</p>
+
+<h3>Set and Start the Preview</h3>
+
+<p>一个Camera实例与它相关的preview必须以一种指定的顺序来创建，首先是创建Camera对象。在下面的示例中，初始化camera的动作被封装起来，这样，无论用户想对Camera做任何的改变，都通过执行setCamera() 来呼叫<a href="http://developer.android.com/reference/android/hardware/Camera.html#startPreview(">Camera.startPreview()</a>)。Preview对象必须在 surfaceChanged() 的回调方法里面去做重新创建的动作。
+```java
+public void setCamera(Camera camera) {</p>
+
+<pre><code>if (mCamera == camera) { return; }
+
+stopPreviewAndFreeCamera();
+
+mCamera = camera;
+
+if (mCamera != null) {
+    List&lt;Size&gt; localSizes = mCamera.getParameters().getSupportedPreviewSizes();
+    mSupportedPreviewSizes = localSizes;
+    requestLayout();
+
+    try {
+        mCamera.setPreviewDisplay(mHolder);
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+
+    /*
+      Important: Call startPreview() to start updating the preview surface. Preview must 
+      be started before you can take a picture.
+      */
+    mCamera.startPreview();
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>Modify Camera Settings(修改相机设置)</h2>
+
+<p>相机设置可以改变拍照的方式，从缩放级别到曝光补偿(exposure compensation)。下面的例子仅仅演示了改变预览大小的设置，更多设置请参考Camera的源代码。
+```java
+public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {</p>
+
+<pre><code>// Now that the size is known, set up the camera parameters and begin
+// the preview.
+Camera.Parameters parameters = mCamera.getParameters();
+parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
+requestLayout();
+mCamera.setParameters(parameters);
+
+/*
+  Important: Call startPreview() to start updating the preview surface. Preview must be
+  started before you can take a picture.
+*/
+mCamera.startPreview();
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>Set the Preview Orientation(设置预览方向)</h2>
+
+<p>大多数相机程序会锁定预览为横屏的，因为那是人拍照的自然方式。设置里面并没有阻止你去拍竖屏的照片，这些信息会被记录在EXIF里面。 <a href="http://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation(int">setCameraDisplayOrientation()</a>) 方法可以使得你改变预览的方向，并且不会影响到图片被记录的效果。然而，在Android API level 14之前，你必须在改变方向之前，先停止你的预览，然后才能去重启它。</p>
+
+<h2>Take a Picture(拍一张图片)</h2>
+
+<p>只要预览开始之后，可以使用<a href="http://developer.android.com/reference/android/hardware/Camera.html#takePicture(android.hardware.Camera.ShutterCallback,%20android.hardware.Camera.PictureCallback,%20android.hardware.Camera.PictureCallback">Camera.takePicture()</a>) 方法来拍下一张图片。你可以创建Camera.PictureCallback 与 Camera.ShutterCallback 对象并传递他们到Camera.takePicture()中。</p>
+
+<p>如果你想要做连拍的动作，你可以创建一个Camera.PreviewCallback 并实现onPreviewFrame().你还可以选择几个预览帧来进行拍照，或是建立一个延迟拍照的动作。</p>
+
+<h2>Restart the Preview(重启预览)</h2>
+
+<p>在图片被获取后，你必须在用户拍下一张图片之前重启预览。在下面的示例中，通过重载shutter button来实现重启。
+```java
+@Override
+public void onClick(View v) {</p>
+
+<pre><code>switch(mPreviewState) {
+case K_STATE_FROZEN:
+    mCamera.startPreview();
+    mPreviewState = K_STATE_PREVIEW;
+    break;
+
+default:
+    mCamera.takePicture( null, rawCallback, null);
+    mPreviewState = K_STATE_BUSY;
+} // switch
+shutterBtnConfig();
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>Stop the Preview and Release the Camera(停止预览并释放相机)</h2>
+
+<p>当你的程序在使用Camera之后，有必要做清理的动作。特别是，你必须释放 Camera 对象，不然会引起其他app crash。</p>
+
+<p>那么何时应该停止预览并释放相机呢? 在预览的surface被摧毁之后，可以做停止预览与释放相机的动作。如下所示：
+```java
+public void surfaceDestroyed(SurfaceHolder holder) {</p>
+
+<pre><code>// Surface will be destroyed when we return, so stop the preview.
+if (mCamera != null) {
+    /*
+      Call stopPreview() to stop updating the preview surface.
+    */
+    mCamera.stopPreview();
+}
+</code></pre>
+
+<p>}</p>
+
+<p>/<em>*
+  * When this function returns, mCamera will be null.
+  </em>/
+private void stopPreviewAndFreeCamera() {</p>
+
+<pre><code>if (mCamera != null) {
+    /*
+      Call stopPreview() to stop updating the preview surface.
+    */
+    mCamera.stopPreview();
+
+    /*
+      Important: Call release() to release the camera for use by other applications. 
+      Applications should release the camera immediately in onPause() (and re-open() it in
+      onResume()).
+    */
+    mCamera.release();
+
+    mCamera = null;
+}
+</code></pre>
+
+<p>}
+```
+在这节课的前面，这一些系列的动作也是setCamera() 方法的一部分，因此初始化一个camera的动作，总是从停止预览开始的。</p>
+
+<hr />
+
+<p><strong>学习自：<a href="http://developer.android.com/training/camera/cameradirect.html">http://developer.android.com/training/camera/cameradirect.html</a>，请多指教，谢谢！</strong><br/>
+<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training Multimedia - 捕获照片(Lesson 2 - 简单的录像动作)]]></title>
+    <link href="http://kesenhoo.github.com/blog/2012/12/18/android-training-capturing-photos-lesson-2/"/>
+    <updated>2012-12-18T23:21:00+08:00</updated>
+    <id>http://kesenhoo.github.com/blog/2012/12/18/android-training-capturing-photos-lesson-2</id>
+    <content type="html"><![CDATA[<p>这节课会介绍如何使用现有的Camera程序来录制一个视频。和拍照一样，我们没有必要去重新发明录像程序。大多数的Android程序都有自带Camera来进行录像。(<em>这一课的内容大多数与前面一课类似，简要带过，一些细节不赘述了</em>)</p>
+
+<h2>Request Camera Permission [请求权限]</h2>
+
+<p>```xml
+<manifest ... ></p>
+
+<pre><code>&lt;uses-feature android:name="android.hardware.camera" /&gt;
+...
+</code></pre>
+
+<p></manifest ... >
+```
+与上一课的拍照一样，你可以在启动Camera之前，使用hasSystemFeature(PackageManager.FEATURE_CAMERA).来检查是否存在Camera。</p>
+
+<!-- more -->
+
+
+<h2>Record a Video with a Camera App(使用相机程序来录制视频)</h2>
+
+<p>```java
+private void dispatchTakeVideoIntent() {</p>
+
+<pre><code>Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+startActivityForResult(takeVideoIntent, ACTION_TAKE_VIDEO);
+</code></pre>
+
+<p>}
+public static boolean isIntentAvailable(Context context, String action) {</p>
+
+<pre><code>final PackageManager packageManager = context.getPackageManager();
+final Intent intent = new Intent(action);
+List&lt;ResolveInfo&gt; list =
+    packageManager.queryIntentActivities(intent,
+        PackageManager.MATCH_DEFAULT_ONLY);
+return list.size() &gt; 0;
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>View the Video(查看视频)</h2>
+
+<p>Android的Camera程序会把拍好的视频地址返回。下面的代码演示了，如何查询到这个视频并显示到VideoView.
+```java
+private void handleCameraVideo(Intent intent) {</p>
+
+<pre><code>mVideoUri = intent.getData();
+mVideoView.setVideoURI(mVideoUri);
+</code></pre>
+
+<p>}
+```</p>
+
+<hr />
+
+<p><strong>学习自：<a href="http://developer.android.com/training/camera/videobasics.html">http://developer.android.com/training/camera/videobasics.html</a>，请多指教，谢谢！</strong><br/>
+<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training Multimedia - 捕获照片(Lesson 1 - 简单的拍照动作)]]></title>
+    <link href="http://kesenhoo.github.com/blog/2012/12/18/android-training-capturing-photos-lesson-1/"/>
+    <updated>2012-12-18T22:21:00+08:00</updated>
+    <id>http://kesenhoo.github.com/blog/2012/12/18/android-training-capturing-photos-lesson-1</id>
+    <content type="html"><![CDATA[<p>在多媒体流行之前，世界是沉闷(dismal)并且特色稀少(featureless)的。还记得Gopher? (<em>Gopher是计算机上的一个工具软件，是Internet提供的一种由菜单式驱动的信息查询工具，采用客户机/服务器模式</em>)。因为你的app将要成为你的用户的生活的一部分，请赋予你的app能够把用户生活装进去的功能。使用内置的Camera，你的程序可以使得用户扩展（augment）他们所看的事物，生成唯一的头像，查找角落的人偶（zombies）,或者仅仅是分享他们的经验。</p>
+
+<p>这一章节，会教你如何简单的使用已经存在的Camera程序。在后面的课程中，你会更加深入的（ dive deeper ）学习如何直接控制Camera的硬件。</p>
+
+<p><strong>试试下面的例子程序</strong>
+<a href="http://developer.android.com/shareables/training/PhotoIntentActivity.zip">PhotoIntentActivity.zip</a></p>
+
+<hr />
+
+<p>假设你想通过你的客户端程序实现一个聚合全球天气的地图，上面会有各地的当前天气图片。那么集合图片只是你程序的一部分。你想要最简单的动作来获取图片，而不是重新发明（reinvent）一个camera。幸运的是，大多数Android设备都已经至少安装了一款相机程序。在这节课中，你会学习，如何拍照。</p>
+
+<!-- more -->
+
+
+<h2>Request Camera Permission(请求使用相机权限)</h2>
+
+<p>在写程序之前，需要在你的程序的manifest文件中添加下面的权限：
+```xml
+ <manifest ... ></p>
+
+<pre><code>&lt;uses-feature android:name="android.hardware.camera" /&gt;
+...
+</code></pre>
+
+<p></manifest ... >
+```
+如果你的程序并不需要一定有Camera，可以添加android:required="false" 的tag属性。这样的话，Google Play 也会允许没有camera的设备下载这个程序。当然你有必要在使用Camera之前通过hasSystemFeature(PackageManager.FEATURE_CAMERA)方法来检查设备上是否有Camera。如果没有，你应该关闭你的Camera相关的功能！(<em>这个几乎没有人去做检查，因为目前所有的智能手机都会有相机</em>)</p>
+
+<h2>Take a Photo with the Camera App(使用相机应用程序进行拍照]</h2>
+
+<p>Android中的方法是：启动一个Intent来完成你想要的动作。这个步骤包含三部分： Intent 本身，启动的外部 Activity, 与一些处理返回照片的代码。如：
+```java
+private void dispatchTakePictureIntent(int actionCode) {</p>
+
+<pre><code>Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+startActivityForResult(takePictureIntent, actionCode);
+</code></pre>
+
+<p>}
+<code>
+当然在发出Intent之前，你需要检查是否有app会来handle这个intent，否则会引起启动失败：
+</code>java
+public static boolean isIntentAvailable(Context context, String action) {</p>
+
+<pre><code>final PackageManager packageManager = context.getPackageManager();
+final Intent intent = new Intent(action);
+List&lt;ResolveInfo&gt; list =
+        packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+return list.size() &gt; 0;
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>View the Photo(查看照片)</h2>
+
+<p>Android的Camera程序会把拍好的照片编码为bitmap，使用extra value的方式添加到返回的 Intent 当中， 对应的key为data。
+```java
+private void handleSmallCameraPhoto(Intent intent) {</p>
+
+<pre><code>Bundle extras = intent.getExtras();
+mImageBitmap = (Bitmap) extras.get("data");
+mImageView.setImageBitmap(mImageBitmap);
+</code></pre>
+
+<p>}
+```
+<strong>Note:</strong> 这仅仅是处理一张很少的缩略图而已，如果是大的全图，需要做更多的事情来避免ANR。</p>
+
+<h2>Save the Photo(保存照片)</h2>
+
+<p>如果你提供一个file对象给Android的Camera程序，它会保存这张全图到给定的路径下。你必须提供存储的卷名，文件夹名与文件名。对于2.2以上的系统，如下操作即可：
+```java
+storageDir = new File(</p>
+
+<pre><code>Environment.getExternalStoragePublicDirectory(
+    Environment.DIRECTORY_PICTURES
+), 
+getAlbumName()
+</code></pre>
+
+<p>);
+```</p>
+
+<h2>Set the file name(设置文件名)</h2>
+
+<p>正如上面描述的那样，文件的路径会有设备的系统环境决定。你自己需要做的只是定义个不会引起文件名冲突的命名scheme。下面会演示一种解决方案：
+```java
+private File createImageFile() throws IOException {</p>
+
+<pre><code>// Create an image file name
+String timeStamp = 
+    new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+String imageFileName = JPEG_FILE_PREFIX + timeStamp + "_";
+File image = File.createTempFile(
+    imageFileName, 
+    JPEG_FILE_SUFFIX, 
+    getAlbumDir()
+);
+mCurrentPhotoPath = image.getAbsolutePath();
+return image;
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>Append the file name onto the Intent(把文件名添加到网络上)</h2>
+
+<p>Once you have a place to save your image, pass that location to the camera application via the Intent.
+<code>java
+File f = createImageFile();
+takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
+</code></p>
+
+<h2>Add the Photo to a Gallery(添加照片到相册)</h2>
+
+<p>对于大多数人来说，最简单查看你的照片的方式是通过系统的Media Provider。下面会演示如何触发系统的Media Scanner来添加你的照片到Media Provider的DB中，这样使得相册程序与其他程序能够读取到那些图片。
+```java
+private void galleryAddPic() {</p>
+
+<pre><code>Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+File f = new File(mCurrentPhotoPath);
+Uri contentUri = Uri.fromFile(f);
+mediaScanIntent.setData(contentUri);
+this.sendBroadcast(mediaScanIntent);
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>Decode a Scaled Image(解码缩放图片)</h2>
+
+<p>在有限的内存下，管理全尺寸的图片会很麻烦。下面会介绍如何缩放图片来适应程序的显示：
+```java
+private void setPic() {</p>
+
+<pre><code>// Get the dimensions of the View
+int targetW = mImageView.getWidth();
+int targetH = mImageView.getHeight();
+
+// Get the dimensions of the bitmap
+BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+bmOptions.inJustDecodeBounds = true;
+BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+int photoW = bmOptions.outWidth;
+int photoH = bmOptions.outHeight;
+
+// Determine how much to scale down the image
+int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
+
+// Decode the image file into a Bitmap sized to fill the View
+bmOptions.inJustDecodeBounds = false;
+bmOptions.inSampleSize = scaleFactor;
+bmOptions.inPurgeable = true;
+
+Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+mImageView.setImageBitmap(bitmap);
+</code></pre>
+
+<p>}
+```</p>
+
+<hr />
+
+<p><strong>学习自：<a href="http://developer.android.com/training/camera/photobasics.html">http://developer.android.com/training/camera/photobasics.html</a>，请多指教，谢谢！</strong><br/>
+<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training Multimedia - 音频播放(Lesson 3 - 音频设备的相关问题)]]></title>
+    <link href="http://kesenhoo.github.com/blog/2012/03/23/android-training-managing-audio-playback-lesson-3/"/>
+    <updated>2012-03-23T15:28:00+08:00</updated>
+    <id>http://kesenhoo.github.com/blog/2012/03/23/android-training-managing-audio-playback-lesson-3</id>
+    <content type="html"><![CDATA[<p>用户在播放音乐的时候有多个选择，可以使用内置的扬声器，有线耳机或者是支持A2DP的蓝牙耳机。
+【补充：A2DP全名是Advanced Audio Distribution Profile 蓝牙音频传输模型协定! A2DP是能够采用耳机内的芯片来堆栈数据，达到声音的高清晰度。有A2DP的耳机就是蓝牙立体声耳机。声音能达到44.1kHz，一般的耳机只能达到8kHz。如果手机支持蓝牙，只要装载A2DP协议，就能使用A2DP耳机了。还有消费者看到技术参数提到蓝牙V1.0 V1.1 V1.2 V2.0——这些是指蓝牙的技术版本，是指通过蓝牙传输的速度，他们是否支持A2DP具体要看蓝牙产品制造商是否使用这个技术。来自<a href="http://baike.baidu.com/view/551149.htm">百度百科</a>】</p>
+
+<!-- more -->
+
+
+<h2>Check What Hardware is Being Used(检测目前正在使用的硬件设备)</h2>
+
+<p>选择的播放设备会影响App的行为。可以使用AudioManager来查询某个音频输出到扬声器，有线耳机还是蓝牙上。
+```java
+if (isBluetoothA2dpOn()) {</p>
+
+<pre><code>// Adjust output for Bluetooth.  
+</code></pre>
+
+<p>} else if (isSpeakerphoneOn()) {</p>
+
+<pre><code>// Adjust output for Speakerphone.  
+</code></pre>
+
+<p>} else if (isWiredHeadsetOn()) {</p>
+
+<pre><code>// Adjust output for headsets  
+</code></pre>
+
+<p>} else {</p>
+
+<pre><code>// If audio plays and noone can hear it, is it still playing?  
+</code></pre>
+
+<p>}<br/>
+```</p>
+
+<h2>Handle Changes in the Audio Output Hardware(处理音频输出设备的改变)</h2>
+
+<p>当有线耳机被拔出或者蓝牙设备断开连接的时候，音频流会自动输出到内置的扬声器上。假设之前播放声音很大，这个时候突然转到扬声器播放会显得非常嘈杂。</p>
+
+<p>幸运的是，系统会在那种事件发生时会广播带有ACTION_AUDIO_BECOMING_NOISY的intent。无论何时播放音频去注册一个BroadcastReceiver来监听这个intent会是比较好的做法。</p>
+
+<p>在音乐播放器下，用户通常希望发生那样事情的时候能够暂停当前歌曲的播放。在游戏里，通常会选择减低音量。
+```java
+private class NoisyAudioStreamReceiver extends BroadcastReceiver {</p>
+
+<pre><code>@Override  
+public void onReceive(Context context, Intent intent) {  
+    if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intent.getAction())) {  
+        // Pause the playback  
+    }  
+}  
+</code></pre>
+
+<p>}</p>
+
+<p>private IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);</p>
+
+<p>private void startPlayback() {</p>
+
+<pre><code>registerReceiver(myNoisyAudioStreamReceiver(), intentFilter);  
+</code></pre>
+
+<p>}</p>
+
+<p>private void stopPlayback() {</p>
+
+<pre><code>unregisterReceiver(myNoisyAudioStreamReceiver);  
+</code></pre>
+
+<p>}<br/>
+```</p>
+
+<hr />
+
+<p><strong>学习自：<a href="http://developer.android.com/training/managing-audio/audio-output.html">http://developer.android.com/training/managing-audio/audio-output.html</a>，请多指教，谢谢！</strong><br/>
+<strong>转载请注明出自<a href="http://kesenhoo.github.io">http://kesenhoo.github.io</a>，谢谢配合！</strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training Multimedia - 音频播放(Lesson 2 - 管理音频焦点Audio Focus)]]></title>
+    <link href="http://kesenhoo.github.com/blog/2012/03/22/android-training-managing-audio-playback-lesson-2/"/>
+    <updated>2012-03-22T23:16:00+08:00</updated>
+    <id>http://kesenhoo.github.com/blog/2012/03/22/android-training-managing-audio-playback-lesson-2</id>
+    <content type="html"><![CDATA[<p>很多App都可以播放音频，因此在播放前如何获取到音频焦点就显得很重要了，这样可以避免同时出现多个声音，Android使用audio focus来节制音频的播放，仅仅是获取到audio focus的App才能够播放音频。</p>
+
+<p>在App开始播放音频之前，它需要经过发出请求[request]->接受请求[receive]->音频焦点锁定[Audio Focus]的过程。同样，它需要知道如何监听失去音频焦点[lose of audio focus]的事件并进行合适的响应。</p>
+
+<!-- more -->
+
+
+<h2>Request the Audio Focus(请求获取音频焦点)</h2>
+
+<p>通过call <a href="http://developer.android.com/reference/android/media/AudioManager.html#requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener,%20int,%20int">requestAudioFocus()</a>) 方法来获取你想要获取到的音频流焦点。如果请求成功这个方法会返回 AUDIOFOCUS_REQUEST_GRANTED 。</p>
+
+<p>我们必须指定正在使用哪个音频流，而且需要确定请求的是短暂的还是永久的audio focus。</p>
+
+<ul>
+<li>短暂的焦点锁定：当期待播放一个短暂的音频的时候（比如播放导航指示）</li>
+<li>永久的焦点锁定：当计划播放可预期到的较长的音频的时候（比如播放音乐）</li>
+</ul>
+
+
+<p>下面是一个在播放音乐的时候请求永久的音频焦点的例子，我们必须在开始播放之前立即请求音频焦点，比如在用户点击播放或者游戏程序中下一关开始的片头音乐。
+```java
+AudioManager am = mContext.getSystemService(Context.AUDIO_SERVICE);<br/>
+...</p>
+
+<p>// Request audio focus for playback<br/>
+int result = am.requestAudioFocus(afChangeListener,</p>
+
+<pre><code>                             // Use the music stream.  
+                             AudioManager.STREAM_MUSIC,  
+                             // Request permanent focus.  
+                             AudioManager.AUDIOFOCUS_GAIN);  
+</code></pre>
+
+<p>if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {</p>
+
+<pre><code>am.unregisterMediaButtonEventReceiver(RemoteControlReceiver);  
+// Start playback.  
+</code></pre>
+
+<p>}<br/>
+<code>
+一旦结束了播放，需要确保call [abandonAudioFocus()](http://developer.android.com/reference/android/media/AudioManager.html#abandonAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener))方法。这样会通知系统说你不再需要获取焦点并且取消注册[AudioManager.OnAudioFocusChangeListener](http://developer.android.com/reference/android/media/AudioManager.OnAudioFocusChangeListener.html)的监听。在这样释放短暂音频焦点的case下，可以允许任何打断的App继续播放。
+</code>java
+// Abandon audio focus when playback complete    <br/>
+am.abandonAudioFocus(afChangeListener);<br/>
+<code>
+当请求短暂音频焦点的时候，我们可以选择是否开启“ducking”。Ducking是一个特殊的机制使得允许音频间歇性的短暂播放。
+通常情况下，一个好的App在失去音频焦点的时候它会立即保持安静。如果我们选择在请求短暂音频焦点的时候开启了ducking，那意味着其它App可以继续播放，仅仅是在这一刻降低自己的音量，在短暂重新获取到音频焦点后恢复正常音量(也就是说：不用理会这个请求短暂焦点的请求，这并不会导致目前在播放的音频受到牵制，比如在播放音乐的时候突然出现一个短暂的短信提示声音，这个时候仅仅是把播放歌曲的音量暂时调低，好让短信声能够让用户听到，之后立马恢复正常播放)。
+</code>java
+// Request audio focus for playback<br/>
+int result = am.requestAudioFocus(afChangeListener,</p>
+
+<pre><code>                         // Use the music stream.  
+                         AudioManager.STREAM_MUSIC,  
+                         // Request permanent focus.  
+                         AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);  
+</code></pre>
+
+<p>if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {</p>
+
+<pre><code>// Start playback.  
+</code></pre>
+
+<p>}<br/>
+```</p>
+
+<h2>Handle the Loss of Audio Focus(处理失去音频焦点)</h2>
+
+<p>如果A程序可以请求获取音频焦点，那么在B程序请求获取的时候，A获取到的焦点就会失去。显然我们需要处理失去焦点的事件。</p>
+
+<p>在音频焦点的监听器里面，当接受到描述焦点改变的事件时会触发<a href="http://developer.android.com/reference/android/media/AudioManager.OnAudioFocusChangeListener.html#onAudioFocusChange(int">onAudioFocusChange()</a>)回调方法。对应于获取焦点的三种类型，我们同样会有三种失去焦点的类型。</p>
+
+<p>失去短暂焦点：通常在失去这种焦点的情况下，我们会暂停当前音频的播放或者降低音量，同时需要准备恢复播放在重新获取到焦点之后。</p>
+
+<p>失去永久焦点：假设另外一个程序开始播放音乐等，那么我们的程序就应该有效的结束自己。实用的做法是停止播放，移除button监听，允许新的音频播放器独占监听那些按钮事件，并且放弃自己的音频焦点。</p>
+
+<p>在重新播放器自己的音频之前，我们需要确保用户重新点击自己App的播放按钮等。
+```java
+OnAudioFocusChangeListener afChangeListener = new OnAudioFocusChangeListener() {</p>
+
+<pre><code>public void onAudioFocusChange(int focusChange) {  
+    if (focusChange == AUDIOFOCUS_LOSS_TRANSIENT  
+        // Pause playback  
+    } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {  
+        // Resume playback   
+    } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {  
+        am.unregisterMediaButtonEventReceiver(RemoteControlReceiver);  
+        am.abandonAudioFocus(afChangeListener);  
+        // Stop playback  
+    }  
+}  
+</code></pre>
+
+<p>};<br/>
+```
+在上面失去短暂焦点的例子中，如果允许ducking，那么我们可以选择“duck”的行为而不是暂停当前的播放。</p>
+
+<h2>Duck! [闪避]</h2>
+
+<p>Ducking是一个特殊的机制使得允许音频间歇性的短暂播放。在Ducking的情况下，正常播放的歌曲会降低音量来凸显这个短暂的音频声音，这样既让这个短暂的声音比较突出，又不至于打断正常的声音。
+```java
+OnAudioFocusChangeListener afChangeListener = new OnAudioFocusChangeListener() {</p>
+
+<pre><code>public void onAudioFocusChange(int focusChange) {  
+    if (focusChange == AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK  
+        // Lower the volume  
+    } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {  
+        // Raise it back to normal  
+    }  
+}  
+</code></pre>
+
+<p>};<br/>
+```
+监听失去音频焦点是最重要的广播之一，但不是唯一的方法。系统广播了一系列的intent来警示你去改变用户的音频使用体验。下节课会演示如何监视那些广播来提升用户的整体体验。</p>
+
+<hr />
+
+<p><strong>学习自：<a href="http://developer.android.com/training/managing-audio/audio-focus.html">http://developer.android.com/training/managing-audio/audio-focus.html</a>，请多指教，谢谢！</strong><br/>
+<strong>转载请注明出自<a href="http://kesenhoo.github.io">http://kesenhoo.github.io</a>，谢谢配合！</strong></p>
+]]></content>
+  </entry>
+  
+</feed>

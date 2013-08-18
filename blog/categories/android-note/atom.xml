@@ -1,0 +1,1553 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Android:Note | 四方城]]></title>
+  <link href="http://kesenhoo.github.com/blog/categories/android-note/atom.xml" rel="self"/>
+  <link href="http://kesenhoo.github.com/"/>
+  <updated>2013-08-18T18:16:00+08:00</updated>
+  <id>http://kesenhoo.github.com/</id>
+  <author>
+    <name><![CDATA[Kesen Hoo]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Android Notes 05 - Tasks and Back Stack]]></title>
+    <link href="http://kesenhoo.github.com/blog/2013/04/20/android-notes-05-task-and-back-stack/"/>
+    <updated>2013-04-20T20:42:00+08:00</updated>
+    <id>http://kesenhoo.github.com/blog/2013/04/20/android-notes-05-task-and-back-stack</id>
+    <content type="html"><![CDATA[<ul>
+<li>所有的activities都归属于一个task。</li>
+<li>一个task包含了一些activities，这些activities以用户与他们的交互前后为顺序存放在task中。</li>
+<li>Tasks可以把activies放置在background并且保存每一个activites的状态，以便于用户可以切换到其他task而不至于丢失之前的活动状态。</li>
+</ul>
+
+
+<h1>要点概述</h1>
+
+<p>一个程序通常包含了多个actvities。每一个activity都应该围绕用户需要执行的一个特定功能而进行设计，并且可以启动其他的activites。例如:一个邮件程序应该拥有一个显示新邮件的列表。当用户选择其中一封邮件，一个新的activity将打开用来显示邮件内容。</p>
+
+<!-- more -->
+
+
+<p>一个activity甚至可以启动设备上其他程序的activites。例如：如果你的程序想要发送邮件，你可以定义一个intent来表达你的请求。其他可以接收这个请求的程序则会对这个请求作出响应。当使用其他程序的组件把邮件发送出去之后，你自己的activity将会resume，这样另外一个程序的发邮件组件看起来像是你的程序中的一部分。尽管真正发邮件的activites也许是来自其他不同的程序，Android会通过保存那些activites到同一个task中的方式让用户感觉到无缝的体验。</p>
+
+<p>一个task是用户执行一个确定的动作所会用到的activites的集合。那些activities被安置到一个stack中 (也就是"back stack"), 他们以每个activity被打开的顺序方式存放在stack中。</p>
+
+<p>设备Home界面是大多数tasks的起始点。当用户点击程序在launcher或者Home上的启动图标时，这个程序的task则变成了foreground的。如果程序之前不存在task(程序最近并没有被使用过), 那么一个新的task将被创建并且程序的"main" activity将被打开并作为stack的root activity。</p>
+
+<p>当目前的activity启动另外一个activity时，新的activity被压入栈中作为栈顶并且获取到了focus。前面的那个activity则以stopped的状态继续保留在stack中。当一个activity stops时，系统会保留它的UI状态。当用户点击back按钮时，当前的activity从栈顶退出并被destroyed，之前的activity则resume(之前保存的UI状态得到恢复). 在栈中的Activities的是不会被重新排序的，仅仅是做入栈与出栈的动作。当被启动时入栈，用户点击后退时出栈。下图演示了上面提到的情况：</p>
+
+<p><img src="/images/articles/diagram_backstack.png" title="Figure 1. A representation of how each new activity in a task adds an item to the back stack. When the user presses the Back button, the current activity is destroyed and the previous activity resumes." alt="diagram_backstack.png" /></p>
+
+<p>如果用户持续点击back按钮，那么在栈中的每一个activity都会做退栈并显示之前activity的动作, 直到用户退回到Home界面(或者是用户开始task的地方).当所有的activities都从栈中被移除之后，这个task也就消失了。</p>
+
+<p>一个task是一个紧密结合的单元，当用户开始一个新的task或者通过点击Home按钮回到Home桌面时，之前的task会整体移动到background。当在background时，在task中的所有的activity都是stopped状态的。但是这个task的回退栈仍然保留了与系统交互的特质，仅仅是失去了focus而已。如下图所示：</p>
+
+<p><img src="/images/articles/diagram_multitasking.png" title="Figure 2. Two tasks: Task B receives user interaction in the foreground, while Task A is in the background, waiting to be resumed." alt="diagram_multitasking.png" /></p>
+
+<p>一个task可以返回到"foreground"，这样用户可以从他们离开的地方重新开始操作。例如，当前task(Task A)的栈中有三个activities. 用户点击Home按钮，然后从桌面启动一个新的程序. 当Home界面出现时，Task A变成了background的. 当新的程序启动，系统为它启动一个新的task，里面包含了它自己的activites. 在用户与那个程序交互完之后，重新退回桌面并选择之前启动的task A. 这个时候，Task A重新回到foreground, 在stack中的那三个activities被重新选中，栈顶的那个activity被resume. 此时，用户仍然可以选择通过切回Home，再次启动task B.( 或者通过长按Home按钮触发最近使用的task界面进行选择). 这便是Android中的多任务的一个例子.</p>
+
+<p><strong>Note:</strong> 众多tasks都可以一并在后台被Hold住。然而，如果用户同时执行了多个后台任务，系统便会为了恢复内存而开始销毁后台activities. 这会导致activity状态丢失. 关于着部分内容，请看下面的Activity state部分.</p>
+
+<p>因为在back stack中的activities是不会被重新调整顺序的。如果你的程序中的某个特定的activity可以被多个activity所叫起，那么将会为那个特定activity创建一个新的实例并压入栈中(而不是把那个activity之前的实例移动到栈顶). 如下图所示:你程序中的一个activity可以被多次实例化(即使是在不同的task中)。如果用户通过点击Back按钮回退，每一个实例都将以他们被打开的顺序依次被重新呈现。然而，如果你不想一个activity被重复实例化，你可以修改这种行为。关于如何修改这种行为，将在下面的Managing Tasks中讲到.</p>
+
+<p><img src="/images/articles/diagram_multiple_instances.png" title="Figure 3. A single activity is instantiated multiple times." alt="diagram_multiple_instances.png" /></p>
+
+<p><strong>总结一下系统默认的activities与tasks的行为:</strong></p>
+
+<ul>
+<li>当Activity A启动Activity B时, Activity A会是stopped, 但是系统会保存它的状态(例如scroll的位置与填表格的文字). 如果用户在activity B时点击Back按钮，那么activity A会恢复它之前保存的状态信息.</li>
+<li>当用户通过点击Home按钮离开一个task时，当前的activity会是stopped并且它的task会退到background. 系统保留task中的每一个activity. 如果用户之后通过点击启动图标来重新叫起它,task会成为foreground的并且栈顶的activity会得到恢复.</li>
+<li>如果用户点击Back按钮, 当前activity会从栈中退出并被destroyed. 在栈中的前一个activity得到resumed. 当一个activity被destroyed, 系统不会再保留activity的状态信息.</li>
+<li>Activities可以被多次实例化，即使是请求来自其他tasks.</li>
+</ul>
+
+
+<h1>Saving Activity State(保存Activity状态)</h1>
+
+<p>正如上面提到的，当activity stopped时，系统默认会保存它的状态. 这样的话, 当用户回退到之前的activity, 它的UI将和离开时一致. 然而, 如果activity被destoryed并且需要recreated时，你可以并且应该主动使用activity的callback方法来保存它的状态信息.</p>
+
+<p>当系统stop你的某个activity时, 系统可能会在需要恢复内存时destory那个stop状态的activity. 当发生这件事时，关于activity的状态信息则会丢失. 即使真的发生那样的情况, 系统仍然为那个activity在back stack中保留了位置, 但是当这个activity成为栈顶activity时, 系统必须recreate它(而不是resume它). 为了避免丢失用户的工作内容, 你应该主动通过实现<a href="http://developer.android.com/reference/android/app/Activity.html#onSaveInstanceState(android.os.Bundle">onSaveInstanceState()</a>)回调方法来保存那些信息.</p>
+
+<p>想了解更多关于如何保存activity的状态，请参考<a href="http://developer.android.com/guide/components/activities.html#SavingActivityState">Activities</a>.</p>
+
+<h1>Managing Tasks(管理Tasks)</h1>
+
+<p>Android系统默认的管理tasks与back stack的方法使用于大部分情况, 对于大多数程序来说, 你不需要担心你的activites是如何与task进行联系的，它们又是如何存放在back stack中的. 但是你可能想要打断通常的行为, 可能你想要在你的程序中的某个activity被启动时会创建一个新的task而不是放置到旧的task中; 或者, 当你启动一个activity，你想要把已经存在的某个实例放置到栈顶(而不是在栈顶创建一个新的实例); 又或者说, 你想要在用户退出task时除了根activity之外清除栈中其它的activities.</p>
+
+<p>你可以通过在manifest的<activity>标签下设置属性，并且在把intent传递给startActivity()方法之前为intent设置flag.</p>
+
+<p>关于此事, 在<activity>标签下可以设置的主要属性为:<br/>
+* taskAffinity
+* launchMode
+* allowTaskReparenting
+* clearTaskOnLaunch
+* alwaysRetainTaskState
+* finishOnTaskLaunch</p>
+
+<p>你可以为intent设置flag的主要值有:<br/>
+* FLAG_ACTIVITY_NEW_TASK
+* FLAG_ACTIVITY_CLEAR_TOP
+* FLAG_ACTIVITY_SINGLE_TOP</p>
+
+<p>下面将会讲解如何使用上面定义的方法<br/>
+<strong>Caution:</strong> 大多数程序不应该打断系统默认的activities与tasks之间的行为. 如果你确定有必要修改默认的行为, 请谨慎使用并确保用户切换与回退的行为是可用正常的. 请确保你的设计行为不会对用户期待的体验有冲突.</p>
+
+<h2>(0)Defining launch modes(定义启动模式)</h2>
+
+<p>启动模式允许你定义一个activity的实例与当前task是如何结合的. 你可以用下面两种方式来定义不同的启动模式:</p>
+
+<ul>
+<li><p><strong>Using the manifest file</strong><br/>
+当你在manifest文件中定义一个activity时，你可以指定当它启动时与task的结合方式.</p></li>
+<li><p><strong>Using Intent flags</strong><br/>
+当你调用startActivity(), 你可以对intent进行设置flag来表示这个activity将与task如何进行结合.</p></li>
+</ul>
+
+
+<p>像这样, 如果Activity A 启动 Activity B, 那么Activity B 可以在它的manifest中定义它应该如何与当前的task进行联合，同样Activity A 也可以请求Activity B 应该如何与当前task进行结合. <strong>如果两个都有定义，那么A的请求(定义在Intent中的)的优先级比B的请求(定义在manifest中)要更高</strong>.</p>
+
+<p><strong>Note:</strong>某些可以定义在manifest中的启动模式并不一定在intent flag中可以找到对应的方式. 同样,某些在intent flag中可以找到的并不一定可以在manifest中进行设置.</p>
+
+<h3>Using the manifest file</h3>
+
+<p>在manifest的<activity>标签下设置<strong>launchMode</strong>属性，一共可以设置下面4种类型的启动模式:</p>
+
+<hr />
+
+<ul>
+<li><strong>"standard"</strong> (the default mode)</li>
+</ul>
+
+
+<p>系统默认的启动模式. 系统在task中创建一个新的实例，activity可以被多次实例化. 每一个实例可以属于不同的task, 同样一个task可以有多个实例.</p>
+
+<ul>
+<li><strong>"singleTop"</strong></li>
+</ul>
+
+
+<p>如果activity的实例已经存在于当前task的栈顶, 系统会通过调用它的onNewIntent()方法把intent导向那个实例, 而不是为那个activity创建新的实例. activity可以被多次实例化，每一个实例可以属于不同的tasks, 同样一个task可以有多个实例 (仅仅当目前栈顶activity不是那个activity时才行，否则栈顶元素就是想要创建的activity的实例的话，则不会重复创建).</p>
+
+<p>例如, 某个栈中的元素由root至top依次为activity A-B-C-D; Acivity D是栈顶. 一个intent来到activity D中. 如果D是默认的"standard"启动模式, 那么stack则会变成A-B-C-D-D. 然而, 如果D的启动模式是"singleTop", 那么D将通过onNewIntent()来接受那个intent, 栈结构仍然是A-B-C-D. 然而, 如果Activity B接受到一个intent, 那么即使现在是single top模式，仍然会创建一个新的B加入到栈中.(A-B-C-D-B)</p>
+
+<p><strong>Note:</strong> 当一个activity的实例被创建时，用户可以点击Back按钮来回退到之前的activity. <strong>但是当已经存在的某个实例需要处理一个新的intent时，用户在这个intent还没有到达onNewIntent()方法之前是没有办法通过点击back按钮来回退的.</strong></p>
+
+<ul>
+<li><strong>"singleTask"</strong></li>
+</ul>
+
+
+<p>系统会创建一个新的task并把实例化的activity作为task的root元素(这个task还可以继续添加其他activity的实例). <strong>然而, 如果这个activity的实例已经存在于另外一个task中，系统会通过调用onNewIntent()方法把intent导向已经存在的实例中, 而不是创建一个新的实例. 某一时刻，activity的实例只能存在一个.</strong></p>
+
+<p><strong>Note:</strong>尽管activity是在一个新的task中被启动的, Back按钮仍然是可以回退到上一个activity的.</p>
+
+<ul>
+<li><strong>"singleInstance".</strong></li>
+</ul>
+
+
+<p>除了系统不会再对拥有的那个activity的task添加新的其他实例之外，与"singleTask"是类似的. activity的实例总是唯一的，并且是task中唯一的一个元素. 并且task是新创建的.</p>
+
+<hr />
+
+<p>另外一个例子, Android的Browser程序通过为web browser activity在manifest中指定singleTask模式定义了activity总是在它自己的taks中打开. 这意味着，如果你的程序定义了一个intent来打开Android Browser, 它的activity并不是在你的程序task中被打开的. 要么为browser启动一个新的task，要么把browser正在后台允运行的task带到forgound来处理那个Intent.<br/>
+<strong>???</strong>(<em>奇怪，前面不是说intent请求的优先级比manifest中的要高吗？这里怎么会这样？</em>)</p>
+
+<p>不管是启动一个新的task还是在原来的task中，Back按钮都可以回退到前面的activity. 然而，如果你启动的activity的launch mode定义为singleTask, 然后如果那个activity的某个实例已经存在于一个background的task中，那么这个background的task的所有activites会<strong>整个全部</strong>被带到foreground的. 下图Figure 4 演示了这种情况：</p>
+
+<p><img src="/images/articles/diagram_backstack_singletask_multiactivity.png" title="Figure 4. A representation of how an activity with launch mode &quot;singleTask&quot; is added to the back stack. If the activity is already a part of a background task with its own back stack, then the entire back stack also comes forward, on top of the current task." alt="diagram_backstack_singletask_multiactivity.png" /></p>
+
+<p><strong>Note:</strong> 通过manifest中launchMode属性设置的方式定义的启动模式可以被intent中的flag所覆盖，请看下面的解释.</p>
+
+<h3>Using Intent flags</h3>
+
+<ul>
+<li><p>FLAG_ACTIVITY_NEW_TASK<br/>
+在新的task中启动activity. 如果你要启动的activity已经存在于某个运行的task中, 那么这个task会整个被提升为foregound的，activity会通过onNewIntent()来接收intent.这部分的行为与singleTask启动模式是一致的.</p></li>
+<li><p>FLAG_ACTIVITY_SINGLE_TOP<br/>
+如果在栈顶的activity接受到这样的intent, 那么已经存在于栈顶的实例会通过onNewIntent()来获取intent, 而不是创建一个新的实例. 这部门的行为与singleTop启动模式是一致的.</p></li>
+<li><p>FLAG_ACTIVITY_CLEAR_TOP<br/>
+如果被启动的activity已经存在于当前运行的task中, 不是为那个activity启动一个新的实例，而是在这个activity实例之上的activities都被destoryed，intent被通过onNewIntent()传递到这个实例中，并且这个时候，它就成了栈顶元素. 这个行为在launchMode的属性中并没有对应的值.<br/>
+FLAG_ACTIVITY_CLEAR_TOP通常与FLAG_ACTIVITY_NEW_TASK同时使用. 当他们结合一起时，那意味着把已经存在的activity放置到另外一个task中并且把它作为栈顶元素开始与用户进行交互.</p></li>
+</ul>
+
+
+<p><strong>Note:</strong>如果被启动的activity的launch mode是"standard", 那么这个activity同样会被先清除掉，然后创建一个新的实例来接受intent. 那是因为当launch mode是standard时，新的实例总是为了新的intent而被创建.</p>
+
+<h2>(1)Handling affinities(处理联姻关系)</h2>
+
+<p>Affinity(联姻)意味着activity更倾向归属于哪一个task. 默认的，来自同一程序的所有的activities会拥有同样的联姻关系. 因此，他们更倾向于处于同一个task中. 然而, 你可以修改这种默认的行为. 在不同程序中的activites可以有同样的联姻关系，或者同一程序中的不同activites可以分配到不同的task联姻关系中</p>
+
+<p>可以在manifest的activity中设置taskAffinity属性，一共有下面两种情况：</p>
+
+<ul>
+<li>When the intent that launches an activity contains the FLAG_ACTIVITY_NEW_TASK flag.</li>
+</ul>
+
+
+<p>A new activity is, by default, launched into the task of the activity that called startActivity(). It's pushed onto the same back stack as the caller. However, if the intent passed to startActivity() contains the FLAG_ACTIVITY_NEW_TASK flag, the system looks for a different task to house the new activity. Often, it's a new task. However, it doesn't have to be. If there's already an existing task with the same affinity as the new activity, the activity is launched into that task. If not, it begins a new task.<br/>
+If this flag causes an activity to begin a new task and the user presses the Home button to leave it, there must be some way for the user to navigate back to the task. Some entities (such as the notification manager) always start activities in an external task, never as part of their own, so they always put FLAG_ACTIVITY_NEW_TASK in the intents they pass to startActivity(). If you have an activity that can be invoked by an external entity that might use this flag, take care that the user has a independent way to get back to the task that's started, such as with a launcher icon (the root activity of the task has a CATEGORY_LAUNCHER intent filter; see the Starting a task section below).</p>
+
+<ul>
+<li>When an activity has its allowTaskReparenting attribute set to "true".</li>
+</ul>
+
+
+<p>In this case, the activity can move from the task it starts to the task it has an affinity for, when that task comes to the foreground.<br/>
+For example, suppose that an activity that reports weather conditions in selected cities is defined as part of a travel application. It has the same affinity as other activities in the same application (the default application affinity) and it allows re-parenting with this attribute. When one of your activities starts the weather reporter activity, it initially belongs to the same task as your activity. However, when the travel application's task comes to the foreground, the weather reporter activity is reassigned to that task and displayed within it.</p>
+
+<p><strong>Tip:</strong> 如果一个.apk文件从用户的角度看包含了不止一个"application"的话，你可能会想要使用taskAffinity属性来为那些activites设置不同的联姻关系.</p>
+
+<h2>(2)Clearing the back stack(清除回退栈)</h2>
+
+<p>如果用户长时间离开一个task, 系统会清除task中root activity之外的所有的activites. 当用户回退到task时，仅仅只有root activity会被恢复.</p>
+
+<p>有下面一些值可以用来设置，如果你想修改系统默认的行为的话:</p>
+
+<ul>
+<li><p><strong>alwaysRetainTaskState</strong><br/>
+设置了这个属性为true之后，即使很长时间，也不会被destory的</p></li>
+<li><p><strong>clearTaskOnLaunch</strong><br/>
+如果这个属性设置为true，那么就是与alwaysRetainTaskState相反的. 每次启动都会清除root以上的activities.</p></li>
+<li><p><strong>finishOnTaskLaunch</strong><br/>
+这个属性与clearTaskOnLaunch类似, 但是它仅仅是对单个activity进行操作，而不是整个task. It can also cause any activity to go away, including the root activity. When it's set to "true", the activity remains part of the task only for the current session. If the user leaves and then returns to the task, it is no longer present.</p></li>
+</ul>
+
+
+<h2>(3)Starting a task(启动一个任务)</h2>
+
+<p>你可以启动一个activity作为一个task的起点，通过为它的intent filter设置"android.intent.action.MAIN"作为特定的action，设置"android.intent.category.LAUNCHER"作为特定的category. 例如：
+```xml
+<activity ... ></p>
+
+<pre><code>&lt;intent-filter ... &gt;
+    &lt;action android:name="android.intent.action.MAIN" /&gt;
+    &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+&lt;/intent-filter&gt;
+...
+</code></pre>
+
+<p></activity>
+```
+上面的设置方式不仅仅是使得这个activity作为launcher的图标，允许用户通过点击它启动activity并且随时通过点击它来触发恢复之前的task.</p>
+
+<p>第二点非常重要: 用户必须能够在离开task之后通过activity的launcher来回到task. 因为这点, "singleTask" 与 ""singleInstance" 这两种启动模式总是会初始化一个task, 需要有ACTION_MAIN 与 CATEGORY_LAUNCHER 配合. 例如，用户启动了一个task做了一些动作，然后点击Home回到桌面，这个时候想要回到刚才的task，需要有launcher作为入口.</p>
+
+<p>对于那些你不想用户可以回退的情况，请设置<activity>标签下的finishOnTaskLaunch属性为"true" (参考上面的章节).</p>
+
+<hr />
+
+<p><strong>文章学习自<a href="http://developer.android.com/guide/components/tasks-and-back-stack.html">http://developer.android.com/guide/components/tasks-and-back-stack.html</a></strong><br/>
+<strong>转载请注明出自<a href="http:://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢</strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Notes 04 - Intents and Intent Filters]]></title>
+    <link href="http://kesenhoo.github.com/blog/2013/04/12/android-notes-04-intent-and-intentFilter/"/>
+    <updated>2013-04-12T18:27:00+08:00</updated>
+    <id>http://kesenhoo.github.com/blog/2013/04/12/android-notes-04-intent-and-intentFilter</id>
+    <content type="html"><![CDATA[<h2>Intent与Intent Filter</h2>
+
+<p>Android其中的三大组件，Activity,Service与broadcast receivers是通过Intent来触发彼此的。Intent本身会携带一些信息，它是一种组件内部或者组件间进行交互的中介。<br/>
+对于不同的组件之间有着不同的机制：</p>
+
+<ul>
+<li>一个Intent对象通过Context.startActivity()或者Activity.startActivityForResult()来启动一个activity或者让已经存在的activity做一些更新的操作。</li>
+<li>一个Intent对象通过Context.startService()来初始化一个Service或者给已经在运行的Service传递新的指令。同样的，对于Context.bindService()是一样的道理。</li>
+<li>Intent对象通过broadcast的方法（例如Context.sendBroadcast(), Context.sendOrderedBroadcast()或者Context.sendStickyBroadcast())传递给那些感兴趣的broadcast receivers.</li>
+</ul>
+
+
+<!-- more -->
+
+
+<p>每一种不同类型的intent都会由系统传递到对应的组件上，下面会介绍Android系统是如何根据Intent里面的参数进行分类处理并传递到符合要求的组件上的。</p>
+
+<h3>Intent对象</h3>
+
+<p>一个Intent对象是许多信息的一个bundle.通常来说，它可以包含下面的内容：</p>
+
+<ul>
+<li><p>Component name组件名</p>
+
+<ul>
+<li>指定处理这个intent的组件。包名与包中的组件名。组件名是可选的。如果设置了组件名，这个intent就会传递给对应的类。如果没有设置组件名，Android会利用Intent对象中的其他信息来判断传递的对象。</li>
+<li>可以通过setComponent(), setClass()或者setClassName()来设置组件名，并通过getComponent()来读取组件名.</li>
+</ul>
+</li>
+<li><p>Action动作意图<br/>
+一个String名称来表示执行Intent的意图是什么，Intent类定义了一些action常量，如下：</p></li>
+</ul>
+
+
+<hr />
+
+<table>
+   <tr>
+      <td>Constant</td>
+      <td>Target component</td>
+      <td>Action</td>
+   </tr>
+   <tr>
+      <td>ACTION_CALL</td>
+      <td>activity</td>
+      <td>Initiate a phone call.</td>
+   </tr>
+   <tr>
+      <td>ACTION_EDIT</td>
+      <td>activity</td>
+      <td>Display data for the user to edit.</td>
+   </tr>
+   <tr>
+      <td>ACTION_MAIN</td>
+      <td>activity</td>
+      <td>Start up as the initial activity of a task, with no data input and no returned output.</td>
+   </tr>
+   <tr>
+      <td>ACTION_SYNC</td>
+      <td>activity</td>
+      <td>Synchronize data on a server with data on the mobile device.</td>
+   </tr>
+   <tr>
+      <td>ACTION_BATTERY_LOW</td>
+      <td>broadcast receiver</td>
+      <td>A warning that the battery is low.</td>
+   </tr>
+   <tr>
+      <td>ACTION_HEADSET_PLUG</td>
+      <td>broadcast receiver</td>
+      <td>A headset has been plugged into the device, or unplugged from it.</td>
+   </tr>
+   <tr>
+      <td>ACTION_SCREEN_ON</td>
+      <td>broadcast receiver</td>
+      <td>The screen has been turned on.</td>
+   </tr>
+   <tr>
+      <td>ACTION_TIMEZONE_CHANGED</td>
+      <td>broadcast receiver</td>
+      <td>The setting for the time zone has changed.</td>
+   </tr>
+</table>
+
+
+<hr />
+
+<p>更多通用的常量定义，请查看<a href="http://developer.android.com/reference/android/content/Intent.html">Intent</a>类的描述。<br/>
+你可以定义自己的action string来激活你程序中的其他组件。那些action请遵循把包名作为前缀的规则：例如"com.example.project.SHOW_COLOR".</p>
+
+<ul>
+<li><p>Data数据
+不同的action会有不同类型的数据。例如，如果你的action是ACTION_EDIT,那么数据应该包含想要编辑的文件URI。如果action是ACTION_CALL,数据应该是tel: URI的格式。同样的，如果action是ACTION_VIEW，那么数据应该是http: URI。接受的action的activity会负责去处理那些指定的数据。<br/>
+数据的MIME类型也是非常重要的，例如，一个可以显示图片数据的组件不应该被叫起来做播放音频的动作。<br/>
+在许多情况下，数据类型可以从URI中读取到。但是数据类型同样可以显示的定义在Intent对象中。setData()方法指定了数据的URL，setType()方法指定了MIME类型, 同时setDataAndType()方法则可以同时指定URI与MIME。URI可以通过getData()来读取，数据类型则可以通过getType()来读取.</p></li>
+<li><p>Category分类
+指定哪一类的组件应该处理这个intent。Intent有定义一些分类，如下:</p></li>
+</ul>
+
+
+<hr />
+
+<table>
+   <tr>
+      <td>Constant</td>
+      <td>Meaning</td>
+   </tr>
+   <tr>
+      <td>CATEGORY_BROWSABLE</td>
+      <td>The target activity can be safely invoked by the browser to display data referenced by a link — for example, an image or an e-mail message.</td>
+   </tr>
+   <tr>
+      <td>CATEGORY_GADGET</td>
+      <td>The activity can be embedded inside of another activity that hosts gadgets.</td>
+   </tr>
+   <tr>
+      <td>CATEGORY_HOME</td>
+      <td>The activity displays the home screen, the first screen the user sees when the device is turned on or when the Home button is pressed.</td>
+   </tr>
+   <tr>
+      <td>CATEGORY_LAUNCHER</td>
+      <td>The activity can be the initial activity of a task and is listed in the top-level application launcher.</td>
+   </tr>
+   <tr>
+      <td>CATEGORY_PREFERENCE</td>
+      <td>The target activity is a preference panel.</td>
+   </tr>
+</table>
+
+
+<hr />
+
+<p>请查看<a href="http://developer.android.com/reference/android/content/Intent.html">Intent</a>获取完整的分类列表.<br/>
+addCategory()方法可以把某个intent对象加入到指定的分类中，也可以通过removeCategory()来移除，使用getCategories()来获取当前对象中的所有分类。</p>
+
+<ul>
+<li><p>Extras额外的值
+Intent对象有一系列put...() 方法来插入不同类型的数据，get...() 方法来读取数据. 那些方法可以对数据进行序列化处理成一个bundle对象。实际上，我们也可以new一个bundle对象，通过putExtras() 与 getExtras() 方法来进行处理.</p></li>
+<li><p>Flags标志
+Flags用来表示，如何启动一个activity(例如，指定activity应该属于哪一个task) 并且在activity被启动后，这个activity在系统中的状态是怎么样的 (例如，是否应该属于最近使用的activity列表中). 所有的flag都在Intent类中有定义。</p></li>
+</ul>
+
+
+<p>想了解如何启动Android系统内的组件，请查看<a href="http://developer.android.com/guide/appendix/g-app-intents.html">list of intents</a>.</p>
+
+<h2>Intent Resolution[Intent详解]</h2>
+
+<p>Intents应该可以分成两类:<br/>
+* <strong>Explicit</strong>显式intents通过组件名来指定目标组件。因为组件名不一定可以被其他应用程序的开发者所了解，显式intent通常用来程序内部传递消息：例如activity启动一个下属级别的service或者是启动一个同级的activity。Android系统会根据组件名来把intent送到指定的组件上。<br/>
+* <strong>Implicit</strong>隐式intents并不指定特定的组件名。Implicit intents通常用来触发其他应用程序里面的组件。Android系统通过intentFilter来筛选出合适的组件来接收这个intent。没有定义IntentFilter的组件只能接受显式的intent，而定义了intentFilter的组件则可以接受显式与隐式两种类型的intent。</p>
+
+<h3>Intent filters[Intent过滤器]</h3>
+
+<ul>
+<li>Activities, services 与 broadcast receivers可以有一个或者多个intent filter.每一个filter都描述了一种可以通过筛选的intent。一个intent要像被这个组件所接收到，必须满足这个组件的所有filter中的一个。</li>
+<li>接收intent的组件会根据接收到的数据来决定做不同的动作。<br/>
+<strong>注意</strong>:intent filter并不能用来做安全性的检查。因为如果某个显式的intent通过组合多个action与data,指定发送到组件，这样就没有办法起到filter的作用了。</li>
+<li>intent filter是<a href="http://developer.android.com/reference/android/content/IntentFilter.html">IntentFilter</a>的实例。因为Android系统需要在组件被启动之前知道它的过滤值，所以一般都是直接写在AndroidManifest.xml里面。其中一个例外是broadcast receiver可以通过Context.registerReceiver()来动态进行注册。</li>
+<li><p>一个filter会对action,data与category进行序列化处理。一个隐式的intent均需要通过前面三方面的过滤。如果其中某一项不符合，Android系统將过滤掉这个事件。另外，如果组件有定义多个filter，那么只要满足其中一个filter就可以让其通过。</p></li>
+<li><p>Action test
+<code>xml
+&lt;intent-filter . . . &gt;
+  &lt;action android:name="com.example.project.SHOW_CURRENT" /&gt;
+  &lt;action android:name="com.example.project.SHOW_RECENT" /&gt;
+  &lt;action android:name="com.example.project.SHOW_PENDING" /&gt;
+  . . .
+&lt;/intent-filter&gt;
+</code>
+如果某个intent有定义action，那么想要通过上面的测试，必须满足其中一条action.同时，如果intent没有定义任何action，则默认是可以通过的。</p></li>
+<li><p>Category test
+<code>xml
+&lt;intent-filter . . . &gt;
+  &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+  &lt;category android:name="android.intent.category.BROWSABLE" /&gt;
+  . . .
+&lt;/intent-filter&gt;
+</code>
+与action类似，如果有定义category，想要通过，则必须满足filter中的任意一条，否则，如果没有定义category，则默认可以通过。<br/>
+然而，activity如果想要接收隐式的intent，那么在activity的filter里面必须包含"android.intent.category.DEFAULT"。</p></li>
+<li><p>Data test
+<code>xml
+&lt;intent-filter . . . &gt;
+  &lt;data android:mimeType="video/mpeg" android:scheme="http" . . . /&gt;
+  &lt;data android:mimeType="audio/mpeg" android:scheme="http" . . . /&gt;
+  . . .
+&lt;/intent-filter&gt;
+</code>
+每一个<data>标签都可以指定一个URI与一个数据类型(MIME media type). 格式像下面定义的那样：
+<code>xml
+scheme://host:port/path
+</code>
+例如：content://com.example.project:200/folder/subfolder/etc<br/>
+那些属性是可选的，但是他们并不是相互独立的。例如，一个路径想要有意义，必须指定scheme与authority.<br/>
+他们有着下面一些规则需要遵守：</p></li>
+<li><p>一个既没有URI也没有数据类型的Intent对象，只有在filter没有指定任何URI或者数据类型的情况下才能通过。</p></li>
+<li>一个包含URI但是没有数据类型的Intent对象，符合filter定义的URI,同时filter并没有定义数据类型，这样这个对象能够通过。这种情况仅仅发生在类似<strong>mailto:</strong>与<strong>tel:</strong>，他们并没有指定任何实际的数据。</li>
+<li>一个包含数据类型但是没有定义URI的Intent对象，仅仅在fliter拥有同样的数据类型而且也没有定义URI的情况下，才能通过。</li>
+<li>一个即包含URI又包含数据类型的(或者数据类型可以从URI中获取到)Intent对象。如果与filter中的URI相匹配，这URI部分可以通过。如果数据类型也匹配，则数据部分也可以通过。有个例外，<strong>如果intent的URI是content: 或者 file: ，然而filter却没有定义任何URI(只定义了数据类型)，这样的话，同样能够通过。也就是说content:与file:是特例。</strong></li>
+</ul>
+
+
+<hr />
+
+<p>如果一个intent可以通过多个组件的filter，那么系统会提示用户选择启动哪一个组件。如果没有一个组件满足，则会发生异常。</p>
+
+<h3>Common cases[常见情况]</h3>
+
+<p>上面最后一条规则说明组件可以从文件或者content provider中获取本地的数据。因此，他们的filter可以仅仅需要指定数据类型，而不用显式指定content: 与 file: 的URI. 这是一个很常见的Case.</p>
+
+<ul>
+<li>下面的filter将使得符合条件的组件从content provider获取图片数据并进行显示
+<code>xml
+&lt;data android:mimeType="image/*" /&gt;
+</code></li>
+<li>从网络获取video数据并进行显示
+<code>xml
+&lt;data android:scheme="http" android:type="video/*" /&gt;
+</code></li>
+</ul>
+
+
+<h3>Using intent matching[intent匹配模式]</h3>
+
+<ul>
+<li><p>Intents与intent filters进行匹配，不仅仅是为了寻找待激活的某个组件，而且是为了寻找符合条件的所有的组件。例如，Android系统会把那些intent filter中包含android.intent.action.MAIN" action与"android.intent.category.LAUNCHER" category的组件作为程序的入口(icon launcher).同样的，它通过"android.intent.category.HOME"来寻找桌面组件。</p></li>
+<li><p><a href="http://developer.android.com/reference/android/content/pm/PackageManager.html">PackageManager</a>有一组query...()方法来查询那些符合intent条件的组件，还提供了一组resolve...() 方法来决定最佳的组件对intent进行响应。例如，<a href="http://developer.android.com/reference/android/content/pm/PackageManager.html#queryIntentActivities(android.content.Intent,%20int">queryIntentActivities()</a>)返回所有符合参数intent描述的activity。<a href="http://developer.android.com/reference/android/content/pm/PackageManager.html#queryIntentServices(android.content.Intent,%20int">queryIntentServices()</a>)则返回符合条件的sevice。同样的，对<a href="http://developer.android.com/reference/android/content/pm/PackageManager.html#queryBroadcastReceivers(android.content.Intent,%20int">queryBroadcastReceivers()</a>)也是一样.</p></li>
+</ul>
+
+
+<hr />
+
+<p><strong>文章学习自<a href="http://developer.android.com/guide/components/processes-and-threads.html">http://developer.android.com/guide/components/processes-and-threads.html</a></strong><br/>
+<strong>转载请注明出自<a href="http:://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢</strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Notes 03 - Process and Thread]]></title>
+    <link href="http://kesenhoo.github.com/blog/2013/03/31/android-notes-03-process-and-thread/"/>
+    <updated>2013-03-31T16:27:00+08:00</updated>
+    <id>http://kesenhoo.github.com/blog/2013/03/31/android-notes-03-process-and-thread</id>
+    <content type="html"><![CDATA[<p><img src="/images/articles/process_and_thread.jpg"></p>
+
+<p>当程序的第一个组件开始启动时，Android系统会为这个程序启动一个新的Linux进程。默认的，程序中的后续其他组件都是运行在这个进程的线程中(这个线程被成为"主"线程:main thread)。如果程序的组件在启动时发现已经存在这个程序的进程了(因为其他组件正在运行)， 那么这个组件将启动在该进程中，并使用同一线程。然而，你可以安排程序中的不同组件运行在另外一个进程中，而且你可以为任何进程创建其它的线程。</p>
+
+<h1>Process：进程</h1>
+
+<p>默认的，同一程序的所有组件都是运行在一个Proces里面的，并且大多数程序都不应该去改变这一规则。然而，如果你需要控制某一确定的组件的Proces，你可以在manifest文件中做特殊设置。<em>Music播放器的Playback Service就可以这样做</em></p>
+
+<!-- more -->
+
+
+<p>manifest中的activity，service，receiver与provider的标签都可以支持<strong>android:process</strong>的属性，它可以为这个组件的运行指定一个特定的进程。这样你可以为某些组件设置运行的进程而其他组件共享一个进程。你还可以通过设置进程属性使得不同程序的运行在同一个进程，共享同一个Linux ID，并且签有同样的签名。</p>
+
+<p>application标签也可以支持设置<strong>android:process</strong>属性，这样会给所有的组件设置一个默认的进程值。</p>
+
+<p>Android会在系统内存紧张时决定关闭某些进程。那么程序中的运行的组件会因此被摧毁掉。当他们需要再次运行时会重新启动一个进程。</p>
+
+<p>当决定杀掉哪一个进程时，Android系统会自动衡量进程的重要性。例如，一个在屏幕上不再可见的进程相对于那些有组件正在被显示的进程更容易被杀掉是显得合理的。那么衡量的权重后面会讲到。</p>
+
+<h1>Process lifecycle：进程生命周期</h1>
+
+<p>Android系统会尝试尽可能的维持程序的存在。但是当需要为新的或者更重要的进程开辟内存空间的时候，最终某些程序是会要被拿掉。为了决定存活当中的程序哪些该拿掉，哪些该留下，系统会根据每一个进程的组件与组件运行状态来生成一个"importance hierarchy"（权重层级）。那些权重低的进程将依次被移除，直到系统恢复了足够的资源。</p>
+
+<p>在权重层级中，一个有5个层次。下面列出了不同类型进程的权重：</p>
+
+<ol>
+<li><strong>Foreground process</strong>：<br/>
+用户目前正在使用的进程。要成为此类型的进程需要满足下面的任意一点：
+
+<ul>
+<li>该进程拥有一个用户正在交互的页面。（onResume方法正在执行）</li>
+<li>该进程拥有一个Service，该Service绑定到正在与用户交互的Activity中。</li>
+<li>该进程拥有一个in the foreground的Service,通过执行startForeground().</li>
+<li>该进程拥有一个Service，正在执行Service的某些callbacks方法(onCreate()， onStart()，或者onDestroy()).</li>
+<li>该进程拥有一个BroadcastReceiver，并且在执行它的onReceive()方法。</li>
+</ul>
+</li>
+<li><strong>Visible process</strong>
+一个没有任何foreground组件，但是仍然能够影响屏幕呈现内容的进程。需要满足下面条件之一：
+
+<ul>
+<li>该进程没有任何foreground的组件，但是仍然对用户可见。例如onPause()被调用的情况，started dialog。</li>
+<li>该进程拥有一个一个Service，并且该Service绑定到某个Visible的activity上。</li>
+</ul>
+</li>
+<li><strong>Service process</strong><br/>
+一个进程拥有正在运行的Service，该Service是通过startService()的方式被启动的，并且不会进入到前面的两种高权重的层级。尽管Service进程没有与用户看到的部分有直接关系，但是他们通常是在做用户关心在意的工作（例如后台播放音乐，后台下载网络数据），因此系统会保持他们能够运行，除非现有的内存已经不够维持前面2个权重层级的进程使用。</li>
+<li><strong>Background process</strong><br/>
+进程拥有一个activity，并且这个activity不被用户所见（例如activity的onStop方法被执行）。这些进程对用户体验没有直接的影响，系统可以杀掉这些进程为前面三个层级的进程空出内存。通常来说，系统中存在许多后台进程正在运行，因此他们被保存为一个LRU(least recently used)列表，用来确保最近被使用过的activity会被最后杀死。如果一个activity正确的实现了它的生命周期函数，可以保存它的当前状态。那么杀掉该进程并不会对用户体验有明显的影响。因为当用户重新回到这个Activity时，activity可以所有可见时的状态。</li>
+<li><strong>Empty process</strong><br/>
+该进程没有拥有任何激活状态的程序组件。保持该进程存在的唯一理由是为了缓存。使用缓存可以提升程序的下次启动时间。系统通常会权衡所有的资源来决定杀掉哪些缓存程序。</li>
+</ol>
+
+
+<p><strong>取最高优先级</strong><br/>
+如果一个程序中有好几种优先级的组件，Android系统会把其中最高级别的当作整个程序的权重。例如，如果一个进程拥有一个service与一个visible activity，这个进程会被当作是一个visible进程而不是service进程。</p>
+
+<p><strong>提升优先级</strong><br/>
+另外，一个进程的排名会因为其依赖的组件的权重提升而提升。例如，进程A本来是权重为3的，但是它的某个组件与另外一个权重为1的进程B进行绑定后，进程A的权重也会被提升为1。</p>
+
+<p>因为一个执行service的进程的排名比一个后台activity的进程排名要高，所以，如果一个activity启动时要执行一段长时间的操作，应该选择使用Service而不是创建一个worker thread。例如，一个activity做上传图片的操作，应该选择启动一个Service做上传的动作。使用service能确保这个操作会至少有"service process"的优先级。</p>
+
+<h1>Thread</h1>
+
+<p>当一个程序首次启动，系统会为这个程序创建一个<strong>"main thread"</strong>。这个线程非常重要，因为它将肩负起UI的控制调度，还包含绘制图像的事件。同时，它还是与UI相关的组件（来自android.widget与android.view下的组件）进行交互的中介。因此，有些时候main thread 也被成为<strong>"UI thread"</strong>.</p>
+
+<p>系统不会为每一个组件的实例创建单独的线程。所有运行在同一个进程中的组件都会在UI Thread中被实例化。系统调用组件与他们自身的回调函数都是运行在UI Thread的。</p>
+
+<p>例如，当用户点击屏幕上的一个button，程序的UI thread会把这个事件分发至button这个组件上，然后button会执行它的presss state并post an invalidate请求到事件队列中。UI thread然后从事件队列中取出消息并通知组件进行重绘。</p>
+
+<p>当你的app执行一个比较重的工作时，单线程模式有可能会卡到UI。特别是，在UI线程里面做网络请求操作或者是db查询会严重卡到整个UI。当UI thread被阻塞时，没有事件能够继续被分发，包括绘制事件。那么在用户看来，这样的程序是糟糕的。更糟糕的是，如果UI线程被阻塞超过5秒，程序会就出现ANR的错误提示。那么用户可能会决定推出程序，并对该程序进行卸载。</p>
+
+<p>另外，Andoid的UI组件不是thread-safe的。因此，你不应该在另外一个线程去操控UI组件。有两个原则需要遵守：<br/>
+* 不要阻塞UI线程。<br/>
+* 不要在UI线程之外访问UI组件。</p>
+
+<h2>Worker threads</h2>
+
+<p>为了实现执行耗时的操作，你应该确保那些动作执行在另外一个线程("background" or "worker" threads)。</p>
+
+<p>例如，下面的代码演示了点击事件后开启另外一个线程来下载并显示图片的操作：<br/>
+```java</p>
+
+<pre><code>public void onClick(View v) {
+    new Thread(new Runnable() {
+        public void run() {
+            Bitmap b = loadImageFromNetwork("http://example.com/image.png");
+            mImageView.setImageBitmap(b);
+        }
+    }).start();
+}
+</code></pre>
+
+<p>```java
+上面的例子看起来没有问题，实际上违法了第二条规则：不要在UI线程之外访问UI组件。
+Android提供了下面三个方法来解决这个问题：</p>
+
+<ul>
+<li>Activity.runOnUiThread(Runnable)</li>
+<li>View.post(Runnable)</li>
+<li>View.postDelayed(Runnable, long)</li>
+</ul>
+
+
+<p>例如下面就是使用View.post的方式实现的代码示例
+```java</p>
+
+<pre><code>public void onClick(View v) {
+    new Thread(new Runnable() {
+        public void run() {
+            final Bitmap bitmap = loadImageFromNetwork("http://example.com/image.png");
+            mImageView.post(new Runnable() {
+                public void run() {
+                    mImageView.setImageBitmap(bitmap);
+                }
+            });
+        }
+    }).start();
+}
+</code></pre>
+
+<p>```java
+上面的代码虽然实现了功能，可是当系统变复杂时，会显得不好处理。也许我们可以考虑使用Handler，但是更好的方案也许是使用AsyncTask。</p>
+
+<h2>Using AsyncTask</h2>
+
+<p>关于什么是AsyncTask与如何使用<a href="http://developer.android.com/reference/android/os/AsyncTask.html">AsyncTask</a>，不再赘述。
+下面是使用AsyncTask来实现上面的例子：
+```java</p>
+
+<pre><code>public void onClick(View v) {
+    new DownloadImageTask().execute("http://example.com/image.png");
+}
+
+private class DownloadImageTask extends AsyncTask&lt;String, Void, Bitmap&gt; {
+    /** The system calls this to perform work in a worker thread and
+      * delivers it the parameters given to AsyncTask.execute() */
+    protected Bitmap doInBackground(String... urls) {
+        return loadImageFromNetwork(urls[0]);
+    }
+
+    /** The system calls this to perform work in the UI thread and delivers
+      * the result from doInBackground() */
+    protected void onPostExecute(Bitmap result) {
+        mImageView.setImageBitmap(result);
+    }
+}
+</code></pre>
+
+<p>```java</p>
+
+<h2>Thread-safe methods</h2>
+
+<p>在某些情况下，你实现的一些方法有可能会被不止一个线程中执行到，因此这些方法必须是线程安全的。</p>
+
+<p><strong>在bound service的情况下，回调函数通常都需要是线程安全的。如果IBinder的Client与Server是在同一进程的话，那么被Client调用的方法是执行在Client的线程当中的。然而如果Client是在另外一个进程的话，被调用的方法则是执行在来自系统为Server端维护的一个线程池当中的某个线程中（非UI Thread）。例如，既然Service的onBind()的方法可以被service进程的UI线程所调用执行，那么onBind所返回的对象（Client端）所实现的方法则可以被线程池中的线程所调用执行。因为一个service可以拥有多个client，那么在同一时刻可以有不止一个线程可以占用同一个IBinder的回调函数。所以IBinder的方法必须是线程安全的。</strong></p>
+
+<p>同样的，一个content provider可以接受来自另外一个进程的数据请求。尽管ContentResolver与ContentProvider类隐藏了实现细节，但是ContentProvider所提供的query()，insert()，delete()，update()与getType()都是在content provider进程的线程池中被调用执行的，而不是进程的主线程中。因为那些方法可能同时被多个线程所调用，所以他们都应该是线程安全的。</p>
+
+<h1>Interprocess Communication</h1>
+
+<p>Android提供了为远程过程调用（RPC）提供了一种进程间通信（IPC）的机制。调用发生在activity或者其他组件中，执行却在另外一个进程，最后再把结果返回给调用者。这需要把调用的数据解析成操作系统能够识别的格式，解码，传递，再编码返回。Android提供了IPC交互的实现细节，因此我们只需要专注于定义与实现RPC接口。</p>
+
+<p>为了执行IPC，你的程序必须通过bindService()方法绑定到service上，更多细节，请查看<a href="http://developer.android.com/guide/components/services.html">Services</a>开发指南。</p>
+
+<hr />
+
+<p><strong>文章学习自http://developer.android.com/guide/components/processes-and-threads.html</strong><br/>
+<strong>转载请注明出自<a href="http:://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢</strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Notes 02 - AIDL]]></title>
+    <link href="http://kesenhoo.github.com/blog/2013/02/19/android-notes-02-aidl/"/>
+    <updated>2013-02-19T21:18:00+08:00</updated>
+    <id>http://kesenhoo.github.com/blog/2013/02/19/android-notes-02-aidl</id>
+    <content type="html"><![CDATA[<ul>
+<li>在Android process之间不能用通常的方式去访问彼此的内存数据。 他们把需要传递的数据解析成基础对象，使得系统能够识别并处理这些对象。因为这个处理过程很难写，所以Android使用AIDL来解决这个问题。</li>
+<li>在定义AIDL接口之前，请意识到call这些接口是direct function call。 请不要认为这些call 接口的行为是发生在另外一个线程里面的。具体的不同因这个调用是发生在local process还是remote process而异。
+
+<ul>
+<li>发生在local process里面的调用会跑在这个local process的thread里面。如果这是你的主UI线程，那么AIDL接口的调用也会发生在这个UI thread里面。如果这是发生在另外一个thread，那么调用会发生在service里面。因此，如果仅仅是发生在local process的调用，则你可以完全控制这些调用，当然这样的话，也就不需要用AIDL了。因为你完全可以使用Bound Service的第一种方式去实现。</li>
+<li>发生在remote process里面的调用是会跑在你自己的process所维护的一个thread pool里面。那么你需要注意可能会在同一时刻接受到多个请求。所以AIDL的操作需要做到thread-safe。(<em>每次请求，都会交给Service，在线程池里面启动一个thread去执行那些请求，所以那些方法需要是线程安全的</em>)</li>
+<li>oneway关键字改变了remote call的行为。当使用这个关键字时，remote call不会被阻塞住，它仅仅是发送交互数据后再立即返回。IBinder thread pool 之后会把它当作一个通常的remote call呼叫。</li>
+</ul>
+</li>
+</ul>
+
+
+<!-- more -->
+
+
+<h2>定义一个AIDL接口</h2>
+
+<ul>
+<li>需要在src的目录下使用Java的语法去定义一个.aidl的文件，Android SDK tools会基于这个文件在gen目录下生成一个IBinder的接口（与.aidl同名，后缀名为java的文件）。Service需要实现这个接口，然后Client程序才可以bind到service并执行接口的方法，从而实现IPC。</li>
+<li>具体实现一个AIDL接口，需要下面几个步骤：(请注意，aidl的文件需要向后兼容[能增加，不能减少与修改之前的接口]，因为这个文件需要提供给客户端程序)
+
+<ul>
+<li>创建一个.aidl文件</li>
+<li>实现接口</li>
+<li>暴露接口给Client</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>1)Create the .aidl file</h3>
+
+<p>```java
+// IRemoteService.aidl
+package com.example.android;</p>
+
+<p>// Declare any non-default types here with import statements</p>
+
+<p>/<em>* Example service interface </em>/
+interface IRemoteService{</p>
+
+<pre><code>/** Request the process ID of this service, to do evil things with it. */
+int getPid();
+
+/** Demonstrates some basic types that you can use as parameters
+ * and return values in AIDL.
+ */
+void basicTypes(int anInt,long aLong,boolean aBoolean,float aFloat,
+        double aDouble,String aString);
+</code></pre>
+
+<p>}
+```</p>
+
+<h3>2)Implement the interface</h3>
+
+<p>```java
+private final IRemoteService.Stub mBinder = new IRemoteService.Stub(){</p>
+
+<pre><code>public int getPid(){
+    returnProcess.myPid();
+}
+public void basicTypes(int anInt,long aLong,boolean aBoolean,
+    float aFloat,double aDouble,String aString){
+    // Does nothing
+}
+</code></pre>
+
+<p>};
+```</p>
+
+<h3>3)Expose the interface to clients</h3>
+
+<ul>
+<li>Service端：
+```java
+public class RemoteService extends Service{    @Override
+  public void onCreate(){
+
+<pre><code>  super.onCreate();
+</code></pre>
+
+<p>  }</p>
+
+<p>  @Override
+  public IBinder onBind(Intent intent){</p>
+
+<pre><code>  // Return the interface
+  return mBinder;
+</code></pre>
+
+<p>  }</p>
+
+<p>  private finalI RemoteService.Stub mBinder = newIRemoteService.Stub(){</p>
+
+<pre><code>  public int getPid(){
+      returnProcess.myPid();
+  }
+  public void basicTypes(int anInt,long aLong,boolean aBoolean,
+      float aFloat,double aDouble,String aString){
+      // Does nothing
+  }
+</code></pre>
+
+<p>  };
+}
+```</p></li>
+<li>Client端
+```java
+IRemoteService mIRemoteService;
+private ServiceConnection mConnection = new ServiceConnection(){
+  // Called when the connection with the service is established
+  public void onServiceConnected(ComponentName className,IBinder service){
+
+<pre><code>  // Following the example above for an AIDL interface,
+  // this gets an instance of the IRemoteInterface, which we can use to call on the service
+  mIRemoteService = IRemoteService.Stub.asInterface(service);
+</code></pre>
+
+<p>  }</p>
+
+<p>  // Called when the connection with the service disconnects unexpectedly
+  public void onServiceDisconnected(ComponentName className){</p>
+
+<pre><code>  Log.e(TAG,"Service has unexpectedly disconnected");
+  mIRemoteService =null;
+</code></pre>
+
+<p>  }
+};
+```</p></li>
+</ul>
+
+
+<h2>通过IPC传递对象</h2>
+
+<ul>
+<li><p>某些时候传递的对象不是Android默认支持的那些，我们需要自己使得这个对象Parcelable化，实现步骤如下：</p>
+
+<ul>
+<li>Make your class implement the Parcelable interface.</li>
+<li>Implement writeToParcel, which takes the current state of the object and writes it to a Parcel.</li>
+<li>Add a static field called CREATOR to your class which is an object implementing the Parcelable.Creator interface.</li>
+<li>Finally, create an .aidl file that declares your parcelable class (as shown for the Rect.aidl file, below).If you are using a custom build process, do not add the .aidl file to your build. Similar to a header file in the C language, this .aidl file isn't compiled.</li>
+</ul>
+</li>
+<li><p>首先需要在aidl文件中声明这个对象类型
+```java
+package android.graphics;</p></li>
+</ul>
+
+
+<p>// Declare Rect so AIDL can find it and knows that it implements
+// the parcelable protocol.
+parcelable Rect;
+import android.os.Parcel;
+import android.os.Parcelable;</p>
+
+<p>public final class Rect implements Parcelable{</p>
+
+<pre><code>public int left;
+public int top;
+public int right;
+public int bottom;
+
+public static final Parcelable.Creator&lt;Rect&gt; CREATOR = new
+</code></pre>
+
+<p>Parcelable.Creator<Rect>(){</p>
+
+<pre><code>    public Rect createFromParcel(Parcelin){
+        return new Rect(in);
+    }
+
+    public Rect[] newArray(int size){
+        return new Rect[size];
+    }
+};
+
+public Rect(){
+}
+
+private Rect(Parcelin){
+    readFromParcel(in);
+}
+
+public void writeToParcel(Parcelout){
+    out.writeInt(left);
+    out.writeInt(top);
+    out.writeInt(right);
+    out.writeInt(bottom);
+}
+
+public void readFromParcel(Parcelin){
+    left = in.readInt();
+    top = in.readInt();
+    right = in.readInt();
+    bottom = in.readInt();
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>调用IPC的方法</h2>
+
+<ul>
+<li>Include the .aidl file in the project src/ directory.</li>
+<li>Declare an instance of the IBinder interface (generated based on the AIDL).</li>
+<li>Implement ServiceConnection.</li>
+<li>Call Context.bindService(), passing in your ServiceConnection implementation.</li>
+<li>In your implementation of onServiceConnected(), you will receive an IBinder instance (called service). Call YourInterfaceName.Stub.asInterface((IBinder)service) to cast the returned parameter toYourInterface type.</li>
+<li>Call the methods that you defined on your interface. You should always trap DeadObjectException exceptions, which are thrown when the connection has broken; this will be the only exception thrown by remote methods.</li>
+<li><p>To disconnect, call Context.unbindService() with the instance of your interface.
+```java
+public static class Binding extends Activity {
+  /<strong> The primary interface we will be calling on the service. */
+  IRemoteService mService = null;
+  /</strong> Another interface we use on the service. */
+  ISecondary mSecondaryService = null;</p>
+
+<p>  Button mKillButton;
+  TextView mCallbackText;</p>
+
+<p>  private boolean mIsBound;</p>
+
+<p>  /**</p>
+
+<ul>
+<li> Standard initialization of this activity.  Set up the UI, then wait</li>
+<li><p> for the user to poke it before doing anything.
+*/
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+  super.onCreate(savedInstanceState);</p>
+
+<p>  setContentView(R.layout.remote_service_binding);</p>
+
+<p>  // Watch for button clicks.
+  Button button = (Button)findViewById(R.id.bind);
+  button.setOnClickListener(mBindListener);
+  button = (Button)findViewById(R.id.unbind);
+  button.setOnClickListener(mUnbindListener);
+  mKillButton = (Button)findViewById(R.id.kill);
+  mKillButton.setOnClickListener(mKillListener);
+  mKillButton.setEnabled(false);</p>
+
+<p>  mCallbackText = (TextView)findViewById(R.id.callback);
+  mCallbackText.setText("Not attached.");
+}</p></li>
+</ul>
+
+
+<p>  /**</p>
+
+<ul>
+<li> Class for interacting with the main interface of the service.
+*/
+private ServiceConnection mConnection = new ServiceConnection() {
+  public void onServiceConnected(ComponentName className,
+
+<pre><code>      IBinder service) {
+  // This is called when the connection with the service has been
+  // established, giving us the service object we can use to
+  // interact with the service.  We are communicating with our
+  // service through an IDL interface, so get a client-side
+  // representation of that from the raw service object.
+  mService = IRemoteService.Stub.asInterface(service);
+  mKillButton.setEnabled(true);
+  mCallbackText.setText("Attached.");
+
+  // We want to monitor the service for as long as we are
+  // connected to it.
+  try {
+      mService.registerCallback(mCallback);
+  } catch (RemoteException e) {
+      // In this case the service has crashed before we could even
+      // do anything with it; we can count on soon being
+      // disconnected (and then reconnected if it can be restarted)
+      // so there is no need to do anything here.
+  }
+
+  // As part of the sample, tell the user what happened.
+  Toast.makeText(Binding.this, R.string.remote_service_connected,
+          Toast.LENGTH_SHORT).show();
+</code></pre>
+
+<p>  }</p>
+
+<p>  public void onServiceDisconnected(ComponentName className) {</p>
+
+<pre><code>  // This is called when the connection with the service has been
+  // unexpectedly disconnected -- that is, its process crashed.
+  mService = null;
+  mKillButton.setEnabled(false);
+  mCallbackText.setText("Disconnected.");
+
+  // As part of the sample, tell the user what happened.
+  Toast.makeText(Binding.this, R.string.remote_service_disconnected,
+          Toast.LENGTH_SHORT).show();
+</code></pre>
+
+<p>  }
+};</p></li>
+</ul>
+
+
+<p>  /**</p>
+
+<ul>
+<li> Class for interacting with the secondary interface of the service.
+*/
+private ServiceConnection mSecondaryConnection = new ServiceConnection() {
+  public void onServiceConnected(ComponentName className,
+
+<pre><code>      IBinder service) {
+  // Connecting to a secondary interface is the same as any
+  // other interface.
+  mSecondaryService = ISecondary.Stub.asInterface(service);
+  mKillButton.setEnabled(true);
+</code></pre>
+
+<p>  }</p>
+
+<p>  public void onServiceDisconnected(ComponentName className) {</p>
+
+<pre><code>  mSecondaryService = null;
+  mKillButton.setEnabled(false);
+</code></pre>
+
+<p>  }
+};</p></li>
+</ul>
+
+
+<p>  private OnClickListener mBindListener = new OnClickListener() {</p>
+
+<pre><code>  public void onClick(View v) {
+      // Establish a couple connections with the service, binding
+      // by interface names.  This allows other applications to be
+      // installed that replace the remote service by implementing
+      // the same interface.
+      bindService(new Intent(IRemoteService.class.getName()),
+              mConnection, Context.BIND_AUTO_CREATE);
+      bindService(new Intent(ISecondary.class.getName()),
+              mSecondaryConnection, Context.BIND_AUTO_CREATE);
+      mIsBound = true;
+      mCallbackText.setText("Binding.");
+  }
+</code></pre>
+
+<p>  };</p>
+
+<p>  private OnClickListener mUnbindListener = new OnClickListener() {</p>
+
+<pre><code>  public void onClick(View v) {
+      if (mIsBound) {
+          // If we have received the service, and hence registered with
+          // it, then now is the time to unregister.
+          if (mService != null) {
+              try {
+                  mService.unregisterCallback(mCallback);
+              } catch (RemoteException e) {
+                  // There is nothing special we need to do if the service
+                  // has crashed.
+              }
+          }
+
+          // Detach our existing connection.
+          unbindService(mConnection);
+          unbindService(mSecondaryConnection);
+          mKillButton.setEnabled(false);
+          mIsBound = false;
+          mCallbackText.setText("Unbinding.");
+      }
+  }
+</code></pre>
+
+<p>  };</p>
+
+<p>  private OnClickListener mKillListener = new OnClickListener() {</p>
+
+<pre><code>  public void onClick(View v) {
+      // To kill the process hosting our service, we need to know its
+      // PID.  Conveniently our service has a call that will return
+      // to us that information.
+      if (mSecondaryService != null) {
+          try {
+              int pid = mSecondaryService.getPid();
+              // Note that, though this API allows us to request to
+              // kill any process based on its PID, the kernel will
+              // still impose standard restrictions on which PIDs you
+              // are actually able to kill.  Typically this means only
+              // the process running your application and any additional
+              // processes created by that app as shown here; packages
+              // sharing a common UID will also be able to kill each
+              // other's processes.
+              Process.killProcess(pid);
+              mCallbackText.setText("Killed service process.");
+          } catch (RemoteException ex) {
+              // Recover gracefully from the process hosting the
+              // server dying.
+              // Just for purposes of the sample, put up a notification.
+              Toast.makeText(Binding.this,
+                      R.string.remote_call_failed,
+                      Toast.LENGTH_SHORT).show();
+          }
+      }
+  }
+</code></pre>
+
+<p>  };</p>
+
+<p>  // ----------------------------------------------------------------------
+  // Code showing how to deal with callbacks.
+  // ----------------------------------------------------------------------</p>
+
+<p>  /**</p>
+
+<ul>
+<li> This implementation is used to receive callbacks from the remote</li>
+<li> service.
+*/
+private IRemoteServiceCallback mCallback = new IRemoteServiceCallback.Stub() {
+  /**
+
+<ul>
+<li> This is called by the remote service regularly to tell us about</li>
+<li> new values.  Note that IPC calls are dispatched through a thread</li>
+<li> pool running in each process, so the code executing here will</li>
+<li> NOT be running in our main thread like most other things -- so,</li>
+<li> to update the UI, we need to use a Handler to hop over there.
+*/
+public void valueChanged(int value) {
+  mHandler.sendMessage(mHandler.obtainMessage(BUMP_MSG, value, 0));
+}
+};</li>
+</ul>
+</li>
+</ul>
+
+
+<p>  private static final int BUMP_MSG = 1;</p>
+
+<p>  private Handler mHandler = new Handler() {</p>
+
+<pre><code>  @Override public void handleMessage(Message msg) {
+      switch (msg.what) {
+          case BUMP_MSG:
+              mCallbackText.setText("Received from service: " + msg.arg1);
+              break;
+          default:
+              super.handleMessage(msg);
+      }
+  }
+</code></pre>
+
+<p>  };
+}
+```</p></li>
+</ul>
+
+
+<hr />
+
+<p><strong>文章学习自<a href="http://developer.android.com/guide/components/aidl.html">http://developer.android.com/guide/components/aidl.html</a></strong><br/>
+<strong>转载请注明出自<a href="http:://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢</strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Notes 01 - Bound Services]]></title>
+    <link href="http://kesenhoo.github.com/blog/2013/02/18/android-notes-01-bound-services/"/>
+    <updated>2013-02-18T22:30:00+08:00</updated>
+    <id>http://kesenhoo.github.com/blog/2013/02/18/android-notes-01-bound-services</id>
+    <content type="html"><![CDATA[<ul>
+<li>一个bound的service是C/S的接口。它允许其他组件绑定到service,发送请求，接收回应并执行IPC。通常是需要给其他程序组件提供服务。
+
+<ul>
+<li>A bound service allows other components to bind to it, in order to interact with it and perform interprocess communication。</li>
+<li>A bound service is destroyed once all clients unbind, unless the service was also started。</li>
+</ul>
+</li>
+<li>客户端通过执行 bindService()绑定到service。这样的话，客户端需要实现一个ServiceConnection, 它可以监视与service的连接状态。bindService() 并不会有返回值，但是Android系统会在client与service连接上时，执行onServiceConnected() 的callback。在这个回调方法里面传递IBinder给client用来与service进行交互。</li>
+<li>前面提到可以有多个Client同时bind到service。然而，系统只会在第一个client做绑定时才会执行service的onBind() 方法。对于随后需要绑定的客户端，系统会直接传递同一个 IBinder 对象给Client，而不是去再次执行onBind方法。(<em>那么也就是onBind方法只会被执行一次</em>)</li>
+<li>通常来说，Music程序需要实现service的两种方式，这样既可以在activity被销毁之后(<em>假设只实现bound的方式的话，这个时候，unbind了，Music会停止</em>)音乐可以继续播放，当重新进入activity时又会重新bind上。这刚好验证了下面的说法：</li>
+<li>如果一个service既可以started与bound。当一个service是started的，系统并不会在所有的Client都unbind之后去杀死这个service，我们需要显示的去停止这个service，通过stopSelf或者stopService的方式。</li>
+</ul>
+
+
+<!-- more -->
+
+
+<h2>创建一个bound的Service</h2>
+
+<ul>
+<li>当创建了一个可以绑定的service之后，你必须提供一个<a href="http://developer.android.com/reference/android/os/IBinder.html">IBinder</a>对象，它用来提供client与service进行交互的接口。我们有下面三种方式来实现这个接口：
+
+<ul>
+<li><strong>Extending the Binder class</strong>： 如果你的sevice是私有的（不需要与其他程序进行IPC交互），Client可以与Service在同一个Process里面直接进行交互。若不需要IPC，建议使用这个方法。</li>
+<li><strong>Using a Messenger</strong>： 可以使用handler与message进行IPC操作，这是一种直观简便的方式。一个发送消息，一个接受处理后并返回。Handler使得有一个Queue来装这些发送的请求，然后Service再逐个接受并进行处理。(<em>这样的话，只能顺序执行那些发出的请求</em>)</li>
+<li><strong>Using AIDL</strong>(Android Interface Definition Language)： 一种系统可以理解并做出合适处理的IPC机制。使用AIDL可以处理同时发出的请求（并发）。在这种情况下，Service必须小心仔细的去处理多线程操作。 我们需要生成一个.aidl的文件来定义接口，Android SDK tool会使用这个文件生成一个抽象类，在这个类里面去实现接口并处理IPC。</li>
+<li><strong>请注意</strong>：AIDL的方式并不常见，因为他实现起来更加复杂，若需要了解AIDL的详情，请参考后续文章。</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>(1)Extending the Binder class</h3>
+
+<p>Note: 这种方法仅仅适合client与service在同一个程序与process中的情况。这种情况是最常见的。例如，如果你的音乐程序需要bind到一个activity，并且想使得播放音乐在后台。(<em>实际上，大多数情况下，播放音乐程序的service都需要与其他process的组件进行bind，所以这种方式extend Binder类的方式只适合简单的播放需求</em>)</p>
+
+<ul>
+<li><p>实现步骤</p>
+
+<ul>
+<li>In your service, create an instance of Binder that either:Return this instance of Binder from the onBind() callback method.
+
+<ul>
+<li>contains public methods that the client can call</li>
+<li>returns the current Service instance, which has public methods the client can call</li>
+<li>or, returns an instance of another class hosted by the service with public methods the client can call</li>
+</ul>
+</li>
+<li>Return this instance of Binder from the onBind() callback method.</li>
+<li>In the client, receive the Binder from the onServiceConnected() callback method and make calls to the bound service using the methods provided.</li>
+</ul>
+</li>
+<li><p>Service端代码示例：
+```java
+public class LocalService extends Service{
+  // Binder given to clients
+  private final IBinder mBinder = new LocalBinder();
+  // Random number generator
+  private final Random mGenerator = new Random();</p>
+
+<p>  /**</p>
+
+<ul>
+<li> Class used for the client Binder.  Because we know this service always</li>
+<li> runs in the same process as its clients, we don't need to deal with IPC.
+*/
+public class LocalBinder extends Binder{
+  LocalService getService(){
+
+<pre><code>  // Return this instance of LocalService so clients can call public methods
+  return LocalService.this;
+</code></pre>
+
+<p>  }
+}</p></li>
+</ul>
+
+
+<p>  @Override
+  public IBinder onBind(Intent intent){</p>
+
+<pre><code>  return mBinder;
+</code></pre>
+
+<p>  }</p>
+
+<p>  /<em>* method for clients </em>/
+  public int getRandomNumber(){</p>
+
+<pre><code>return mGenerator.nextInt(100);
+</code></pre>
+
+<p>  }
+}
+```</p></li>
+<li><p>Client端代码示例：
+```java
+public class BindingActivity extends Activity{
+  LocalService mService;
+  boolean mBound =false;</p>
+
+<p>  @Override
+  protected void onCreate(Bundle savedInstanceState){</p>
+
+<pre><code>  super.onCreate(savedInstanceState);
+  setContentView(R.layout.main);
+</code></pre>
+
+<p>  }</p>
+
+<p>  @Override
+  protected void onStart(){</p>
+
+<pre><code>  super.onStart();
+  // Bind to LocalService
+  Intent intent = new Intent(this,LocalService.class);
+  bindService(intent, mConnection,Context.BIND_AUTO_CREATE);
+</code></pre>
+
+<p>  }</p>
+
+<p>  @Override
+  protected void onStop(){</p>
+
+<pre><code>  super.onStop();
+  // Unbind from the service
+  if(mBound){
+      unbindService(mConnection);
+      mBound =false;
+  }
+</code></pre>
+
+<p>  }</p>
+
+<p>  /** Called when a button is clicked (the button in the layout file attaches to</p>
+
+<pre><code>* this method with the android:onClick attribute) */
+</code></pre>
+
+  public void onButtonClick(View v){
+
+<pre><code>  if(mBound){
+      // Call a method from the LocalService.
+      // However, if this call were something that might hang, then this request should
+      // occur in a separate thread to avoid slowing down the activity performance.
+      int num = mService.getRandomNumber();
+      Toast.makeText(this,"number: "+ num,Toast.LENGTH_SHORT).show();
+  }
+</code></pre>
+
+<p>  }</p>
+
+<p>  /<em>* Defines callbacks for service binding, passed to bindService() </em>/
+  private ServiceConnection mConnection = new ServiceConnection(){</p>
+
+<pre><code>  @Override
+  publicvoid onServiceConnected(ComponentName className,
+          IBinder service){
+      // We've bound to LocalService, cast the IBinder and get LocalService instance
+      LocalBinder binder =(LocalBinder) service;
+      mService = binder.getService();
+      mBound =true;
+  }
+
+  @Override
+  public void onServiceDisconnected(ComponentName arg0){
+      mBound =false;
+  }
+</code></pre>
+
+<p>  };
+}
+```</p></li>
+</ul>
+
+
+<h3>(2)Using a Messenger</h3>
+
+<ul>
+<li>这是避免使用AIDL仍然可以实现IPC的一个简便方法。
+
+<ul>
+<li>Service实现一个Handler来接受Client的每一个callback。</li>
+<li>这个Handler用来创建Messenger 对象。</li>
+<li>Messenger 创建一个IBinder对象，Service在onBind方法里面把这个对象返回给客户端。</li>
+<li>客户端使用这个IBinder对象来实例化 Messenger (that references the service's Handler), 然后客户端使用这个messager再发送message对象给service。</li>
+<li>Service在它的handler里面接收到每一个Message。</li>
+</ul>
+</li>
+<li><p>Service代码示例：
+```java
+public class MessengerService extends Service{
+  /<em>* Command to the service to display a message </em>/
+  static final int MSG_SAY_HELLO =1;</p>
+
+<p>  /**</p>
+
+<ul>
+<li> Handler of incoming messages from clients.
+*/
+class IncomingHandler extends Handler{
+  @Override
+  public void handleMessage(Message msg){
+
+<pre><code>  switch(msg.what){
+      case MSG_SAY_HELLO:
+          Toast.makeText(getApplicationContext(),"hello!",Toast.LENGTH_SHORT).show();
+          break;
+      default:
+          super.handleMessage(msg);
+  }
+</code></pre>
+
+<p>  }
+}</p></li>
+</ul>
+
+
+<p>  /**</p>
+
+<ul>
+<li> Target we publish for clients to send messages to IncomingHandler.
+*/
+final Messenger mMessenger =new Messenger(newIncomingHandler());</li>
+</ul>
+
+
+<p>  /**</p>
+
+<ul>
+<li> When binding to the service, we return an interface to our messenger</li>
+<li> for sending messages to the service.
+*/
+@Override
+public IBinder onBind(Intent intent){
+  Toast.makeText(getApplicationContext(),"binding",Toast.LENGTH_SHORT).show();
+  return mMessenger.getBinder();
+}
+}
+```</li>
+</ul>
+</li>
+<li><p>Client端代码
+```java
+public class ActivityMessenger extends Activity{
+  /<em>* Messenger for communicating with the service. </em>/
+  Messenger mService =null;</p>
+
+<p>  /<em>* Flag indicating whether we have called bind on the service. </em>/
+  boolean mBound;</p>
+
+<p>  /**</p>
+
+<ul>
+<li> Class for interacting with the main interface of the service.
+*/
+private ServiceConnection mConnection = new ServiceConnection(){
+  publicvoid onServiceConnected(ComponentName className,IBinder service){
+
+<pre><code>  // This is called when the connection with the service has been
+  // established, giving us the object we can use to
+  // interact with the service.  We are communicating with the
+  // service using a Messenger, so here we get a client-side
+  // representation of that from the raw IBinder object.
+  mService = new Messenger(service);
+  mBound = true;
+</code></pre>
+
+<p>  }</p>
+
+<p>  public void onServiceDisconnected(ComponentName className){</p>
+
+<pre><code>  // This is called when the connection with the service has been
+  // unexpectedly disconnected -- that is, its process crashed.
+  mService = null;
+  mBound = false;
+</code></pre>
+
+<p>  }
+};</p></li>
+</ul>
+
+
+<p>  public void sayHello(View v){</p>
+
+<pre><code>  if(!mBound) return;
+  // Create and send a message to the service, using a supported 'what' value
+  Message msg = Message.obtain(null,MessengerService.MSG_SAY_HELLO,0,0);
+  try{
+      mService.send(msg);
+  }catch(RemoteException e){
+      e.printStackTrace();
+  }
+</code></pre>
+
+<p>  }</p>
+
+<p>  @Override
+  protected void onCreate(Bundle savedInstanceState){</p>
+
+<pre><code>  super.onCreate(savedInstanceState);
+  setContentView(R.layout.main);
+</code></pre>
+
+<p>  }</p>
+
+<p>  @Override
+  protected void onStart(){</p>
+
+<pre><code>  super.onStart();
+  // Bind to the service
+  bindService(newIntent(this,MessengerService.class), mConnection,
+      Context.BIND_AUTO_CREATE);
+</code></pre>
+
+<p>  }</p>
+
+<p>  @Override
+  protected void onStop(){</p>
+
+<pre><code>  super.onStop();
+  // Unbind from the service
+  if(mBound){
+      unbindService(mConnection);
+      mBound =false;
+  }
+</code></pre>
+
+<p>  }
+}
+```</p></li>
+<li>请注意：上面并没有演示Service接收到Client的Msg之后，如何再与Client进行交互的。如果想了解更多请看Demo Source Code:<a href="http://developer.android.com/resources/samples/ApiDemos/src/com/example/android/apis/app/MessengerService.html">MessengerService.java</a> (service) and <a href="http://developer.android.com/resources/samples/ApiDemos/src/com/example/android/apis/app/MessengerServiceActivities.html">MessengerServiceActivities.java</a> (client) samples.</li>
+</ul>
+
+
+<h3>(3)AIDL:关于这部分内容，请看下一篇文章</h3>
+
+<ul>
+<li><strong>使用Messager与AIDL的对比：</strong>
+
+<ul>
+<li>如果想要IPC,使用Messager要比AIDL更简单，只是AIDL可以处理并发的情况，更加复杂一点。</li>
+<li>对于大多数App来说，都不需要处理多线程并发的问题，所以使用Messager会更简单一点。每次处理一个message。</li>
+<li>如果你的Service需要是多线程的，那么需要使用AIDL。(<em>有多个bind对象，他们可能会同时发出request</em>)</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>绑定到Service</h2>
+
+<ul>
+<li>因为Binding的操作是异步（asynchronous）的， bindService() 会立即返回，并不携带IBinder对象返回给Client。为了接收到IBinder对象，客户端需要创建一个 ServiceConnection 来接收它。</li>
+<li>Note: 只有activities, services, and content providers 可以bind到service，你不可以从broadcast receiver里面去做bind service的操作。</li>
+<li>为了实现Bind到Service，你需要做以下的事情：
+
+<ul>
+<li>Implement ServiceConnection.需要重写下面两个方法
+
+<ul>
+<li>onServiceConnected()： 系统会在connected上的时候call到这个方法。</li>
+<li>onServiceDisconnected()： 只有在serivce被异常终结时才会call到这个方法，正常的unbind不会call这里。</li>
+</ul>
+</li>
+<li>当系统call了onServiceConnected（）之后，你可以开始使用定义好的接口去呼叫service。</li>
+<li>想要与service解绑，可以执行 unbindService()。</li>
+</ul>
+</li>
+<li>Additional notes:
+
+<ul>
+<li>你应该总是去捕获 DeadObjectException ，当connection被破坏时会抛出这个异常。</li>
+<li>对象都是跨process引用的。</li>
+<li>你应该成对的使用bind与unbind。例如
+
+<ul>
+<li>如果你不想在activity不可见的时候再与service进行交互，需要在activity的onStart里面进行bind，在onStop里面去unbind。</li>
+<li>如果想在activity不可见时，仍然进行交互，那么在onDestory里面再去做unbind。</li>
+</ul>
+</li>
+<li>请不要在activity的onResume与onPause里面去做bind与unbind，这两个activity的状态切换太频繁，不适合用来做与service的交互。</li>
+</ul>
+</li>
+</ul>
+
+
+<h4>管理Bound Service的Lifecycle</h4>
+
+<ul>
+<li>如果这个service是一个单纯的bound service(不是started与bound的混合体)，那么Android系统会自动去管理它的lifecycle。(当所有的client都unbind时，系统kill这个service)。</li>
+<li>如果你实现了onStartCommand()方法，那么这个service就被认为是started类型的，那么即使所有的client都unbind了，那么还是需要通过stopSelf或者stopService的方式来停止这个service。</li>
+<li>另外，如果你的service是started类型的，并且还可以接受bind操作。那么当系统执行你的 onUnbind() 方法时，如果你想在Client下次bind上service的时候系统去call onRebind（而不是重新call onBind），你可以选择在onUnbind里面去return true。 在 onRebind() 会返回void，但是client仍然会在onServiceConnected里面接受到IBinder。</li>
+</ul>
+
+
+<p><img src="/images/articles/service_binding_tree_lifecycle.png" alt="service_binding_tree_lifecycle.png" /></p>
+
+<hr />
+
+<p><strong>文章学习自<a href="http://developer.android.com/guide/components/bound-services.html">http://developer.android.com/guide/components/bound-services.html</a></strong><br/>
+<strong>转载请注明出自<a href="http:://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢</strong></p>
+]]></content>
+  </entry>
+  
+</feed>

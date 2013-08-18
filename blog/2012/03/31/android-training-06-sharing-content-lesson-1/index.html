@@ -1,0 +1,358 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Android Training 06 - 分享内容(Lesson 1 - 发送分享的内容到其他Apps) - 四方城</title>
+  <meta name="author" content="Kesen Hoo">
+
+  
+  <meta name="description" content="章节序言 Android程序中很炫的一个功能是程序之间可以互相通信。为什么要重新发明一个已经存在于另外一个程序中的功能呢，而且这个功能并非自己程序的核心部分。 这一章节会讲述一些通常使用的方法来在不同程序之间通过使用Intent APIs与ActionProvider对象来发送与接受content &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://kesenhoo.github.com/blog/2012/03/31/android-training-06-sharing-content-lesson-1/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="四方城" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-37679268-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   class="no-sidebar"  >
+  <header role="banner"><hgroup>
+  <h1><a href="/">四方城</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:kesenhoo.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Android Training 06 - 分享内容(Lesson 1 - 发送分享的内容到其他Apps)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-31T14:00:00+08:00" pubdate data-updated="true">Mar 31<span>st</span>, 2012</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p><strong>章节序言</strong></p>
+
+<p>Android程序中很炫的一个功能是程序之间可以互相通信。为什么要重新发明一个已经存在于另外一个程序中的功能呢，而且这个功能并非自己程序的核心部分。</p>
+
+<p>这一章节会讲述一些通常使用的方法来在不同程序之间通过使用<a href="https://developer.android.com/reference/android/content/Intent.html">Intent</a> APIs与<a href="https://developer.android.com/reference/android/view/ActionProvider.html">ActionProvider</a>对象来发送与接受content。</p>
+
+<!-- more -->
+
+
+<p>当你构建一个intent，你必须指定这个intent需要触发的actions。Android定义了一些actions，包括ACTION_SEND，这个action表明着这个intent是用来从一个activity发送数据到另外一个activity的，甚至是跨进程之间的。</p>
+
+<p>为了发送数据到另外一个activity，你需要做的是指定数据与数据的类型，系统会识别出能够兼容接受的这些数据的activity并且把这些activity显示给用户进行选择(如果有多个选择)，或者是立即启动Activity(只有一个兼容的选择)。同样的，你可以在manifest文件的Activity描述中添加接受哪些数据类型。</p>
+
+<p>在不同的程序之间使用intent来发送与接受数据是在社交分享内容的时候最常用的方法。Intent使得用户用最常用的程序进行快速简单的分享信息。</p>
+
+<p><strong>注意:</strong>为ActionBar添加分享功能的最好方法是使用<a href="https://developer.android.com/reference/android/widget/ShareActionProvider.html">ShareActionProvide</a>，它能够在API level 14以上进行使用。ShareActionProvider会在第3课中进行详细介绍。</p>
+
+<h2>Send Text Content(分享文本内容)</h2>
+
+<p>ACTION_SEND的最直接与最常用的是从一个Activity发送文本内容到另外一个Activity。例如，Android内置的浏览器可以把当前显示页面的URL作为文本内容分享到其他程序。这是非常有用的，通过邮件或者社交网络来分享文章或者网址给好友。下面是一段Sample Code:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">Intent</span> <span class="n">sendIntent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">();</span>
+</span><span class='line'><span class="n">sendIntent</span><span class="o">.</span><span class="na">setAction</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_SEND</span><span class="o">);</span>
+</span><span class='line'><span class="n">sendIntent</span><span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">EXTRA_TEXT</span><span class="o">,</span> <span class="s">&quot;This is my text to send.&quot;</span><span class="o">);</span>
+</span><span class='line'><span class="n">sendIntent</span><span class="o">.</span><span class="na">setType</span><span class="o">(</span><span class="s">&quot;text/plain&quot;</span><span class="o">);</span>
+</span><span class='line'><span class="n">startActivity</span><span class="o">(</span><span class="n">sendIntent</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果设备上有安装某个能够匹配ACTION_SEND与MIME类型为text/plain程序，那么Android系统会自动把他们都给筛选出来，并呈现Dialog给用户进行选择。如果你为intent调用了Intent.createChooser()，那么Android总是会显示可供选择。这样有一些好处：</p>
+
+<ul>
+<li>即使用户之前为这个intent设置了默认的action，选择界面还是会被显示。</li>
+<li>如果没有匹配的程序，Android会显示系统信息。</li>
+<li>你可以指定选择界面的标题。</li>
+</ul>
+
+
+<p>下面是更新后的代码：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">Intent</span> <span class="n">sendIntent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">();</span>
+</span><span class='line'><span class="n">sendIntent</span><span class="o">.</span><span class="na">setAction</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_SEND</span><span class="o">);</span>
+</span><span class='line'><span class="n">sendIntent</span><span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">EXTRA_TEXT</span><span class="o">,</span> <span class="s">&quot;This is my text to send.&quot;</span><span class="o">);</span>
+</span><span class='line'><span class="n">sendIntent</span><span class="o">.</span><span class="na">setType</span><span class="o">(</span><span class="s">&quot;text/plain&quot;</span><span class="o">);</span>
+</span><span class='line'><span class="n">startActivity</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">createChooser</span><span class="o">(</span><span class="n">sendIntent</span><span class="o">,</span> <span class="n">getResources</span><span class="o">().</span><span class="na">getText</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">string</span><span class="o">.</span><span class="na">send_to</span><span class="o">));</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>效果图如下：</p>
+
+<p><img src="/images/articles/share-text-screenshot.png" title="Figure 1. Screenshot of ACTION_SEND intent chooser on a handset." alt="share-text-screenshot.png" /></p>
+
+<p>Optionally,你可以为intent设置一些标准的附加值，例如：EXTRA_EMAIL, EXTRA_CC, EXTRA_BCC, EXTRA_SUBJECT.然而，如果接收程序没有针对那些做特殊的处理，则不会有对应的反应。你也可以使用自定义的附加值，但是除非接收的程序能够识别出来，不然没有任何效果。典型的做法是，你使用被接受程序定义的附加值。</p>
+
+<p><strong>注意：</strong>一些e-mail程序，例如Gmail,对应接收的是EXTRA_EMAIL与EXTRA_CC，他们都是String类型的，可以使用putExtra(string,string[])方法来添加到intent里面。</p>
+
+<h2>Send Binary Content(分享二进制内容)</h2>
+
+<p>分享二进制的数据需要结合设置特定的MIME Type，需要在EXTRA_STREAM里面放置数据的URI,下面有个分享图片的例子，这个例子也可以修改用来分享任何类型的二进制数据：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">Intent</span> <span class="n">shareIntent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">();</span>
+</span><span class='line'><span class="n">shareIntent</span><span class="o">.</span><span class="na">setAction</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_SEND</span><span class="o">);</span>
+</span><span class='line'><span class="n">shareIntent</span><span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">EXTRA_STREAM</span><span class="o">,</span> <span class="n">uriToImage</span><span class="o">);</span>
+</span><span class='line'><span class="n">shareIntent</span><span class="o">.</span><span class="na">setType</span><span class="o">(</span><span class="s">&quot;image/jpeg&quot;</span><span class="o">);</span>
+</span><span class='line'><span class="n">startActivity</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">createChooser</span><span class="o">(</span><span class="n">shareIntent</span><span class="o">,</span> <span class="n">getResources</span><span class="o">().</span><span class="na">getText</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">string</span><span class="o">.</span><span class="na">send_to</span><span class="o">)));</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>请注意下面的内容：</strong></p>
+
+<ul>
+<li>你可以使用&#8221;<em>/</em>&#8220;这样的方式来制定MIME类型，但是这仅仅会match到那些能够处理一般数据类型的Activity(即一般的Activity无法详尽所有的MIME类型)</li>
+<li>接收的程序需要有访问URI资源的权限。下面有一些方法来处理这个问题：
+
+<ul>
+<li>把文件写到外部存储设备上，类似SDCard，这样所有的app都可以进行读取。使用Uri.fromFile()方法来创建可以用在分享时传递到intent里面的Uri.。然而，请记住，不是所有的程序都遵循“file://”这样格式的Uri。</li>
+<li>在调用 getFileStreamPath()返回一个File之后，使用带有MODE_WORLD_READABLE 模式的openFileOutput() 方法把数据写入到你自己的程序目录下。像上面一样，使用Uri.fromFile()创建一个“file://”格式的Uri用来添加到intent里面进行分享。</li>
+<li>媒体文件，例如图片，视频与音频，可以使用scanFile()方法进行扫描并存储到MediaStore里面。onScanCompletted()回调函数会返回一个&#8221;content://&#8221;格式的Uri.，这样便于你进行分享的时候把这个uri放到intent里面。</li>
+<li>图片可以使用 insertImage() 方法直接插入到MediaStore 系统里面。那个方法会返回一个&#8221;content://&#8221;格式的Uri.。</li>
+<li>存储数据到你自己的ContentProvider里面，确保其他app可以有访问你的provider的权限。(或者使用 per-URI permissions)</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>Send Multiple Pieces of Content(发送多块内容)</h2>
+
+<p>为了同时分享多种不同类型的内容，需要使用ACTION_SEND_MULTIPLE与指定到那些数据的URIs列表。MIME类型会根据你分享的混合内容而不同。例如，如果你分享3张JPEG的图片，那么MIME类型仍然是“image/jpeg”。如果是不同图片格式的话，应该是用“image/<em>”来匹配那些可以接收任何图片类型的activity。如果你需要分享多种不同类型的数据，可以使用“</em>/*”来表示MIME。像前面描述的那样，这取决于那些接收的程序解析并处理你的数据。下面是一个例子：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Uri</span><span class="o">&gt;</span> <span class="n">imageUris</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Uri</span><span class="o">&gt;();</span>
+</span><span class='line'><span class="n">imageUris</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">imageUri1</span><span class="o">);</span> <span class="c1">// Add your image URIs here  </span>
+</span><span class='line'><span class="n">imageUris</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">imageUri2</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">Intent</span> <span class="n">shareIntent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">();</span>
+</span><span class='line'><span class="n">shareIntent</span><span class="o">.</span><span class="na">setAction</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_SEND_MULTIPLE</span><span class="o">);</span>
+</span><span class='line'><span class="n">shareIntent</span><span class="o">.</span><span class="na">putParcelableArrayListExtra</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">EXTRA_STREAM</span><span class="o">,</span> <span class="n">imageUris</span><span class="o">);</span>
+</span><span class='line'><span class="n">shareIntent</span><span class="o">.</span><span class="na">setType</span><span class="o">(</span><span class="s">&quot;image/*&quot;</span><span class="o">);</span>
+</span><span class='line'><span class="n">startActivity</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">createChooser</span><span class="o">(</span><span class="n">shareIntent</span><span class="o">,</span> <span class="s">&quot;Share images to..&quot;</span><span class="o">));</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>当然，请确保指定到数据的URIs能够被接收程序所访问(添加访问权限)。</p>
+
+<hr />
+
+<p><strong>学习自：<a href="http://developer.android.com/training/sharing/send.html">http://developer.android.com/training/sharing/send.html</a>，请多指教，谢谢！</strong><br/>
+<strong>转载请注明出自<a href="http://kesenhoo.github.io">http://kesenhoo.github.io</a>，谢谢配合！</strong></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Kesen Hoo</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-31T14:00:00+08:00" pubdate data-updated="true">Mar 31<span>st</span>, 2012</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/android/'>Android</a>, <a class='category' href='/blog/categories/android-training/'>Android:Training</a>
+  
+</span>
+
+
+    </p>
+    
+    
+      <div class="sharing">
+  
+  
+  
+  
+	<!--JiaThis Button BEGIN -->
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_renren"></a>
+	<a class="jiathis_button_douban"></a>
+	<a class="jiathis_button_xiaoyou"></a>
+	<a class="jiathis_button_fb"></a>
+	<a class="jiathis_button_twitter"></a>
+	<a class="jiathis_button_linkedin"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1342501457879302" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+  
+</div>
+
+    
+    <br></br>
+    <!-- End: Add By @kesen -->
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/03/23/android-training-managing-audio-playback-lesson-3/" title="Previous Post: Android Training Multimedia - 音频播放(Lesson 3 - 音频设备的相关问题)">&laquo; Android Training Multimedia - 音频播放(Lesson 3 - 音频设备的相关问题)</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2012/03/31/android-training-06-sharing-content-lesson-2/" title="Next Post: Android Training 06 - 分享内容(Lesson 2 - 接收从其它Apps分享过来的内容)">Android Training 06 - 分享内容(Lesson 2 - 接收从其它Apps分享过来的内容) &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - Kesen Hoo -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'kesenhoo';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://kesenhoo.github.com/blog/2012/03/31/android-training-06-sharing-content-lesson-1/';
+        var disqus_url = 'http://kesenhoo.github.com/blog/2012/03/31/android-training-06-sharing-content-lesson-1/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

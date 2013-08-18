@@ -1,0 +1,1166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Android:Training:Graphics | 四方城]]></title>
+  <link href="http://kesenhoo.github.com/blog/categories/android-training-graphics/atom.xml" rel="self"/>
+  <link href="http://kesenhoo.github.com/"/>
+  <updated>2013-08-18T18:16:00+08:00</updated>
+  <id>http://kesenhoo.github.com/</id>
+  <author>
+    <name><![CDATA[Kesen Hoo]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training Graphics - 高效地显示Bitmap(Lesson 4 - 优化Bitmap的内存使用)]]></title>
+    <link href="http://kesenhoo.github.com/blog/2013/05/19/android-training-displaying-bitmaps-efficiently-lesson-4/"/>
+    <updated>2013-05-19T14:43:00+08:00</updated>
+    <id>http://kesenhoo.github.com/blog/2013/05/19/android-training-displaying-bitmaps-efficiently-lesson-4</id>
+    <content type="html"><![CDATA[<p>作为缓存Bitmaps的进一步延伸, 为了促进GC与bitmap的重用，你还有一些特定的事情可以做. 推荐的策略会根据Android的版本不同而有所差异. <a href="http://developer.android.com/shareables/training/BitmapFun.zip">BitmapFun</a>的示例程序会演示如何设计你的程序使得能够在不同的Android平台上高效的运行.</p>
+
+<p>我们首先要知道Android管理bitmap memory的演变进程:</p>
+
+<ul>
+<li>在Android 2.2 (API level 8)以及之前, 当GC发生时, 你的应用的线程是会stopped的. 这导致了一个滞后，它会降低效率. <strong>在Android 2.3上，添加了并发GC的机制, 这意味着在一个bitmap不再被引用到之后，内存会被立即reclaimed.</strong></li>
+<li>在Android 2.3.3 (API level 10)已经之后, 一个bitmap的像素级数据是存放在native内存中的. 这些数据与bitmap本身是隔离的, bitmap本身是被存放在Dalvik heap中. 在native内存中的pixel数据不是以可以预测的方式去释放的, 这意味着有可能导致一个程序容易超过它的内存限制并Crash. <strong>在Android 3.0 (API Level 11), pixel数据则是与bitmap本身一起存放在dalvik heap中.</strong></li>
+</ul>
+
+
+<p>下面会介绍如何在不同的Android版本上优化bitmap内存使用.</p>
+
+<!-- more -->
+
+
+<h2>Manage Memory on Android 2.3.3 and Lower</h2>
+
+<p>在Android 2.3.3 (API level 10) 以及更低版本上，推荐使用<a href="http://developer.android.com/reference/android/graphics/Bitmap.html#recycle(">recycle()</a>). 如果在你的程序中显示了大量的bitmap数据，你很可能会遇到OutOfMemoryError错误. recycle()方法可以使得程序尽快的reclaim memory.<br/>
+<strong>Caution:</strong>只有你确保这个bitmap不再需要用到的时候才应该使用recycle(). 如果你执行recycle()，然后尝试绘画这个bitmap, 你将得到错误:"Canvas: trying to use a recycled bitmap".</p>
+
+<p>下面的例子演示了使用recycle()的例子. 它使用了引用计数的方法(mDisplayRefCount 与 mCacheRefCount)来追踪一个bitmap目前是否有被显示或者是在缓存中. 当下面条件满足时回收bitmap:</p>
+
+<ul>
+<li>mDisplayRefCount 与 mCacheRefCount 的引用计数均为 0.</li>
+<li>bitmap不为null, 并且它还没有被回收.</li>
+</ul>
+
+
+<p>```java
+private int mCacheRefCount = 0;
+private int mDisplayRefCount = 0;
+...
+// Notify the drawable that the displayed state has changed.
+// Keep a count to determine when the drawable is no longer displayed.
+public void setIsDisplayed(boolean isDisplayed) {</p>
+
+<pre><code>synchronized (this) {
+    if (isDisplayed) {
+        mDisplayRefCount++;
+        mHasBeenDisplayed = true;
+    } else {
+        mDisplayRefCount--;
+    }
+}
+// Check to see if recycle() can be called.
+checkState();
+</code></pre>
+
+<p>}</p>
+
+<p>// Notify the drawable that the cache state has changed.
+// Keep a count to determine when the drawable is no longer being cached.
+public void setIsCached(boolean isCached) {</p>
+
+<pre><code>synchronized (this) {
+    if (isCached) {
+        mCacheRefCount++;
+    } else {
+        mCacheRefCount--;
+    }
+}
+// Check to see if recycle() can be called.
+checkState();
+</code></pre>
+
+<p>}</p>
+
+<p>private synchronized void checkState() {</p>
+
+<pre><code>// If the drawable cache and display ref counts = 0, and this drawable
+// has been displayed, then recycle.
+if (mCacheRefCount &lt;= 0 &amp;&amp; mDisplayRefCount &lt;= 0 &amp;&amp; mHasBeenDisplayed
+        &amp;&amp; hasValidBitmap()) {
+    getBitmap().recycle();
+}
+</code></pre>
+
+<p>}</p>
+
+<p>private synchronized boolean hasValidBitmap() {</p>
+
+<pre><code>Bitmap bitmap = getBitmap();
+return bitmap != null &amp;&amp; !bitmap.isRecycled();
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>Manage Memory on Android 3.0 and Higher</h2>
+
+<p>在Android 3.0 (API Level 11) 介绍了<a href="http://developer.android.com/reference/android/graphics/BitmapFactory.Options.html#inBitmap">BitmapFactory.Options.inBitmap</a>. 如果这个值被设置了，decode方法会在加载内容的时候去reuse已经存在的bitmap. 这意味着bitmap的内存是被reused的，这样可以提升性能, 并且减少了内存的allocation与de-allocation. 在使用inBitmap时有几个注意点(caveats):</p>
+
+<ul>
+<li>reused的bitmap必须和原数据内容大小一致, 并且是JPEG 或者 PNG 的格式 (或者是某个resource 与 stream).</li>
+<li>reused的bitmap的<a href="http://developer.android.com/reference/android/graphics/Bitmap.Config.html">configuration</a>值如果有设置，则会覆盖掉<a href="http://developer.android.com/reference/android/graphics/BitmapFactory.Options.html#inPreferredConfig">inPreferredConfig</a>值.</li>
+<li>你应该总是使用decode方法返回的bitmap, 因为你不可以假设reusing的bitmap是可用的(例如，大小不对).</li>
+</ul>
+
+
+<h3>Save a bitmap for later use</h3>
+
+<p>下面演示了一个已经存在的bitmap是如何被存放起来以便后续使用的. 当一个应用运行在Android 3.0或者更高的平台上并且bitmap被从LruCache中移除时, bitmap的一个soft reference会被存放在Hashset中，这样便于之后有可能被inBitmap进行reuse:
+```java
+HashSet&lt;SoftReference<Bitmap>> mReusableBitmaps;
+private LruCache&lt;String, BitmapDrawable> mMemoryCache;</p>
+
+<p>// If you're running on Honeycomb or newer, create
+// a HashSet of references to reusable bitmaps.
+if (Utils.hasHoneycomb()) {</p>
+
+<pre><code>mReusableBitmaps = new HashSet&lt;SoftReference&lt;Bitmap&gt;&gt;();
+</code></pre>
+
+<p>}</p>
+
+<p>mMemoryCache = new LruCache&lt;String, BitmapDrawable>(mCacheParams.memCacheSize) {</p>
+
+<pre><code>// Notify the removed entry that is no longer being cached.
+@Override
+protected void entryRemoved(boolean evicted, String key,
+        BitmapDrawable oldValue, BitmapDrawable newValue) {
+    if (RecyclingBitmapDrawable.class.isInstance(oldValue)) {
+        // The removed entry is a recycling drawable, so notify it
+        // that it has been removed from the memory cache.
+        ((RecyclingBitmapDrawable) oldValue).setIsCached(false);
+    } else {
+        // The removed entry is a standard BitmapDrawable.
+        if (Utils.hasHoneycomb()) {
+            // We're running on Honeycomb or later, so add the bitmap
+            // to a SoftReference set for possible use with inBitmap later.
+            mReusableBitmaps.add
+                    (new SoftReference&lt;Bitmap&gt;(oldValue.getBitmap()));
+        }
+    }
+}
+</code></pre>
+
+<p>....
+}
+```</p>
+
+<h3>Use an existing bitmap</h3>
+
+<p>在运行的程序中，decoder方法会去做检查看是否有可用的bitmap. 例如:
+```java
+public static Bitmap decodeSampledBitmapFromFile(String filename,</p>
+
+<pre><code>    int reqWidth, int reqHeight, ImageCache cache) {
+
+final BitmapFactory.Options options = new BitmapFactory.Options();
+...
+BitmapFactory.decodeFile(filename, options);
+...
+
+// If we're running on Honeycomb or newer, try to use inBitmap.
+if (Utils.hasHoneycomb()) {
+    addInBitmapOptions(options, cache);
+}
+...
+return BitmapFactory.decodeFile(filename, options);
+</code></pre>
+
+<p>}
+<code>
+下面的代码演示了上面被执行的addInBitmapOptions()方法. 它会为inBitmap查找一个已经存在的bitmap设置为value. 注意这个方法只是去为inBitmap尝试寻找合适的值，但是并不一定能够找到:
+</code>java
+private static void addInBitmapOptions(BitmapFactory.Options options,</p>
+
+<pre><code>    ImageCache cache) {
+// inBitmap only works with mutable bitmaps, so force the decoder to
+// return mutable bitmaps.
+options.inMutable = true;
+
+if (cache != null) {
+    // Try to find a bitmap to use for inBitmap.
+    Bitmap inBitmap = cache.getBitmapFromReusableSet(options);
+
+    if (inBitmap != null) {
+        // If a suitable bitmap has been found, set it as the value of
+        // inBitmap.
+        options.inBitmap = inBitmap;
+    }
+}
+</code></pre>
+
+<p>}</p>
+
+<p>// This method iterates through the reusable bitmaps, looking for one
+// to use for inBitmap:
+protected Bitmap getBitmapFromReusableSet(BitmapFactory.Options options) {</p>
+
+<pre><code>    Bitmap bitmap = null;
+
+if (mReusableBitmaps != null &amp;&amp; !mReusableBitmaps.isEmpty()) {
+    final Iterator&lt;SoftReference&lt;Bitmap&gt;&gt; iterator
+            = mReusableBitmaps.iterator();
+    Bitmap item;
+
+    while (iterator.hasNext()) {
+        item = iterator.next().get();
+
+        if (null != item &amp;&amp; item.isMutable()) {
+            // Check to see it the item can be used for inBitmap.
+            if (canUseForInBitmap(item, options)) {
+                bitmap = item;
+
+                // Remove from reusable set so it can't be used again.
+                iterator.remove();
+                break;
+            }
+        } else {
+            // Remove from the set if the reference has been cleared.
+            iterator.remove();
+        }
+    }
+}
+return bitmap;
+</code></pre>
+
+<p>}
+<code>
+最后，下面这个方法去判断候选bitmap是否满足inBitmap的大小条件:
+</code>java
+private static boolean canUseForInBitmap(</p>
+
+<pre><code>    Bitmap candidate, BitmapFactory.Options targetOptions) {
+int width = targetOptions.outWidth / targetOptions.inSampleSize;
+int height = targetOptions.outHeight / targetOptions.inSampleSize;
+
+// Returns true if "candidate" can be used for inBitmap re-use with
+// "targetOptions".
+return candidate.getWidth() == width &amp;&amp; candidate.getHeight() == height;
+</code></pre>
+
+<p>}
+```</p>
+
+<hr />
+
+<p><strong>学习自：<a href="http://developer.android.com/training/displaying-bitmaps/manage-memory.html">http://developer.android.com/training/displaying-bitmaps/manage-memory.html</a>，请多指教，谢谢！</strong><br/>
+<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training Graphics - 高效地显示Bitmap(Lesson 5 - 呈现Bitmap到UI上)]]></title>
+    <link href="http://kesenhoo.github.com/blog/2012/04/26/android-training-displaying-bitmaps-efficiently-lesson-5/"/>
+    <updated>2012-04-26T22:27:00+08:00</updated>
+    <id>http://kesenhoo.github.com/blog/2012/04/26/android-training-displaying-bitmaps-efficiently-lesson-5</id>
+    <content type="html"><![CDATA[<p>这一课会演示如何运用前面几节课的内容，使用后台线程与Cache机制来加载图片到 ViewPager 与 GridView 组件，并且学习处理并发与配置改变问题。(<em>并发问题的处理确实需要好好考虑，大多数App都没有仔细考虑到这个问题，会导致浪费更多的资源，效率不够</em>)</p>
+
+<!-- more -->
+
+
+<h2>Load Bitmaps into a ViewPager Implementation(实现加载图片到ViewPager)</h2>
+
+<p><a href="http://developer.android.com/design/patterns/swipe-views.html">swipe view pattern</a>是一个用来切换显示不同详情界面的很好的方法。(<em>关于这种效果请先参看<a href="http://developer.android.com/design/patterns/swipe-views.html">Android Design: Swipe Views</a> ，这是一个很好的设计，在很多App里面都可以看到这种设计，例如网易新闻，可以左右滑动来切换分类与文章，在Google Reader里面文章的切换也是这样</em>).</p>
+
+<p>你可以通过 <a href="http://developer.android.com/reference/android/support/v4/view/PagerAdapter.html">PagerAdapter</a> 与 <a href="http://developer.android.com/reference/android/support/v4/view/ViewPager.html">ViewPager</a> 组件来实现这个效果. 然而，一个更加合适的Adapter是PagerAdapter 的子类 <a href="http://developer.android.com/reference/android/support/v4/app/FragmentStatePagerAdapter.html">FragmentStatePagerAdapter</a>:它可以在某个ViewPager中的子视图切换出屏幕时自动销毁与保存 Fragments 的状态。这样能够保持消耗更少的内存。<br/>
+<strong>Note:</strong> 如果你只有为数不多的图片并且确保不会超出程序内存限制，那么使用 PagerAdapter 或 FragmentPagerAdapter 会更加合适。</p>
+
+<p>下面是一个使用ViewPager与ImageView作为子视图的示例。
+```java
+public class ImageDetailActivity extends FragmentActivity {</p>
+
+<pre><code>public static final String EXTRA_IMAGE = "extra_image";  
+
+private ImagePagerAdapter mAdapter;  
+private ViewPager mPager;  
+
+// A static dataset to back the ViewPager adapter  
+public final static Integer[] imageResIds = new Integer[] {  
+        R.drawable.sample_image_1, R.drawable.sample_image_2, R.drawable.sample_image_3,  
+        R.drawable.sample_image_4, R.drawable.sample_image_5, R.drawable.sample_image_6,  
+        R.drawable.sample_image_7, R.drawable.sample_image_8, R.drawable.sample_image_9};  
+
+@Override  
+public void onCreate(Bundle savedInstanceState) {  
+    super.onCreate(savedInstanceState);  
+    setContentView(R.layout.image_detail_pager); // Contains just a ViewPager  
+
+    mAdapter = new ImagePagerAdapter(getSupportFragmentManager(), imageResIds.length);  
+    mPager = (ViewPager) findViewById(R.id.pager);  
+    mPager.setAdapter(mAdapter);  
+}  
+
+public static class ImagePagerAdapter extends FragmentStatePagerAdapter {  
+    private final int mSize;  
+
+    public ImagePagerAdapter(FragmentManager fm, int size) {  
+        super(fm);  
+        mSize = size;  
+    }  
+
+    @Override  
+    public int getCount() {  
+        return mSize;  
+    }  
+
+    @Override  
+    public Fragment getItem(int position) {  
+        return ImageDetailFragment.newInstance(position);  
+    }  
+}  
+</code></pre>
+
+<p>}<br/>
+<code>
+Fragment 里面包含了ImageView 的子组件:
+</code>java
+public class ImageDetailFragment extends Fragment {</p>
+
+<pre><code>private static final String IMAGE_DATA_EXTRA = "resId";  
+private int mImageNum;  
+private ImageView mImageView;  
+
+static ImageDetailFragment newInstance(int imageNum) {  
+    final ImageDetailFragment f = new ImageDetailFragment();  
+    final Bundle args = new Bundle();  
+    args.putInt(IMAGE_DATA_EXTRA, imageNum);  
+    f.setArguments(args);  
+    return f;  
+}  
+
+// Empty constructor, required as per Fragment docs  
+public ImageDetailFragment() {}  
+
+@Override  
+public void onCreate(Bundle savedInstanceState) {  
+    super.onCreate(savedInstanceState);  
+    mImageNum = getArguments() != null ? getArguments().getInt(IMAGE_DATA_EXTRA) : -1;  
+}  
+
+@Override  
+public View onCreateView(LayoutInflater inflater, ViewGroup container,  
+        Bundle savedInstanceState) {  
+    // image_detail_fragment.xml contains just an ImageView  
+    final View v = inflater.inflate(R.layout.image_detail_fragment, container, false);  
+    mImageView = (ImageView) v.findViewById(R.id.imageView);  
+    return v;  
+}  
+
+@Override  
+public void onActivityCreated(Bundle savedInstanceState) {  
+    super.onActivityCreated(savedInstanceState);  
+    final int resId = ImageDetailActivity.imageResIds[mImageNum];  
+    mImageView.setImageResource(resId); // Load image into ImageView  
+}  
+</code></pre>
+
+<p>}<br/>
+<code>
+希望你有发现上面示例存在的问题：在UI Thread中读取图片可能会导致程序ANR。使用在Lesson 2中学习的 AsyncTask 会比较好。
+</code>java
+public class ImageDetailActivity extends FragmentActivity {</p>
+
+<pre><code>...  
+
+public void loadBitmap(int resId, ImageView imageView) {  
+    mImageView.setImageResource(R.drawable.image_placeholder);  
+    BitmapWorkerTask task = new BitmapWorkerTask(mImageView);  
+    task.execute(resId);  
+}  
+
+... // include BitmapWorkerTask class  
+</code></pre>
+
+<p>}</p>
+
+<p>public class ImageDetailFragment extends Fragment {</p>
+
+<pre><code>...  
+
+@Override  
+public void onActivityCreated(Bundle savedInstanceState) {  
+    super.onActivityCreated(savedInstanceState);  
+    if (ImageDetailActivity.class.isInstance(getActivity())) {  
+        final int resId = ImageDetailActivity.imageResIds[mImageNum];  
+        // Call out to ImageDetailActivity to load the bitmap in a background thread  
+        ((ImageDetailActivity) getActivity()).loadBitmap(resId, mImageView);  
+    }  
+}  
+</code></pre>
+
+<p>}<br/>
+<code>
+在 BitmapWorkerTask 中做一些例如resizing or fetching images from the network，不会卡到UI Thread。如果后台线程不仅仅是做个简单的直接加载动作，增加一个内存Cache或者磁盘Cache会比较好[参考Lesson 3] ,下面是一些为了内存Cache而附加的内容:
+</code>java
+public class ImageDetailActivity extends FragmentActivity {</p>
+
+<pre><code>...  
+private LruCache mMemoryCache;  
+
+@Override  
+public void onCreate(Bundle savedInstanceState) {  
+    ...  
+    // initialize LruCache as per Use a Memory Cache section  
+}  
+
+public void loadBitmap(int resId, ImageView imageView) {  
+    final String imageKey = String.valueOf(resId);  
+
+    final Bitmap bitmap = mMemoryCache.get(imageKey);  
+    if (bitmap != null) {  
+        mImageView.setImageBitmap(bitmap);  
+    } else {  
+        mImageView.setImageResource(R.drawable.image_placeholder);  
+        BitmapWorkerTask task = new BitmapWorkerTask(mImageView);  
+        task.execute(resId);  
+    }  
+}  
+
+... // include updated BitmapWorkerTask from Use a Memory Cache section  
+</code></pre>
+
+<p>}<br/>
+```</p>
+
+<h2>Load Bitmaps into a GridView Implementation(实现加载图片到GridView)</h2>
+
+<p><a href="http://developer.android.com/design/building-blocks/grid-lists.html">Grid list building block</a> 是一种有效显示大量图片的方式。这样能够一次显示许多图片，而且那些即将被显示的图片也处于准备显示状态。如果你想要实现这种效果，你必须确保UI是流畅的，能够控制内存使用，并且正确的处理并发问题（因为 GridView 会循环使用子视图)。</p>
+
+<p>下面是一个在Fragment里面内置了ImageView作为GridView子视图的示例：
+```java
+public class ImageGridFragment extends Fragment implements AdapterView.OnItemClickListener {</p>
+
+<pre><code>private ImageAdapter mAdapter;  
+
+// A static dataset to back the GridView adapter  
+public final static Integer[] imageResIds = new Integer[] {  
+        R.drawable.sample_image_1, R.drawable.sample_image_2, R.drawable.sample_image_3,  
+        R.drawable.sample_image_4, R.drawable.sample_image_5, R.drawable.sample_image_6,  
+        R.drawable.sample_image_7, R.drawable.sample_image_8, R.drawable.sample_image_9};  
+
+// Empty constructor as per Fragment docs  
+public ImageGridFragment() {}  
+
+@Override  
+public void onCreate(Bundle savedInstanceState) {  
+    super.onCreate(savedInstanceState);  
+    mAdapter = new ImageAdapter(getActivity());  
+}  
+
+@Override  
+public View onCreateView(  
+        LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {  
+    final View v = inflater.inflate(R.layout.image_grid_fragment, container, false);  
+    final GridView mGridView = (GridView) v.findViewById(R.id.gridView);  
+    mGridView.setAdapter(mAdapter);  
+    mGridView.setOnItemClickListener(this);  
+    return v;  
+}  
+
+@Override  
+public void onItemClick(AdapterView parent, View v, int position, long id) {  
+    final Intent i = new Intent(getActivity(), ImageDetailActivity.class);  
+    i.putExtra(ImageDetailActivity.EXTRA_IMAGE, position);  
+    startActivity(i);  
+}  
+
+private class ImageAdapter extends BaseAdapter {  
+    private final Context mContext;  
+
+    public ImageAdapter(Context context) {  
+        super();  
+        mContext = context;  
+    }  
+
+    @Override  
+    public int getCount() {  
+        return imageResIds.length;  
+    }  
+
+    @Override  
+    public Object getItem(int position) {  
+        return imageResIds[position];  
+    }  
+
+    @Override  
+    public long getItemId(int position) {  
+        return position;  
+    }  
+
+    @Override  
+    public View getView(int position, View convertView, ViewGroup container) {  
+        ImageView imageView;  
+        if (convertView == null) { // if it's not recycled, initialize some attributes  
+            imageView = new ImageView(mContext);  
+            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);  
+            imageView.setLayoutParams(new GridView.LayoutParams(  
+                    LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));  
+        } else {  
+            imageView = (ImageView) convertView;  
+        }  
+    //请注意下面的代码  
+    imageView.setImageResource(imageResIds[position]); // Load image into ImageView  
+    return imageView;  
+}  
+</code></pre>
+
+<p>}<br/>
+<code>
+与前面加载到图片到ViewPager一样，如果setImageResource的操作会比较耗时，有可能会卡到UI Thread。可以使用类似前面异步处理图片与增加缓存的方法来解决那个问题。然而，我们还需要考虑GridView的循环机制所带来的并发问题。为了处理这个问题，请参考前面的课程 。下面是一个更新的解决方案：
+</code>java
+public class ImageGridFragment extends Fragment implements AdapterView.OnItemClickListener {</p>
+
+<pre><code>...  
+
+private class ImageAdapter extends BaseAdapter {  
+    ...  
+
+    @Override  
+    public View getView(int position, View convertView, ViewGroup container) {  
+        ...  
+        loadBitmap(imageResIds[position], imageView)  
+        return imageView;  
+    }  
+}  
+
+public void loadBitmap(int resId, ImageView imageView) {  
+    if (cancelPotentialWork(resId, imageView)) {  
+        final BitmapWorkerTask task = new BitmapWorkerTask(imageView);  
+        final AsyncDrawable asyncDrawable =  
+                new AsyncDrawable(getResources(), mPlaceHolderBitmap, task);  
+        imageView.setImageDrawable(asyncDrawable);  
+        task.execute(resId);  
+    }  
+}  
+
+static class AsyncDrawable extends BitmapDrawable {  
+    private final WeakReference bitmapWorkerTaskReference;  
+
+    public AsyncDrawable(Resources res, Bitmap bitmap,  
+            BitmapWorkerTask bitmapWorkerTask) {  
+        super(res, bitmap);  
+        bitmapWorkerTaskReference =  
+            new WeakReference(bitmapWorkerTask);  
+    }  
+
+    public BitmapWorkerTask getBitmapWorkerTask() {  
+        return bitmapWorkerTaskReference.get();  
+    }  
+}  
+
+public static boolean cancelPotentialWork(int data, ImageView imageView) {  
+    final BitmapWorkerTask bitmapWorkerTask = getBitmapWorkerTask(imageView);  
+
+    if (bitmapWorkerTask != null) {  
+        final int bitmapData = bitmapWorkerTask.data;  
+        if (bitmapData != data) {  
+            // Cancel previous task  
+            bitmapWorkerTask.cancel(true);  
+        } else {  
+            // The same work is already in progress  
+            return false;  
+        }  
+    }  
+    // No task associated with the ImageView, or an existing task was cancelled  
+    return true;  
+}  
+
+private static BitmapWorkerTask getBitmapWorkerTask(ImageView imageView) {  
+   if (imageView != null) {  
+       final Drawable drawable = imageView.getDrawable();  
+       if (drawable instanceof AsyncDrawable) {  
+           final AsyncDrawable asyncDrawable = (AsyncDrawable) drawable;  
+           return asyncDrawable.getBitmapWorkerTask();  
+       }  
+    }  
+    return null;  
+}  
+
+... // include updated BitmapWorkerTask class  
+</code></pre>
+
+<p>```
+<strong>Note:</strong>对于 ListView 同样可以套用上面的方法。</p>
+
+<p>上面的方法提供了足够的弹性，使得你可以做从网络加载与Resize大的数码照片等操作而不至于卡到UI Thread。</p>
+
+<hr />
+
+<p><strong>学习自：<a href="http://developer.android.com/training/displaying-bitmaps/display-bitmap.html">http://developer.android.com/training/displaying-bitmaps/display-bitmap.html</a>，请多指教，谢谢！</strong><br/>
+<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training Graphics - 高效地显示Bitmap(Lesson 3 - 两种缓存Bitmap的方式)]]></title>
+    <link href="http://kesenhoo.github.com/blog/2012/04/24/android-training-displaying-bitmaps-efficiently-lesson-3/"/>
+    <updated>2012-04-24T12:59:00+08:00</updated>
+    <id>http://kesenhoo.github.com/blog/2012/04/24/android-training-displaying-bitmaps-efficiently-lesson-3</id>
+    <content type="html"><![CDATA[<p>加载单个Bitmap到UI是简单直接的，但是如果你需要一次加载大量的图片，事情则会变得复杂起来。在大多数情况下(例如在ListView,GridView or ViewPager), 显示图片的数量通常是没有限制的。</p>
+
+<p>通过循环利用子视图可以抑制内存的使用，GC(garbage collector)也会释放那些不再需要使用的bitmap。这些机制都非常好，但是为了保持一个流畅的用户体验，你想要在屏幕滑回来时避免每次重复处理那些图片。内存与磁盘缓存通常可以起到帮助的作用，允许组件快速的重新加载那些处理过的图片。</p>
+
+<p>这一课会介绍在加载多张位图时使用内存Cache与磁盘Cache来提高反应速度与UI的流畅度。</p>
+
+<!-- more -->
+
+
+<h2>Use a Memory Cache(使用内存缓存)</h2>
+
+<p>内存缓存以花费宝贵的程序内存为前提来快速访问位图。<a href="http://developer.android.com/reference/android/util/LruCache.html">LruCache</a> 类(在 Support Library 中也可以找到) 特别合适用来caching bitmaps，用一个strong referenced的 LinkedHashMap 来保存最近引用的对象，并且在Cache超出设置大小的时候踢出(evict)最近最少使用到的对象。<br/>
+<strong>Note:</strong> 在过去, 一个比较流行的内存缓存实现方法是使用 SoftReference or WeakReference , 然而这是不推荐的。从Android 2.3 (API Level 9) 开始，GC变得更加频繁的去释放soft/weak references，这使得他们就显得效率低下. 而且在Android 3.0 (API Level 11)之前，备份的bitmap是存放在native memory 中，它不是以可预知的方式被释放，这样可能导致程序超出它的内存限制而崩溃。</p>
+
+<p>为了给LruCache选择一个合适的大小，有下面一些因素需要考虑到：</p>
+
+<ul>
+<li>你的程序剩下了多少可用的内存?</li>
+<li>多少图片会被一次呈现到屏幕上？有多少图片需要准备好以便马上显示到屏幕？</li>
+<li>设备的屏幕大小与密度是多少? 一个具有特别高密度屏幕(xhdpi)的设备，像 Galaxy Nexus 会比 Nexus S (hdpi)需要一个更大的Cache来hold住同样数量的图片.</li>
+<li>位图的尺寸与配置是多少，会花费多少内存？</li>
+<li>图片被访问的频率如何？是其中一些比另外的访问更加频繁吗？如果是，也许你想要保存那些最常访问的到内存中，或者为不同组别的位图(按访问频率分组)设置多个LruCache 对象。</li>
+<li>你可以平衡质量与数量吗? 某些时候保存大量低质量的位图会非常有用，在加载更高质量图片的任务则交给另外一个后台线程。</li>
+</ul>
+
+
+<p>没有指定的大小与公式能够适用与所有的程序，那取决于分析你的使用情况后提出一个合适的解决方案。一个太小的Cache会导致额外的花销却没有明显的好处，一个太大的Cache同样会导致java.lang.OutOfMemory的异常(Cache占用太多内存，其他活动则会因为内存不够而异常)，并且使得你的程序只留下小部分的内存用来工作。</p>
+
+<p>下面是一个为bitmap建立LruCache 的示例：
+```java
+private LruCache mMemoryCache;</p>
+
+<p>@Override<br/>
+protected void onCreate(Bundle savedInstanceState) {</p>
+
+<pre><code>...  
+// Get memory class of this device, exceeding this amount will throw an  
+// OutOfMemory exception.  
+final int memClass = ((ActivityManager) context.getSystemService(  
+        Context.ACTIVITY_SERVICE)).getMemoryClass();  
+
+// Use 1/8th of the available memory for this memory cache.  
+final int cacheSize = 1024 * 1024 * memClass / 8;  
+
+mMemoryCache = new LruCache(cacheSize) {  
+    @Override  
+    protected int sizeOf(String key, Bitmap bitmap) {  
+        // The cache size will be measured in bytes rather than number of items.  
+        return bitmap.getByteCount();  
+    }  
+};  
+...  
+</code></pre>
+
+<p>}</p>
+
+<p>public void addBitmapToMemoryCache(String key, Bitmap bitmap) {</p>
+
+<pre><code>if (getBitmapFromMemCache(key) == null) {  
+    mMemoryCache.put(key, bitmap);  
+}  
+</code></pre>
+
+<p>}</p>
+
+<p>public Bitmap getBitmapFromMemCache(String key) {</p>
+
+<pre><code>return mMemoryCache.get(key);  
+</code></pre>
+
+<p>}<br/>
+```
+<strong>Note:</strong>在上面的例子中, 有1/8的程序内存被作为Cache. 在一个常见的设备上(hdpi)，最小大概有4MB (32/8). 如果一个填满图片的GridView组件放置在800x480像素的手机屏幕上，大概会花费1.5MB (800x480x4 bytes), 因此缓存的容量大概可以缓存2.5页的图片内容.</p>
+
+<p>当加载位图到 ImageView 时，LruCache 会先被检查是否存在这张图片。如果找到有，它会被用来立即更新 ImageView 组件，否则一个后台线程则被触发去处理这张图片。
+```java
+public void loadBitmap(int resId, ImageView imageView) {</p>
+
+<pre><code>final String imageKey = String.valueOf(resId);  
+
+final Bitmap bitmap = getBitmapFromMemCache(imageKey);  
+if (bitmap != null) {  
+    mImageView.setImageBitmap(bitmap);  
+} else {  
+    mImageView.setImageResource(R.drawable.image_placeholder);  
+    BitmapWorkerTask task = new BitmapWorkerTask(mImageView);  
+    task.execute(resId);  
+}  
+</code></pre>
+
+<p>}<br/>
+<code>
+上面的程序中 BitmapWorkerTask 也需要做添加到内存Cache中的动作：
+</code>java
+class BitmapWorkerTask extends AsyncTask {</p>
+
+<pre><code>...  
+// Decode image in background.  
+@Override  
+protected Bitmap doInBackground(Integer... params) {  
+    final Bitmap bitmap = decodeSampledBitmapFromResource(  
+            getResources(), params[0], 100, 100));  
+    addBitmapToMemoryCache(String.valueOf(params[0]), bitmap);  
+    return bitmap;  
+}  
+...  
+</code></pre>
+
+<p>}<br/>
+```</p>
+
+<h2>Use a Disk Cache(使用磁盘缓存)</h2>
+
+<p>内存缓存能够提高访问最近查看过的位图，但是你不能保证这个图片会在Cache中。像类似 GridView 等带有大量数据的组件很容易就填满内存Cache。你的程序可能会被类似Phone call等任务而中断，这样后台程序可能会被杀死，那么内存缓存就会被销毁。一旦用户恢复前面的状态，你的程序就又需要为每个图片重新处理。</p>
+
+<p>磁盘缓存磁盘缓存可以用来保存那些已经处理好的位图，并且在那些图片在内存缓存中不可用时减少加载的次数。当然从磁盘读取图片会比从内存要慢，而且读取操作需要在后台线程中处理，因为磁盘读取操作是不可预期的。<br/>
+<strong>Note:</strong>如果图片被更频繁的访问到，也许使用 ContentProvider 会更加的合适，比如在Gallery程序中。</p>
+
+<p>在下面的sample code中实现了一个基本的 DiskLruCache 。然而，Android 4.0 的源代码提供了一个更加robust并且推荐使用的DiskLruCache 方案。(libcore/luni/src/main/java/libcore/io/DiskLruCache.java). 因为向后兼容，所以在前面发布的Android版本中也可以直接使用。 (quick search 提供了一个实现这个解决方案的示例)。
+```java
+private DiskLruCache mDiskCache;<br/>
+private static final int DISK_CACHE_SIZE = 1024 * 1024 * 10; // 10MB<br/>
+private static final String DISK_CACHE_SUBDIR = "thumbnails";</p>
+
+<p>@Override<br/>
+protected void onCreate(Bundle savedInstanceState) {</p>
+
+<pre><code>...  
+// Initialize memory cache  
+...  
+File cacheDir = getCacheDir(this, DISK_CACHE_SUBDIR);  
+mDiskCache = DiskLruCache.openCache(this, cacheDir, DISK_CACHE_SIZE);  
+...  
+</code></pre>
+
+<p>}</p>
+
+<p>class BitmapWorkerTask extends AsyncTask {</p>
+
+<pre><code>...  
+// Decode image in background.  
+@Override  
+protected Bitmap doInBackground(Integer... params) {  
+    final String imageKey = String.valueOf(params[0]);  
+
+    // Check disk cache in background thread  
+    Bitmap bitmap = getBitmapFromDiskCache(imageKey);  
+
+    if (bitmap == null) { // Not found in disk cache  
+        // Process as normal  
+        final Bitmap bitmap = decodeSampledBitmapFromResource(  
+                getResources(), params[0], 100, 100));  
+    }  
+
+    // Add final bitmap to caches  
+    addBitmapToCache(String.valueOf(imageKey, bitmap);  
+
+    return bitmap;  
+}  
+...  
+</code></pre>
+
+<p>}</p>
+
+<p>public void addBitmapToCache(String key, Bitmap bitmap) {</p>
+
+<pre><code>// Add to memory cache as before  
+if (getBitmapFromMemCache(key) == null) {  
+    mMemoryCache.put(key, bitmap);  
+}  
+
+// Also add to disk cache  
+if (!mDiskCache.containsKey(key)) {  
+    mDiskCache.put(key, bitmap);  
+}  
+</code></pre>
+
+<p>}</p>
+
+<p>public Bitmap getBitmapFromDiskCache(String key) {</p>
+
+<pre><code>return mDiskCache.get(key);  
+</code></pre>
+
+<p>}</p>
+
+<p>// Creates a unique subdirectory of the designated app cache directory. Tries to use external<br/>
+// but if not mounted, falls back on internal storage.<br/>
+public static File getCacheDir(Context context, String uniqueName) {</p>
+
+<pre><code>// Check if media is mounted or storage is built-in, if so, try and use external cache dir  
+// otherwise use internal cache dir  
+final String cachePath = Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED  
+        || !Environment.isExternalStorageRemovable() ?  
+                context.getExternalCacheDir().getPath() : context.getCacheDir().getPath();  
+
+return new File(cachePath + File.separator + uniqueName);  
+</code></pre>
+
+<p>}<br/>
+```
+内存缓存的检查是可以在UI线程中进行的，磁盘缓存的检查需要在后台线程中处理。磁盘操作永远都不应该在UI线程中发生。当图片处理完成后，最后的位图需要添加到内存缓存与磁盘缓存中，方便之后的使用。</p>
+
+<h2>Handle Configuration Changes(处理配置改变)</h2>
+
+<p>运行时配置改变，例如屏幕方向的改变会导致Android去destory并restart当前运行的Activity。(关于这一行为的更多信息，请参考<a href="http://developer.android.com/guide/topics/resources/runtime-changes.html">Handling Runtime Changes</a>). 你想要在配置改变时避免重新处理所有的图片，这样才能提供给用户一个良好的平滑过度的体验。</p>
+
+<p>幸运的是，在前面介绍Use a Memory Cache的部分，你已经知道如何建立一个内存缓存。这个缓存可以通过使用一个Fragment去调用 <a href="http://developer.android.com/reference/android/app/Fragment.html#setRetainInstance(boolean">setRetainInstance(true)</a>) 传递到新的Activity中。在这个activity被recreate之后, 这个保留的 Fragment 会被重新附着上。这样你就可以访问Cache对象，从中获取到图片信息并快速的重新添加到ImageView对象中。</p>
+
+<p>下面配置改变时使用Fragment来重新获取LruCache 的示例：
+```java
+private LruCache mMemoryCache;</p>
+
+<p>@Override<br/>
+protected void onCreate(Bundle savedInstanceState) {</p>
+
+<pre><code>...  
+RetainFragment mRetainFragment =  
+        RetainFragment.findOrCreateRetainFragment(getFragmentManager());  
+mMemoryCache = RetainFragment.mRetainedCache;  
+if (mMemoryCache == null) {  
+    mMemoryCache = new LruCache(cacheSize) {  
+        ... // Initialize cache here as usual  
+    }  
+    mRetainFragment.mRetainedCache = mMemoryCache;  
+}  
+...  
+</code></pre>
+
+<p>}</p>
+
+<p>class RetainFragment extends Fragment {</p>
+
+<pre><code>private static final String TAG = "RetainFragment";  
+public LruCache mRetainedCache;  
+
+public RetainFragment() {}  
+
+public static RetainFragment findOrCreateRetainFragment(FragmentManager fm) {  
+    RetainFragment fragment = (RetainFragment) fm.findFragmentByTag(TAG);  
+    if (fragment == null) {  
+        fragment = new RetainFragment();  
+    }  
+    return fragment;  
+}  
+
+@Override  
+public void onCreate(Bundle savedInstanceState) {  
+    super.onCreate(savedInstanceState);  
+    setRetainInstance(true);  
+}  
+</code></pre>
+
+<p>}<br/>
+```
+为了测试上面的效果，尝试对比retaining 这个 Fragment.与没有这样做的时候去旋转屏幕。你会发现从内存缓存中重新绘制几乎没有卡的现象，而从磁盘缓存则显得稍慢，如果两个缓存中都没有，则处理速度像平时一样。</p>
+
+<hr />
+
+<p><strong>学习自：<a href="http://developer.android.com/training/displaying-bitmaps/cache-bitmap.html">http://developer.android.com/training/displaying-bitmaps/cache-bitmap.html</a>，请多指教，谢谢！</strong><br/>
+<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training Graphics - 高效地显示Bitmap(Lesson 2 - 在UI线程之外处理Bitmaps)]]></title>
+    <link href="http://kesenhoo.github.com/blog/2012/04/23/android-training-displaying-bitmaps-efficiently-lesson-2/"/>
+    <updated>2012-04-23T19:55:00+08:00</updated>
+    <id>http://kesenhoo.github.com/blog/2012/04/23/android-training-displaying-bitmaps-efficiently-lesson-2</id>
+    <content type="html"><![CDATA[<p>在上一课中有介绍一系列的BitmapFactory.decode* 方法，当数据源是网络或者是磁盘时(或者是任何实际源不在内存的)，这些方法都不应该在main UI 线程中执行。那些情况下加载数据是不可以预知的，它依赖于许多因素(从网络或者硬盘读取数据的速度, 图片的大小, CPU的速度, etc.)。如果其中任何一个任务卡住了UI thread, 系统会出现ANR的错误。</p>
+
+<p>这一节课会介绍如何使用 AsyncTask 在后台线程中处理bitmap并且演示了如何处理并发(concurrency)的问题。</p>
+
+<!-- more -->
+
+
+<h2>Use an AsyncTask(使用AsyncTask)</h2>
+
+<p>AsyncTask 类提供了一个简单的方法来在后台线程执行一些操作，并且可以把后台的结果呈现到UI线程。下面是一个加载大图的示例：
+```java
+class BitmapWorkerTask extends AsyncTask {</p>
+
+<pre><code>private final WeakReference imageViewReference;  
+private int data = 0;  
+
+public BitmapWorkerTask(ImageView imageView) {  
+    // Use a WeakReference to ensure the ImageView can be garbage collected  
+    imageViewReference = new WeakReference(imageView);  
+}  
+
+// Decode image in background.  
+@Override  
+protected Bitmap doInBackground(Integer... params) {  
+    data = params[0];  
+    return decodeSampledBitmapFromResource(getResources(), data, 100, 100));  
+}  
+
+// Once complete, see if ImageView is still around and set bitmap.  
+@Override  
+protected void onPostExecute(Bitmap bitmap) {  
+    if (imageViewReference != null &amp;&amp; bitmap != null) {  
+        final ImageView imageView = imageViewReference.get();  
+        if (imageView != null) {  
+            imageView.setImageBitmap(bitmap);  
+        }  
+    }  
+}  
+</code></pre>
+
+<p>}<br/>
+```
+为ImageView使用WeakReference 确保了 AsyncTask 所引用的资源可以被GC(garbage collected)。因为当任务结束时不能确保 ImageView 仍然存在，因此你必须在 onPostExecute() 里面去检查引用.  这个ImageView 也许已经不存在了，例如，在任务结束时用户已经不在那个Activity或者是设备已经发生配置改变(旋转屏幕等)。</p>
+
+<p>开始异步加载位图，只需要创建一个新的任务并执行它即可:
+```java
+public void loadBitmap(int resId, ImageView imageView) {</p>
+
+<pre><code>BitmapWorkerTask task = new BitmapWorkerTask(imageView);  
+task.execute(resId);  
+</code></pre>
+
+<p>}<br/>
+```</p>
+
+<h2>Handle Concurrency(处理并发问题)</h2>
+
+<p>通常类似 ListView 与 GridView 等视图组件在使用上面演示的AsyncTask 方法时会同时带来另外一个问题。为了更有效的处理内存，那些视图的子组件会在用户滑动屏幕时被循环使用（关于这个原理请参考<a href="http://blog.csdn.net/kesenhoo/article/details/7196920">ListView中getView的原理与解决多轮重复调用的方法</a>）. 如果每一个子视图都触发一个 AsyncTask ，那么就无法确保当前视图在结束task时，分配的视图已经进入循环队列中给另外一个子视图进行重用。而且, 无法确保所有的异步任务能够按顺序执行完毕。</p>
+
+<p><a href="http://android-developers.blogspot.com/2010/07/multithreading-for-performance.html">Multithreading for Performance</a> 这篇博文更进一步的讨论了如何处理并发并且提供了一种解决方法，当任务结束时ImageView 保存一个最近常使用的AsyncTask引用。使用类似的方法,  AsyncTask 可以扩展出一个类似的模型。创建一个专用的 Drawable 子类来保存一个可以回到当前工作任务的引用。在这种情况下，BitmapDrawable 被用来作为占位图片，它可以在任务结束时显示到ImageView中。
+```java
+static class AsyncDrawable extends BitmapDrawable {</p>
+
+<pre><code>private final WeakReference bitmapWorkerTaskReference;  
+
+public AsyncDrawable(Resources res, Bitmap bitmap,  
+        BitmapWorkerTask bitmapWorkerTask) {  
+    super(res, bitmap);  
+    bitmapWorkerTaskReference =  
+        new WeakReference(bitmapWorkerTask);  
+}  
+
+public BitmapWorkerTask getBitmapWorkerTask() {  
+    return bitmapWorkerTaskReference.get();  
+}  
+</code></pre>
+
+<p>}<br/>
+<code>
+在执行BitmapWorkerTask 之前，你需要创建一个 AsyncDrawable 并且绑定它到目标组件 ImageView 中：
+</code>java
+public void loadBitmap(int resId, ImageView imageView) {</p>
+
+<pre><code>if (cancelPotentialWork(resId, imageView)) {  
+    final BitmapWorkerTask task = new BitmapWorkerTask(imageView);  
+    final AsyncDrawable asyncDrawable =  
+            new AsyncDrawable(getResources(), mPlaceHolderBitmap, task);  
+    imageView.setImageDrawable(asyncDrawable);  
+    task.execute(resId);  
+}  
+</code></pre>
+
+<p>}<br/>
+<code>
+在上面的代码示例中，cancelPotentialWork 方法检查确保了另外一个在ImageView中运行的任务得以取消。如果是这样，它通过执行 cancel() 方法来取消之前的一个任务. 在小部分情况下, New出来的任务有可能已经存在，这样就不需要执行这个任务了。下面演示了如何实现一个 cancelPotentialWork 。
+</code>java
+public static boolean cancelPotentialWork(int data, ImageView imageView) {</p>
+
+<pre><code>final BitmapWorkerTask bitmapWorkerTask = getBitmapWorkerTask(imageView);  
+
+if (bitmapWorkerTask != null) {  
+    final int bitmapData = bitmapWorkerTask.data;  
+    if (bitmapData != data) {  
+        // Cancel previous task  
+        bitmapWorkerTask.cancel(true);  
+    } else {  
+        // The same work is already in progress  
+        return false;  
+    }  
+}  
+// No task associated with the ImageView, or an existing task was cancelled  
+return true;  
+</code></pre>
+
+<p>}<br/>
+<code>
+在上面有一个帮助方法， getBitmapWorkerTask(), 被用作检索任务是否已经被分配到指定的 ImageView:
+</code>java
+private static BitmapWorkerTask getBitmapWorkerTask(ImageView imageView) {<br/>
+   if (imageView != null) {</p>
+
+<pre><code>   final Drawable drawable = imageView.getDrawable();  
+   if (drawable instanceof AsyncDrawable) {  
+       final AsyncDrawable asyncDrawable = (AsyncDrawable) drawable;  
+       return asyncDrawable.getBitmapWorkerTask();  
+   }  
+}  
+return null;  
+</code></pre>
+
+<p>}<br/>
+<code>
+最后一步是在BitmapWorkerTask 的onPostExecute() 方法里面做更新操作:
+</code>java
+class BitmapWorkerTask extends AsyncTask {</p>
+
+<pre><code>...  
+
+@Override  
+protected void onPostExecute(Bitmap bitmap) {  
+    if (isCancelled()) {  
+        bitmap = null;  
+    }  
+
+    if (imageViewReference != null &amp;&amp; bitmap != null) {  
+        final ImageView imageView = imageViewReference.get();  
+        final BitmapWorkerTask bitmapWorkerTask =  
+                getBitmapWorkerTask(imageView);  
+        if (this == bitmapWorkerTask &amp;&amp; imageView != null) {  
+            imageView.setImageBitmap(bitmap);  
+        }  
+    }  
+}  
+</code></pre>
+
+<p>}<br/>
+```
+这个方法不仅仅适用于 ListView 与 GridView 组件，在那些需要循环利用子视图的组件中同样适用。只需要在设置图片到ImageView的地方调用 loadBitmap 方法。例如，在GridView 中实现这个方法会是在 getView() 方法里面调用。</p>
+
+<hr />
+
+<p><strong>学习自：<a href="http://developer.android.com/training/displaying-bitmaps/process-bitmap.html">http://developer.android.com/training/displaying-bitmaps/process-bitmap.html</a>，请多指教，谢谢！</strong><br/>
+<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training Graphics - 高效地显示Bitmap(Lesson 1 - 有效地加载大尺寸图片)]]></title>
+    <link href="http://kesenhoo.github.com/blog/2012/04/22/android-training-displaying-bitmaps-efficiently-lesson-1/"/>
+    <updated>2012-04-22T11:57:00+08:00</updated>
+    <id>http://kesenhoo.github.com/blog/2012/04/22/android-training-displaying-bitmaps-efficiently-lesson-1</id>
+    <content type="html"><![CDATA[<h1>章节概要</h1>
+
+<p>这一章节会介绍一些通用的用来处理与加载Bitmap对象的方法，这些技术能够使得不会卡到程序的UI并且避免程序消耗过度内存.如果你不注意这些，Bitmaps会迅速的消耗你可用的内存而导致程序crash,出现下面的异常:java.lang.OutofMemoryError: bitmap size exceeds VM budget.</p>
+
+<p>有许多原因说明在你的Android程序中加载Bitmaps是非常棘手的，需要你特别注意:</p>
+
+<ul>
+<li>移动设备的系统资源有限。Android设备对于单个程序至少需要16MB的内存。<a href="http://source.android.com/compatibility/downloads.html">Android Compatibility Definition Document (CDD)</a>, Section 3.7. Virtual Machine Compatibility 给出了对于不同大小与密度的屏幕的最低内存需求. 程序应该在这个最低内存限制下最优化程序的效率。当然，大多数设备的都有更高的限制需求.</li>
+<li>Bitmap会消耗很多内存，特别是对于类似照片等更加丰富的图片. 例如，Galaxy Nexus的照相机能够拍摄2592x1936 pixels (5 MB)的图片. 如果bitmap的配置是使用ARGB_8888 (the default from the Android 2.3 onward) ，那么加载这张照片到内存会大概需要19MB(2592<em>1936</em>4 bytes) 的内存, 这样的话会迅速消耗掉设备的整个内存.</li>
+<li>Android app的UI通常会在一次操作中立即加载许多张bitmaps. 例如在ListView, GridView 与 ViewPager 等组件中通常会需要一次加载许多张bitmaps，而且需要多加载一些内容为了用户可能的滑动操作。</li>
+</ul>
+
+
+<!-- more -->
+
+
+<h1>第1课:Loading Large Bitmaps Efficiently(有效地加载大尺寸位图)</h1>
+
+<p>图片有不同的形状与大小。在大多数情况下它们的实际大小都比需要呈现出来的要大很多。例如，系统的Gallery程序会显示那些你使用设备camera拍摄的图片，但是那些图片的分辨率通常都比你的设备屏幕分辨率要高很多。</p>
+
+<p>考虑到程序是在有限的内存下工作，理想情况是你只需要在内存中加载一个低分辨率的版本即可。这个低分辨率的版本应该是与你的UI大小所匹配的，这样才便于显示。一个高分辨率的图片不会提供任何可见的好处，却会占用宝贵的(precious)的内存资源，并且会在快速滑动图片时导致(incurs)附加的效率问。</p>
+
+<p>这一课会介绍如何通过加载一个低版本的图片到内存中去decoding大的bitmaps，从而避免超出程序的内存限制。</p>
+
+<h2>Read Bitmap Dimensions and Type(读取位图的尺寸与类型)</h2>
+
+<p>BitmapFactory 类提供了一些decode的方法 (<a href="http://developer.android.com/reference/android/graphics/BitmapFactory.html#decodeByteArray(byte[],%20int,%20int,%20android.graphics.BitmapFactory.Options">decodeByteArray()</a>), <a href="http://developer.android.com/reference/android/graphics/BitmapFactory.html#decodeFile(java.lang.String,%20android.graphics.BitmapFactory.Options">decodeFile()</a>), <a href="http://developer.android.com/reference/android/graphics/BitmapFactory.html#decodeResource(android.content.res.Resources,%20int,%20android.graphics.BitmapFactory.Options">decodeResource()</a>), etc.) 用来从不同的资源中创建一个Bitmap. 根据你的图片数据源来选择合适的decode方法. 那些方法在构造位图的时候会尝试分配内存，因此会容易导致OutOfMemory的异常。每一种decode方法都提供了通过<a href="http://developer.android.com/reference/android/graphics/BitmapFactory.Options.html">BitmapFactory.Options</a> 来设置一些附加的标记来指定decode的选项。设置 <a href="http://developer.android.com/reference/android/graphics/BitmapFactory.Options.html#inJustDecodeBounds">inJustDecodeBounds</a> 属性为true可以在decoding的时候避免内存的分配，它会返回一个null的bitmap，但是 outWidth, outHeight 与 outMimeType 还是可以获取。这个技术可以允许你在构造bitmap之前优先读图片的尺寸与类型。
+<code>java
+BitmapFactory.Options options = new BitmapFactory.Options();
+options.inJustDecodeBounds = true;
+BitmapFactory.decodeResource(getResources(), R.id.myimage, options);
+int imageHeight = options.outHeight;
+int imageWidth = options.outWidth;
+String imageType = options.outMimeType;
+</code>
+为了避免java.lang.OutOfMemory 的异常，我们在真正decode图片之前检查它的尺寸，除非你确定这个数据源提供了准确无误的图片且不会导致占用过多的内存。</p>
+
+<h2>Load a Scaled Down Version into Memory(加载一个按比例缩小的版本到内存中)</h2>
+
+<p>通过上面的步骤我们已经知道了图片的尺寸，那些数据可以用来决定是应该加载整个图片到内存中还是加一个缩小的版本。下面有一些因素需要考虑：</p>
+
+<ul>
+<li>评估加载完整图片所需要耗费的内存。</li>
+<li>程序在加载这张图片时会涉及到其他内存需求。</li>
+<li>呈现这张图片的组件的尺寸大小。</li>
+<li>屏幕大小与当前设备的屏幕密度。</li>
+</ul>
+
+
+<p>例如，如果把一个原图是1024<em>768 pixel的图片显示到ImageView为128</em>96 pixel的缩略图就没有必要把整张图片都加载到内存中。</p>
+
+<p>为了告诉decoder去加载一个低版本的图片到内存，需要在你的BitmapFactory.Options 中设置 inSampleSize 为 true 。For example, 一个分辨率为2048x1536 的图片，如果设置 inSampleSize 为4，那么会产出一个大概为512x384的bitmap。加载这张小的图片仅仅使用大概0.75MB，如果是加载全图那么大概要花费12MB(前提都是bitmap的配置是 ARGB_8888). 下面有一段根据目标图片大小来计算Sample图片大小的Sample Code:
+```java
+public static int calculateInSampleSize(</p>
+
+<pre><code>        BitmapFactory.Options options, int reqWidth, int reqHeight) {  
+// Raw height and width of image
+final int height = options.outHeight;
+final int width = options.outWidth;
+int inSampleSize = 1;
+
+if (height &gt; reqHeight || width &gt; reqWidth) {
+    if (width &gt; height) {  
+        inSampleSize = Math.round((float)height / (float)reqHeight);  
+    } else {  
+        inSampleSize = Math.round((float)width / (float)reqWidth);  
+    }  
+}
+return inSampleSize;
+</code></pre>
+
+<p>}
+```
+<strong>Note:</strong> 设置 inSampleSize 为2的幂对于decoder会更加的有效率，然而，如果你打算把调整过大小的图片Cache到磁盘上，设置为更加接近的合适大小则能够更加有效的节省缓存的空间.</p>
+
+<p>为了使用这个方法，首先需要设置 inJustDecodeBounds 为 true, 把options的值传递过来，然后使用 inSampleSize 的值并设置 inJustDecodeBounds 为 false 来重新Decode一遍。
+```java
+public static Bitmap decodeSampledBitmapFromResource(Resources res, int resId,</p>
+
+<pre><code>    int reqWidth, int reqHeight) {  
+
+// First decode with inJustDecodeBounds=true to check dimensions
+final BitmapFactory.Options options = new BitmapFactory.Options();
+options.inJustDecodeBounds = true;
+BitmapFactory.decodeResource(res, resId, options);
+
+// Calculate inSampleSize
+options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+
+// Decode bitmap with inSampleSize set
+options.inJustDecodeBounds = false;
+return BitmapFactory.decodeResource(res, resId, options);
+</code></pre>
+
+<p>}
+<code>
+使用上面这个方法可以简单的加载一个任意大小的图片并显示为100*100 pixel的缩略图形式。像下面演示的一样:
+</code>java
+mImageView.setImageBitmap(</p>
+
+<pre><code>decodeSampledBitmapFromResource(getResources(), R.id.myimage, 100, 100));
+</code></pre>
+
+<p>```
+你可以通过替换合适的BitmapFactory.decode* 方法来写一个类似的方法从其他的数据源进行decode bitmap。</p>
+
+<hr />
+
+<p><strong>学习自：<a href="http://developer.android.com/training/displaying-bitmaps/load-bitmap.html">http://developer.android.com/training/displaying-bitmaps/load-bitmap.html</a>，请多指教，谢谢！</strong><br/>
+<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
+]]></content>
+  </entry>
+  
+</feed>

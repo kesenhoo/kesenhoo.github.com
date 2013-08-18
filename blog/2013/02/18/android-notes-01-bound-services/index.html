@@ -1,0 +1,762 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Android Notes 01 - Bound Services - 四方城</title>
+  <meta name="author" content="Kesen Hoo">
+
+  
+  <meta name="description" content="一个bound的service是C/S的接口。它允许其他组件绑定到service,发送请求，接收回应并执行IPC。通常是需要给其他程序组件提供服务。 A bound service allows other components to bind to it, in order to &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://kesenhoo.github.com/blog/2013/02/18/android-notes-01-bound-services/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="四方城" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-37679268-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   class="no-sidebar"  >
+  <header role="banner"><hgroup>
+  <h1><a href="/">四方城</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:kesenhoo.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Android Notes 01 - Bound Services</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-18T22:30:00+08:00" pubdate data-updated="true">Feb 18<span>th</span>, 2013</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><ul>
+<li>一个bound的service是C/S的接口。它允许其他组件绑定到service,发送请求，接收回应并执行IPC。通常是需要给其他程序组件提供服务。
+
+<ul>
+<li>A bound service allows other components to bind to it, in order to interact with it and perform interprocess communication。</li>
+<li>A bound service is destroyed once all clients unbind, unless the service was also started。</li>
+</ul>
+</li>
+<li>客户端通过执行 bindService()绑定到service。这样的话，客户端需要实现一个ServiceConnection, 它可以监视与service的连接状态。bindService() 并不会有返回值，但是Android系统会在client与service连接上时，执行onServiceConnected() 的callback。在这个回调方法里面传递IBinder给client用来与service进行交互。</li>
+<li>前面提到可以有多个Client同时bind到service。然而，系统只会在第一个client做绑定时才会执行service的onBind() 方法。对于随后需要绑定的客户端，系统会直接传递同一个 IBinder 对象给Client，而不是去再次执行onBind方法。(<em>那么也就是onBind方法只会被执行一次</em>)</li>
+<li>通常来说，Music程序需要实现service的两种方式，这样既可以在activity被销毁之后(<em>假设只实现bound的方式的话，这个时候，unbind了，Music会停止</em>)音乐可以继续播放，当重新进入activity时又会重新bind上。这刚好验证了下面的说法：</li>
+<li>如果一个service既可以started与bound。当一个service是started的，系统并不会在所有的Client都unbind之后去杀死这个service，我们需要显示的去停止这个service，通过stopSelf或者stopService的方式。</li>
+</ul>
+
+
+<!-- more -->
+
+
+<h2>创建一个bound的Service</h2>
+
+<ul>
+<li>当创建了一个可以绑定的service之后，你必须提供一个<a href="http://developer.android.com/reference/android/os/IBinder.html">IBinder</a>对象，它用来提供client与service进行交互的接口。我们有下面三种方式来实现这个接口：
+
+<ul>
+<li><strong>Extending the Binder class</strong>： 如果你的sevice是私有的（不需要与其他程序进行IPC交互），Client可以与Service在同一个Process里面直接进行交互。若不需要IPC，建议使用这个方法。</li>
+<li><strong>Using a Messenger</strong>： 可以使用handler与message进行IPC操作，这是一种直观简便的方式。一个发送消息，一个接受处理后并返回。Handler使得有一个Queue来装这些发送的请求，然后Service再逐个接受并进行处理。(<em>这样的话，只能顺序执行那些发出的请求</em>)</li>
+<li><strong>Using AIDL</strong>(Android Interface Definition Language)： 一种系统可以理解并做出合适处理的IPC机制。使用AIDL可以处理同时发出的请求（并发）。在这种情况下，Service必须小心仔细的去处理多线程操作。 我们需要生成一个.aidl的文件来定义接口，Android SDK tool会使用这个文件生成一个抽象类，在这个类里面去实现接口并处理IPC。</li>
+<li><strong>请注意</strong>：AIDL的方式并不常见，因为他实现起来更加复杂，若需要了解AIDL的详情，请参考后续文章。</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>(1)Extending the Binder class</h3>
+
+<p>Note: 这种方法仅仅适合client与service在同一个程序与process中的情况。这种情况是最常见的。例如，如果你的音乐程序需要bind到一个activity，并且想使得播放音乐在后台。(<em>实际上，大多数情况下，播放音乐程序的service都需要与其他process的组件进行bind，所以这种方式extend Binder类的方式只适合简单的播放需求</em>)</p>
+
+<ul>
+<li><p>实现步骤</p>
+
+<ul>
+<li>In your service, create an instance of Binder that either:Return this instance of Binder from the onBind() callback method.
+
+<ul>
+<li>contains public methods that the client can call</li>
+<li>returns the current Service instance, which has public methods the client can call</li>
+<li>or, returns an instance of another class hosted by the service with public methods the client can call</li>
+</ul>
+</li>
+<li>Return this instance of Binder from the onBind() callback method.</li>
+<li>In the client, receive the Binder from the onServiceConnected() callback method and make calls to the bound service using the methods provided.</li>
+</ul>
+</li>
+<li><p>Service端代码示例：</p></li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">LocalService</span> <span class="kd">extends</span> <span class="n">Service</span><span class="o">{</span>
+</span><span class='line'>    <span class="c1">// Binder given to clients</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">final</span> <span class="n">IBinder</span> <span class="n">mBinder</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LocalBinder</span><span class="o">();</span>
+</span><span class='line'>    <span class="c1">// Random number generator</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">final</span> <span class="n">Random</span> <span class="n">mGenerator</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Random</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="cm">/**</span>
+</span><span class='line'><span class="cm">     * Class used for the client Binder.  Because we know this service always</span>
+</span><span class='line'><span class="cm">     * runs in the same process as its clients, we don&#39;t need to deal with IPC.</span>
+</span><span class='line'><span class="cm">     */</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">class</span> <span class="nc">LocalBinder</span> <span class="kd">extends</span> <span class="n">Binder</span><span class="o">{</span>
+</span><span class='line'>        <span class="n">LocalService</span> <span class="nf">getService</span><span class="o">(){</span>
+</span><span class='line'>            <span class="c1">// Return this instance of LocalService so clients can call public methods</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">LocalService</span><span class="o">.</span><span class="na">this</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">IBinder</span> <span class="nf">onBind</span><span class="o">(</span><span class="n">Intent</span> <span class="n">intent</span><span class="o">){</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">mBinder</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="cm">/** method for clients */</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getRandomNumber</span><span class="o">(){</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">mGenerator</span><span class="o">.</span><span class="na">nextInt</span><span class="o">(</span><span class="mi">100</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>Client端代码示例：</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">BindingActivity</span> <span class="kd">extends</span> <span class="n">Activity</span><span class="o">{</span>
+</span><span class='line'>    <span class="n">LocalService</span> <span class="n">mService</span><span class="o">;</span>
+</span><span class='line'>    <span class="kt">boolean</span> <span class="n">mBound</span> <span class="o">=</span><span class="kc">false</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">){</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">onCreate</span><span class="o">(</span><span class="n">savedInstanceState</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">setContentView</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">layout</span><span class="o">.</span><span class="na">main</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onStart</span><span class="o">(){</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">onStart</span><span class="o">();</span>
+</span><span class='line'>        <span class="c1">// Bind to LocalService</span>
+</span><span class='line'>        <span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="k">this</span><span class="o">,</span><span class="n">LocalService</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">bindService</span><span class="o">(</span><span class="n">intent</span><span class="o">,</span> <span class="n">mConnection</span><span class="o">,</span><span class="n">Context</span><span class="o">.</span><span class="na">BIND_AUTO_CREATE</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onStop</span><span class="o">(){</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">onStop</span><span class="o">();</span>
+</span><span class='line'>        <span class="c1">// Unbind from the service</span>
+</span><span class='line'>        <span class="k">if</span><span class="o">(</span><span class="n">mBound</span><span class="o">){</span>
+</span><span class='line'>            <span class="n">unbindService</span><span class="o">(</span><span class="n">mConnection</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">mBound</span> <span class="o">=</span><span class="kc">false</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="cm">/** Called when a button is clicked (the button in the layout file attaches to</span>
+</span><span class='line'><span class="cm">      * this method with the android:onClick attribute) */</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onButtonClick</span><span class="o">(</span><span class="n">View</span> <span class="n">v</span><span class="o">){</span>
+</span><span class='line'>        <span class="k">if</span><span class="o">(</span><span class="n">mBound</span><span class="o">){</span>
+</span><span class='line'>            <span class="c1">// Call a method from the LocalService.</span>
+</span><span class='line'>            <span class="c1">// However, if this call were something that might hang, then this request should</span>
+</span><span class='line'>            <span class="c1">// occur in a separate thread to avoid slowing down the activity performance.</span>
+</span><span class='line'>            <span class="kt">int</span> <span class="n">num</span> <span class="o">=</span> <span class="n">mService</span><span class="o">.</span><span class="na">getRandomNumber</span><span class="o">();</span>
+</span><span class='line'>            <span class="n">Toast</span><span class="o">.</span><span class="na">makeText</span><span class="o">(</span><span class="k">this</span><span class="o">,</span><span class="s">&quot;number: &quot;</span><span class="o">+</span> <span class="n">num</span><span class="o">,</span><span class="n">Toast</span><span class="o">.</span><span class="na">LENGTH_SHORT</span><span class="o">).</span><span class="na">show</span><span class="o">();</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="cm">/** Defines callbacks for service binding, passed to bindService() */</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">ServiceConnection</span> <span class="n">mConnection</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ServiceConnection</span><span class="o">(){</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nd">@Override</span>
+</span><span class='line'>        <span class="n">publicvoid</span> <span class="nf">onServiceConnected</span><span class="o">(</span><span class="n">ComponentName</span> <span class="n">className</span><span class="o">,</span>
+</span><span class='line'>                <span class="n">IBinder</span> <span class="n">service</span><span class="o">){</span>
+</span><span class='line'>            <span class="c1">// We&#39;ve bound to LocalService, cast the IBinder and get LocalService instance</span>
+</span><span class='line'>            <span class="n">LocalBinder</span> <span class="n">binder</span> <span class="o">=(</span><span class="n">LocalBinder</span><span class="o">)</span> <span class="n">service</span><span class="o">;</span>
+</span><span class='line'>            <span class="n">mService</span> <span class="o">=</span> <span class="n">binder</span><span class="o">.</span><span class="na">getService</span><span class="o">();</span>
+</span><span class='line'>            <span class="n">mBound</span> <span class="o">=</span><span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nd">@Override</span>
+</span><span class='line'>        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onServiceDisconnected</span><span class="o">(</span><span class="n">ComponentName</span> <span class="n">arg0</span><span class="o">){</span>
+</span><span class='line'>            <span class="n">mBound</span> <span class="o">=</span><span class="kc">false</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">};</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>(2)Using a Messenger</h3>
+
+<ul>
+<li>这是避免使用AIDL仍然可以实现IPC的一个简便方法。
+
+<ul>
+<li>Service实现一个Handler来接受Client的每一个callback。</li>
+<li>这个Handler用来创建Messenger 对象。</li>
+<li>Messenger 创建一个IBinder对象，Service在onBind方法里面把这个对象返回给客户端。</li>
+<li>客户端使用这个IBinder对象来实例化 Messenger (that references the service&#8217;s Handler), 然后客户端使用这个messager再发送message对象给service。</li>
+<li>Service在它的handler里面接收到每一个Message。</li>
+</ul>
+</li>
+<li>Service代码示例：</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MessengerService</span> <span class="kd">extends</span> <span class="n">Service</span><span class="o">{</span>
+</span><span class='line'>    <span class="cm">/** Command to the service to display a message */</span>
+</span><span class='line'>    <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">MSG_SAY_HELLO</span> <span class="o">=</span><span class="mi">1</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="cm">/**</span>
+</span><span class='line'><span class="cm">     * Handler of incoming messages from clients.</span>
+</span><span class='line'><span class="cm">     */</span>
+</span><span class='line'>    <span class="kd">class</span> <span class="nc">IncomingHandler</span> <span class="kd">extends</span> <span class="n">Handler</span><span class="o">{</span>
+</span><span class='line'>        <span class="nd">@Override</span>
+</span><span class='line'>        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">handleMessage</span><span class="o">(</span><span class="n">Message</span> <span class="n">msg</span><span class="o">){</span>
+</span><span class='line'>            <span class="k">switch</span><span class="o">(</span><span class="n">msg</span><span class="o">.</span><span class="na">what</span><span class="o">){</span>
+</span><span class='line'>                <span class="k">case</span> <span class="nl">MSG_SAY_HELLO:</span>
+</span><span class='line'>                    <span class="n">Toast</span><span class="o">.</span><span class="na">makeText</span><span class="o">(</span><span class="n">getApplicationContext</span><span class="o">(),</span><span class="s">&quot;hello!&quot;</span><span class="o">,</span><span class="n">Toast</span><span class="o">.</span><span class="na">LENGTH_SHORT</span><span class="o">).</span><span class="na">show</span><span class="o">();</span>
+</span><span class='line'>                    <span class="k">break</span><span class="o">;</span>
+</span><span class='line'>                <span class="k">default</span><span class="o">:</span>
+</span><span class='line'>                    <span class="kd">super</span><span class="o">.</span><span class="na">handleMessage</span><span class="o">(</span><span class="n">msg</span><span class="o">);</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="cm">/**</span>
+</span><span class='line'><span class="cm">     * Target we publish for clients to send messages to IncomingHandler.</span>
+</span><span class='line'><span class="cm">     */</span>
+</span><span class='line'>    <span class="kd">final</span> <span class="n">Messenger</span> <span class="n">mMessenger</span> <span class="o">=</span><span class="k">new</span> <span class="n">Messenger</span><span class="o">(</span><span class="n">newIncomingHandler</span><span class="o">());</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="cm">/**</span>
+</span><span class='line'><span class="cm">     * When binding to the service, we return an interface to our messenger</span>
+</span><span class='line'><span class="cm">     * for sending messages to the service.</span>
+</span><span class='line'><span class="cm">     */</span>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">IBinder</span> <span class="nf">onBind</span><span class="o">(</span><span class="n">Intent</span> <span class="n">intent</span><span class="o">){</span>
+</span><span class='line'>        <span class="n">Toast</span><span class="o">.</span><span class="na">makeText</span><span class="o">(</span><span class="n">getApplicationContext</span><span class="o">(),</span><span class="s">&quot;binding&quot;</span><span class="o">,</span><span class="n">Toast</span><span class="o">.</span><span class="na">LENGTH_SHORT</span><span class="o">).</span><span class="na">show</span><span class="o">();</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">mMessenger</span><span class="o">.</span><span class="na">getBinder</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>Client端代码</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ActivityMessenger</span> <span class="kd">extends</span> <span class="n">Activity</span><span class="o">{</span>
+</span><span class='line'>    <span class="cm">/** Messenger for communicating with the service. */</span>
+</span><span class='line'>    <span class="n">Messenger</span> <span class="n">mService</span> <span class="o">=</span><span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="cm">/** Flag indicating whether we have called bind on the service. */</span>
+</span><span class='line'>    <span class="kt">boolean</span> <span class="n">mBound</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="cm">/**</span>
+</span><span class='line'><span class="cm">     * Class for interacting with the main interface of the service.</span>
+</span><span class='line'><span class="cm">     */</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">ServiceConnection</span> <span class="n">mConnection</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ServiceConnection</span><span class="o">(){</span>
+</span><span class='line'>        <span class="n">publicvoid</span> <span class="nf">onServiceConnected</span><span class="o">(</span><span class="n">ComponentName</span> <span class="n">className</span><span class="o">,</span><span class="n">IBinder</span> <span class="n">service</span><span class="o">){</span>
+</span><span class='line'>            <span class="c1">// This is called when the connection with the service has been</span>
+</span><span class='line'>            <span class="c1">// established, giving us the object we can use to</span>
+</span><span class='line'>            <span class="c1">// interact with the service.  We are communicating with the</span>
+</span><span class='line'>            <span class="c1">// service using a Messenger, so here we get a client-side</span>
+</span><span class='line'>            <span class="c1">// representation of that from the raw IBinder object.</span>
+</span><span class='line'>            <span class="n">mService</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Messenger</span><span class="o">(</span><span class="n">service</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">mBound</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onServiceDisconnected</span><span class="o">(</span><span class="n">ComponentName</span> <span class="n">className</span><span class="o">){</span>
+</span><span class='line'>            <span class="c1">// This is called when the connection with the service has been</span>
+</span><span class='line'>            <span class="c1">// unexpectedly disconnected -- that is, its process crashed.</span>
+</span><span class='line'>            <span class="n">mService</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>            <span class="n">mBound</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">};</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">sayHello</span><span class="o">(</span><span class="n">View</span> <span class="n">v</span><span class="o">){</span>
+</span><span class='line'>        <span class="k">if</span><span class="o">(!</span><span class="n">mBound</span><span class="o">)</span> <span class="k">return</span><span class="o">;</span>
+</span><span class='line'>        <span class="c1">// Create and send a message to the service, using a supported &#39;what&#39; value</span>
+</span><span class='line'>        <span class="n">Message</span> <span class="n">msg</span> <span class="o">=</span> <span class="n">Message</span><span class="o">.</span><span class="na">obtain</span><span class="o">(</span><span class="kc">null</span><span class="o">,</span><span class="n">MessengerService</span><span class="o">.</span><span class="na">MSG_SAY_HELLO</span><span class="o">,</span><span class="mi">0</span><span class="o">,</span><span class="mi">0</span><span class="o">);</span>
+</span><span class='line'>        <span class="k">try</span><span class="o">{</span>
+</span><span class='line'>            <span class="n">mService</span><span class="o">.</span><span class="na">send</span><span class="o">(</span><span class="n">msg</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span><span class="k">catch</span><span class="o">(</span><span class="n">RemoteException</span> <span class="n">e</span><span class="o">){</span>
+</span><span class='line'>            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">){</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">onCreate</span><span class="o">(</span><span class="n">savedInstanceState</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">setContentView</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">layout</span><span class="o">.</span><span class="na">main</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onStart</span><span class="o">(){</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">onStart</span><span class="o">();</span>
+</span><span class='line'>        <span class="c1">// Bind to the service</span>
+</span><span class='line'>        <span class="n">bindService</span><span class="o">(</span><span class="n">newIntent</span><span class="o">(</span><span class="k">this</span><span class="o">,</span><span class="n">MessengerService</span><span class="o">.</span><span class="na">class</span><span class="o">),</span> <span class="n">mConnection</span><span class="o">,</span>
+</span><span class='line'>            <span class="n">Context</span><span class="o">.</span><span class="na">BIND_AUTO_CREATE</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onStop</span><span class="o">(){</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">onStop</span><span class="o">();</span>
+</span><span class='line'>        <span class="c1">// Unbind from the service</span>
+</span><span class='line'>        <span class="k">if</span><span class="o">(</span><span class="n">mBound</span><span class="o">){</span>
+</span><span class='line'>            <span class="n">unbindService</span><span class="o">(</span><span class="n">mConnection</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">mBound</span> <span class="o">=</span><span class="kc">false</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>请注意：上面并没有演示Service接收到Client的Msg之后，如何再与Client进行交互的。如果想了解更多请看Demo Source Code:<a href="http://developer.android.com/resources/samples/ApiDemos/src/com/example/android/apis/app/MessengerService.html">MessengerService.java</a> (service) and <a href="http://developer.android.com/resources/samples/ApiDemos/src/com/example/android/apis/app/MessengerServiceActivities.html">MessengerServiceActivities.java</a> (client) samples.</li>
+</ul>
+
+
+<h3>(3)AIDL:关于这部分内容，请看下一篇文章</h3>
+
+<ul>
+<li><strong>使用Messager与AIDL的对比：</strong>
+
+<ul>
+<li>如果想要IPC,使用Messager要比AIDL更简单，只是AIDL可以处理并发的情况，更加复杂一点。</li>
+<li>对于大多数App来说，都不需要处理多线程并发的问题，所以使用Messager会更简单一点。每次处理一个message。</li>
+<li>如果你的Service需要是多线程的，那么需要使用AIDL。(<em>有多个bind对象，他们可能会同时发出request</em>)</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>绑定到Service</h2>
+
+<ul>
+<li>因为Binding的操作是异步（asynchronous）的， bindService() 会立即返回，并不携带IBinder对象返回给Client。为了接收到IBinder对象，客户端需要创建一个 ServiceConnection 来接收它。</li>
+<li>Note: 只有activities, services, and content providers 可以bind到service，你不可以从broadcast receiver里面去做bind service的操作。</li>
+<li>为了实现Bind到Service，你需要做以下的事情：
+
+<ul>
+<li>Implement ServiceConnection.需要重写下面两个方法
+
+<ul>
+<li>onServiceConnected()： 系统会在connected上的时候call到这个方法。</li>
+<li>onServiceDisconnected()： 只有在serivce被异常终结时才会call到这个方法，正常的unbind不会call这里。</li>
+</ul>
+</li>
+<li>当系统call了onServiceConnected（）之后，你可以开始使用定义好的接口去呼叫service。</li>
+<li>想要与service解绑，可以执行 unbindService()。</li>
+</ul>
+</li>
+<li>Additional notes:
+
+<ul>
+<li>你应该总是去捕获 DeadObjectException ，当connection被破坏时会抛出这个异常。</li>
+<li>对象都是跨process引用的。</li>
+<li>你应该成对的使用bind与unbind。例如
+
+<ul>
+<li>如果你不想在activity不可见的时候再与service进行交互，需要在activity的onStart里面进行bind，在onStop里面去unbind。</li>
+<li>如果想在activity不可见时，仍然进行交互，那么在onDestory里面再去做unbind。</li>
+</ul>
+</li>
+<li>请不要在activity的onResume与onPause里面去做bind与unbind，这两个activity的状态切换太频繁，不适合用来做与service的交互。</li>
+</ul>
+</li>
+</ul>
+
+
+<h4>管理Bound Service的Lifecycle</h4>
+
+<ul>
+<li>如果这个service是一个单纯的bound service(不是started与bound的混合体)，那么Android系统会自动去管理它的lifecycle。(当所有的client都unbind时，系统kill这个service)。</li>
+<li>如果你实现了onStartCommand()方法，那么这个service就被认为是started类型的，那么即使所有的client都unbind了，那么还是需要通过stopSelf或者stopService的方式来停止这个service。</li>
+<li>另外，如果你的service是started类型的，并且还可以接受bind操作。那么当系统执行你的 onUnbind() 方法时，如果你想在Client下次bind上service的时候系统去call onRebind（而不是重新call onBind），你可以选择在onUnbind里面去return true。 在 onRebind() 会返回void，但是client仍然会在onServiceConnected里面接受到IBinder。</li>
+</ul>
+
+
+<p><img src="/images/articles/service_binding_tree_lifecycle.png" alt="service_binding_tree_lifecycle.png" /></p>
+
+<hr />
+
+<p><strong>文章学习自<a href="http://developer.android.com/guide/components/bound-services.html">http://developer.android.com/guide/components/bound-services.html</a></strong><br/>
+<strong>转载请注明出自<a href="http:://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢</strong></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Kesen Hoo</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-18T22:30:00+08:00" pubdate data-updated="true">Feb 18<span>th</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/android/'>Android</a>, <a class='category' href='/blog/categories/android-note/'>Android:Note</a>
+  
+</span>
+
+
+    </p>
+    
+    
+      <div class="sharing">
+  
+  
+  
+  
+	<!--JiaThis Button BEGIN -->
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_renren"></a>
+	<a class="jiathis_button_douban"></a>
+	<a class="jiathis_button_xiaoyou"></a>
+	<a class="jiathis_button_fb"></a>
+	<a class="jiathis_button_twitter"></a>
+	<a class="jiathis_button_linkedin"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1342501457879302" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+  
+</div>
+
+    
+    <br></br>
+    <!-- End: Add By @kesen -->
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/02/04/android-notes-00-services/" title="Previous Post: Android Notes 00 - Services">&laquo; Android Notes 00 - Services</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2013/02/19/android-notes-02-aidl/" title="Next Post: Android Notes 02 - AIDL">Android Notes 02 - AIDL &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - Kesen Hoo -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'kesenhoo';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://kesenhoo.github.com/blog/2013/02/18/android-notes-01-bound-services/';
+        var disqus_url = 'http://kesenhoo.github.com/blog/2013/02/18/android-notes-01-bound-services/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

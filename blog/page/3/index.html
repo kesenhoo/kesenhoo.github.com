@@ -1,0 +1,433 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>四方城</title>
+  <meta name="author" content="Kesen Hoo">
+
+  
+  <meta name="description" content="在Android process之间不能用通常的方式去访问彼此的内存数据。 他们把需要传递的数据解析成基础对象，使得系统能够识别并处理这些对象。因为这个处理过程很难写，所以Android使用AIDL来解决这个问题。
+在定义AIDL接口之前，请意识到call这些接口是direct function &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://kesenhoo.github.com/blog/page/3/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="四方城" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-37679268-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">四方城</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:kesenhoo.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div class="blog-index">
+  
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/02/19/android-notes-02-aidl/">Android Notes 02 - AIDL</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-19T21:18:00+08:00" pubdate data-updated="true">Feb 19<span>th</span>, 2013</time>
+        
+         | <a href="/blog/2013/02/19/android-notes-02-aidl/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><ul>
+<li>在Android process之间不能用通常的方式去访问彼此的内存数据。 他们把需要传递的数据解析成基础对象，使得系统能够识别并处理这些对象。因为这个处理过程很难写，所以Android使用AIDL来解决这个问题。</li>
+<li>在定义AIDL接口之前，请意识到call这些接口是direct function call。 请不要认为这些call 接口的行为是发生在另外一个线程里面的。具体的不同因这个调用是发生在local process还是remote process而异。
+
+<ul>
+<li>发生在local process里面的调用会跑在这个local process的thread里面。如果这是你的主UI线程，那么AIDL接口的调用也会发生在这个UI thread里面。如果这是发生在另外一个thread，那么调用会发生在service里面。因此，如果仅仅是发生在local process的调用，则你可以完全控制这些调用，当然这样的话，也就不需要用AIDL了。因为你完全可以使用Bound Service的第一种方式去实现。</li>
+<li>发生在remote process里面的调用是会跑在你自己的process所维护的一个thread pool里面。那么你需要注意可能会在同一时刻接受到多个请求。所以AIDL的操作需要做到thread-safe。(<em>每次请求，都会交给Service，在线程池里面启动一个thread去执行那些请求，所以那些方法需要是线程安全的</em>)</li>
+<li>oneway关键字改变了remote call的行为。当使用这个关键字时，remote call不会被阻塞住，它仅仅是发送交互数据后再立即返回。IBinder thread pool 之后会把它当作一个通常的remote call呼叫。</li>
+</ul>
+</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/02/19/android-notes-02-aidl/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/02/18/android-notes-01-bound-services/">Android Notes 01 - Bound Services</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-18T22:30:00+08:00" pubdate data-updated="true">Feb 18<span>th</span>, 2013</time>
+        
+         | <a href="/blog/2013/02/18/android-notes-01-bound-services/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><ul>
+<li>一个bound的service是C/S的接口。它允许其他组件绑定到service,发送请求，接收回应并执行IPC。通常是需要给其他程序组件提供服务。
+
+<ul>
+<li>A bound service allows other components to bind to it, in order to interact with it and perform interprocess communication。</li>
+<li>A bound service is destroyed once all clients unbind, unless the service was also started。</li>
+</ul>
+</li>
+<li>客户端通过执行 bindService()绑定到service。这样的话，客户端需要实现一个ServiceConnection, 它可以监视与service的连接状态。bindService() 并不会有返回值，但是Android系统会在client与service连接上时，执行onServiceConnected() 的callback。在这个回调方法里面传递IBinder给client用来与service进行交互。</li>
+<li>前面提到可以有多个Client同时bind到service。然而，系统只会在第一个client做绑定时才会执行service的onBind() 方法。对于随后需要绑定的客户端，系统会直接传递同一个 IBinder 对象给Client，而不是去再次执行onBind方法。(<em>那么也就是onBind方法只会被执行一次</em>)</li>
+<li>通常来说，Music程序需要实现service的两种方式，这样既可以在activity被销毁之后(<em>假设只实现bound的方式的话，这个时候，unbind了，Music会停止</em>)音乐可以继续播放，当重新进入activity时又会重新bind上。这刚好验证了下面的说法：</li>
+<li>如果一个service既可以started与bound。当一个service是started的，系统并不会在所有的Client都unbind之后去杀死这个service，我们需要显示的去停止这个service，通过stopSelf或者stopService的方式。</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/02/18/android-notes-01-bound-services/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/02/04/android-notes-00-services/">Android Notes 00 - Services</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-04T18:37:00+08:00" pubdate data-updated="true">Feb 4<span>th</span>, 2013</time>
+        
+         | <a href="/blog/2013/02/04/android-notes-00-services/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>概要</h2>
+
+<ul>
+<li>Service是一个可以在后台长时间进行工作的一个程序组件。这个组件并没有提供UI。其他的程序组件可以Start一个Service，并且可以在用户切换到另外一个程序的时候继续工作。另外，某个组件可以Bind到一个Service上，并与他进行交互，甚至是进行IPC操作。例如，一个Service可以处理网络交互，播放音乐，执行I/O操作，或者与Content Provider进行交互，他们都是在后台的。
+
+<ul>
+<li>Service可以跑在后台进行工作，即使用户在切换到另外一个程序。</li>
+<li>Service可以允许其他组件与它进行Bind，从而进行IPC操作。</li>
+<li>Service默认是跑在host程序的main thread。</li>
+</ul>
+</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/02/04/android-notes-00-services/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/12/20/android-training-course-index/">Android Training系列课程索引</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-20T01:04:00+08:00" pubdate data-updated="true">Dec 20<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/12/20/android-training-course-index/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img src="/images/articles/android_trainning.jpg"></p>
+
+<p>下面是我在<a href="http://blog.csdn.net/kesenhoo">CSDN博客</a>中开的专栏，分享一下！欢迎交流!<br/>
+学习了Android有段时间了，感觉还是官方的英文资料学习起来收获最大。之前看了很多Android Dev Guide里面的文章，也写过几篇文章，可惜没有坚持下去。这次学习官方培训课程，决定把自己所学与大家一起分享，写的不好的地方还请多多指教，多多支持，谢谢！</p>
+
+<h1>基础部分</h1>
+
+<h3>(00)Building Your First App</h3>
+
+<p>这部分相对简单，翻译起来又比较繁琐，需要的请<a href="http://developer.android.com/training/basics/firstapp/index.html">点击这里</a>查看原文。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/12/20/android-training-course-index/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/12/20/hi/">Hello, World</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-20T00:57:00+08:00" pubdate data-updated="true">Dec 20<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/12/20/hi/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img src="/images/articles/hello_world.jpg"></p>
+
+<p>Hi.This is my first post. <strong>By markdown.</strong></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  <div class="pagination">
+    
+      <a class="prev" href="/blog/page/4/">&larr; Older</a>
+    
+    <a href="/blog/archives">Blog Archives</a>
+    
+    <a class="next" href="/blog/page/2/">Newer &rarr;</a>
+    
+  </div>
+</div>
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-4/">Android Training UI - 创建自定义的Views(Lesson 4 - 优化Views)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-3/">Android Training UI - 创建自定义的Views(Lesson 3 - 处理View的交互性)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-2/">Android Training UI - 创建自定义的Views(Lesson 2 - 自定义Drawing)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-1/">Android Training UI - 创建自定义的Views(Lesson 1 - 创建一个View类)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-0/">Android Training UI - 创建自定义的Views(Lesson 0 - 章节概览)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/05/19/android-training-displaying-bitmaps-efficiently-lesson-4/">Android Training Graphics - 高效地显示Bitmap(Lesson 4 - 优化Bitmap的内存使用)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/04/20/android-notes-05-task-and-back-stack/">Android Notes 05 - Tasks and Back Stack</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/04/12/android-notes-04-intent-and-intentFilter/">Android Notes 04 - Intents and Intent Filters</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/04/06/android-training-performance-tips/">Android Training Performance - 性能优化小技巧</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/03/31/android-notes-03-process-and-thread/">Android Notes 03 - Process and Thread</a>
+      </li>
+    
+  </ul>
+</section>
+
+  
+</aside>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - Kesen Hoo -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'kesenhoo';
+      
+        
+        var disqus_script = 'count.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

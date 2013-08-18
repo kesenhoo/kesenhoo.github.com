@@ -1,0 +1,495 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Android Training 04 - 保存数据(Lesson 2 - 保存到文件) - 四方城</title>
+  <meta name="author" content="Kesen Hoo">
+
+  
+  <meta name="description" content="Android使用与其他平台类似的基于磁盘文件系统(disk-based file systems)。这节课会描述如何在Android文件系统上使用 File 的读写APIs。File 对象非常适合用来读写那种流式顺序的数据。例如，很适合用来读写图片文件或者是网络中交换的数据。 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://kesenhoo.github.com/blog/2012/11/29/android-training-04-saving-data-lesson-2/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="四方城" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-37679268-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   class="no-sidebar"  >
+  <header role="banner"><hgroup>
+  <h1><a href="/">四方城</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:kesenhoo.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Android Training 04 - 保存数据(Lesson 2 - 保存到文件)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-11-29T20:37:00+08:00" pubdate data-updated="true">Nov 29<span>th</span>, 2012</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Android使用与其他平台类似的基于磁盘文件系统(disk-based file systems)。这节课会描述如何在Android文件系统上使用 <a href="http://developer.android.com/reference/java/io/File.html">File</a> 的读写APIs。File 对象非常适合用来读写那种流式顺序的数据。例如，很适合用来读写图片文件或者是网络中交换的数据。这节课会演示在app中如何执行基本的文件操作任务。假定你已经对linux的文件系统与java.io中标准的I/O APIs有一定认识。</p>
+
+<!-- more -->
+
+
+<h2>Choose Internal or External Storage[选择Internal还是External存储]</h2>
+
+<p>所有的Android设备都有两个文件存储区域：&#8221;internal&#8221; 与 &#8220;external&#8221; 存储。 那两个名称来自与早先的Android系统中，那个时候大多数的设备都内置了不可变的内存（internal storage)，然后再加上一个类似SD card（external storage）这样可以卸载的存储部件。后来有一些设备把&#8221;internal&#8221; 与 &#8220;external&#8221; 的部分都做成不可卸载的内置存储了，虽然如此，但是这一整块还是从逻辑上有被划分为&#8221;internal&#8221;与&#8221;external&#8221;的。只是现在不再以是否可以卸载来区分了。 下面列出了两者的区别：</p>
+
+<ul>
+<li><p><strong>Internal storage:</strong></p>
+
+<ul>
+<li>总是可用的</li>
+<li>这里的文件默认是只能被你的app所访问的。</li>
+<li>当用户卸载你的app的时候，系统会把internal里面的相关文件都清除干净。</li>
+<li>Internal是在你想确保不被用户与其他app所访问的最佳存储区域。</li>
+</ul>
+</li>
+<li><p><strong>External storage:</strong></p>
+
+<ul>
+<li>并不总是可用的，因为用户可以选择把这部分作为USB存储模式，这样就不可以访问了。</li>
+<li>是大家都可以访问的，因此保存到这里的文件是失去访问控制权限的。</li>
+<li>当用户卸载你的app时，系统仅仅会删除external根目录（getExternalFilesDir()）下的相关文件。</li>
+<li>External是在你不需要严格的访问权限并且你希望这些文件能够被其他app所共享或者是允许用户通过电脑访问时的最佳存储区域。</li>
+</ul>
+</li>
+</ul>
+
+
+<p><strong>Tip:</strong> 尽管app是默认被安装到internal storage的，你还是可以通过在程序的manifest文件中声明android:installLocation 属性来指定程序也可以被安装到external storage。当某个程序的安装文件很大，用户会倾向这个程序能够提供安装到external storage的选项。更多安装信息，请参考<a href="http://developer.android.com/guide/topics/data/install-location.html">App Install Location</a>。</p>
+
+<h2>obtain Permissions for External Storage [获取External存储的权限]</h2>
+
+<p>为了写数据到external storage, 你必须在你的manifest文件中请求<a href="http://developer.android.com/reference/android/Manifest.permission.html#WRITE_EXTERNAL_STORAGE">WRITE_EXTERNAL_STORAGE</a>权限：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;manifest</span> <span class="err">...</span><span class="nt">&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;uses-permission</span> <span class="na">android:name=</span><span class="s">&quot;android.permission.WRITE_EXTERNAL_STORAGE&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>    ...
+</span><span class='line'><span class="nt">&lt;/manifest&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>Caution:</strong>目前，所有的apps都可以在不指定<strong>写</strong>的权限下做<strong>读</strong>external storage的动作。但是，这会在以后的版本中被修正。如果你的app需要<strong>读</strong>的权限(不是写), 那么你需要声明 <a href="http://developer.android.com/reference/android/Manifest.permission.html#READ_EXTERNAL_STORAGE">READ_EXTERNAL_STORAGE</a> 权限。为了确保你的app能够在正常工作，你需要现在就声明读权限。但是，如果你的程序有声明<strong>写</strong>的权限，那么就默认有了<strong>读</strong>的权限。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;manifest</span> <span class="err">...</span><span class="nt">&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;uses-permission</span> <span class="na">android:name=</span><span class="s">&quot;android.permission.READ_EXTERNAL_STORAGE&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>    ...
+</span><span class='line'><span class="nt">&lt;/manifest&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>对于internal storage，你不需要声明任何权限，因为你的程序默认就有读写程序目录下的文件的权限。</p>
+
+<h2>Save a File on Internal Storage[保存文件到Internal Storage]</h2>
+
+<p>当保存文件到internal storage时，你可以通过执行下面两个方法之一来获取合适的目录作为File的对象：</p>
+
+<ul>
+<li><strong>getFilesDir()</strong> : 返回一个 File ，代表了你的app的internal目录。</li>
+<li><strong>getCacheDir()</strong> : 返回一个 File ，代表了你的app的internal缓存目录。请确保这个目录下的文件在一旦不再需要的时候能够马上被删除，还有请给予一个合理的大小，例如1MB 。如果系统的内存不够，会自行选择删除缓存文件。为了在那些目录下创建一个新的文件，你可以使用 File() 构造器，如下：</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">File</span> <span class="n">file</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">context</span><span class="o">.</span><span class="na">getFilesDir</span><span class="o">(),</span> <span class="n">filename</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>同样，你也可以执行<a href="http://developer.android.com/reference/android/content/Context.html#openFileOutput(java.lang.String,%20int">openFileOutput()</a>) 来获取一个 FileOutputStream 用来写文件到internal目录。如下：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">String</span> <span class="n">filename</span> <span class="o">=</span> <span class="s">&quot;myfile&quot;</span><span class="o">;</span>
+</span><span class='line'><span class="n">String</span> <span class="n">string</span> <span class="o">=</span> <span class="s">&quot;Hello world!&quot;</span><span class="o">;</span>
+</span><span class='line'><span class="n">FileOutputStream</span> <span class="n">outputStream</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">outputStream</span> <span class="o">=</span> <span class="n">openFileOutput</span><span class="o">(</span><span class="n">filename</span><span class="o">,</span> <span class="n">Context</span><span class="o">.</span><span class="na">MODE_PRIVATE</span><span class="o">);</span>
+</span><span class='line'>  <span class="n">outputStream</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">string</span><span class="o">.</span><span class="na">getBytes</span><span class="o">());</span>
+</span><span class='line'>  <span class="n">outputStream</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+</span><span class='line'><span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果，你需要缓存一些文件，你可以使用<a href="http://developer.android.com/reference/java/io/File.html#createTempFile(java.lang.String,%20java.lang.String">createTempFile()</a>)。例如：下面的方法从URL中抽取了一个文件名，然后再创建了一个以这个文件名命名的文件。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'> <span class="kd">public</span> <span class="n">File</span> <span class="nf">getTempFile</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="n">String</span> <span class="n">url</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">File</span> <span class="n">file</span><span class="o">;</span>
+</span><span class='line'>    <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">String</span> <span class="n">fileName</span> <span class="o">=</span> <span class="n">Uri</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="n">url</span><span class="o">).</span><span class="na">getLastPathSegment</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">file</span> <span class="o">=</span> <span class="n">File</span><span class="o">.</span><span class="na">createTempFile</span><span class="o">(</span><span class="n">fileName</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="n">context</span><span class="o">.</span><span class="na">getCacheDir</span><span class="o">());</span>
+</span><span class='line'>    <span class="k">catch</span> <span class="o">(</span><span class="n">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// Error while creating file</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">file</span><span class="o">;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>Note:</strong> 你的app的internal storage 目录是以你的app的包名作为标识存放在Android文件系统的特定目录下[data/data/com.example.xx]。 从技术上讲，如果你设置文件为可读的，那么其他app就可以读取你的internal文件。然而，其他app需要知道你的包名与文件名。若是你没有设置为可读或者可写，其他app是没有办法读写的。因此只要你使用<a href="http://developer.android.com/reference/android/content/Context.html#MODE_PRIVATE">MODE_PRIVATE</a> ，那么这些文件就不可能被其他app所访问。</p>
+
+<h2>Save a File on External Storage [保存文件到External Storage]</h2>
+
+<p>因为external storage可能是不可用的，那么你应该在访问之前去检查是否可用。你可以通过执行 getExternalStorageState() 来查询external storage的状态。如果返回的状态是MEDIA_MOUNTED, 那么你可以读写。示例如下：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'> <span class="cm">/* Checks if external storage is available for read and write */</span>
+</span><span class='line'><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isExternalStorageWritable</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">String</span> <span class="n">state</span> <span class="o">=</span> <span class="n">Environment</span><span class="o">.</span><span class="na">getExternalStorageState</span><span class="o">();</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">Environment</span><span class="o">.</span><span class="na">MEDIA_MOUNTED</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">state</span><span class="o">))</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="k">return</span> <span class="kc">false</span><span class="o">;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/* Checks if external storage is available to at least read */</span>
+</span><span class='line'><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isExternalStorageReadable</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">String</span> <span class="n">state</span> <span class="o">=</span> <span class="n">Environment</span><span class="o">.</span><span class="na">getExternalStorageState</span><span class="o">();</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">Environment</span><span class="o">.</span><span class="na">MEDIA_MOUNTED</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">state</span><span class="o">)</span> <span class="o">||</span>
+</span><span class='line'>        <span class="n">Environment</span><span class="o">.</span><span class="na">MEDIA_MOUNTED_READ_ONLY</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">state</span><span class="o">))</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="k">return</span> <span class="kc">false</span><span class="o">;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>尽管external storage对与用户与其他app是可修改的，那么你可能会保存下面两种类型的文件。
+* <strong>Public files</strong> :这些文件对与用户与其他app来说是public的，当用户卸载你的app时，这些文件应该保留。例如，那些被你的app拍摄的图片或者下载的文件。
+* <strong>Private files</strong>: 这些文件应该是被你的app所拥有的，它们应该在你的app被卸载时删除掉。尽管那些文件从技术上可以被用户与其他app所访问，实际上那些文件对于其他app是没有意义的。所以，当用户卸载你的app时，系统会删除你的app的private目录。例如，那些被你的app下载的缓存文件。</p>
+
+<p>如果你想要保存文件为public形式的，请使用<a href="http://developer.android.com/reference/android/os/Environment.html#getExternalStoragePublicDirectory(java.lang.String">getExternalStoragePublicDirectory()</a>)方法来获取一个 File 对象来表示存储在external storage的目录。这个方法会需要你带有一个特定的参数来指定这些public的文件类型，以便于与其他public文件进行分类。参数类型包括<a href="http://developer.android.com/reference/android/os/Environment.html#DIRECTORY_MUSIC">DIRECTORY_MUSIC</a> 或者 <a href="http://developer.android.com/reference/android/os/Environment.html#DIRECTORY_PICTURES">DIRECTORY_PICTURES</a>. 如下:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="n">File</span> <span class="nf">getAlbumStorageDir</span><span class="o">(</span><span class="n">String</span> <span class="n">albumName</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="c1">// Get the directory for the user&#39;s public pictures directory. </span>
+</span><span class='line'>    <span class="n">File</span> <span class="n">file</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">Environment</span><span class="o">.</span><span class="na">getExternalStoragePublicDirectory</span><span class="o">(</span>
+</span><span class='line'>            <span class="n">Environment</span><span class="o">.</span><span class="na">DIRECTORY_PICTURES</span><span class="o">),</span> <span class="n">albumName</span><span class="o">);</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(!</span><span class="n">file</span><span class="o">.</span><span class="na">mkdirs</span><span class="o">())</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">Log</span><span class="o">.</span><span class="na">e</span><span class="o">(</span><span class="n">LOG_TAG</span><span class="o">,</span> <span class="s">&quot;Directory not created&quot;</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">file</span><span class="o">;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果你想要保存文件为私有的方式，你可以通过执行<a href="http://developer.android.com/reference/android/content/Context.html#getExternalFilesDir(java.lang.String">getExternalFilesDir()</a>) 来获取相应的目录，并且传递一个指示文件类型的参数。每一个以这种方式创建的目录都会被添加到external storage封装你的app目录下的参数文件夹下（如下则是albumName）。这下面的文件会在用户卸载你的app时被系统删除。如下示例：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="n">File</span> <span class="nf">getAlbumStorageDir</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="n">String</span> <span class="n">albumName</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="c1">// Get the directory for the app&#39;s private pictures directory. </span>
+</span><span class='line'>    <span class="n">File</span> <span class="n">file</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">context</span><span class="o">.</span><span class="na">getExternalFilesDir</span><span class="o">(</span>
+</span><span class='line'>            <span class="n">Environment</span><span class="o">.</span><span class="na">DIRECTORY_PICTURES</span><span class="o">),</span> <span class="n">albumName</span><span class="o">);</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(!</span><span class="n">file</span><span class="o">.</span><span class="na">mkdirs</span><span class="o">())</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">Log</span><span class="o">.</span><span class="na">e</span><span class="o">(</span><span class="n">LOG_TAG</span><span class="o">,</span> <span class="s">&quot;Directory not created&quot;</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">file</span><span class="o">;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果刚开始的时候，没有预定义的子目录存放你的文件，你可以在 getExternalFilesDir()方法中传递 null. 它会返回你的app在external storage下的private的根目录。</p>
+
+<p>请记住， getExternalFilesDir() 方法会创建的目录会在app被卸载时被系统删除。如果你的文件想在app被删除时仍然保留，请使用getExternalStoragePublicDirectory().</p>
+
+<p>不管你是使用 getExternalStoragePublicDirectory() 来存储可以共享的文件，还是使用 getExternalFilesDir() 来储存那些对与你的app来说是私有的文件，有一点很重要，那就是你要使用那些类似DIRECTORY_PICTURES 的API的常量。那些目录类型参数可以确保那些文件被系统正确的对待。例如，那些以DIRECTORY_RINGTONES 类型保存的文件就会被系统的media scanner认为是ringtone而不是音乐。</p>
+
+<h2>Query Free Space[查询剩余空间]</h2>
+
+<p>如果你事先知道你想要保存的文件大小，你可以通过执行<a href="http://developer.android.com/reference/java/io/File.html#getFreeSpace(">getFreeSpace()</a>) or <a href="http://developer.android.com/reference/java/io/File.html#getTotalSpace(">getTotalSpace()</a>) 来判断是否有足够的空间来保存文件，从而避免发生IOException。那些方法提供了当前可用的空间还有存储系统的总容量。</p>
+
+<p>然而，系统并不会授权你写入通过getFreeSpace().查询到的容量文件， 如果查询的剩余容易比你的文件大小多几MB，或者说文件系统使用率还不足90%，这样则可以继续进行写的操作，否则你最好不要写进去。</p>
+
+<p><strong>Note:</strong>你并没有强制要求在写文件之前一定有要去检查剩余容量。你可以尝试先做写的动作，然后通过捕获 IOException 。这种做法仅适合于你并不知道你想要写的文件的确切大小。</p>
+
+<h2>Delete a File [删除文件]</h2>
+
+<p>你应该在不需要使用某些文件的时候，删除它。删除文件最直接的方法是直接执行文件的 delete() 方法。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">myFile</span><span class="o">.</span><span class="na">delete</span><span class="o">();</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果文件是保存在internal storage，你可以通过 Context 来访问并通过执行deleteFile()进行删除</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">myContext</span><span class="o">.</span><span class="na">deleteFile</span><span class="o">(</span><span class="n">fileName</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>Note:</strong> 当用户卸载你的app时，android系统会删除下面的文件：</p>
+
+<ul>
+<li>所有保存到internal storage的文件。</li>
+<li>所有使用getExternalFilesDir()方式保存在external storage的文件<br/>
+然而，你应该手动删除所有通过 getCacheDir() 方式创建的缓存文件，还有那些通常来说不会再用的文件。</li>
+</ul>
+
+
+<hr />
+
+<p><strong>学习自：<a href="http://developer.android.com/training/basics/data-storage/files.html">http://developer.android.com/training/basics/data-storage/files.html</a>，请多指教，谢谢！</strong><br/>
+<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Kesen Hoo</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-11-29T20:37:00+08:00" pubdate data-updated="true">Nov 29<span>th</span>, 2012</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/android/'>Android</a>, <a class='category' href='/blog/categories/android-training/'>Android:Training</a>
+  
+</span>
+
+
+    </p>
+    
+    
+      <div class="sharing">
+  
+  
+  
+  
+	<!--JiaThis Button BEGIN -->
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_renren"></a>
+	<a class="jiathis_button_douban"></a>
+	<a class="jiathis_button_xiaoyou"></a>
+	<a class="jiathis_button_fb"></a>
+	<a class="jiathis_button_twitter"></a>
+	<a class="jiathis_button_linkedin"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1342501457879302" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+  
+</div>
+
+    
+    <br></br>
+    <!-- End: Add By @kesen -->
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/11/29/android-training-04-saving-data-lesson-1/" title="Previous Post: Android Training 04 - 保存数据(Lesson 1 - 保存Key-Value)">&laquo; Android Training 04 - 保存数据(Lesson 1 - 保存Key-Value)</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2012/11/30/android-training-04-saving-data-lesson-3/" title="Next Post: Android Training 04 - 保存数据(Lesson 3 - 保存到SQLite)">Android Training 04 - 保存数据(Lesson 3 - 保存到SQLite) &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - Kesen Hoo -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'kesenhoo';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://kesenhoo.github.com/blog/2012/11/29/android-training-04-saving-data-lesson-2/';
+        var disqus_url = 'http://kesenhoo.github.com/blog/2012/11/29/android-training-04-saving-data-lesson-2/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
