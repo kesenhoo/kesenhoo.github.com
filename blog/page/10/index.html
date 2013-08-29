@@ -9,8 +9,9 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="用户在播放音乐的时候有多个选择，可以使用内置的扬声器，有线耳机或者是支持A2DP的蓝牙耳机。
-【补充：A2DP全名是Advanced Audio Distribution Profile 蓝牙音频传输模型协定! A2DP是能够采用耳机内的芯片来堆栈数据，达到声音的高清晰度。 &hellip;">
+  <meta name="description" content="在这一章，我们将学习为了最小化某些操作对电量的影响是如何处理下载，网络连接，尤其是无线电连接的。
+下面几节课会演示了如何使用缓存caching，轮询polling，预取prefetching等技术来计划与执行下载操作。
+我们还会学习无线电波的power-use属性配置是如何影响我们对于在何时， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -76,6 +77,66 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/03/25/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-1/">Android Training Connectivity - 优化下载效率(Lesson 1 - 用有效率的网络访问方式来优化下载)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-25T16:54:00+08:00" pubdate data-updated="true">Mar 25<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/03/25/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-1/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>在这一章，我们将学习为了最小化某些操作对电量的影响是如何处理下载，网络连接，尤其是无线电连接的。
+下面几节课会演示了如何使用缓存caching，轮询polling，预取prefetching等技术来计划与执行下载操作。
+我们还会学习无线电波的power-use属性配置是如何影响我们对于在何时，用什么，以何种方式来传输数据的选择。
+当然这些选择是为了最小化对电池寿命的影响。</p>
+
+<p><strong>Dependencies and prerequisites</strong><br/>
+Android 2.0 (API Level 5) or higher</p>
+
+<p><strong>You should also read</strong><br/>
+<a href="http://developer.android.com/training/monitoring-device-state/index.html">Optimizing Battery Life</a></p>
+
+<h2>Lessons</h2>
+
+<ul>
+<li><strong>Optimizing Downloads for Efficient Network Access[使用有效的网络连接方式来最优化下载]</strong><br/>
+This lesson introduces the wireless radio state machine, explains how your app’s connectivity model interacts with it, and how you can minimize your data connection and use prefetching and bundling to minimize the battery drain associated with your data transfers.</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/03/25/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-1/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -256,57 +317,6 @@
   
     <footer>
       <a rel="full-article" href="/blog/2012/03/21/android-training-02-supporting-different-device-lesson-3/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/03/20/android-training-02-supporting-different-device-lesson-2/">Android Training 02 - 适配不同的屏幕(Lesson 2 - 适配不同屏幕密度)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-20T20:32:00+08:00" pubdate data-updated="true">Mar 20<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/03/20/android-training-02-supporting-different-device-lesson-2/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>Supporting Different Densities</h1>
-
-<p>上一篇文章和大家分享了如何适配不同大小的屏幕，有个概念需要提前弄清楚，屏幕大的不一定就分辨率高，详细请看下面的内容。<br/>
-This lesson shows you how to support different screen densities by providing different resources and using resolution-independent units of measurements.<br/>
-我们需要通过提供不同的resources来support不同的屏幕密度，使用一种独立与分辨率的测量单元来表示（也就是dp）</p>
-
-<h2>Use Density-independent Pixels[使用设备独立像素dp/sp]</h2>
-
-<p>前一节，我们就提到过，一定要避免使用绝对pixels(像素)的方式来设计layout的大小或者距离，因为不同的的屏幕有不同的像素密度，所以相同的像素在不同的设备上物理大小会有区别。通常我们都会在需要的时候使用dp，或者sp来表示大小</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/03/20/android-training-02-supporting-different-device-lesson-2/">Read on &rarr;</a>
     </footer>
   
 
