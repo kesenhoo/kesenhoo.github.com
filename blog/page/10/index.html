@@ -134,6 +134,56 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-4/">Android Training Connectivity - 优化下载效率(Lesson 4 - 根据网络类型来切换下载模式)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-26T00:00:00+08:00" pubdate data-updated="true">Mar 26<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-4/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Modifying your Download Patterns Based on the Connectivity Type</h2>
+
+<p>并不是所有的网络类型(Wi-Fi,3G,2G,etc)对电量的消耗是同等的。不仅仅Wi-Fi电波比无线电波消耗的电量要少很多，而且不同的无线电波(3G,2G,LTE……)也存在使用不同电量的区别。</p>
+
+<h2>1.Use Wi-Fi[使用Wi-Fi]</h2>
+
+<p>在大多数情况下，Wi-Fi电波会在使用相对较低的电量的情况下提供一个相对较大的带宽。因此，我们需要努力争取尽量使用Wi-Fi来传递数据。
+我们可以使用Broadcast Receiver来监听当网络连接切换为Wi-Fi，这个时候我们可以进行大量的数据传递操作，例如下载，执行定时的更新操作，甚至是在这个时候加大更新的频率。这些内容都可以在前面的课程中找到。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-4/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2012/03/25/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-1/">Android Training Connectivity - 优化下载效率(Lesson 1 - 用有效率的网络访问方式来优化下载)</a></h1>
     
     
@@ -272,54 +322,6 @@ This lesson introduces the wireless radio state machine, explains how your app�
   
     <footer>
       <a rel="full-article" href="/blog/2012/03/22/android-training-multimedia-managing-audio-playback-lesson-2/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/03/21/android-training-multimedia-managing-audio-playback-lesson-1/">Android Training Multimedia - 音频播放(Lesson 1 - 控制app的音量与播放)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-21T23:27:00+08:00" pubdate data-updated="true">Mar 21<span>st</span>, 2012</time>
-        
-         | <a href="/blog/2012/03/21/android-training-multimedia-managing-audio-playback-lesson-1/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>如果你的App在播放音频，显然用户能够以预期的方式来控制音频是很重要的。为了保证好的用户体验，同样App能够获取音频焦点是很重要的，这样才能确保不会在同一时刻出现多个App的声音。在学习这个课程后，你将能够创建对硬件音量按钮进行响应的App，当按下音量按钮的时候需要获取到当前音频的焦点，然后以适当的方式改变音量从而进行响应用户的行为。</p>
-
-<hr />
-
-<p>一个好的用户体验是可预期可控的。如果App是在播放音频，那么显然我们需要做到能够通过硬件按钮，软件按钮，蓝牙耳麦等来控制音量。
-同样的，我们需要能够进行play, stop, pause, skip, and previous等动作，并且进行对应的响应。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/03/21/android-training-multimedia-managing-audio-playback-lesson-1/">Read on &rarr;</a>
     </footer>
   
 
