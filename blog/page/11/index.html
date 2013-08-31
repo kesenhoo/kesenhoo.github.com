@@ -9,7 +9,8 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="如果你的App在播放音频，显然用户能够以预期的方式来控制音频是很重要的。为了保证好的用户体验，同样App能够获取音频焦点是很重要的，这样才能确保不会在同一时刻出现多个App的声音。在学习这个课程后，你将能够创建对硬件音量按钮进行响应的App，当按下音量按钮的时候需要获取到当前音频的焦点， &hellip;">
+  <meta name="description" content="用户在播放音乐的时候有多个选择，可以使用内置的扬声器，有线耳机或者是支持A2DP的蓝牙耳机。
+【补充：A2DP全名是Advanced Audio Distribution Profile 蓝牙音频传输模型协定! A2DP是能够采用耳机内的芯片来堆栈数据，达到声音的高清晰度。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +76,95 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/03/23/android-training-multimedia-managing-audio-playback-lesson-3/">Android Training Multimedia - 音频播放(Lesson 3 - 音频设备的相关问题)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-23T15:28:00+08:00" pubdate data-updated="true">Mar 23<span>rd</span>, 2012</time>
+        
+         | <a href="/blog/2012/03/23/android-training-multimedia-managing-audio-playback-lesson-3/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>用户在播放音乐的时候有多个选择，可以使用内置的扬声器，有线耳机或者是支持A2DP的蓝牙耳机。
+【补充：A2DP全名是Advanced Audio Distribution Profile 蓝牙音频传输模型协定! A2DP是能够采用耳机内的芯片来堆栈数据，达到声音的高清晰度。有A2DP的耳机就是蓝牙立体声耳机。声音能达到44.1kHz，一般的耳机只能达到8kHz。如果手机支持蓝牙，只要装载A2DP协议，就能使用A2DP耳机了。还有消费者看到技术参数提到蓝牙V1.0 V1.1 V1.2 V2.0——这些是指蓝牙的技术版本，是指通过蓝牙传输的速度，他们是否支持A2DP具体要看蓝牙产品制造商是否使用这个技术。来自<a href="http://baike.baidu.com/view/551149.htm">百度百科</a>】</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/03/23/android-training-multimedia-managing-audio-playback-lesson-3/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/03/22/android-training-multimedia-managing-audio-playback-lesson-2/">Android Training Multimedia - 音频播放(Lesson 2 - 管理音频焦点Audio Focus)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-22T23:16:00+08:00" pubdate data-updated="true">Mar 22<span>nd</span>, 2012</time>
+        
+         | <a href="/blog/2012/03/22/android-training-multimedia-managing-audio-playback-lesson-2/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>很多App都可以播放音频，因此在播放前如何获取到音频焦点就显得很重要了，这样可以避免同时出现多个声音，Android使用audio focus来节制音频的播放，仅仅是获取到audio focus的App才能够播放音频。</p>
+
+<p>在App开始播放音频之前，它需要经过发出请求[request]->接受请求[receive]->音频焦点锁定[Audio Focus]的过程。同样，它需要知道如何监听失去音频焦点[lose of audio focus]的事件并进行合适的响应。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/03/22/android-training-multimedia-managing-audio-playback-lesson-2/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -223,74 +313,9 @@ This lesson shows you how to support different screen densities by providing dif
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/03/16/android-training-02-supporting-different-device-lesson-1/">Android Training 02 - 适配不同的屏幕(Lesson 1 - 支持不同的屏幕大小)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-16T21:09:00+08:00" pubdate data-updated="true">Mar 16<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/03/16/android-training-02-supporting-different-device-lesson-1/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><strong>Android设备屏幕不一，为了更好的用户体验，我们必须做适配不同屏幕的操作</strong></p>
-
-<ul>
-<li>Dependencies and prerequisites<br/>
-Android 1.6 or higher (2.1+ for the sample app)<br/>
-Basic knowledge of Activities and Fragment<br/>
-Experience building an Android User Interface<br/>
-Several features require the use of the support library</li>
-<li>You should also read<br/>
-<a href="http://developer.android.com/guide/practices/screens_support.html">Supporting Multiple Screens</a></li>
-<li>Download the sample app<br/>
-<a href="http://developer.android.com/shareables/training/NewsReader.zip">NewsReader.zip</a></li>
-</ul>
-
-
-<h1>Supporting Different Screen Sizes</h1>
-
-<h2>Use &#8220;wrap_content&#8221; and &#8220;match_parent&#8221;[使用wrap_content与match_parent]</h2>
-
-<ul>
-<li>wrap_content：宽高根据内容大小调整</li>
-<li>match_parent：伸展至与父控件一致<br/>
-显然我们不能hard-coded（写死大小）</li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/03/16/android-training-02-supporting-different-device-lesson-1/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
+    
+      <a class="prev" href="/blog/page/12/">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
