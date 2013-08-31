@@ -9,9 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="在这一章，我们将学习为了最小化某些操作对电量的影响是如何处理下载，网络连接，尤其是无线电连接的。
-下面几节课会演示了如何使用缓存caching，轮询polling，预取prefetching等技术来计划与执行下载操作。
-我们还会学习无线电波的power-use属性配置是如何影响我们对于在何时， &hellip;">
+  <meta name="description" content="Minimizing the Effect of Regular Updates[最小化定期更新操作的副作用] 最佳的定时更新频率是不确定的，通常由设备状态，网络连接状态，用户行为与用户定义明确的偏好而决定。 Optimizing Battery Life这一章有讨论如何根据设备状态来修改更新频率 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +75,59 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-2/">Android Training Connectivity - 优化下载效率(Lesson 2 - 调整更新的频率[C2DM与退避算法])</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-26T16:51:00+08:00" pubdate data-updated="true">Mar 26<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-2/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Minimizing the Effect of Regular Updates[最小化定期更新操作的副作用]</h2>
+
+<p>最佳的定时更新频率是不确定的，通常由设备状态，网络连接状态，用户行为与用户定义明确的偏好而决定。</p>
+
+<p><a href="http://developer.android.com/training/monitoring-device-state/index.html">Optimizing Battery Life</a>这一章有讨论如何根据设备状态来修改更新频率。里面介绍了当断开网络连接的时候去关闭后台服务，在电量比较低的时候减少更新的频率。</p>
+
+<p>这一课会介绍更新频率是多少才会使得更新操作对无线电状态机的影响最小。(C2DM与指数退避算法的使用)</p>
+
+<h2>Use Google Cloud Messaging as an Alternative to Polling[使用C2DM作为轮询方式之一]</h2>
+
+<p>关于<code>Android Cloud to Device Messaging</code> (C2DM)详情 ,请参考:<a href="http://code.google.com/intl/zh-CN/android/c2dm/">http://code.google.com/intl/zh-CN/android/c2dm/</a></p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-2/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -269,54 +320,6 @@ This lesson introduces the wireless radio state machine, explains how your app�
   
     <footer>
       <a rel="full-article" href="/blog/2012/03/21/android-training-multimedia-managing-audio-playback-lesson-1/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/03/21/android-training-02-supporting-different-device-lesson-3/">Android Training 02 - 适配不同的屏幕(Lesson 3 - 实现可适配的UI流程)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-21T14:38:00+08:00" pubdate data-updated="true">Mar 21<span>st</span>, 2012</time>
-        
-         | <a href="/blog/2012/03/21/android-training-02-supporting-different-device-lesson-3/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>Implementing Adaptative UI Flows</h1>
-
-<p>根据显示不同的layout，我们需要设计不同的UI flow。比如如果你的AP是dual-pane的模式，点击左边list的item的时候，会在右边直接显示对应的内容，如果是single-pane的模式，那么需要跳转到另外一个Activity来显示对于的内容</p>
-
-<p><strong>注：</strong>个人认为目前很多AP都会针对比较大的屏幕设计一个对于的版本，比如QQ Pad版，QQ HD版，QQ Pad Mini版，这些信息可以看出来大多数情况，还是不太会采取同一份代码适应所有屏幕的方案。
-这一课主要就是讲如何在运行的时候判断当前的布局，从而让AP选择不同行为。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/03/21/android-training-02-supporting-different-device-lesson-3/">Read on &rarr;</a>
     </footer>
   
 

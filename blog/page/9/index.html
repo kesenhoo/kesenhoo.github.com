@@ -270,7 +270,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-2/">Android Training Connectivity - 优化下载效率(Lesson 2 - 调整更新的频率[C2DM与退避算法])</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-3/">Android Training Connectivity - 优化下载效率(Lesson 3 - 使用缓存来避免重复下载)</a></h1>
     
     
       <p class="meta">
@@ -286,32 +286,28 @@
   
 
 
-<time datetime="2012-03-26T16:51:00+08:00" pubdate data-updated="true">Mar 26<span>th</span>, 2012</time>
+<time datetime="2012-03-26T17:59:00+08:00" pubdate data-updated="true">Mar 26<span>th</span>, 2012</time>
         
-         | <a href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-2/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-3/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h2>Minimizing the Effect of Regular Updates[最小化定期更新操作的副作用]</h2>
+  <div class="entry-content"><h2>Redundant Downloads are Redundant[重复下载是冗余的]</h2>
 
-<p>最佳的定时更新频率是不确定的，通常由设备状态，网络连接状态，用户行为与用户定义明确的偏好而决定。</p>
+<p>减少下载的最基本方法是仅仅下载那些你需要的。从数据的角度看，我们可以通过传递类似上次更新时间这样的参数来制定查询数据的条件。同样，在下载图片的时候，server那边最好能够减少图片的大小，而不是让我们下载完整大小的图片。</p>
 
-<p><a href="http://developer.android.com/training/monitoring-device-state/index.html">Optimizing Battery Life</a>这一章有讨论如何根据设备状态来修改更新频率。里面介绍了当断开网络连接的时候去关闭后台服务，在电量比较低的时候减少更新的频率。</p>
+<h2>1.Cache Files Locally[缓存文件到本地]</h2>
 
-<p>这一课会介绍更新频率是多少才会使得更新操作对无线电状态机的影响最小。(C2DM与指数退避算法的使用)</p>
-
-<h2>Use Google Cloud Messaging as an Alternative to Polling[使用C2DM作为轮询方式之一]</h2>
-
-<p>关于<code>Android Cloud to Device Messaging</code> (C2DM)详情 ,请参考:<a href="http://code.google.com/intl/zh-CN/android/c2dm/">http://code.google.com/intl/zh-CN/android/c2dm/</a></p>
+<p>避免下载重复的数据是很重要的。可以使用缓存机制来处理这个问题。缓存static的资源，例如完整的图片。这些缓存的资源需要分开存放。为了保证app不会因为缓存而导致显示的是旧数据，请从缓存中获取最新的数据，当数据过期的时候，会提示进行刷新。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-2/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-3/">Read on &rarr;</a>
     </footer>
   
 
