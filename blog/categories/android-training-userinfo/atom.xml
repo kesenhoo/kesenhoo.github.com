@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Android:Training:UserInfo | 四方城]]></title>
+  <link href="http://kesenhoo.github.com/blog/categories/android-training-userinfo/atom.xml" rel="self"/>
+  <link href="http://kesenhoo.github.com/"/>
+  <updated>2013-08-31T17:01:17+08:00</updated>
+  <id>http://kesenhoo.github.com/</id>
+  <author>
+    <name><![CDATA[Kesen Hoo]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training UserInfo - 记住用户的信息(Lesson 3 - 创建自定义的账户类型)]]></title>
+    <link href="http://kesenhoo.github.com/blog/2012/03/29/android-training-userInfo-remembering-users-lesson-3/"/>
+    <updated>2012-03-29T12:37:00+08:00</updated>
+    <id>http://kesenhoo.github.com/blog/2012/03/29/android-training-userInfo-remembering-users-lesson-3</id>
+    <content type="html"><![CDATA[<h2>Creating a Custom Account Type</h2>
+
+<p>到目前为止，我们讨论了如何使用Google APIs。但是我们应该不仅仅是只需要Google的服务而已，比如增加QQ账户，Sina账户等。那么这一课会讲述如何创建一个自定义的账户，并且像内置的账户那样进行工作。</p>
+
+<h2>(1)Implement Your Custom Account Code</h2>
+
+<p>首先需要做的是从用户那获取证书[输入账户与密码后进行验证],这个过程也许只是简单的显示一个对话框来输入用户名与密码，或者是比较复杂的操作来获取证书，比如一次性的密码口令或者精密的扫描。不管怎么样，你需要实现下面的操作:</p>
+
+<!-- More -->
+
+
+<ul>
+<li>从用户那收集账户与密码。</li>
+<li>连接到server进行验证。</li>
+<li>把获得的证书存储到设备上。</li>
+</ul>
+
+
+<p>上面三个请求通常能够在一个Activity上实现，我们叫这个Acitivity为Authenticator activity。
+因为需要与AccountManager系统进行交互，authenticator activity需要比通常的activity多做一些特定的请求。为了使得这个过程简单化，Android framework提供了一个<a href="http://developer.android.com/reference/android/accounts/AccountAuthenticatorActivity.html">AccountAuthenticatorActivity</a>来给用户进行扩展并创建自定义的authenticator。</p>
+
+<p>前面两个操作，都需要你来完成操作[邀请用户输入信息并进行验证]，第三个步骤通常像下面一样
+<code>java
+final Account account = new Account(mUsername, your_account_type);  
+mAccountManager.addAccountExplicitly(account, mPassword, null);  
+</code></p>
+
+<h2>(2)Be Smart About Security!</h2>
+
+<p>请注意，AccountManager里面的账户信息是没有加密的。他仅仅是使用plain text的方式[明文方式]来存储那些账户信息。在大多数设备上，那不是特别的严重，因为他存储那些信息在数据库中，而这些数据只能是有ROOT权限的才能访问。但是在已经有root权限的设备上，证书信息可以通过adb来被任何人进行访问。</p>
+
+<p>请注意这个问题，你不应该使用AccountManager.addAccountExplicitly()方法来传递真实的密码。你应该使用暗文加密的方式来存储账户信息。[显然安全性是很重要的，最近爆发的大量密码泄露事件又重新提醒了开发者需要注意这些问题，听说之前CSDN就是明文存储了用户的账户信息]</p>
+
+<p>请注意：当面对安全性问题的时候，请遵守<strong>"Mythbusters</strong>(流言终结者:美国某个科普节目)”守则：Don't Try This at Home(请不要在家里模仿尝试)。【这是一个习语：a phrase used in the media to advise against imitating a dangerous activity,详细请参考：http://baike.baidu.com/view/725048.htm】，在现实任何一个自定义账户之前请向专业的安全顾问进行咨询。
+[最后一句话，一直不知道怎么理解比较好，还是贴上原文] Now that the security disclaimers are out of the way, it's time to get back to work. You've already implemented the meat of your custom account code; what's left is plumbing.(大概意思应该是说这只是实现密码安全的一小部分，真正如何确保安全好需要做更多深入的研究)</p>
+
+<h2>(3)Extend AbstractAccountAuthenticator</h2>
+
+<p>为了使得AccountManager能够和你的自定义账户进行操作，你需要一个实现AccountManager期待的界面类来处理这个问题。这个类叫做authenticator类。
+最简单的方法是创建一个authenticator类去继承AbstractAccountAuthenticator，并且实现它的抽象方法。如果你学习过前面一课的内容，AbstractAccountAuthenticator的抽象方法与获取account与token的方法有一定的关系。
+实现这个类需要下面一些操作：</p>
+
+<ul>
+<li>首先，需要重写AbstractAccountAuthenticator的7个抽象方法。</li>
+<li>其次，你需要为"android.accounts.AccountAuthenticator"在manifest中增加一个intent filiter。</li>
+<li>最后你需要有两套资源文件，自定义的账户名与图标。</li>
+</ul>
+
+
+<p>你可以在AbstractAccountAuthenticator 文档中找到按部就班的实现方法。在SampleSyncAdapter sample app里面也有一个案例。
+如果你查阅了SampleSyncAdapter的代码，你会发现一些方法里面返回了带有bundle的intent。这个intent是用来启动你自定义authenticator activity的。如果你的authenticator activity需要任何特定初始化的参数，你可以使用intent.putExtra()方法来附带参数。</p>
+
+<h2>(4)Create an Authenticator Service</h2>
+
+<p>现在你已经有了一个authenticator的类，你需要一个让它发挥作用的地方。Account authenticator需要在多个程序中可用，并且在后台程序中运行。因此它需要在运行在一个Service里面。我们叫这个为authenticator service.
+你的authenticator Service可以是非常简单的，它需要做的仅仅是在authenticator的onCreate()里面创建一个instance，并且在onBind()里面调用getIBinder()。在SampleSyncAdapter里面有一个比较好的例子。
+别忘记在manifest里面增加<serivce>标签，并添加intent filiter。
+```xml
+<service ...><br/>
+   <intent-filter></p>
+
+<pre><code>  &lt;action android:name="android.accounts.AccountAuthenticator" /&gt;  
+</code></pre>
+
+<p>   </intent-filter><br/>
+   &lt;meta-data android:name="android.accounts.AccountAuthenticator"</p>
+
+<pre><code>         android:resource="@xml/authenticator" /&gt;  
+</code></pre>
+
+<p></service><br/>
+```</p>
+
+<h2>Distribute Your Service</h2>
+
+<p>你可以到Account &amp; Sync的设置页面去增加一个account。</p>
+
+<p>如果仅仅只有一个app会使用到这个account,这样做就不太好了，你只需要把这个account捆绑到自己app的service里面就可以了。但是如果你想要把自己的account被多个app使用，增加account到Account &amp; Sync里面会是比较好的做法，避免了重复多个绑定到app。</p>
+
+<p>一个解决方案是，把这个Service放在一个特定功能的APK里面。当一个app想要使用你自定义的账户的时候，你可以检查设备看是否你的自定义账户可用。如果不可用，它会引导用户到Google Play上面去下载这种服务。增加账户到Account &amp; Sync，这个操作可能刚开始觉得会比较麻烦，但是比起为每个app重新输入账户与密码显得要要简单些。</p>
+
+<hr />
+
+<p><strong>学习自：<a href="http://developer.android.com/training/id-auth/custom_auth.html">http://developer.android.com/training/id-auth/custom_auth.html</a>，请多指教，谢谢！</strong><br/>
+<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training UserInfo - 记住用户的信息(Lesson 2 - 使用OAuth2来进行身份鉴定)]]></title>
+    <link href="http://kesenhoo.github.com/blog/2012/03/28/android-training-userInfo-remembering-users-lesson-2/"/>
+    <updated>2012-03-28T18:53:00+08:00</updated>
+    <id>http://kesenhoo.github.com/blog/2012/03/28/android-training-userInfo-remembering-users-lesson-2</id>
+    <content type="html"><![CDATA[<h2>Authenticating to OAuth2 Services[使用OAuth2来进行鉴权]</h2>
+
+<p>为了安全的访问线上服务，用户需要在service上进行鉴定，他们需要提供身份的证明。对于一个程序来说，如果是访问第三方的服务，那么这个安全问题就更加复杂。
+【比如，你有个资料在A服务器上，但是你需要在B上面对A里面的数据进行操作，这个时候如果把登入A的帐号与密码给B去直接操作就不够安全，简单的方法是先把A上的资料拿下来，再弄到B上面去，然后B再做操作，这又显得很不方便，就是为了解决这样类似的问题，才诞生了OAuth。关于OAuth2的详情，请参考：<a href="http://oauth.net/2/">http://oauth.net/2/</a>，谢谢！】
+目前行业内解决这种第三方服务身份鉴定的方法是使用OAuth2协议。OAuth2提供了auth token，它代表用户身份与用户对于程序的授权。这一课演示了如何使用OAuth2连接到Google Server。同样在其他支持OAuth2协议的服务上都可以使用类似的方法。</p>
+
+<p>使用OAuth2有利于:</p>
+
+<ul>
+<li>从用户那得到授权，使用账户信息来访问online service。</li>
+<li>对online service进行鉴定，保护用户利益。</li>
+<li>处理认证错误。</li>
+</ul>
+
+
+<!-- More -->
+
+
+<h2>(1)Gather Information[收集信息]</h2>
+
+<p>在开始使用OAuth2之前，你需要获取到下面一些信息:</p>
+
+<ul>
+<li>你想访问的服务地址。</li>
+<li>auth scope，app获取到用来表示操作的权限范围的字串。例如，Google Tasks的read-only的auth scope是View your tasks，但是read-write的auth scope是Manage Your Tasks。</li>
+<li>client id与client secret。用来表示身份的字串。你需要直接从service提供者那边获取那些字串。文章<a href="http://code.google.com/apis/tasks/articles/oauth-and-tasks-on-android.html">Getting Started with the Tasks API and OAuth 2.0 on Android</a>解释了如何使用Google Tasks API来获取那些需要的字串。</li>
+</ul>
+
+
+<h2>(2)Request an Auth Token[请求一个授权口令]</h2>
+
+<p>现在你准备请求一个auth token，下面是请求流程图。</p>
+
+<p><img src="/images/articles/oauth_dance.png" title="Figure 1" alt="oauth_dance.png" /></p>
+
+<p>为了获取到auth token，你首先需要在manifest文件中增加ACCOUNT_MANAGER与INTERNET的权限。
+```xml
+<manifest ... ></p>
+
+<pre><code>&lt;uses-permission android:name="android.permission.ACCOUNT_MANAGER" /&gt;  
+&lt;uses-permission android:name="android.permission.INTERNET" /&gt;  
+...  
+</code></pre>
+
+<p></manifest><br/>
+<code>
+一旦设置好了上面的permissions，你可以使用AccountManager.getAuthToken() 来获取到token。
+值得注意的是：Call [AccountManager](http://developer.android.com/reference/android/accounts/AccountManager.html)里面的方法can be tricky(狡猾的，棘手的)！因为account操作可能包括了网络通信，大多数方法是asynchronous，这意味着不应该把所有的auth操作放在一个方法里面，你需要使用callback机制来实现它。例如：
+</code>java
+AccountManager am = AccountManager.get(this);<br/>
+Bundle options = new Bundle();</p>
+
+<p>am.getAuthToken(</p>
+
+<pre><code>myAccount_,                     // Account retrieved using getAccountsByType()  
+"Manage your tasks",            // Auth scope  
+options,                        // Authenticator-specific options  
+this,                           // Your activity  
+new OnTokenAcquired(),          // Callback called when a token is successfully acquired  
+new Handler(new OnError()));    // Callback called if an error occurs  
+</code></pre>
+
+<p>```
+在上面的例子中，OnTokenAcquired是AccountManagerCallback的子类。在OnTokenAcquired类里面AccountManager会执行run(AccountManagerFuture<Bundle> arg0)方法。如果获取成功，那么token就在Bundle里面。</p>
+
+<p>下面是如何从Bundle中获取token的示例：
+```java
+private class OnTokenAcquired implements AccountManagerCallback<Bundle> {</p>
+
+<pre><code>@Override  
+public void run(AccountManagerFuture&lt;Bundle&gt; result) {  
+    // Get the result of the operation from the AccountManagerFuture.  
+    Bundle bundle = result.getResult();  
+
+    // The token is a named value in the bundle. The name of the value  
+    // is stored in the constant AccountManager.KEY_AUTHTOKEN.  
+    token = bundle.getString(AccountManager.KEY_AUTHTOKEN);  
+    ...  
+}  
+</code></pre>
+
+<p>}
+```<br/>
+如果一切正常，那么Bundle里面会包含KEY_AUTHTOKEN的字段，但是通常事情没有那么顺利。</p>
+
+<h2>(3)Request an Auth Token... Again[再次请求Auth Token]</h2>
+
+<p>你的第一次有可能由于下面的某个原因而导致失败:</p>
+
+<ul>
+<li>设备上的某个错误或者是网络错误导致AccuntManager操作失败。</li>
+<li>用户不授权你的app访问account。</li>
+<li>存储的account证书信息不足以让你访问account。</li>
+<li>在Cache里面的auth token已经过期。</li>
+</ul>
+
+
+<p>程序能简单的处理前两种情况，通常仅仅是显示一个错误信息给用户。如果网络异常或者用户不授权，程序就没有必要接下去操作了。对于后面两种情况稍微有点复杂，通常对于好的程序都应该自动处理那些错误。</p>
+
+<p>第三种情况，没有足够的证书，这些证书是通过前面提到的回调函数返回在bunde里面，是一个使用KEY_INTENT关键字的intent。这是获取token的前提。
+之所以鉴定者返回一个intent是有很多原因的。也许是用户的account过期或者他们存储的证书出错，这个时候可以使用intent来让用户重新登入。也许account需要两个证书，或者他需要激活camera来做某个扫描的动作进而验证。不管到底是因为什么，如果你想要一个有效的token，你需要启动intent来获取token。
+```java
+private class OnTokenAcquired implements AccountManagerCallback<Bundle> {</p>
+
+<pre><code>@Override  
+public void run(AccountManagerFuture&lt;Bundle&gt; result) {  
+    ...  
+    Intent launch = (Intent) result.get(AccountManager.KEY_INTENT);  
+    if (launch != null) {  
+        startActivityForResult(launch, 0);  
+        return;  
+    }  
+}  
+</code></pre>
+
+<p>}<br/>
+```
+请注意例子中使用的是startActivityForResult()，这样我们可以在自己的activity里面通过实现onActivityResult()的方法来获取start intent的结果。这是非常重要的，如果你没有获取返回的结果，那么就无法区分出用户是否成功获得了鉴定。如果result是RRSULT_OK，然后认证者就会更新存储的证书，这样就可以获取到足够的证书，你也可以再次执行AccountManage.getAuthToken()方法来请求新的token。</p>
+
+<p>最后一种情况，token过期，实际上这不是AccountManager的错误。唯一判断token是否过期的方法是把token告诉server，通过server来告知已经过期，但是不断的去线上检查是否过期明显是比较浪费资源的。</p>
+
+<h2>Connect to the Online Service[连接到Online Service]</h2>
+
+<p>下面的例子显示了如何连接到Google server。因为Google使用了行业标准的OAuth2协议，所以这个例子很具有代表性。请记住，尽管每一个Server是不一样的，你仍然可以对特殊的情形进行调整。
+Google APIs需要你为每个请求提供4个值，分别是API key,client ID,client secret与auth key。前面三个可以从Google API的网站上找到，最后一个字段需要你通过执行AccountManager.getAuthToken()方法来获取。当都拿到之后，通过HTTP request来传递那些值给Google Server。
+<code>java
+URL url = new URL("https://www.googleapis.com/tasks/v1/users/@me/lists?key=" + your_api_key);  
+URLConnection conn = (HttpURLConnection) url.openConnection();  
+conn.addRequestProperty("client_id", your client id);  
+conn.addRequestProperty("client_secret", your client secret);  
+conn.setRequestProperty("Authorization", "OAuth " + token);  
+</code>
+如果上面的请求返回HTTP错误代码401，表明你的token被否定了。在最后一部分我们有提到，最通常的错误原因是token过期了，解决这个问题的方法很简单，执行AccountManager.invalidateAuthToken()方法并且在需要的时候重复执行token的请求操作。</p>
+
+<p>因为token过期是如此的常见，并且修复它是那么的简单，许多程序甚至在获取token之前就假定它是过期的，如果server重新生成一个token的花费并不大，我们可以直接刚开始就执行AccountManager.invalidateAuthToken()，这样就省得刚开始需要请求两次。</p>
+
+<p><strong>Ps:oauth2很常见:目前开放平台似乎都是用这个规则来开放自己的账户系统，使用QQ登入，Sina微博帐号登入等等</strong></p>
+
+<hr />
+
+<p><strong>学习自：<a href="http://developer.android.com/training/id-auth/authenticate.html">http://developer.android.com/training/id-auth/authenticate.html</a>，请多指教，谢谢！</strong><br/>
+<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training UserInfo - 记住用户的信息(Lesson 1 - 使用AccountManager来记录用户)]]></title>
+    <link href="http://kesenhoo.github.com/blog/2012/03/27/android-training-userInfo-remembering-users-lesson-1/"/>
+    <updated>2012-03-27T11:12:00+08:00</updated>
+    <id>http://kesenhoo.github.com/blog/2012/03/27/android-training-userInfo-remembering-users-lesson-1</id>
+    <content type="html"><![CDATA[<p><strong>章节概览:Remembering Users</strong></p>
+
+<p>Android用户希望把自己的信息绑定到喜欢的app与设备上，那么使得你的程序更加令人喜爱的一个方法是使得它更加的人性化。Android设备知道你的使用者是谁，他们都使用过哪些服务，在哪里存储了你的数据。在得到你的用户授权的前提下，你可以使用那些信息来使得你的app更加丰富，更加人性化。</p>
+
+<p>在这一章节，你将学习到鉴定用户信息的多种技术，你可以:</p>
+
+<ul>
+<li>通过记住用户账户名来人性化你的appd。</li>
+<li>鉴定用户以确保是否是那个人。</li>
+<li>通过service来获取访问用户线上数据的权限，例如Google APIs。</li>
+<li>增加一个自定义的账户来鉴定自己后台的服务。</li>
+</ul>
+
+
+<!-- More -->
+
+
+<p><strong>Requirements and prerequisites</strong></p>
+
+<ul>
+<li>Android 2.0 (API level 5) or higher</li>
+<li>Experience with <a href="http://developer.android.com/guide/topics/fundamentals/services.html">Services</a></li>
+<li>Experience with <a href="http://oauth.net/2/">OAuth 2.0</a></li>
+</ul>
+
+
+<p><strong>You should also read</strong></p>
+
+<p><a href="http://developer.android.com/resources/samples/SampleSyncAdapter/index.html">SampleSyncAdapter app</a></p>
+
+<p>每个人都很喜欢自己的名字能被人记住。其中最简单，最有效的使得你的app让人喜欢的方法是记住你的用户是谁，特别是当用户升级到一台新的设备或者是在tablet希望能够像在手机上一样使用(存有同样的数据，比如书签等)。但是如何知道用户是谁，如何在新的设备上识别出他们。</p>
+
+<p>对于许多程序来说，可以使用AccountManager APIs来处理上面的问题。在用户授权下，你可以使用AccountManager来获取用户存储在设备上的账户名。</p>
+
+<p>整合用户的账户，这样可以使得你可以做许多事情，例如:</p>
+
+<ul>
+<li>自动填写用户的email地址。</li>
+<li>获取绑定到用户的ID，而不是绑定到设备的。</li>
+</ul>
+
+
+<h2>(1)Determine if AccountManager for You</h2>
+
+<p>程序通常使用下面三个方法之一来尝试记住用户:</p>
+
+<ul>
+<li>(a)通知用户输入用户名.</li>
+<li>(b)取得一个唯一的ID来记住设备.</li>
+<li>(c)从AccountManager取得一个嵌入的账户.</li>
+</ul>
+
+
+<p>选项(a):是有问题的。第一，在进入app之前通知用户来输入些什么，这会使得app不受欢迎[当然需要排除首次登入]，第二，那不能保证用户名的唯一性[可能的前提是说某个app固定显示某个用户的信息，而不需要进行切换。这个理解起来有点怪怪的]。</p>
+
+<p>选项(b):对于用户来说稍微简单点，但是有点投机取巧的味道。更重要的是，这仅仅使得用户只能在某个设备上被识别，当用户升级到新的设备上时，会导致app不再记得那些用户。</p>
+
+<p>选项(c):是比较好的。Account Manager允许你获取存储在用户设备上的账户信息。下面我们会学习到使用AccountManager来记住用户，不管用户有多少的设备，仅仅需要几步额外的操作就可以达到同步目的。
+【老外写文章习惯就是这样，讲某个技术之前，说一大堆为什么选择这个技术，而不是选择其他的方法。这种精神很值得我们学习，先问WHY？而不只立马拿来灌输】</p>
+
+<h2>(2)Decide What Type of Account to Use</h2>
+
+<p>Android设备可以根据许多不同的提供者来存储多个不同类型的账户。当你为了某个账户名而使用AcccountManager进行查询的时候，可以选择使用Account Type来filter。账户类型是一个唯一标识已经发布账户的String。例如，Google账户使用“com.google”，Twitter使用“com.twitter.android.auth.login”。</p>
+
+<h2>(3)Request GET_ACCOUNT permission</h2>
+
+<p>为了获得在设备上所有的账户列表，你的app需要有GET_ACCOUNTS权限，使用<uses-permission>标签在manifest文件中来添加请求权限。
+```xml
+<manifest ... ></p>
+
+<pre><code>&lt;uses-permission android:name="android.permission.GET_ACCOUNTS" /&gt;  
+...  
+</code></pre>
+
+<p></manifest><br/>
+```</p>
+
+<h2>(4)Query AccountManager for a List of Accounts</h2>
+
+<p>一旦你决定需要查询哪些账户了，可以像下面的例子一样来获得一个Account的数组，里面均是与类型符合的账户信息。
+```java
+AccountManager am = AccountManager.get(this); // "this" references the current Context</p>
+
+<p>Account[] accounts = am.getAccountsByType("com.google");<br/>
+```
+如果在数组里面不止一个账户，你需要先呈现出一个对话框来让用户选择其中一个。</p>
+
+<h2>(5)Use the Account Object to Personalize Your App</h2>
+
+<p>Account对象里面包含了账户名(对于Google账户来说是一个邮件地址)。你可以使用这个信息来做不同的事情，例如：</p>
+
+<ul>
+<li>在填写表格的时候给出对应的提示，这样的话用户就不用手动输入完整的账户信息。</li>
+<li>作为你自己线上数据库的使用与个性化信息的关键字。</li>
+</ul>
+
+
+<h2>(6)Decide Whether an Account Name is Enough</h2>
+
+<p>账户名是记住用户的一个好方法，但是Account对象本身并不会保护你的数据或者让你访问除账户名本身之外的任何东西。
+如果你的app需要允许用户到线上访问私人数据，你需要一些更加强大的东西：authentication。
+下一节课会解释如何通过线上服务来鉴定当前用户，如何自定义的一个认证机制，这样使得可以安装自定义的账户。[也就是OAuth2的使用]。</p>
+
+<hr />
+
+<p><strong>学习自：<a href="http://developer.android.com/training/id-auth/identify.html">http://developer.android.com/training/id-auth/identify.html</a>，请多指教，谢谢！</strong><br/>
+<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
+]]></content>
+  </entry>
+  
+</feed>

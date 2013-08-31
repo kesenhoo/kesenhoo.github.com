@@ -62,6 +62,24 @@
     </url>
     <url>
         <loc>
+            http://kesenhoo.github.com/blog/2012/03/27/android-training-userInfo-remembering-users-lesson-1/
+        </loc>
+        <lastmod>2013-08-31T16:59:46+08:00</lastmod>
+    </url>
+    <url>
+        <loc>
+            http://kesenhoo.github.com/blog/2012/03/28/android-training-userInfo-remembering-users-lesson-2/
+        </loc>
+        <lastmod>2013-08-31T17:00:31+08:00</lastmod>
+    </url>
+    <url>
+        <loc>
+            http://kesenhoo.github.com/blog/2012/03/29/android-training-userInfo-remembering-users-lesson-3/
+        </loc>
+        <lastmod>2013-08-31T16:52:40+08:00</lastmod>
+    </url>
+    <url>
+        <loc>
             http://kesenhoo.github.com/blog/2012/03/31/android-training-06-sharing-content-lesson-1/
         </loc>
         <lastmod>2013-08-11T11:49:08+08:00</lastmod>
@@ -324,7 +342,7 @@
     </url>
     <url>
         <loc>http://kesenhoo.github.com/about/</loc>
-        <lastmod>2013-08-31T15:37:15+08:00</lastmod>
+        <lastmod>2013-08-31T17:00:31+08:00</lastmod>
     </url>
     <url>
         <loc>
@@ -334,10 +352,10 @@
     </url>
     <url>
         <loc>http://kesenhoo.github.com/blog/archives/</loc>
-        <lastmod>2013-08-31T15:37:15+08:00</lastmod>
+        <lastmod>2013-08-31T17:00:31+08:00</lastmod>
     </url>
     <url>
         <loc>http://kesenhoo.github.com/</loc>
-        <lastmod>2013-08-31T15:37:15+08:00</lastmod>
+        <lastmod>2013-08-31T17:00:31+08:00</lastmod>
     </url>
 </urlset>
