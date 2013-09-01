@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training Performance - 性能优化小技巧"
+title: "Android Training Performance - 代码性能优化小技巧"
 date: 2013-04-06 18:27
 comments: true
 sidebar: false
