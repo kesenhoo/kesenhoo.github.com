@@ -129,7 +129,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/03/21/android-training-02-supporting-different-device-lesson-3/">Android Training 02 - 适配不同的屏幕(Lesson 3 - 实现可适配的UI流程)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/03/21/android-training-performance-improve-layouts-lesson-4/">Android Training Performance - 提升布局文件的性能(Lesson 4 - 使用ViewHolder来提升ListView的性能)</a></h1>
     
     
       <p class="meta">
@@ -145,27 +145,25 @@
   
 
 
-<time datetime="2012-03-21T14:38:00+08:00" pubdate data-updated="true">Mar 21<span>st</span>, 2012</time>
+<time datetime="2012-03-21T21:20:00+08:00" pubdate data-updated="true">Mar 21<span>st</span>, 2012</time>
         
-         | <a href="/blog/2012/03/21/android-training-02-supporting-different-device-lesson-3/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/03/21/android-training-performance-improve-layouts-lesson-4/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h1>Implementing Adaptative UI Flows</h1>
+  <div class="entry-content"><h2>Making ListView Scrolling Smooth</h2>
 
-<p>根据显示不同的layout，我们需要设计不同的UI flow。比如如果你的AP是dual-pane的模式，点击左边list的item的时候，会在右边直接显示对应的内容，如果是single-pane的模式，那么需要跳转到另外一个Activity来显示对于的内容</p>
-
-<p><strong>注：</strong>个人认为目前很多AP都会针对比较大的屏幕设计一个对于的版本，比如QQ Pad版，QQ HD版，QQ Pad Mini版，这些信息可以看出来大多数情况，还是不太会采取同一份代码适应所有屏幕的方案。
-这一课主要就是讲如何在运行的时候判断当前的布局，从而让AP选择不同行为。</p>
+<p>使得滚动ListView平滑的关键在与保持APP的UI thread与复杂的操作隔离。确保另起一个Thread来处理Disk IO，network access或者SQL access.
+为了测试AP的状态，可以enable <a href="http://developer.android.com/reference/android/os/StrictMode.html">StrictMode</a>.(Android ICS 4.0上已经默认开启了StrickMode)</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/03/21/android-training-02-supporting-different-device-lesson-3/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/03/21/android-training-performance-improve-layouts-lesson-4/">Read on &rarr;</a>
     </footer>
   
 
@@ -177,7 +175,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/03/20/android-training-02-supporting-different-device-lesson-2/">Android Training 02 - 适配不同的屏幕(Lesson 2 - 适配不同屏幕密度)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/03/21/android-training-performance-improve-layouts-lesson-3/">Android Training Performance - 提升布局文件的性能(Lesson 3 - 使用viewStub按需载入视图)</a></h1>
     
     
       <p class="meta">
@@ -193,30 +191,30 @@
   
 
 
-<time datetime="2012-03-20T20:32:00+08:00" pubdate data-updated="true">Mar 20<span>th</span>, 2012</time>
+<time datetime="2012-03-21T18:47:00+08:00" pubdate data-updated="true">Mar 21<span>st</span>, 2012</time>
         
-         | <a href="/blog/2012/03/20/android-training-02-supporting-different-device-lesson-2/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/03/21/android-training-performance-improve-layouts-lesson-3/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h1>Supporting Different Densities</h1>
+  <div class="entry-content"><h2>Loading Views On Demand</h2>
 
-<p>上一篇文章和大家分享了如何适配不同大小的屏幕，有个概念需要提前弄清楚，屏幕大的不一定就分辨率高，详细请看下面的内容。<br/>
-This lesson shows you how to support different screen densities by providing different resources and using resolution-independent units of measurements.<br/>
-我们需要通过提供不同的resources来support不同的屏幕密度，使用一种独立与分辨率的测量单元来表示（也就是dp）</p>
+<p>某些时候，我们需要一些很复杂的视图却仅仅很少用到。如果我们在它仅仅需要的时候再载入，这样可以减少内存的使用并且给用户带来流畅的体验。</p>
 
-<h2>Use Density-independent Pixels[使用设备独立像素dp/sp]</h2>
+<h2>1)Define a ViewStub</h2>
 
-<p>前一节，我们就提到过，一定要避免使用绝对pixels(像素)的方式来设计layout的大小或者距离，因为不同的的屏幕有不同的像素密度，所以相同的像素在不同的设备上物理大小会有区别。通常我们都会在需要的时候使用dp，或者sp来表示大小</p>
+<p><a href="http://developer.android.com/reference/android/view/ViewStub.html">ViewStub</a>是一个轻量级的view，没有占有空间，没有花费draw的资源，也没有参与在任何一个layout的计算与绘制里面。</p>
+
+<p>创建它仅需要很少的系统资源，而且存留在View的层级也是个比较不花费资源的动作。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/03/20/android-training-02-supporting-different-device-lesson-2/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/03/21/android-training-performance-improve-layouts-lesson-3/">Read on &rarr;</a>
     </footer>
   
 
@@ -228,7 +226,7 @@ This lesson shows you how to support different screen densities by providing dif
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/03/16/android-training-02-supporting-different-device-lesson-1/">Android Training 02 - 适配不同的屏幕(Lesson 1 - 支持不同的屏幕大小)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/03/21/android-training-performance-improve-layouts-lesson-2/">Android Training Performance - 提升布局文件的性能(Lesson 2 - 使用include标签重用Layout)</a></h1>
     
     
       <p class="meta">
@@ -244,46 +242,75 @@ This lesson shows you how to support different screen densities by providing dif
   
 
 
-<time datetime="2012-03-16T21:09:00+08:00" pubdate data-updated="true">Mar 16<span>th</span>, 2012</time>
+<time datetime="2012-03-21T18:06:00+08:00" pubdate data-updated="true">Mar 21<span>st</span>, 2012</time>
         
-         | <a href="/blog/2012/03/16/android-training-02-supporting-different-device-lesson-1/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/03/21/android-training-performance-improve-layouts-lesson-2/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p><strong>Android设备屏幕不一，为了更好的用户体验，我们必须做适配不同屏幕的操作</strong></p>
+  <div class="entry-content"><h2>Re-using Layouts with <include/></h2>
 
-<ul>
-<li>Dependencies and prerequisites<br/>
-Android 1.6 or higher (2.1+ for the sample app)<br/>
-Basic knowledge of Activities and Fragment<br/>
-Experience building an Android User Interface<br/>
-Several features require the use of the support library</li>
-<li>You should also read<br/>
-<a href="http://developer.android.com/guide/practices/screens_support.html">Supporting Multiple Screens</a></li>
-<li>Download the sample app<br/>
-<a href="http://developer.android.com/shareables/training/NewsReader.zip">NewsReader.zip</a></li>
-</ul>
+<p>尽管Android提供了很多种小的组件可以重用，我们还需要自定义一些稍微复杂一点的小组件进行重用。我们可以使用<code>&lt;include/&gt;</code> 与 <code>&lt;merge/&gt;</code> 标签来对当前的layout嵌入一些其他的layout.</p>
 
-
-<h1>Supporting Different Screen Sizes</h1>
-
-<h2>Use &#8220;wrap_content&#8221; and &#8220;match_parent&#8221;[使用wrap_content与match_parent]</h2>
-
-<ul>
-<li>wrap_content：宽高根据内容大小调整</li>
-<li>match_parent：伸展至与父控件一致<br/>
-显然我们不能hard-coded（写死大小）</li>
-</ul>
-
+<p>在创建一个稍微复杂一点的layout时，重用layout是个很给力的方法。比如我们需要一个YES/NO的控制栏，包含文字提示的Progress bar。像这种的布局会在很多地方需要重用到.</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/03/16/android-training-02-supporting-different-device-lesson-1/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/03/21/android-training-performance-improve-layouts-lesson-2/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/03/21/android-training-performance-improve-layouts-lesson-1/">Android Training Performance - 提升布局文件的性能(Lesson 1 - 优化布局的层级)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-21T17:14:00+08:00" pubdate data-updated="true">Mar 21<span>st</span>, 2012</time>
+        
+         | <a href="/blog/2012/03/21/android-training-performance-improve-layouts-lesson-1/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Optimizing Layout Hierarchies</h2>
+
+<p>Layout是Android程序影响用户体验最关键的一部分。如果布局文件不好会使得程序比较卡。SDK里面包含了一些工具用来帮助我们发现布局文件的性能问题</p>
+
+<p>使用基本的Layout结构是最有效的。但是，每一个添加到系统的组件都需要初始化，进行布局，绘制的过程。比如，使用在LinearLayout里面使用子组件会导致一个过于deep的层级结构。而且内嵌使用包含layout_weight属性的LinearLayout会在绘制时花费昂贵的系统资源，因为每一个子组件都需要被测量两次。在使用ListView与GridView的时候，这个问题显的尤其重要，因为子组件会重复被创建</p>
+
+<p>这一课我们会学习使用Hierarchy Viewer and Lint 来检查并最优化布局文件。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/03/21/android-training-performance-improve-layouts-lesson-1/">Read on &rarr;</a>
     </footer>
   
 
@@ -291,6 +318,8 @@ Several features require the use of the support library</li>
     </article>
   
   <div class="pagination">
+    
+      <a class="prev" href="/blog/page/13/">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
