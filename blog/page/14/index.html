@@ -9,7 +9,8 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="Implementing Adaptative UI Flows 根据显示不同的layout，我们需要设计不同的UI flow。比如如果你的AP是dual-pane的模式，点击左边list的item的时候，会在右边直接显示对应的内容，如果是single-pane的模式， &hellip;">
+  <meta name="description" content="Supporting Different Densities 上一篇文章和大家分享了如何适配不同大小的屏幕，有个概念需要提前弄清楚，屏幕大的不一定就分辨率高，详细请看下面的内容。
+This lesson shows you how to support different screen &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,54 +76,6 @@
     <div id="content">
       <div class="blog-index">
   
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/03/21/android-training-02-supporting-different-device-lesson-3/">Android Training 02 - 适配不同的屏幕(Lesson 3 - 实现可适配的UI流程)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-21T14:38:00+08:00" pubdate data-updated="true">Mar 21<span>st</span>, 2012</time>
-        
-         | <a href="/blog/2012/03/21/android-training-02-supporting-different-device-lesson-3/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>Implementing Adaptative UI Flows</h1>
-
-<p>根据显示不同的layout，我们需要设计不同的UI flow。比如如果你的AP是dual-pane的模式，点击左边list的item的时候，会在右边直接显示对应的内容，如果是single-pane的模式，那么需要跳转到另外一个Activity来显示对于的内容</p>
-
-<p><strong>注：</strong>个人认为目前很多AP都会针对比较大的屏幕设计一个对于的版本，比如QQ Pad版，QQ HD版，QQ Pad Mini版，这些信息可以看出来大多数情况，还是不太会采取同一份代码适应所有屏幕的方案。
-这一课主要就是讲如何在运行的时候判断当前的布局，从而让AP选择不同行为。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/03/21/android-training-02-supporting-different-device-lesson-3/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
   
   
     <article>
