@@ -244,7 +244,7 @@ This lesson introduces the wireless radio state machine, explains how your app�
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/03/23/android-training-multimedia-managing-audio-playback-lesson-3/">Android Training Multimedia - 音频播放(Lesson 3 - 音频设备的相关问题)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/03/24/android-training-performance-optimiizing-battery-life-lesson-4/">Android Training Performance - 优化电池续航能力(Lesson 4 - 判断并监测网络连接状态)</a></h1>
     
     
       <p class="meta">
@@ -260,23 +260,28 @@ This lesson introduces the wireless radio state machine, explains how your app�
   
 
 
-<time datetime="2012-03-23T15:28:00+08:00" pubdate data-updated="true">Mar 23<span>rd</span>, 2012</time>
+<time datetime="2012-03-24T16:37:00+08:00" pubdate data-updated="true">Mar 24<span>th</span>, 2012</time>
         
-         | <a href="/blog/2012/03/23/android-training-multimedia-managing-audio-playback-lesson-3/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/03/24/android-training-performance-optimiizing-battery-life-lesson-4/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>用户在播放音乐的时候有多个选择，可以使用内置的扬声器，有线耳机或者是支持A2DP的蓝牙耳机。
-【补充：A2DP全名是Advanced Audio Distribution Profile 蓝牙音频传输模型协定! A2DP是能够采用耳机内的芯片来堆栈数据，达到声音的高清晰度。有A2DP的耳机就是蓝牙立体声耳机。声音能达到44.1kHz，一般的耳机只能达到8kHz。如果手机支持蓝牙，只要装载A2DP协议，就能使用A2DP耳机了。还有消费者看到技术参数提到蓝牙V1.0 V1.1 V1.2 V2.0——这些是指蓝牙的技术版本，是指通过蓝牙传输的速度，他们是否支持A2DP具体要看蓝牙产品制造商是否使用这个技术。来自<a href="http://baike.baidu.com/view/551149.htm">百度百科</a>】</p>
+  <div class="entry-content"><h2>Manipulating Broadcast Receivers On Demand[按需操控广播接收者]</h2>
+
+<p>简单的方法是为我们监测的状态创建一个BroadcastReceiver，并在manifest中为每一个状态进行注册监听。然后，每一个Receiver根据当前设备的状态来简单重新安排下一步执行的任务。[这句话感觉理解有点问题]</p>
+
+<p>上面那个方法的副作用是，设备会在每次收到广播都被唤醒，这有点超出期望，因为有些广播是不希望唤醒设备的。</p>
+
+<p>更好的方法是根据程序运行情况开启或者关闭广播接收者。这样的话，那些在manifest中注册的receivers仅仅会在需要的时候才被激活。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/03/23/android-training-multimedia-managing-audio-playback-lesson-3/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/03/24/android-training-performance-optimiizing-battery-life-lesson-4/">Read on &rarr;</a>
     </footer>
   
 
@@ -288,7 +293,7 @@ This lesson introduces the wireless radio state machine, explains how your app�
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/03/22/android-training-multimedia-managing-audio-playback-lesson-2/">Android Training Multimedia - 音频播放(Lesson 2 - 管理音频焦点Audio Focus)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-3/">Android Training Performance - 优化电池续航能力(Lesson 3 - 判断并监测网络连接状态)</a></h1>
     
     
       <p class="meta">
@@ -304,24 +309,28 @@ This lesson introduces the wireless radio state machine, explains how your app�
   
 
 
-<time datetime="2012-03-22T23:16:00+08:00" pubdate data-updated="true">Mar 22<span>nd</span>, 2012</time>
+<time datetime="2012-03-23T21:09:00+08:00" pubdate data-updated="true">Mar 23<span>rd</span>, 2012</time>
         
-         | <a href="/blog/2012/03/22/android-training-multimedia-managing-audio-playback-lesson-2/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-3/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>很多App都可以播放音频，因此在播放前如何获取到音频焦点就显得很重要了，这样可以避免同时出现多个声音，Android使用audio focus来节制音频的播放，仅仅是获取到audio focus的App才能够播放音频。</p>
+  <div class="entry-content"><h2>Determining and Monitoring the Connectivity Status[判断并监测网络连接状态]</h2>
 
-<p>在App开始播放音频之前，它需要经过发出请求[request]->接受请求[receive]->音频焦点锁定[Audio Focus]的过程。同样，它需要知道如何监听失去音频焦点[lose of audio focus]的事件并进行合适的响应。</p>
+<p>通常我们会有一些计划的任务，比如重复闹钟，后台定时启动的任务等。但是如果我们的网络没有连接上，那么就没有必要启动那些需要连接网络的任务。我们可以使用ConnectivityManager来检查是否连接上网络，是何种网络。[通过网络的连接状况改变，相应的改变app的行为，减少无谓的操作，从而延长设备的续航能力]</p>
+
+<h2>1)Determine if You Have an Internet Connection[判断当前是否有网络连接]</h2>
+
+<p>显然如果没有网络连接，那么就没有必要做那些需要联网的事情。下面是一个检查是否有网络连接的例子：</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/03/22/android-training-multimedia-managing-audio-playback-lesson-2/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-3/">Read on &rarr;</a>
     </footer>
   
 
@@ -377,7 +386,7 @@ This lesson introduces the wireless radio state machine, explains how your app�
       </li>
     
       <li class="post">
-        <a href="/blog/2013/04/06/android-training-performance-tips/">Android Training Performance - 性能优化小技巧</a>
+        <a href="/blog/2013/04/06/android-training-performance-tips/">Android Training Performance - 代码性能优化小技巧</a>
       </li>
     
       <li class="post">

@@ -4,7 +4,7 @@
   <title><![CDATA[四方城]]></title>
   <link href="http://kesenhoo.github.com/atom.xml" rel="self"/>
   <link href="http://kesenhoo.github.com/"/>
-  <updated>2013-09-01T17:24:00+08:00</updated>
+  <updated>2013-09-01T18:54:55+08:00</updated>
   <id>http://kesenhoo.github.com/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -1669,7 +1669,7 @@ Flags用来表示，如何启动一个activity(例如，指定activity应该属�
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training Performance - 性能优化小技巧]]></title>
+    <title type="html"><![CDATA[Android Training Performance - 代码性能优化小技巧]]></title>
     <link href="http://kesenhoo.github.com/blog/2013/04/06/android-training-performance-tips/"/>
     <updated>2013-04-06T18:27:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2013/04/06/android-training-performance-tips</id>

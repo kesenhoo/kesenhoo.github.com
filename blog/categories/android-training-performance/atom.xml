@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android:Training:Performance | 四方城]]></title>
   <link href="http://kesenhoo.github.com/blog/categories/android-training-performance/atom.xml" rel="self"/>
   <link href="http://kesenhoo.github.com/"/>
-  <updated>2013-09-01T17:24:00+08:00</updated>
+  <updated>2013-09-01T18:54:55+08:00</updated>
   <id>http://kesenhoo.github.com/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Android Training Performance - 性能优化小技巧]]></title>
+    <title type="html"><![CDATA[Android Training Performance - 代码性能优化小技巧]]></title>
     <link href="http://kesenhoo.github.com/blog/2013/04/06/android-training-performance-tips/"/>
     <updated>2013-04-06T18:27:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2013/04/06/android-training-performance-tips</id>
@@ -209,297 +209,279 @@ Foo$Inner里面有访问外部类的一个变量。这样的做法会给系统�
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training Performance - 提升布局文件的性能(Lesson 4 - 使用ViewHolder来提升ListView的性能)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2012/03/21/android-training-performance-improve-layouts-lesson-4/"/>
-    <updated>2012-03-21T21:20:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2012/03/21/android-training-performance-improve-layouts-lesson-4</id>
-    <content type="html"><![CDATA[<h2>Making ListView Scrolling Smooth</h2>
+    <title type="html"><![CDATA[Android Training Performance - 优化电池续航能力(Lesson 4 - 判断并监测网络连接状态)]]></title>
+    <link href="http://kesenhoo.github.com/blog/2012/03/24/android-training-performance-optimiizing-battery-life-lesson-4/"/>
+    <updated>2012-03-24T16:37:00+08:00</updated>
+    <id>http://kesenhoo.github.com/blog/2012/03/24/android-training-performance-optimiizing-battery-life-lesson-4</id>
+    <content type="html"><![CDATA[<h2>Manipulating Broadcast Receivers On Demand[按需操控广播接收者]</h2>
 
-<p>使得滚动ListView平滑的关键在与保持APP的UI thread与复杂的操作隔离。确保另起一个Thread来处理Disk IO，network access或者SQL access.
-为了测试AP的状态，可以enable <a href="http://developer.android.com/reference/android/os/StrictMode.html">StrictMode</a>.(Android ICS 4.0上已经默认开启了StrickMode)</p>
+<p>简单的方法是为我们监测的状态创建一个BroadcastReceiver，并在manifest中为每一个状态进行注册监听。然后，每一个Receiver根据当前设备的状态来简单重新安排下一步执行的任务。[这句话感觉理解有点问题]</p>
+
+<p>上面那个方法的副作用是，设备会在每次收到广播都被唤醒，这有点超出期望，因为有些广播是不希望唤醒设备的。</p>
+
+<p>更好的方法是根据程序运行情况开启或者关闭广播接收者。这样的话，那些在manifest中注册的receivers仅仅会在需要的时候才被激活。</p>
 
 <!-- More -->
 
 
-<h2>1)Use a Background Thread</h2>
+<h2>1)Toggle and Cascade State Change Receivers to Improve Efficiency[切换是否开启这些状态Receivers来提高效率]</h2>
 
-<p>使用后台线程，这样可以使得UI线程可以专注于描绘UI。大多数时候，AsycnTask实现了一种简单把需要做的事情与main thread隔离的方法。下面是一个例子：
+<p>我们可以使用PackageManager来切换任何一个在mainfest里面定义好的组件的开启状态。
+可以使用下面的方法来开启或者关闭任何一个broadcast receiver:
 ```java
-// Using an AsyncTask to load the slow images in a background thread<br/>
-new AsyncTask&lt;ViewHolder, Void, Bitmap>() {</p>
+ComponentName receiver = new ComponentName(context, myReceiver.class);</p>
 
-<pre><code>private ViewHolder v;  
+<p>PackageManager pm = context.getPackageManager();</p>
 
-@Override  
-protected Bitmap doInBackground(ViewHolder... params) {  
-    v = params[0];  
-    return mFakeImageLoader.getImage();  
-}  
+<p>pm.setComponentEnabledSetting(receiver,</p>
 
-@Override  
-protected void onPostExecute(Bitmap result) {  
-    super.onPostExecute(result);  
-    if (v.position == position) {  
-        // If this item hasn't been recycled already, hide the  
-        // progress and set and show the image  
-        v.progress.setVisibility(View.GONE);  
-        v.icon.setVisibility(View.VISIBLE);  
-        v.icon.setImageBitmap(result);  
-    }  
-}  
-</code></pre>
-
-<p>}.execute(holder);
-```
-从Android 3.0开始，对于AsyncTask有个额外的特色：在多核处理器的情况下，我们可以使用<a href="http://developer.android.com/reference/android/os/AsyncTask.html#executeOnExecutor(java.util.concurrent.Executor,%20Params...">executeOnExecutor()</a>) 来替代execute()，这样系统会根据当前设备的内核数量同时进行多个任务。</p>
-
-<h2>2)Hold View Objects in a View Holder</h2>
-
-<p>你的程序在滚动ListView的时候也许会重复频繁的call findViewById()，这样会降低性能。尽管Adapter会因为View的循环机制返回一个创建好的View。你仍然需要查找到这些组件并更新它，避免这样的重复，我们可以使用ViewHolder的设计模式。</p>
-
-<p>A ViewHolder对象存放每一个View组件于Layout的tag属性中，因此我们可以立即访问tag中的组件从而避免重复call findViewById()。下面是定义了一个ViewHolder的例子：
-<code>java
-static class ViewHolder {  
-  TextView text;  
-  TextView timestamp;  
-  ImageView icon;  
-  ProgressBar progress;  
-  int position;  
-}
-</code><br/>
-这样之后，我们可以填充这个ViewHolder，并且保存到tag field.
-<code>java
-ViewHolder holder = new ViewHolder();  
-holder.icon = (ImageView) convertView.findViewById(R.id.listitem_image);  
-holder.text = (TextView) convertView.findViewById(R.id.listitem_text);  
-holder.timestamp = (TextView) convertView.findViewById(R.id.listitem_timestamp);  
-holder.progress = (ProgressBar) convertView.findViewById(R.id.progress_spinner);  
-convertView.setTag(holder);  
-</code>
-那么我们就可以直接访问里面的数据了，省去了重复查询，提升了性能。</p>
-
-<hr />
-
-<p><strong>文章学习自<a href="http://developer.android.com/training/improving-layouts/smooth-scrolling.html">http://developer.android.com/training/improving-layouts/smooth-scrolling.html
-</a></strong>
-<strong>转载请注明出自<a href="http:://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢</strong></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Training Performance - 提升布局文件的性能(Lesson 3 - 使用viewStub按需载入视图)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2012/03/21/android-training-performance-improve-layouts-lesson-3/"/>
-    <updated>2012-03-21T18:47:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2012/03/21/android-training-performance-improve-layouts-lesson-3</id>
-    <content type="html"><![CDATA[<h2>Loading Views On Demand</h2>
-
-<p>某些时候，我们需要一些很复杂的视图却仅仅很少用到。如果我们在它仅仅需要的时候再载入，这样可以减少内存的使用并且给用户带来流畅的体验。</p>
-
-<h2>1)Define a ViewStub</h2>
-
-<p><a href="http://developer.android.com/reference/android/view/ViewStub.html">ViewStub</a>是一个轻量级的view，没有占有空间，没有花费draw的资源，也没有参与在任何一个layout的计算与绘制里面。</p>
-
-<p>创建它仅需要很少的系统资源，而且存留在View的层级也是个比较不花费资源的动作。</p>
-
-<!-- More -->
-
-
-<p>每一个ViewStub简单的包含一个<code>android:layout</code>的属性来指定待创建的布局文件。</p>
-
-<p>下面是一个包含Progress bar的ViewStub例子，这对于overlay来说是透明的，progress bar仅仅会在需要导入的时候才会可见。
-```xml
-&lt;ViewStub</p>
-
-<pre><code>android:id="@+id/stub_import"  
-android:inflatedId="@+id/panel_import"  
-android:layout="@layout/progress_overlay"  
-android:layout_width="fill_parent"  
-android:layout_height="wrap_content"  
-android:layout_gravity="bottom" /&gt;  
+<pre><code>    PackageManager.COMPONENT_ENABLED_STATE_ENABLED,  
+    PackageManager.DONT_KILL_APP)  
 </code></pre>
 
 <p>```</p>
 
-<h2>2)Load the ViewStub Layout</h2>
+<p>使用这种技术，如果我们判断到网络链接已经断开，那么可以在这个时候关闭除了connectivity-change的之外的所有Receivers。</p>
 
-<p>当你想要载入在ViewStub中定义的布局的时候，可以calling setVisibility(View.VISIBLE) 或者是调用 inflate().
-```java
- ((ViewStub) findViewById(R.id.stub_import)).setVisibility(View.VISIBLE);</p>
+<p>相反的，一旦重新建立网络连接，我们可以停止监听网络链接的改变。而仅仅在执行需要联网的操作之前判断当前网络是否可以用即可。</p>
 
-<p>// or
-View importPanel = ((ViewStub) findViewById(R.id.stub_import)).inflate();
-```
-一旦被设置可见或者被创建，这个ViewStub组件则从View层级中消失，它被创建出来的布局所替代，而且这个布局的ID就是ViewStub里面用android:inflatedId属性所定义的。（用来定义这个ViewStub的ID的属性andoid:id直到被可见才是有效的）。</p>
-
-<p><strong>Note:</strong>ViewStub的一个缺陷是目前并不支持创建包含有<merge>标签的布局文件。更多ViewStub的信息请看：http://developer.android.com/resources/articles/layout-tricks-stubs.html</p>
+<p>你可以使用上面同样的技术来暂缓一个需要带宽的下载操作。可以开启receiver来监听是否连接上Wi-Fi来重新开启下载的操作。</p>
 
 <hr />
 
-<p><strong>文章学习自<a href="http://developer.android.com/training/improving-layouts/loading-ondemand.html">http://developer.android.com/training/improving-layouts/loading-ondemand.html
-</a></strong>
+<p><strong>文章学习自<a href="http://developer.android.com/training/monitoring-device-state/manifest-receivers.html">http://developer.android.com/training/monitoring-device-state/manifest-receivers.html</a></strong>
 <strong>转载请注明出自<a href="http:://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢</strong></p>
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training Performance - 提升布局文件的性能(Lesson 2 - 使用include标签重用Layout)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2012/03/21/android-training-performance-improve-layouts-lesson-2/"/>
-    <updated>2012-03-21T18:06:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2012/03/21/android-training-performance-improve-layouts-lesson-2</id>
-    <content type="html"><![CDATA[<h2>Re-using Layouts with <include/></h2>
+    <title type="html"><![CDATA[Android Training Performance - 优化电池续航能力(Lesson 3 - 判断并监测网络连接状态)]]></title>
+    <link href="http://kesenhoo.github.com/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-3/"/>
+    <updated>2012-03-23T21:09:00+08:00</updated>
+    <id>http://kesenhoo.github.com/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-3</id>
+    <content type="html"><![CDATA[<h2>Determining and Monitoring the Connectivity Status[判断并监测网络连接状态]</h2>
 
-<p>尽管Android提供了很多种小的组件可以重用，我们还需要自定义一些稍微复杂一点的小组件进行重用。我们可以使用<code>&lt;include/&gt;</code> 与 <code>&lt;merge/&gt;</code> 标签来对当前的layout嵌入一些其他的layout.</p>
+<p>通常我们会有一些计划的任务，比如重复闹钟，后台定时启动的任务等。但是如果我们的网络没有连接上，那么就没有必要启动那些需要连接网络的任务。我们可以使用ConnectivityManager来检查是否连接上网络，是何种网络。[通过网络的连接状况改变，相应的改变app的行为，减少无谓的操作，从而延长设备的续航能力]</p>
 
-<p>在创建一个稍微复杂一点的layout时，重用layout是个很给力的方法。比如我们需要一个YES/NO的控制栏，包含文字提示的Progress bar。像这种的布局会在很多地方需要重用到.</p>
+<h2>1)Determine if You Have an Internet Connection[判断当前是否有网络连接]</h2>
+
+<p>显然如果没有网络连接，那么就没有必要做那些需要联网的事情。下面是一个检查是否有网络连接的例子：</p>
 
 <!-- More -->
 
 
-<h2>1)Create a Re-usable Layout</h2>
+<p>```java
+ConnectivityManager cm =</p>
 
-<p>如果你已经知道哪些组件是会重用的，我们可以创建一个XML并且定义这个layout。例如：下面定义了一个需要在每个Activity都需要显示的titlebar.xml
-```xml
-&lt;FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"</p>
-
-<pre><code>android:layout_width=”match_parent”  
-android:layout_height="wrap_content"  
-android:background="@color/titlebar_bg"&gt;  
-
-&lt;ImageView android:layout_width="wrap_content"  
-           android:layout_height="wrap_content"   
-           android:src="@drawable/gafricalogo" /&gt;  
+<pre><code>    (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);  
 </code></pre>
 
-<p></FrameLayout>
+<p>NetworkInfo activeNetwork = cm.getActiveNetworkInfo();<br/>
+boolean isConnected = activeNetwork.isConnectedOrConnecting();<br/>
 ```</p>
 
-<h2>2)Use the <include> Tag</h2>
+<h2>2)Determine the Type of your Internet Connection[判断连接网络的类型]</h2>
 
-<p>下面示例了一个包含了titlebar控件的布局：
-```xml
-&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"</p>
+<p>设备通常可以有移动网络，WiMax,Wi-Fi与以太网连接等类型。通过查询当前活动的网络类型，可以根据网络的带宽做适合的事情。
+<code>java
+boolean isWiFi = activeNetwork.getType() == ConnectivityManager.TYPE_WIFI;  
+</code>
+使用移动网络会比Wi-Fi花费代价更大，所以多数情况下，在移动网络情况下减少一些数据的获取操作，同样，一些像下载文件等操作需要等有Wi-Fi的情况下才开始。
+如果已经关闭了更新操作，那么需要监听网络切换，当有比较好的网络时重新启动之前取消的操作。</p>
 
-<pre><code>android:orientation="vertical"   
-android:layout_width=”match_parent”  
-android:layout_height=”match_parent”  
-android:background="@color/app_bg"  
-android:gravity="center_horizontal"&gt;  
+<h2>3)Monitor for Changes in Connectivity[监测网络连接的切换]</h2>
 
-&lt;include layout="@layout/titlebar"/&gt;  
-
-&lt;TextView android:layout_width=”match_parent”  
-          android:layout_height="wrap_content"  
-          android:text="@string/hello"  
-          android:padding="10dp" /&gt;  
-
-...  
-</code></pre>
-
-<p></LinearLayout>
-<code>  
-我们可以重写任何include里面的属性，例如：
-</code>xml
-&lt;include android:id=”@+id/news_title”</p>
-
-<pre><code>     android:layout_width=”match_parent”  
-     android:layout_height=”match_parent”  
-     layout=”@layout/title”/&gt;  
-</code></pre>
-
-<p>```</p>
-
-<h2>3)Use the <merge> Tag</h2>
-
-<p>某些时候，自定义可重用的布局包含了过多的层级标签，比如我们需要在LinearLayout里面嵌入一个重用的组件，而恰恰这个自定义的可重用的组件根节点也是LinearLayout，这样就多了一层没有用的嵌套，无疑这样只会拖慢程序速度。而这个时候如果我们使用merge根标签就可以避免那样的问题。例如：
-```xml
-<merge xmlns:android="http://schemas.android.com/apk/res/android"></p>
-
-<pre><code>&lt;Button  
-    android:layout_width="fill_parent"   
-    android:layout_height="wrap_content"  
-    android:text="@string/add"/&gt;  
-
-&lt;Button  
-    android:layout_width="fill_parent"   
-    android:layout_height="wrap_content"  
-    android:text="@string/delete"/&gt;  
-</code></pre>
-
-<p></merge><br/>
-<code>``
-这样的话，使用</code><include>`包含上面的布局的时候，系统会自动忽略merge层级，而把两个button直接放置与include平级。</p>
+<p>当网络连接被改变的时候， ConnectivityManager会broadcast CONNECTIVITY_ACTION ("android.net.conn.CONNECTIVITY_CHANGE") 的动作消息。
+我们需要在manifest文件里面注册一个带有像下面action一样的Receiver:
+<code>xml
+&lt;action android:name="android.net.conn.CONNECTIVITY_CHANGE"/&gt;  
+</code>
+通常网络的改变会比较频繁，我们没有必要不间断的注册监听网络的改变。通常我们会在有Wi-Fi的时候进行下载动作，若是网络切换到移动网络则通常会暂停当前下载，监听到恢复到Wi-Fi的情况则开始恢复下载。[也就是说为了完成某个单元操作而进行监测]</p>
 
 <hr />
 
-<p><strong>文章学习自<a href="http://developer.android.com/training/improving-layouts/reusing-layouts.html">http://developer.android.com/training/improving-layouts/reusing-layouts.html
-</a></strong>
+<p><strong>文章学习自<a href="http://developer.android.com/training/monitoring-device-state/connectivity-monitoring.html">http://developer.android.com/training/monitoring-device-state/connectivity-monitoring.html</a></strong>
 <strong>转载请注明出自<a href="http:://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢</strong></p>
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training Performance - 提升布局文件的性能(Lesson 1 - 优化布局的层级)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2012/03/21/android-training-performance-improve-layouts-lesson-1/"/>
-    <updated>2012-03-21T17:14:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2012/03/21/android-training-performance-improve-layouts-lesson-1</id>
-    <content type="html"><![CDATA[<h2>Optimizing Layout Hierarchies</h2>
+    <title type="html"><![CDATA[Android Training Performance - 优化电池续航能力(Lesson 2 - 判断设备的停驻模式)]]></title>
+    <link href="http://kesenhoo.github.com/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-2/"/>
+    <updated>2012-03-23T19:53:00+08:00</updated>
+    <id>http://kesenhoo.github.com/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-2</id>
+    <content type="html"><![CDATA[<h2>Determining and Monitoring the Docking State and Type[判断并监测设备的停驻状态与类型]</h2>
 
-<p>Layout是Android程序影响用户体验最关键的一部分。如果布局文件不好会使得程序比较卡。SDK里面包含了一些工具用来帮助我们发现布局文件的性能问题</p>
+<p>在上一课中有这样一句话：In many cases, the act of charging a device is coincident with putting it into a dock.</p>
 
-<p>使用基本的Layout结构是最有效的。但是，每一个添加到系统的组件都需要初始化，进行布局，绘制的过程。比如，使用在LinearLayout里面使用子组件会导致一个过于deep的层级结构。而且内嵌使用包含layout_weight属性的LinearLayout会在绘制时花费昂贵的系统资源，因为每一个子组件都需要被测量两次。在使用ListView与GridView的时候，这个问题显的尤其重要，因为子组件会重复被创建</p>
+<p>在很多情况下，为设备充电也是一种设备停驻方式</p>
 
-<p>这一课我们会学习使用Hierarchy Viewer and Lint 来检查并最优化布局文件。</p>
+<p>Android设备能够有好几种停驻状态。包括车载模式，家庭模式与数字对战模拟模式[这个有点奇怪]。停驻状态通常与充电状态是非常密切关联的。</p>
+
+<p>停驻模式会如何影响更新频率这完全取决于app的设置。我们可以选择在桌面模式下频繁的更新数据也可以选择在车载模式下关闭更新操作。相反的，你也可以选择在车载模式下最大化更新交通数据频率。</p>
 
 <!-- More -->
 
 
-<h2>1)Inspect Your Layout</h2>
+<p>停驻状态也是以sticky intent方式来广播的，这样可以通过查询intent里面的数据来判断是否目前处于停驻状态，处于哪种停驻状态。[上面的这些操作都可以一定程度上优化电池的使用，提升设备的续航能力]</p>
 
-<p>Android SDK里面包含了一个叫做<a href="http://developer.android.com/tools/help/hierarchy-viewer.html">Hierarchy Viewer</a>的工具，在程序运行的时候分析布局文件，从而找到性能瓶颈</p>
+<h2>1)Determine the Current Docking State[判断当前停驻状态]</h2>
 
-<p>连接上设备，打开Hierarchy Viewer(定位到tools/目录下，直接执行hierarchyviewer的命令，选定需要查看的Process，再点击Load View Hierarchy会显示出当前界面的布局Tree。在每个模块的Traffic light上有三个灯，分别代表了Measure, Layout and Draw三个步骤的性能。</p>
+<p>因为停驻状态的广播内容也是sticky intent(<code>ACTION_DOCK_EVENT</code>)，所以不需要注册BroadcastReceiver。
+```java
+IntentFilter ifilter = new IntentFilter(Intent.ACTION_DOCK_EVENT);<br/>
+Intent dockStatus = context.registerReceiver(null, ifilter);</p>
 
-<p><img src="/images/articles/layout-listitem.png" title="Figure 1. ListView每个Item的常见布局." alt="layout-listitem.png" /></p>
+<p>int dockState = battery.getIntExtra(EXTRA_DOCK_STATE, -1);<br/>
+boolean isDocked = dockState != Intent.EXTRA_DOCK_STATE_UNDOCKED;<br/>
+```</p>
 
-<p><img src="/images/articles/hierarchy-linearlayout.png" title="Figure 2. 上面显示了对应与图片1的布局层级信息." alt="hierarchy-linearlayout.png" /></p>
+<h2>2)Determine the Current Dock Type[判断当前停驻类型]</h2>
 
-<p>可以看到中间LinearLayout的Measure的灯是红色的，这就是因为上面说到的：使用内嵌layout_weight的属性的LinearLayout会导致测量时花费了双倍的时间。</p>
-
-<p><img src="/images/articles/hierarchy-layouttimes.png" title="Figure 3. 点击某个模块会显示具体每个步骤所花费的时间。" alt="hierarchy-layouttimes.png" /></p>
-
-<h2>2)Revise Your Layout</h2>
-
-<p>使得Layout宽而浅，而不是窄而深（在Hierarchy Viewer的Tree视图里面体现）</p>
-
-<p>针对上面的布局我们可以使用RelativeLayout来替代LinearLayout，从而实现shallow and wide.</p>
-
-<p><img src="/images/articles/hierarchy-relativelayout.png" title="Figure 4. 改用RelativeLayout来实现图片1的布局。" alt="hierarchy-relativelayout.png" /></p>
-
-<p>可以看到这是一个小的优化，可是这带来的效果是明显的，因为在ListView里面会出现很多这样的布局。
-导致前面的case会出现花费时间比较多的愿意是使用了layout_weight在LinearLayout。我们需要仔细评估到底是否需要使用那样的布局，尽量避免使用layout_weight。</p>
-
-<h2>3)Use Lint</h2>
-
-<p><a href="http://tools.android.com/tips/lint">Lint</a>是一款在ADT 16才出现用来替代layoutopt的新型工具，具有更强大的功能。</p>
-
-<p>Lint的会提示的一些建议规则如下：</p>
+<p>一共有下面4中停驻类型：</p>
 
 <ul>
-<li>使用compound drawables - 一个包含了ImageView与TextView的LinearLayout可以被当作一个compound drawable来处理。</li>
-<li>使用merge根框架 - 如果FramLayout仅仅是一个纯粹的（没有设置背景，间距等）布局根元素，我们可以使用merge标签来当作根标签。</li>
-<li>无用的分支 - 如果一个layout并没有任何子组件，那么可以被移除，这样可以提高效率。</li>
-<li>无用的父控件 - 如果一个layout只有子控件，没有兄弟控件，并且不是一个ScrollView或者根节点，而且没有设置背景，那么我们可以移除这个父控件，直接把子控件提升为父控件】</li>
-<li>深层次的layout - 尽量减少内嵌的层级，考虑使用更多平级的组件 RelativeLayout or GridLayout来提升布局性能，默认最大的深度是10</li>
+<li>Car</li>
+<li>Desk</li>
+<li>Low-End (Analog) Desk：API level 11开始才有</li>
+<li>High-End (Digital) Desk：API level 11开始才有</li>
 </ul>
 
 
-<p><img src="/images/articles/lint_icon.png" alt="lint_icon.png" /></p>
+<p>通常仅仅需要像下面一样检查当前停驻类型：
+```java
+boolean isCar = dockState == EXTRA_DOCK_STATE_CAR;<br/>
+boolean isDesk = dockState == EXTRA_DOCK_STATE_DESK ||</p>
 
-<p>Eclipse会自动运行Lint的工具，并给出相应的提醒，不管是在导出APK，编辑，保存XML还是在使用layout编辑器的时候。如果想驱动一次运行，请参看上面的图标，点击运行。如果没有安装ADT 16,需要在命令行中执行。</p>
+<pre><code>             dockState == EXTRA_DOCK_STATE_LE_DESK ||  
+             dockState == EXTRA_DOCK_STATE_HE_DESK;  
+</code></pre>
+
+<p>```</p>
+
+<h2>3)Monitor for Changes in the Dock State or Type[监测停驻状态或者类型的改变]</h2>
+
+<p>只需要像下面一样注册一个监听器：
+<code>xml
+&lt;action android:name="android.intent.action.ACTION_DOCK_EVENT"/&gt;
+</code>
+Receiver获取到信息后可以像上面那样检查需要的数据。</p>
+
+<p><strong>Ps:这一课主要是强调了需要在车载模式等停驻状态下的处理电量优化的情况。某些特定的停驻模式下，意味这其他一些操作可以停止，这样来获取更长的续航能力。</strong></p>
 
 <hr />
 
-<p><strong>文章学习自<a href="http://developer.android.com/training/improving-layouts/optimizing-layout.html">http://developer.android.com/training/improving-layouts/optimizing-layout.html</a></strong>
+<p><strong>文章学习自<a href="http://developer.android.com/training/monitoring-device-state/docking-monitoring.html">http://developer.android.com/training/monitoring-device-state/docking-monitoring.html</a></strong>
+<strong>转载请注明出自<a href="http:://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢</strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training Performance - 优化电池续航能力(Lesson 1 - 监测设备的电量与充电状态)]]></title>
+    <link href="http://kesenhoo.github.com/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-1/"/>
+    <updated>2012-03-23T18:28:00+08:00</updated>
+    <id>http://kesenhoo.github.com/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-1</id>
+    <content type="html"><![CDATA[<p>显然，手持设备的电量需要引起很大的重视。通过这一系列的课程，可以学会如何根据设备电池状态来改变App的某些行为与功能。</p>
+
+<p>通过在断开连接时关闭后台服务，在电量减少时减少更新数据的频率等等操作可以在不影响用户体验的前提下，确保App对电池寿命的影响减到最小。</p>
+
+<h2>Monitoring the Battery Level and Charging State[监测电池的电量与充电状态]</h2>
+
+<p>当你想通过改变后台更新操作的频率来减少对电池寿命的影响，那么先手需要检查当前电量与充电状态。</p>
+
+<p>电池的电量与是否在充电状态会影响到一个程序去执行更新的操作。当设备在进行AC充电时，程序做任何操作都不太会受到电量的影响，所以在大多数时候，我们可以在设备充电时做很多想做的事情（刷新数据，下载文件等），相反的，如果设备没有在充电状态，那么我们就需要尽量减少设备的更新操作等来延长电池的续航能力。</p>
+
+<p>同样的，我们可以通过检查电池目前的电量来减少甚至停止一些更新操作。</p>
+
+<!-- More -->
+
+
+<h2>1)Determine the Current Charging State[判断当前充电状态]</h2>
+
+<p><a href="http://developer.android.com/reference/android/os/BatteryManager.html">BatteryManager</a>会广播一个带有电池与充电详情的Sticky Intent。【关于Sticky intent有不清楚的，请参考http://developer.android.com/guide/topics/fundamentals/services.html中对带有sticky的service是如何解释的】</p>
+
+<p>因为广播的是一个sticky intent，那么不需要注册BroadcastReceiver。仅仅只需要简单的call一个参null参数的regiserReceiver()方法。
+<code>java
+IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);  
+Intent batteryStatus = context.registerReceiver(null, ifilter);  
+</code>
+我们可以从intent里面提取出当前的充电状态与是否通过USB或者AC充电器来充电。
+```java
+// Are we charging / charged?<br/>
+int status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);<br/>
+boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||</p>
+
+<pre><code>                 status == BatteryManager.BATTERY_STATUS_FULL;  
+</code></pre>
+
+<p>// How are we charging?<br/>
+int chargePlug = battery.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);<br/>
+boolean usbCharge = chargePlug == BATTERY_PLUGGED_USB;<br/>
+boolean acCharge = chargePlug == BATTERY_PLUGGED_AC;<br/>
+```
+我们可以从intent里面提取出当前的充电状态与是否通过USB或者AC充电器来充电。通常的做法是在使用AC充电时最大化后台更新操作，在使用USB充电时降低更新操作，不在充电状态时，最小化更新操作。</p>
+
+<h2>2)Monitor Changes in Charging State[监测充电状态的改变]</h2>
+
+<p>充电状态随时可能改变，显然，需要通过检查充电状态的改变来通知App改变某些行为。</p>
+
+<p>BatteryManager会在设备连接或者断开充电器的时候广播一个action。接收到这个广播是很重要的，即使我们的app没有在运行。特别是在是否接收这个广播会对app决定后台更新频率产生影响的前提下。因此很有必要在manifest文件里面注册一个监听来接收ACTION_POWER_CONNECTED and ACTION_POWER_DISCONNECTED的intent。
+```xml
+<receiver android:name=".PowerConnectionReceiver"><br/>
+  <intent-filter></p>
+
+<pre><code>&lt;action android:name="android.intent.action.ACTION_POWER_CONNECTED"/&gt;  
+&lt;action android:name="android.intent.action.ACTION_POWER_DISCONNECTED"/&gt;  
+</code></pre>
+
+<p>  </intent-filter><br/>
+</receiver><br/>
+<code>
+</code>java
+public class PowerConnectionReceiver extends BroadcastReceiver {</p>
+
+<pre><code>@Override  
+public void onReceive(Context context, Intent intent) {   
+    int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);  
+    boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||  
+                        status == BatteryManager.BATTERY_STATUS_FULL;  
+
+    int chargePlug = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);  
+    boolean usbCharge = chargePlug == BATTERY_PLUGGED_USB;  
+    boolean acCharge = chargePlug == BATTERY_PLUGGED_AC;  
+}  
+</code></pre>
+
+<p>}<br/>
+```</p>
+
+<h2>3)Determine the Current Battery Level[判断当前电池电量]</h2>
+
+<p>在一些情况下，获取到当前电池电量也是很有帮助的。我们可以在获知电量少于某个级别的时候减少某些后台操作。
+我们可以从获取到电池状态的intent中提取出电池电量与容量等信息。
+<code>java
+int level = battery.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);  
+int scale = battery.getIntExtra(BatteryManager.EXTRA_SCALE, -1);  
+float batteryPct = level / (float)scale;  
+</code></p>
+
+<h2>4)Monitor Significant Changes in Battery Level[检测电量的有效改变]</h2>
+
+<p>虽然我们可以轻易的不间断的检测电池状态，但是这并不是必须的。通常来说，我们只需要检测电量的某些有效改变，特别是设备在进入或者离开低电量状态的时候。下面的例子，电量监听器只会在设备电量进入低电量或者离开低电量的时候才会触发，仅仅需要监听ACTION_BATTERY_LOW与ACTION_BATTERY_OKAY.
+<code>xml
+&lt;receiver android:name=".BatteryLevelReceiver"&gt;  
+&lt;intent-filter&gt;  
+  &lt;action android:name="android.intent.action.ACTION_BATTERY_LOW"/&gt;  
+  &lt;action android:name="android.intent.action.ACTION_BATTERY_OKAY"/&gt;  
+  &lt;/intent-filter&gt;  
+&lt;/receiver&gt;
+</code><br/>
+通常我们都需要在进入低电量的情况下，关闭所有后台程序来维持设备的续航，因为这个时候做任何的更新等操作都是无谓的，很可能在你还没有来的及操作刚才更新的内容的时候就自动关机了。
+In many cases, the act of charging a device is coincident with putting it into a dock. The next lesson shows you how to determine the current dock state and monitor for changes in device docking.</p>
+
+<hr />
+
+<p><strong>文章学习自<a href="http://developer.android.com/training/monitoring-device-state/battery-monitoring.html">http://developer.android.com/training/monitoring-device-state/battery-monitoring.html</a></strong>
 <strong>转载请注明出自<a href="http:://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢</strong></p>
 ]]></content>
   </entry>
