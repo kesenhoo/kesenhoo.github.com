@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="章节概要： 一个Android app通常都会有好几个activities. 每一个activity的界面都可能允许用户执行一些特殊任务（例如查看地图或者是开始拍照等）。为了让用户从一个activity跳到另外一个activity，你的app必须使用Intent来定义你的app想做的事情。 &hellip;">
+  <meta name="description" content="启动另外一个activity并不一定是单向的。你也可以启动另外一个activity然后接受一个result回来。为了接受这个result,你需要使用startActivityForResult()) (而不是startActivity()))。 例如， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,55 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/12/03/android-training-05-interacting-with-other-apps-lesson-2/">Android Training 05 - 与其他Apps进行交互(Lesson 2 - 从activity获取Result)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-03T22:39:00+08:00" pubdate data-updated="true">Dec 3<span>rd</span>, 2012</time>
+        
+         | <a href="/blog/2012/12/03/android-training-05-interacting-with-other-apps-lesson-2/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>启动另外一个activity并不一定是单向的。你也可以启动另外一个activity然后接受一个result回来。为了接受这个result,你需要使用<a href="http://developer.android.com/reference/android/app/Activity.html#startActivityForResult(android.content.Intent,%20int">startActivityForResult()</a>) (而不是<a href="http://developer.android.com/reference/android/app/Activity.html#startActivity(android.content.Intent">startActivity()</a>))。</p>
+
+<p>例如，你的app可以启动一个camera程序并接受拍的照片作为result。或者你可以启动People程序并获取其中联系的人的详情作为result。</p>
+
+<p>当然，被启动的activity需要指定返回的result。它需要把这个result作为另外一个intent对象返回，你的activity需要在<a href="http://developer.android.com/reference/android/app/Activity.html#onActivityResult(int,%20int,%20android.content.Intent">onActivityResult()</a>)的回调方法里面去接收result。</p>
+
+<p><strong>Note:</strong>在执行 startActivityForResult()时，你可以使用explicit 或者 implicit 的intent。当你启动另外一个位于你的程序中的activity时，你应该使用explicit intent来确保你可以接收到期待的结果。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/12/03/android-training-05-interacting-with-other-apps-lesson-2/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -268,55 +317,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/11/28/android-training-03-building-a-dynamic-ui-with-fragments-lesson-3/">Android Training 03 - 使用Fragments建立动态的UI(Lesson 4 - Fragment之间的通信)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-11-28T18:33:00+08:00" pubdate data-updated="true">Nov 28<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/11/28/android-training-03-building-a-dynamic-ui-with-fragments-lesson-3/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>为了重用fragment的UI组件，你必须为每个fragment建立自己的container，模块化自己的layout与行为。一旦你定义了那些可重用的fragment，你可以使用activity与他们建立联系，对那些UI组件做组合动作等。</p>
-
-<p>通常，你也会想要fragment-s之间能够交流。例如，基于用户事件来改变内容。所有的Fragment-to-Fragment之间的交互都是基于activity进行操作的。两个fragment之间没有办法直接交互。</p>
-
-<h2>Define an Interface[定义接口]</h2>
-
-<p>为了允许fragment与activity进行交互，你可以在fragment中定义一个interface，然后在activity中去implement它。Fragment在它的onAttach()方法里面捕获接口的实现，然后call接口的方法来与activity进行交互。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/11/28/android-training-03-building-a-dynamic-ui-with-fragments-lesson-3/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/6/">&larr; Older</a>
@@ -332,6 +332,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/10/19/android-training-performance-managing_your_app_memory/">Android Training Performance - 管理应用的内存</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-4/">Android Training UI - 创建自定义的Views(Lesson 4 - 优化Views)</a>
@@ -367,10 +371,6 @@
     
       <li class="post">
         <a href="/blog/2013/04/06/android-training-performance-tips/">Android Training Performance - 代码性能优化小技巧</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/03/31/android-notes-03-process-and-thread/">Android Notes 03 - Process and Thread</a>
       </li>
     
   </ul>

@@ -9,8 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="在Android process之间不能用通常的方式去访问彼此的内存数据。 他们把需要传递的数据解析成基础对象，使得系统能够识别并处理这些对象。因为这个处理过程很难写，所以Android使用AIDL来解决这个问题。
-在定义AIDL接口之前，请意识到call这些接口是direct function &hellip;">
+  <meta name="description" content="当程序的第一个组件开始启动时，Android系统会为这个程序启动一个新的Linux进程。默认的，程序中的后续其他组件都是运行在这个进程的线程中(这个线程被成为&#8221;主&#8221;线程:main thread)。如果程序的组件在启动时发现已经存在这个程序的进程了(因为其他组件正在运行 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -76,6 +75,55 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/03/31/android-notes-03-process-and-thread/">Android Notes 03 - Process and Thread</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-03-31T16:27:00+08:00" pubdate data-updated="true">Mar 31<span>st</span>, 2013</time>
+        
+         | <a href="/blog/2013/03/31/android-notes-03-process-and-thread/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img src="/images/articles/process_and_thread.jpg"></p>
+
+<p>当程序的第一个组件开始启动时，Android系统会为这个程序启动一个新的Linux进程。默认的，程序中的后续其他组件都是运行在这个进程的线程中(这个线程被成为&#8221;主&#8221;线程:main thread)。如果程序的组件在启动时发现已经存在这个程序的进程了(因为其他组件正在运行)， 那么这个组件将启动在该进程中，并使用同一线程。然而，你可以安排程序中的不同组件运行在另外一个进程中，而且你可以为任何进程创建其它的线程。</p>
+
+<h1>Process：进程</h1>
+
+<p>默认的，同一程序的所有组件都是运行在一个Proces里面的，并且大多数程序都不应该去改变这一规则。然而，如果你需要控制某一确定的组件的Proces，你可以在manifest文件中做特殊设置。<em>Music播放器的Playback Service就可以这样做</em></p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/03/31/android-notes-03-process-and-thread/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -294,46 +342,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/12/20/hi/">Hello, World</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-12-20T00:57:00+08:00" pubdate data-updated="true">Dec 20<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/12/20/hi/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><img src="/images/articles/hello_world.jpg"></p>
-
-<p>Hi.This is my first post. <strong>By markdown.</strong></p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/4/">&larr; Older</a>
@@ -349,6 +357,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/10/19/android-training-performance-managing_your_app_memory/">Android Training Performance - 管理应用的内存</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-4/">Android Training UI - 创建自定义的Views(Lesson 4 - 优化Views)</a>
@@ -384,10 +396,6 @@
     
       <li class="post">
         <a href="/blog/2013/04/06/android-training-performance-tips/">Android Training Performance - 代码性能优化小技巧</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/03/31/android-notes-03-process-and-thread/">Android Notes 03 - Process and Thread</a>
       </li>
     
   </ul>

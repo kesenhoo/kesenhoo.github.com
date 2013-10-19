@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="Minimizing the Effect of Regular Updates[最小化定期更新操作的副作用] 最佳的定时更新频率是不确定的，通常由设备状态，网络连接状态，用户行为与用户定义明确的偏好而决定。 Optimizing Battery Life这一章有讨论如何根据设备状态来修改更新频率 &hellip;">
+  <meta name="description" content="Redundant Downloads are Redundant[重复下载是冗余的] 减少下载的最基本方法是仅仅下载那些你需要的。从数据的角度看，我们可以通过传递类似上次更新时间这样的参数来制定查询数据的条件。同样，在下载图片的时候，server那边最好能够减少图片的大小， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,55 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-3/">Android Training Connectivity - 优化下载效率(Lesson 3 - 使用缓存来避免重复下载)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-26T17:59:00+08:00" pubdate data-updated="true">Mar 26<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-3/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Redundant Downloads are Redundant[重复下载是冗余的]</h2>
+
+<p>减少下载的最基本方法是仅仅下载那些你需要的。从数据的角度看，我们可以通过传递类似上次更新时间这样的参数来制定查询数据的条件。同样，在下载图片的时候，server那边最好能够减少图片的大小，而不是让我们下载完整大小的图片。</p>
+
+<h2>1.Cache Files Locally[缓存文件到本地]</h2>
+
+<p>避免下载重复的数据是很重要的。可以使用缓存机制来处理这个问题。缓存static的资源，例如完整的图片。这些缓存的资源需要分开存放。为了保证app不会因为缓存而导致显示的是旧数据，请从缓存中获取最新的数据，当数据过期的时候，会提示进行刷新。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-3/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -288,55 +337,6 @@ This lesson introduces the wireless radio state machine, explains how your app�
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-3/">Android Training Performance - 优化电池续航能力(Lesson 3 - 判断并监测网络连接状态)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-23T21:09:00+08:00" pubdate data-updated="true">Mar 23<span>rd</span>, 2012</time>
-        
-         | <a href="/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-3/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Determining and Monitoring the Connectivity Status[判断并监测网络连接状态]</h2>
-
-<p>通常我们会有一些计划的任务，比如重复闹钟，后台定时启动的任务等。但是如果我们的网络没有连接上，那么就没有必要启动那些需要连接网络的任务。我们可以使用ConnectivityManager来检查是否连接上网络，是何种网络。[通过网络的连接状况改变，相应的改变app的行为，减少无谓的操作，从而延长设备的续航能力]</p>
-
-<h2>1)Determine if You Have an Internet Connection[判断当前是否有网络连接]</h2>
-
-<p>显然如果没有网络连接，那么就没有必要做那些需要联网的事情。下面是一个检查是否有网络连接的例子：</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-3/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/12/">&larr; Older</a>
@@ -352,6 +352,10 @@ This lesson introduces the wireless radio state machine, explains how your app�
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/10/19/android-training-performance-managing_your_app_memory/">Android Training Performance - 管理应用的内存</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-4/">Android Training UI - 创建自定义的Views(Lesson 4 - 优化Views)</a>
@@ -387,10 +391,6 @@ This lesson introduces the wireless radio state machine, explains how your app�
     
       <li class="post">
         <a href="/blog/2013/04/06/android-training-performance-tips/">Android Training Performance - 代码性能优化小技巧</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/03/31/android-notes-03-process-and-thread/">Android Notes 03 - Process and Thread</a>
       </li>
     
   </ul>
