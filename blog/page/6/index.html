@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="为了重用fragment的UI组件，你必须为每个fragment建立自己的container，模块化自己的layout与行为。一旦你定义了那些可重用的fragment，你可以使用activity与他们建立联系，对那些UI组件做组合动作等。 通常，你也会想要fragment-s之间能够交流。例如， &hellip;">
+  <meta name="description" content="章节概要： 虽然可以在onPause()的时候保存一些信息以免用户的使用进度被丢失，但是大多数Android app仍然是需要做保存数据的动作。大多数比较好的apps都需要保存用户的设置信息，而且有一些apps必须维护大量的文件信息与DB信息。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,58 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/11/29/android-training-04-saving-data-lesson-1/">Android Training 04 - 保存数据(Lesson 1 - 保存Key-Value)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-11-29T13:59:00+08:00" pubdate data-updated="true">Nov 29<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/11/29/android-training-04-saving-data-lesson-1/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><strong>章节概要：</strong></p>
+
+<p>虽然可以在onPause()的时候保存一些信息以免用户的使用进度被丢失，但是大多数Android app仍然是需要做保存数据的动作。大多数比较好的apps都需要保存用户的设置信息，而且有一些apps必须维护大量的文件信息与DB信息。这一章节会介绍给你在Android中一些重要的数据存储方法，例如：</p>
+
+<ul>
+<li>以key-value的方式保存一些简单的数据到shared preferences文件中</li>
+<li>在Android文件系统中保存任意格式的文件</li>
+<li>通过SQLite来使用DB</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/11/29/android-training-04-saving-data-lesson-1/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -277,69 +329,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/11/27/android-training-03-building-a-dynamic-ui-with-fragments-lesson-0/">Android Training 03 - 使用Fragments建立动态的UI(Lesson 0 - 章节概览)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-11-27T14:38:00+08:00" pubdate data-updated="true">Nov 27<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/11/27/android-training-03-building-a-dynamic-ui-with-fragments-lesson-0/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>Building a Dynamic UI with Fragments</h1>
-
-<ul>
-<li>学习这章节的先决条件:
-
-<ul>
-<li>了解Activity的基本概念 (see <a href="http://developer.android.com/training/basics/activity-lifecycle/index.html">Managing the Activity Lifecycle</a>)</li>
-<li>有使用 XML layouts 的经验</li>
-</ul>
-</li>
-<li>你还需要看的有:
-
-<ul>
-<li><a href="http://developer.android.com/guide/components/fragments.html">Fragments</a></li>
-<li><a href="http://developer.android.com/guide/practices/tablets-and-handsets.html">Supporting Tablets and Handsets</a></li>
-</ul>
-</li>
-<li>DEMO:
-<a href="http://developer.android.com/shareables/training/FragmentBasics.zip">FragmentBasics.zip</a></li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/11/27/android-training-03-building-a-dynamic-ui-with-fragments-lesson-0/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/7/">&larr; Older</a>
@@ -355,6 +344,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/11/17/java-notes-00-singleton-pattern/">Java Notes - Singleton Pattern(单例总结)</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2013/10/19/android-training-performance-managing_your_app_memory/">Android Training Performance - 管理应用的内存</a>
@@ -390,10 +383,6 @@
     
       <li class="post">
         <a href="/blog/2013/04/12/android-notes-04-intent-and-intentFilter/">Android Notes 04 - Intents and Intent Filters</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/04/06/android-training-performance-tips/">Android Training Performance - 代码性能优化小技巧</a>
       </li>
     
   </ul>

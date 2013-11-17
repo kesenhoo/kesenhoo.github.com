@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="就像你的程序能够发送数据到其他程序一样，其他程序也能够方便的接收发送过来的数据。需要考虑的是用户与你的程序如何进行交互，你想要从其他程序接收哪些数据类型。例如，一个社交网络程序会希望能够从其他程序接受文本数据，像一个有趣的网址链接。Google+ &hellip;">
+  <meta name="description" content="这一课会介绍在ActionBar 中添加一个高效率且比较友好的Share功能，会使用到ActionProvider(在Android 4.0上才被引进)。它会handle出现share功能的appearance与hehavior。在ShareActionProvider的例子里面， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,51 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/03/31/android-training-06-sharing-content-lesson-3/">Android Training 06 - 分享内容(Lesson 3 - 在Actionbar上添加分享功能)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-31T19:16:00+08:00" pubdate data-updated="true">Mar 31<span>st</span>, 2012</time>
+        
+         | <a href="/blog/2012/03/31/android-training-06-sharing-content-lesson-3/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>这一课会介绍在ActionBar 中添加一个高效率且比较友好的Share功能，会使用到ActionProvider(在Android 4.0上才被引进)。它会handle出现share功能的appearance与hehavior。在ShareActionProvider的例子里面，你之需要提供一个share intent，剩下的就交给<a href="https://developer.android.com/reference/android/widget/ShareActionProvider.html">ShareActionProvider</a>来做。</p>
+
+<p><img src="/images/articles/actionbar-shareaction.png" title="Figure 1. The ShareActionProvider in the Gallery app." alt="actionbar-shareaction.png" /></p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/03/31/android-training-06-sharing-content-lesson-3/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -271,61 +316,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/03/27/android-training-userInfo-remembering-users-lesson-1/">Android Training UserInfo - 记住用户的信息(Lesson 1 - 使用AccountManager来记录用户)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-27T11:12:00+08:00" pubdate data-updated="true">Mar 27<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/03/27/android-training-userInfo-remembering-users-lesson-1/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><strong>章节概览:Remembering Users</strong></p>
-
-<p>Android用户希望把自己的信息绑定到喜欢的app与设备上，那么使得你的程序更加令人喜爱的一个方法是使得它更加的人性化。Android设备知道你的使用者是谁，他们都使用过哪些服务，在哪里存储了你的数据。在得到你的用户授权的前提下，你可以使用那些信息来使得你的app更加丰富，更加人性化。</p>
-
-<p>在这一章节，你将学习到鉴定用户信息的多种技术，你可以:</p>
-
-<ul>
-<li>通过记住用户账户名来人性化你的appd。</li>
-<li>鉴定用户以确保是否是那个人。</li>
-<li>通过service来获取访问用户线上数据的权限，例如Google APIs。</li>
-<li>增加一个自定义的账户来鉴定自己后台的服务。</li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/03/27/android-training-userInfo-remembering-users-lesson-1/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/11/">&larr; Older</a>
@@ -341,6 +331,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/11/17/java-notes-00-singleton-pattern/">Java Notes - Singleton Pattern(单例总结)</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2013/10/19/android-training-performance-managing_your_app_memory/">Android Training Performance - 管理应用的内存</a>
@@ -376,10 +370,6 @@
     
       <li class="post">
         <a href="/blog/2013/04/12/android-notes-04-intent-and-intentFilter/">Android Notes 04 - Intents and Intent Filters</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/04/06/android-training-performance-tips/">Android Training Performance - 代码性能优化小技巧</a>
       </li>
     
   </ul>

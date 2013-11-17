@@ -4,7 +4,7 @@
   <title><![CDATA[四方城]]></title>
   <link href="http://kesenhoo.github.com/atom.xml" rel="self"/>
   <link href="http://kesenhoo.github.com/"/>
-  <updated>2013-10-19T17:39:53+08:00</updated>
+  <updated>2013-11-17T15:39:04+08:00</updated>
   <id>http://kesenhoo.github.com/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -12,6 +12,401 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Java Notes - Singleton Pattern(单例总结)]]></title>
+    <link href="http://kesenhoo.github.com/blog/2013/11/17/java-notes-00-singleton-pattern/"/>
+    <updated>2013-11-17T14:21:00+08:00</updated>
+    <id>http://kesenhoo.github.com/blog/2013/11/17/java-notes-00-singleton-pattern</id>
+    <content type="html"><![CDATA[<p>这里不赘述单例模式的概念了，直接演示几种不同的实现方式。</p>
+
+<h2>0)Eager initialization</h2>
+
+<p>如果程序一开始就需要某个单例，并且创建这个单例并不那么费时，我们可以考虑用这种方式：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Singleton</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">Singleton</span> <span class="n">INSTANCE</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Singleton</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">private</span> <span class="nf">Singleton</span><span class="o">()</span> <span class="o">{}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="n">Singleton</span> <span class="nf">getInstance</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">INSTANCE</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这种实现方式有几个特点：</p>
+
+<!-- More -->
+
+
+<ul>
+<li>实例一开始就被创建(Eager initialization)。</li>
+<li><code>getInstance()</code>方法不需要加<code>synchronize</code>来解决多线程同步的问题。</li>
+<li><code>final</code>关键字确保了实例不可变，并且只会存在一个。</li>
+</ul>
+
+
+<h2>1)Lazy initialization</h2>
+
+<p>懒加载的方式使得单例会在第一次使用到时才会被创建.先看一种有隐患的写法：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">LazySingleton</span> <span class="o">{</span>
+</span><span class='line'>  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">volatile</span> <span class="n">LazySingleton</span> <span class="n">instance</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">// private constructor</span>
+</span><span class='line'>  <span class="kd">private</span> <span class="nf">LazySingleton</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">public</span> <span class="kd">static</span> <span class="n">LazySingleton</span> <span class="nf">getInstance</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">if</span> <span class="o">(</span><span class="n">instance</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>          <span class="kd">synchronized</span> <span class="o">(</span><span class="n">LazySingleton</span><span class="o">.</span><span class="na">class</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>              <span class="n">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LazySingleton</span><span class="o">();</span>
+</span><span class='line'>          <span class="o">}</span>
+</span><span class='line'>      <span class="o">}</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">instance</span><span class="o">;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>请注意</strong>：上面的写法其实非线程安全的，假设两个Thread同时进入了getInstance方法，都判断到instance==null，然后会因为synchronized的原因，逐个执行，这样就得到了2个实例。解决这个问题，需要用到典型的<strong>double-check</strong>方式，如下：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">LazySingleton</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">volatile</span> <span class="n">LazySingleton</span> <span class="n">instance</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">private</span> <span class="nf">LazySingleton</span><span class="o">()</span> <span class="o">{</span>       
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="n">LazySingleton</span> <span class="nf">getInstance</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">instance</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="kd">synchronized</span> <span class="o">(</span><span class="n">LazySingleton</span> <span class="o">.</span><span class="na">class</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="k">if</span> <span class="o">(</span><span class="n">instance</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                        <span class="n">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LazySingleton</span> <span class="o">();</span>
+</span><span class='line'>                <span class="o">}</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">instance</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>另外一个更简略直观的替代写法是：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">LazySingleton</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">volatile</span> <span class="n">LazySingleton</span> <span class="n">instance</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">private</span> <span class="nf">LazySingleton</span><span class="o">()</span> <span class="o">{</span>       
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">synchronized</span> <span class="n">LazySingleton</span> <span class="nf">getInstance</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">instance</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LazySingleton</span> <span class="o">();</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">instance</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>2)Static block initialization</h2>
+
+<p>如果我们对程序的加载顺序有点了解的话，会知道Static block的初始化是执行在加载类之后，Constructor被执行之前。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">StaticBlockSingleton</span> <span class="o">{</span>
+</span><span class='line'>  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">StaticBlockSingleton</span> <span class="n">INSTANCE</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">static</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>          <span class="n">INSTANCE</span> <span class="o">=</span> <span class="k">new</span> <span class="n">StaticBlockSingleton</span><span class="o">();</span>
+</span><span class='line'>      <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>          <span class="k">throw</span> <span class="k">new</span> <span class="nf">RuntimeException</span><span class="o">(</span><span class="s">&quot;Error, You Know This, Haha!&quot;</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+</span><span class='line'>      <span class="o">}</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">public</span> <span class="kd">static</span> <span class="n">StaticBlockSingleton</span> <span class="nf">getInstance</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">INSTANCE</span><span class="o">;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">private</span> <span class="nf">StaticBlockSingleton</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="c1">// ...</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面的写法有一个弊端，如果我们类有若干个static的变量，程序的初始化却只需要其中的1，2个的话，我们会做多余的static initialization。</p>
+
+<h2>3)Bill Pugh solution</h2>
+
+<p>University of Maryland Computer Science researcher Bill Pugh有写过一篇文章<a href="http://en.wikipedia.org/wiki/Initialization_on_demand_holder_idiom">initialization on demand holder idiom</a>。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Singleton</span> <span class="o">{</span>
+</span><span class='line'>    <span class="c1">// Private constructor prevents instantiation from other classes</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="nf">Singleton</span><span class="o">()</span> <span class="o">{</span> <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="cm">/**</span>
+</span><span class='line'><span class="cm">    * SingletonHolder is loaded on the first execution of Singleton.getInstance() </span>
+</span><span class='line'><span class="cm">    * or the first access to SingletonHolder.INSTANCE, not before.</span>
+</span><span class='line'><span class="cm">    */</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">SingletonHolder</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">Singleton</span> <span class="n">INSTANCE</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Singleton</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="n">Singleton</span> <span class="nf">getInstance</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">SingletonHolder</span><span class="o">.</span><span class="na">INSTANCE</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>SingletonHolder类会在你需要的时候才会被初始化，而且它不影响Singleton类的其他static成员变量的使用。这个方法是线程安全的并且避免了使用volatile与synchronized。</p>
+
+<h2>4)Using Enum</h2>
+
+<p>这是最简便安全的方法。没有明显的缺点，并且避免了下面要讲到的序列化的隐患。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">enum</span> <span class="n">Singleton</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">INSTANCE</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">execute</span> <span class="o">(</span><span class="n">String</span> <span class="n">arg</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// perform operation here </span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Serialize and de-serialize</h2>
+
+<p>在某些情况下，需要实现序列化的时候，普通的单例模式需要添加readResolve的方法，不然会出现异常。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">DemoSingleton</span> <span class="kd">implements</span> <span class="n">Serializable</span> <span class="o">{</span>
+</span><span class='line'>  <span class="kd">private</span> <span class="kd">volatile</span> <span class="kd">static</span> <span class="n">DemoSingleton</span> <span class="n">instance</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">public</span> <span class="kd">static</span> <span class="n">DemoSingleton</span> <span class="nf">getInstance</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">if</span> <span class="o">(</span><span class="n">instance</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>          <span class="n">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DemoSingleton</span><span class="o">();</span>
+</span><span class='line'>      <span class="o">}</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">instance</span><span class="o">;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">protected</span> <span class="n">Object</span> <span class="nf">readResolve</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">instance</span><span class="o">;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">private</span> <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">10</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getI</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">i</span><span class="o">;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setI</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">this</span><span class="o">.</span><span class="na">i</span> <span class="o">=</span> <span class="n">i</span><span class="o">;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>仅仅有上面的还不够，我们需要添加serialVersionUID，例子详见下面的总结。</p>
+
+<h2>Conclusion</h2>
+
+<p>实现一个功能完善，性能更佳，不存在序列化等问题的单例，建议使用下面两个方式之一:</p>
+
+<h3>Bill Pugh(Inner Holder)</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">DemoSingleton</span> <span class="kd">implements</span> <span class="n">Serializable</span> <span class="o">{</span>
+</span><span class='line'>  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">long</span> <span class="n">serialVersionUID</span> <span class="o">=</span> <span class="mi">1L</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">private</span> <span class="nf">DemoSingleton</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="c1">// private constructor</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">DemoSingletonHolder</span> <span class="o">{</span>
+</span><span class='line'>      <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">DemoSingleton</span> <span class="n">INSTANCE</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DemoSingleton</span><span class="o">();</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">public</span> <span class="kd">static</span> <span class="n">DemoSingleton</span> <span class="nf">getInstance</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">DemoSingletonHolder</span><span class="o">.</span><span class="na">INSTANCE</span><span class="o">;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">protected</span> <span class="n">Object</span> <span class="nf">readResolve</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="nf">getInstance</span><span class="o">();</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Enum</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">enum</span> <span class="n">Singleton</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">INSTANCE</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">execute</span> <span class="o">(</span><span class="n">String</span> <span class="n">arg</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// perform operation here </span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<hr />
+
+<p><strong>参考资料</strong></p>
+
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/Singleton_pattern">Singleton Pattern</a></li>
+<li><a href="http://howtodoinjava.com/2012/10/22/singleton-design-pattern-in-java/">Singleton Pattern In Java</a></li>
+</ul>
+
+
+<p><strong>转载请注明出自<a href="http:://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢</strong></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Android Training Performance - 管理应用的内存]]></title>
@@ -4924,171 +5319,6 @@ Android提供了下面三个方法来解决这个问题：</p>
 
 <p><strong>学习自：<a href="http://developer.android.com/training/camera/photobasics.html">http://developer.android.com/training/camera/photobasics.html</a>，请多指教，谢谢！</strong><br/>
 <strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Training 05 - 与其他Apps进行交互(Lesson 3 - 允许其他app启动你的activity)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2012/12/04/android-training-05-interacting-with-other-apps-lesson-3/"/>
-    <updated>2012-12-04T22:12:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2012/12/04/android-training-05-interacting-with-other-apps-lesson-3</id>
-    <content type="html"><![CDATA[<p>前两节课主要讲了从你的app启动另外一个app。但是如果你的app可以响应前面发出的action，那么你的app应该做好响应的准备。例如，如果你创建了一个social app，它可以分享messages 或者 photos 给好友，那么最好你的app能够接收ACTION_SEND 的intent,这样当用户在其他app触发分享功能的时候，你的app能够出现在待选对话框。</p>
-
-<p>为了使得其他的app能够启动你的activity，你需要在你的manifest文件的<activity> 标签下添加<intent-filter> 的属性。</p>
-
-<p>当你的app被安装到设备上时，系统可以识别你的intent filter并把这些信息记录下来。当其他app通过执行 startActivity() 或者 startActivityForResult()方法，并使用implicit intent时，系统可以自动查找出那些可以响应这个intent的activity。</p>
-
-<!-- more -->
-
-
-<h2>Add an Intent Filter(添加Intent Filter)</h2>
-
-<p>为了尽可能确切的定义你的activity能够handle哪些intent，每一个intent filter都应该尽可能详尽的定义好action与data。</p>
-
-<p>主要有下面三个方面需要定义：</p>
-
-<ul>
-<li><strong>Action</strong>:一个想要执行的动作的名称。通常是系统已经定义好的值，例如 ACTION_SEND 或者 ACTION_VIEW。</li>
-<li><strong>Data</strong>:Intent附带数据的描述。可以使用一个或者多个属性，你可以只定义MIME type或者是只指定URI prefix，也可以只定义一个URI scheme，或者是他们综合使用。<strong>Note:</strong> 如果你不想handle Uri 类型的数据，那么你应该指定 android:mimeType 属性。例如 text/plain or image/jpeg.</li>
-<li><strong>Category</strong>:提供一个附加的方法来标识这个activity能够handle的intent。通常与用户的手势或者是启动位置有关。系统有支持几种不同的categories,但是大多数都不怎么用的到。而且，所有的implicit intents都默认是 CATEGORY_DEFAULT 类型的。</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;activity</span> <span class="na">android:name=</span><span class="s">&quot;ShareActivity&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;intent-filter&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;action</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.action.SEND&quot;</span><span class="nt">/&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;category</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.category.DEFAULT&quot;</span><span class="nt">/&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;data</span> <span class="na">android:mimeType=</span><span class="s">&quot;text/plain&quot;</span><span class="nt">/&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;data</span> <span class="na">android:mimeType=</span><span class="s">&quot;image/*&quot;</span><span class="nt">/&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;/intent-filter&gt;</span>
-</span><span class='line'><span class="nt">&lt;/activity&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>每一个发送出来的intent只会包含一个action与type，但是handle这个intent的activity的 <intent-filter>是可以声明多个<action>, <category>与 <data> 的。</p>
-
-<p>如果任何的两对action与data是互相矛盾的，你应该创建不同的intent fliter来指定特定的action与type。</p>
-
-<p>例如，假设你的activity可以handle 文本与图片，无论是ACTION_SEND 还是 ACTION_SENDTO 的intent。在这种情况下，你必须为两个action定义两个不同的intent filter。因为ACTION_SENDTO intent 必须使用 Uri 类型来指定接收者使用 send 或 sendto 的地址。例如：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;activity</span> <span class="na">android:name=</span><span class="s">&quot;ShareActivity&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>    <span class="c">&lt;!-- filter for sending text; accepts SENDTO action with sms URI schemes --&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;intent-filter&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;action</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.action.SENDTO&quot;</span><span class="nt">/&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;category</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.category.DEFAULT&quot;</span><span class="nt">/&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;data</span> <span class="na">android:scheme=</span><span class="s">&quot;sms&quot;</span> <span class="nt">/&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;data</span> <span class="na">android:scheme=</span><span class="s">&quot;smsto&quot;</span> <span class="nt">/&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;/intent-filter&gt;</span>
-</span><span class='line'>    <span class="c">&lt;!-- filter for sending text or images; accepts SEND action and text or image data --&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;intent-filter&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;action</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.action.SEND&quot;</span><span class="nt">/&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;category</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.category.DEFAULT&quot;</span><span class="nt">/&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;data</span> <span class="na">android:mimeType=</span><span class="s">&quot;image/*&quot;</span><span class="nt">/&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;data</span> <span class="na">android:mimeType=</span><span class="s">&quot;text/plain&quot;</span><span class="nt">/&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;/intent-filter&gt;</span>
-</span><span class='line'><span class="nt">&lt;/activity&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><strong>Note:</strong>为了接受implicit intents, 你必须在你的intent filter中包含 CATEGORY_DEFAULT 的category。
-关于更多sending 与 receiving ACTION_SEND intents来执行social sharing行为的，请查看<a href="http://developer.android.com/training/sharing/receive.html">Receiving Content from Other Apps.</a>(下一章节内容)</p>
-
-<h2>Handle the Intent in Your Activity [在你的Activity中Handle发送过来的Intent]</h2>
-
-<p>为了决定采用哪个action，你可以读取Intent的内容。</p>
-
-<p>你可以执行 getIntent() 来获取启动你的activity的那个intent。你可以在activity生命周期的任何时候去执行这个方法，当是你最好是在onCreate() 或者 onStart() 里面去执行。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='xml'><span class='line'>@Override
-</span><span class='line'>protected void onCreate(Bundle savedInstanceState) {
-</span><span class='line'>    super.onCreate(savedInstanceState);
-</span><span class='line'>
-</span><span class='line'>    setContentView(R.layout.main);
-</span><span class='line'>
-</span><span class='line'>    // Get the intent that started this activity
-</span><span class='line'>    Intent intent = getIntent();
-</span><span class='line'>    Uri data = intent.getData();
-</span><span class='line'>
-</span><span class='line'>    // Figure out what to do based on the intent type
-</span><span class='line'>    if (intent.getType().indexOf(&quot;image/&quot;) != -1) {
-</span><span class='line'>        // Handle intents with image data ...
-</span><span class='line'>    } else if (intent.getType().equals(&quot;text/plain&quot;)) {
-</span><span class='line'>        // Handle intents with text ...
-</span><span class='line'>    }
-</span><span class='line'>}
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Return a Result(返回Result)</h2>
-
-<p>如果你想返回一个result给启动你的那个activity，仅仅需要执行 setResult() ，通过指定一个result code与result intent。当你的的操作成功之后，用户需要返回到原来的activity，通过执行finish() 来关闭被叫起的activity。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'> <span class="c1">// Create intent to deliver some kind of result data</span>
-</span><span class='line'><span class="n">Intent</span> <span class="n">result</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="s">&quot;com.example.RESULT_ACTION&quot;</span><span class="o">,</span> <span class="n">Uri</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="s">&quot;content://result_uri&quot;</span><span class="o">);</span>
-</span><span class='line'><span class="n">setResult</span><span class="o">(</span><span class="n">Activity</span><span class="o">.</span><span class="na">RESULT_OK</span><span class="o">,</span> <span class="n">result</span><span class="o">);</span>
-</span><span class='line'><span class="n">finish</span><span class="o">();</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>你必须总是指定一个result code。通常不是 RESULT_OK 就是 RESULT_CANCELED。你可以通过Intent 来添加需要返回的数据。</p>
-
-<p><strong>Note:</strong>默认的result code是RESULT_CANCELED.因此，如果用户在没有完成操作之前点击了back key，那么之前的activity接受到的result code就是&#8221;canceled&#8221;。</p>
-
-<p>如果你只是纯粹想要返回一个int来表示某些返回的result数据之一，你可以设置result code为任何大于0的数值。如果你返回的result只是一个int，那么连intent都可以不需要返回了，如下：</p>
-
-<p>setResult(RESULT_COLOR_RED);
-finish();
-<strong>Note:</strong>我们没有必要在意你的activity是被用startActivity() 还是 startActivityForResult()方法所叫起的。系统会自动去判断改如何传递result。在不需要的result的case下，result会被自动忽略。</p>
-
-<hr />
-
-<p><strong>学习自：<a href="http://developer.android.com/training/basics/intents/filters.html">http://developer.android.com/training/basics/intents/filters.html</a>，请多指教，谢谢！</strong><br/>
-<strong>转载请注明出自<a href="http://kesenhoo.github.io">http://kesenhoo.github.io</a>，谢谢配合！</strong></p>
 ]]></content>
   </entry>
   

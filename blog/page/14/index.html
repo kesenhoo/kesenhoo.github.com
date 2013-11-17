@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="Implementing Adaptative UI Flows 根据显示不同的layout，我们需要设计不同的UI flow。比如如果你的AP是dual-pane的模式，点击左边list的item的时候，会在右边直接显示对应的内容，如果是single-pane的模式， &hellip;">
+  <meta name="description" content="Optimizing Layout Hierarchies Layout是Android程序影响用户体验最关键的一部分。如果布局文件不好会使得程序比较卡。SDK里面包含了一些工具用来帮助我们发现布局文件的性能问题 使用基本的Layout结构是最有效的。但是，每一个添加到系统的组件都需要初始化， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,55 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/03/21/android-training-performance-improve-layouts-lesson-1/">Android Training Performance - 提升布局文件的性能(Lesson 1 - 优化布局的层级)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-21T17:14:00+08:00" pubdate data-updated="true">Mar 21<span>st</span>, 2012</time>
+        
+         | <a href="/blog/2012/03/21/android-training-performance-improve-layouts-lesson-1/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Optimizing Layout Hierarchies</h2>
+
+<p>Layout是Android程序影响用户体验最关键的一部分。如果布局文件不好会使得程序比较卡。SDK里面包含了一些工具用来帮助我们发现布局文件的性能问题</p>
+
+<p>使用基本的Layout结构是最有效的。但是，每一个添加到系统的组件都需要初始化，进行布局，绘制的过程。比如，使用在LinearLayout里面使用子组件会导致一个过于deep的层级结构。而且内嵌使用包含layout_weight属性的LinearLayout会在绘制时花费昂贵的系统资源，因为每一个子组件都需要被测量两次。在使用ListView与GridView的时候，这个问题显的尤其重要，因为子组件会重复被创建</p>
+
+<p>这一课我们会学习使用Hierarchy Viewer and Lint 来检查并最优化布局文件。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/03/21/android-training-performance-improve-layouts-lesson-1/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -257,6 +306,10 @@ Several features require the use of the support library</li>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/11/17/java-notes-00-singleton-pattern/">Java Notes - Singleton Pattern(单例总结)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/10/19/android-training-performance-managing_your_app_memory/">Android Training Performance - 管理应用的内存</a>
       </li>
     
@@ -290,10 +343,6 @@ Several features require the use of the support library</li>
     
       <li class="post">
         <a href="/blog/2013/04/12/android-notes-04-intent-and-intentFilter/">Android Notes 04 - Intents and Intent Filters</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/04/06/android-training-performance-tips/">Android Training Performance - 代码性能优化小技巧</a>
       </li>
     
   </ul>

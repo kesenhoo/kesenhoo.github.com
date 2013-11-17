@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="如果你的App在播放音频，显然用户能够以预期的方式来控制音频是很重要的。为了保证好的用户体验，同样App能够获取音频焦点是很重要的，这样才能确保不会在同一时刻出现多个App的声音。在学习这个课程后，你将能够创建对硬件音量按钮进行响应的App，当按下音量按钮的时候需要获取到当前音频的焦点， &hellip;">
+  <meta name="description" content="很多App都可以播放音频，因此在播放前如何获取到音频焦点就显得很重要了，这样可以避免同时出现多个声音，Android使用audio focus来节制音频的播放，仅仅是获取到audio focus的App才能够播放音频。 在App开始播放音频之前，它需要经过发出请求[request]->接受请求[ &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,51 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/03/22/android-training-multimedia-managing-audio-playback-lesson-2/">Android Training Multimedia - 音频播放(Lesson 2 - 管理音频焦点Audio Focus)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-22T23:16:00+08:00" pubdate data-updated="true">Mar 22<span>nd</span>, 2012</time>
+        
+         | <a href="/blog/2012/03/22/android-training-multimedia-managing-audio-playback-lesson-2/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>很多App都可以播放音频，因此在播放前如何获取到音频焦点就显得很重要了，这样可以避免同时出现多个声音，Android使用audio focus来节制音频的播放，仅仅是获取到audio focus的App才能够播放音频。</p>
+
+<p>在App开始播放音频之前，它需要经过发出请求[request]->接受请求[receive]->音频焦点锁定[Audio Focus]的过程。同样，它需要知道如何监听失去音频焦点[lose of audio focus]的事件并进行合适的响应。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/03/22/android-training-multimedia-managing-audio-playback-lesson-2/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -268,55 +313,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/03/21/android-training-performance-improve-layouts-lesson-1/">Android Training Performance - 提升布局文件的性能(Lesson 1 - 优化布局的层级)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-21T17:14:00+08:00" pubdate data-updated="true">Mar 21<span>st</span>, 2012</time>
-        
-         | <a href="/blog/2012/03/21/android-training-performance-improve-layouts-lesson-1/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Optimizing Layout Hierarchies</h2>
-
-<p>Layout是Android程序影响用户体验最关键的一部分。如果布局文件不好会使得程序比较卡。SDK里面包含了一些工具用来帮助我们发现布局文件的性能问题</p>
-
-<p>使用基本的Layout结构是最有效的。但是，每一个添加到系统的组件都需要初始化，进行布局，绘制的过程。比如，使用在LinearLayout里面使用子组件会导致一个过于deep的层级结构。而且内嵌使用包含layout_weight属性的LinearLayout会在绘制时花费昂贵的系统资源，因为每一个子组件都需要被测量两次。在使用ListView与GridView的时候，这个问题显的尤其重要，因为子组件会重复被创建</p>
-
-<p>这一课我们会学习使用Hierarchy Viewer and Lint 来检查并最优化布局文件。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/03/21/android-training-performance-improve-layouts-lesson-1/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/14/">&larr; Older</a>
@@ -332,6 +328,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/11/17/java-notes-00-singleton-pattern/">Java Notes - Singleton Pattern(单例总结)</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2013/10/19/android-training-performance-managing_your_app_memory/">Android Training Performance - 管理应用的内存</a>
@@ -367,10 +367,6 @@
     
       <li class="post">
         <a href="/blog/2013/04/12/android-notes-04-intent-and-intentFilter/">Android Notes 04 - Intents and Intent Filters</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/04/06/android-training-performance-tips/">Android Training Performance - 代码性能优化小技巧</a>
       </li>
     
   </ul>

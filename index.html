@@ -9,7 +9,16 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="Random Access Memory(RAM)在任何软件开发环境中都是一个很宝贵的资源。这一点在物理内存通常很有限的移动操作系统上，显得尤为突出。尽管Android的Dalvik虚拟机扮演了常规的垃圾回收的角色，但这并不意味着你可以忽视app的内存分配与释放的时机与地点。 &hellip;">
+  <meta name="description" content="这里不赘述单例模式的概念了，直接演示几种不同的实现方式。 0)Eager initialization 如果程序一开始就需要某个单例，并且创建这个单例并不那么费时，我们可以考虑用这种方式： 1
+2
+3
+4
+5
+6
+7
+8
+9
+public class Singleton { private &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +84,76 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/11/17/java-notes-00-singleton-pattern/">Java Notes - Singleton Pattern(单例总结)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-17T14:21:00+08:00" pubdate data-updated="true">Nov 17<span>th</span>, 2013</time>
+        
+         | <a href="/blog/2013/11/17/java-notes-00-singleton-pattern/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>这里不赘述单例模式的概念了，直接演示几种不同的实现方式。</p>
+
+<h2>0)Eager initialization</h2>
+
+<p>如果程序一开始就需要某个单例，并且创建这个单例并不那么费时，我们可以考虑用这种方式：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Singleton</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">Singleton</span> <span class="n">INSTANCE</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Singleton</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">private</span> <span class="nf">Singleton</span><span class="o">()</span> <span class="o">{}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="n">Singleton</span> <span class="nf">getInstance</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">INSTANCE</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这种实现方式有几个特点：</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/11/17/java-notes-00-singleton-pattern/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -262,59 +341,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-1/">Android Training UI - 创建自定义的Views(Lesson 1 - 创建一个View类)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-06-30T18:47:00+08:00" pubdate data-updated="true">Jun 30<span>th</span>, 2013</time>
-        
-         | <a href="/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-1/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>设计良好的类总是相似的。它使用一个好用的接口来封装一个特定的功能，它有效的使用CPU与内存，等等。为了成为一个设计良好的类，自定义的view应该:</p>
-
-<ul>
-<li>遵守Android标准规则。</li>
-<li>提供自定义的风格属性值并能够被Android XML Layout所识别。</li>
-<li>发出可访问的事件。</li>
-<li>能够兼容Android的不同平台。</li>
-</ul>
-
-
-<p>Android的framework提供了许多基类与XML标签用来帮助你创建一个符合上面要求的View。这节课会介绍如何使用Android framework来创建一个view的核心功能。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-1/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -328,6 +354,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/11/17/java-notes-00-singleton-pattern/">Java Notes - Singleton Pattern(单例总结)</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2013/10/19/android-training-performance-managing_your_app_memory/">Android Training Performance - 管理应用的内存</a>
@@ -363,10 +393,6 @@
     
       <li class="post">
         <a href="/blog/2013/04/12/android-notes-04-intent-and-intentFilter/">Android Notes 04 - Intents and Intent Filters</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/04/06/android-training-performance-tips/">Android Training Performance - 代码性能优化小技巧</a>
       </li>
     
   </ul>

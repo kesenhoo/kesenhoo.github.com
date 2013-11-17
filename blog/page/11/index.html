@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="Redundant Downloads are Redundant[重复下载是冗余的] 减少下载的最基本方法是仅仅下载那些你需要的。从数据的角度看，我们可以通过传递类似上次更新时间这样的参数来制定查询数据的条件。同样，在下载图片的时候，server那边最好能够减少图片的大小， &hellip;">
+  <meta name="description" content="章节概览:Remembering Users Android用户希望把自己的信息绑定到喜欢的app与设备上，那么使得你的程序更加令人喜爱的一个方法是使得它更加的人性化。Android设备知道你的使用者是谁，他们都使用过哪些服务，在哪里存储了你的数据。在得到你的用户授权的前提下， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,61 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/03/27/android-training-userInfo-remembering-users-lesson-1/">Android Training UserInfo - 记住用户的信息(Lesson 1 - 使用AccountManager来记录用户)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-27T11:12:00+08:00" pubdate data-updated="true">Mar 27<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/03/27/android-training-userInfo-remembering-users-lesson-1/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><strong>章节概览:Remembering Users</strong></p>
+
+<p>Android用户希望把自己的信息绑定到喜欢的app与设备上，那么使得你的程序更加令人喜爱的一个方法是使得它更加的人性化。Android设备知道你的使用者是谁，他们都使用过哪些服务，在哪里存储了你的数据。在得到你的用户授权的前提下，你可以使用那些信息来使得你的app更加丰富，更加人性化。</p>
+
+<p>在这一章节，你将学习到鉴定用户信息的多种技术，你可以:</p>
+
+<ul>
+<li>通过记住用户账户名来人性化你的appd。</li>
+<li>鉴定用户以确保是否是那个人。</li>
+<li>通过service来获取访问用户线上数据的权限，例如Google APIs。</li>
+<li>增加一个自定义的账户来鉴定自己后台的服务。</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/03/27/android-training-userInfo-remembering-users-lesson-1/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -288,55 +343,6 @@ This lesson introduces the wireless radio state machine, explains how your app�
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/03/24/android-training-performance-optimiizing-battery-life-lesson-4/">Android Training Performance - 优化电池续航能力(Lesson 4 - 判断并监测网络连接状态)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-24T16:37:00+08:00" pubdate data-updated="true">Mar 24<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/03/24/android-training-performance-optimiizing-battery-life-lesson-4/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Manipulating Broadcast Receivers On Demand[按需操控广播接收者]</h2>
-
-<p>简单的方法是为我们监测的状态创建一个BroadcastReceiver，并在manifest中为每一个状态进行注册监听。然后，每一个Receiver根据当前设备的状态来简单重新安排下一步执行的任务。[这句话感觉理解有点问题]</p>
-
-<p>上面那个方法的副作用是，设备会在每次收到广播都被唤醒，这有点超出期望，因为有些广播是不希望唤醒设备的。</p>
-
-<p>更好的方法是根据程序运行情况开启或者关闭广播接收者。这样的话，那些在manifest中注册的receivers仅仅会在需要的时候才被激活。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/03/24/android-training-performance-optimiizing-battery-life-lesson-4/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/12/">&larr; Older</a>
@@ -352,6 +358,10 @@ This lesson introduces the wireless radio state machine, explains how your app�
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/11/17/java-notes-00-singleton-pattern/">Java Notes - Singleton Pattern(单例总结)</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2013/10/19/android-training-performance-managing_your_app_memory/">Android Training Performance - 管理应用的内存</a>
@@ -387,10 +397,6 @@ This lesson introduces the wireless radio state machine, explains how your app�
     
       <li class="post">
         <a href="/blog/2013/04/12/android-notes-04-intent-and-intentFilter/">Android Notes 04 - Intents and Intent Filters</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/04/06/android-training-performance-tips/">Android Training Performance - 代码性能优化小技巧</a>
       </li>
     
   </ul>
