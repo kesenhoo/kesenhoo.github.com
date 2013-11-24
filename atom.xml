@@ -4,7 +4,7 @@
   <title><![CDATA[四方城]]></title>
   <link href="http://kesenhoo.github.com/atom.xml" rel="self"/>
   <link href="http://kesenhoo.github.com/"/>
-  <updated>2013-11-17T15:39:04+08:00</updated>
+  <updated>2013-11-24T11:39:01+08:00</updated>
   <id>http://kesenhoo.github.com/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -409,7 +409,7 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training Performance - 管理应用的内存]]></title>
+    <title type="html"><![CDATA[Android Training[Performance] - 管理应用的内存]]></title>
     <link href="http://kesenhoo.github.com/blog/2013/10/19/android-training-performance-managing_your_app_memory/"/>
     <updated>2013-10-19T15:18:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2013/10/19/android-training-performance-managing_your_app_memory</id>
@@ -483,7 +483,7 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training UI - 创建自定义的Views(Lesson 4 - 优化Views)]]></title>
+    <title type="html"><![CDATA[Android Training[UI] - 创建自定义的Views(Lesson 4 - 优化Views)]]></title>
     <link href="http://kesenhoo.github.com/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-4/"/>
     <updated>2013-08-18T17:30:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-4</id>
@@ -585,7 +585,7 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training UI - 创建自定义的Views(Lesson 3 - 处理View的交互性)]]></title>
+    <title type="html"><![CDATA[Android Training[UI] - 创建自定义的Views(Lesson 3 - 处理View的交互性)]]></title>
     <link href="http://kesenhoo.github.com/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-3/"/>
     <updated>2013-08-18T15:01:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-3</id>
@@ -770,7 +770,7 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training UI - 创建自定义的Views(Lesson 2 - 自定义Drawing)]]></title>
+    <title type="html"><![CDATA[Android Training[UI] - 创建自定义的Views(Lesson 2 - 自定义Drawing)]]></title>
     <link href="http://kesenhoo.github.com/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-2/"/>
     <updated>2013-06-30T20:15:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-2</id>
@@ -989,7 +989,7 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training UI - 创建自定义的Views(Lesson 1 - 创建一个View类)]]></title>
+    <title type="html"><![CDATA[Android Training[UI] - 创建自定义的Views(Lesson 1 - 创建一个View类)]]></title>
     <link href="http://kesenhoo.github.com/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-1/"/>
     <updated>2013-06-30T18:47:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-1</id>
@@ -1186,7 +1186,7 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training UI - 创建自定义的Views(Lesson 0 - 章节概览)]]></title>
+    <title type="html"><![CDATA[Android Training[UI] - 创建自定义的Views(Lesson 0 - 章节概览)]]></title>
     <link href="http://kesenhoo.github.com/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-0/"/>
     <updated>2013-06-30T18:23:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-0</id>
@@ -1239,7 +1239,7 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training Graphics - 高效地显示Bitmap(Lesson 4 - 优化Bitmap的内存使用)]]></title>
+    <title type="html"><![CDATA[Android Training[Graphics] - 高效地显示Bitmap(Lesson 4 - 优化Bitmap的内存使用)]]></title>
     <link href="http://kesenhoo.github.com/blog/2013/05/19/android-training-graphics-displaying-bitmaps-efficiently-lesson-4/"/>
     <updated>2013-05-19T14:43:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2013/05/19/android-training-graphics-displaying-bitmaps-efficiently-lesson-4</id>
@@ -2138,7 +2138,7 @@ Flags用来表示，如何启动一个activity(例如，指定activity应该属�
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training Performance - 代码性能优化小技巧]]></title>
+    <title type="html"><![CDATA[Android Training[Performance] - 代码性能优化小技巧]]></title>
     <link href="http://kesenhoo.github.com/blog/2013/04/06/android-training-performance-tips/"/>
     <updated>2013-04-06T18:27:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2013/04/06/android-training-performance-tips</id>
@@ -4346,328 +4346,6 @@ Android提供了下面三个方法来解决这个问题：</p>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training系列课程索引]]></title>
-    <link href="http://kesenhoo.github.com/blog/2012/12/20/android-training-course-index/"/>
-    <updated>2012-12-20T01:04:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2012/12/20/android-training-course-index</id>
-    <content type="html"><![CDATA[<p><img src="http://kesenhoo.github.com/images/articles/android_trainning.jpg"></p>
-
-<p>下面是我在<a href="http://blog.csdn.net/kesenhoo">CSDN博客</a>中开的专栏，分享一下！欢迎交流!<br/>
-学习了Android有段时间了，感觉还是官方的英文资料学习起来收获最大。之前看了很多Android Dev Guide里面的文章，也写过几篇文章，可惜没有坚持下去。这次学习官方培训课程，决定把自己所学与大家一起分享，写的不好的地方还请多多指教，多多支持，谢谢！</p>
-
-<h1>基础部分</h1>
-
-<h3>(00)Building Your First App</h3>
-
-<p>这部分相对简单，翻译起来又比较繁琐，需要的请<a href="http://developer.android.com/training/basics/firstapp/index.html">点击这里</a>查看原文。</p>
-
-<!-- more -->
-
-
-<h3>(01)Managing the Activity Lifecycle</h3>
-
-<ul>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7517971">【Android Training - 01】详解Activity生命周期Lesson 0 - 章节概览</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7519270">【Android Training - 01】详解Activity生命周期Lesson 1 - 启动与销毁Activity</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7519985">【Android Training - 01】详解Activity生命周期Lesson 2 - 暂停与恢复Activity</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7524011">【Android Training - 01】详解Activity生命周期Lesson 3 - 停止与重启Activity</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7524011">【Android Training - 01】详解Activity生命周期Lesson 4 - 重建销毁的Activity</a></li>
-</ul>
-
-
-<h3>(02)Supporting Different Devices</h3>
-
-<p>How to build your app with alternative resources that provide an optimized user experience on multiple device form factors using a single APK.</p>
-
-<ul>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7362575">【Android Training - 02】适配不同的屏幕Lesson 1 - 支持不同的屏幕大小</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7374185">【Android Training - 02】适配不同的屏幕Lesson 2 - 适配不同屏幕密度</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7377610">【Android Training - 02】适配不同的屏幕Lesson 3 - 实现可适配的UI流程</a></li>
-</ul>
-
-
-<h3>(03)Building a Dynamic UI with Fragments</h3>
-
-<p>How to build a user interface for your app that is flexible enough to present multiple UI components on large screens and a more constrained set of UI components on smaller screens—essential for building a single APK for both phones and tablets.</p>
-
-<ul>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/8229800">【Android Training - 03】使用Fragments建立动态的用户界面Lesson 0 - 章节概览 </a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/8230064">【Android Training - 03】使用Fragments建立动态的用户界面Lesson 1 - 使用Support Library</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/8230421">【Android Training - 03】使用Fragments建立动态的用户界面Lesson 2 - 新建一个Fragment</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/8235358">【Android Training - 03】使用Fragments建立动态的用户界面Lesson 3 - 创建灵活可变的UI</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/8235686">【Android Training - 03】使用Fragments建立动态的用户界面Lesson 4 - Fragment之间的通信</a></li>
-</ul>
-
-
-<h3>(04)Saving Data</h3>
-
-<p>How to save data on the device, whether it&#39;s temporary files, downloaded app assets, user media, structured data, or something else.</p>
-
-<ul>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/8237930">【Android Training - 04】保存数据Lesson 0 - 章节概览</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/8238014">【Android Training - 04】保存数据Lesson 1 - 保存Key-Value</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/8238610">【Android Training - 04】保存数据Lesson 2 - 保存文件</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/8240637">【Android Training - 04】保存数据Lesson 3 - 保存数据到SQLite</a></li>
-</ul>
-
-
-<h3>(05)Interacting with Other Apps</h3>
-
-<p>How to build a user experience that leverages other apps available on the device to perform advanced user tasks, such as capture a photo or view an address on a map.</p>
-
-<ul>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/8246638">【Android Training - 05】与其他Apps进行交互Lesson 0 - 章节概览</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/8246830">【Android Training - 05】与其他Apps进行交互Lesson 1 - 启动到另外一个app</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/8251061">【Android Training - 05】与其他Apps进行交互Lesson 2 - 从activity获取Result</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/8251585">【Android Training - 05】与其他Apps进行交互Lesson 3 - 允许其他app启动你的activity</a></li>
-</ul>
-
-
-<h3>(06)Sharing Content</h3>
-
-<p>How to take your app interaction to the next level by sharing information with other apps, receive information back, and provide a simple and scalable way to perform Share actions with user content.</p>
-
-<ul>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7410189">【Android Training - 06】分享数据内容Lesson 0 - 章节概览</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7413470">【Android Training - 06】分享数据内容Lesson 1 - 发送分享的数据到其他App</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7416767">【Android Training - 06】分享数据内容Lesson 2 - 从其它app接收分享的内容</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7416861">【Android Training - 06】分享数据内容Lesson 3 - 在ActionBar上添加Share Action</a></li>
-</ul>
-
-
-<h1>高级部分</h1>
-
-<h2>Building Apps with Multimedia</h2>
-
-<h3>(07)Managing Audio Playback</h3>
-
-<p>How to respond to hardware audio key presses, request audio focus when playing audio, and respond appropriately to changes in audio focus.</p>
-
-<ul>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7381129">【Android Training - 07】管理音频播放Lesson 1 - 控制app的音量</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7381985">【Android Training - 07】管理音频播放Lesson 2 - 管理音频焦点Audio Focus</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7387412">【Android Training - 07】管理音频播放Lesson 3 - 当音频输出设备突然改变</a></li>
-</ul>
-
-
-<h3>(08)Capturing Photos</h3>
-
-<p>How to leverage existing camera apps on the user&#39;s device to capture photos or control the camera hardware directly and build your own camera app.</p>
-
-<ul>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/8314138">【Android Training - 08】捕获照片Lesson 0 - 章节概览</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/8314248">【Android Training - 08】捕获照片Lesson 1 - 简单的拍照动作</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/8315326">【Android Training - 08】捕获照片Lesson 2 - 简单的录像动作</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/8315378">【Android Training - 08】捕获照片Lesson 3 - 直接操控相机</a></li>
-</ul>
-
-
-<h2>Building Apps with Graphics &amp; Animation</h2>
-
-<h3>(09)Displaying Bitmaps Efficiently</h3>
-
-<p>How to load and process bitmaps while keeping your user interface responsive and avoid exceeding memory limits.</p>
-
-<ul>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7488941">【Android Training - 09】高效地显示Bitmap图片Lesson 0 - 章节概览</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7489243">【Android Training - 09】高效地显示Bitmap图片Lesson 1 - 有效率地加载大尺寸的位图</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7490760">【Android Training - 09】高效地显示Bitmap图片Lesson 2 - 在UI线程之外处理Bitmaps</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7491588">【Android Training - 09】高效地显示Bitmap图片Lesson 3 - 两种缓存Bitmap的方式</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7513569">【Android Training - 09】高效地显示Bitmap图片Lesson 4 - 使用ViewPager与GridView显示图片</a></li>
-</ul>
-
-
-<h3>(10)Displaying Graphics with OpenGL ES</h3>
-
-<p>How to create OpenGL graphics within the Android app framework and respond to touch input.<br/>
-<strong> 待学习…… </strong></p>
-
-<h3>(11)Adding Animation</h3>
-
-<p>How to add transitional animations to your user interface.<br/>
-<strong> 待学习…… </strong></p>
-
-<h2>Building Apps with Connectivity &amp; the Cloud</h2>
-
-<h3>(12)Connecting Devices Wirelessly</h3>
-
-<p>How to find and connect to local devices using Network Service Discovery and Wi-Fi Direct in order to create peer-to-peer connections.<br/>
-<strong> 待学习…… </strong></p>
-
-<h3>(13)Performing Network Operations</h3>
-
-<p>How to create a network connection, monitor the connection for changes in connectivity, and perform transactions with XML data.<br /></p>
-
-<ul>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7531608">【Android Training - 13】基本网络操作Lesson 0 - 章节概览</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7531686">【Android Training - 13】基本网络操作Lesson 1 - 如何连接到网络的经典示例</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7541794">【Android Training - 13】基本网络操作Lesson 2 - 管理网络连接的常用方法</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7542632" title="">【Android Training - 13】基本网络操作Lesson 3 - 详解如何解析XML数据</a></li>
-</ul>
-
-
-<h3>(14)Transferring Data Without Draining the Battery</h3>
-
-<p>How to minimize your apps impact on the battery when performing downloads and other network transactions.</p>
-
-<ul>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7390519">【Android Training - 14】传输数据时避免电量的浪费Lesson 0 - 章节概览</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7391031">【Android Training - 14】传输数据时避免电量的浪费Lesson 1 - 看无线电波如何影响网络操作</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7395253">【Android Training - 14】传输数据时避免电量的浪费Lesson 2 - 调整定时更新的频率(C2DM与退避算法)</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7395817">【Android Training - 14】传输数据时避免电量的浪费Lesson 3 - 使用缓存来避免重复的下载</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7396321">【Android Training - 14】传输数据时避免电量的浪费Lesson 4 - 根据网络类型更改下载模式</a></li>
-</ul>
-
-
-<h3>(15)Syncing to Cloud</h3>
-
-<p>How to sync and back up app and user data to remote web services in the cloud and how to restore the data back to multiple devices.</p>
-
-<ul>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7486110">【Android Training - 15】云同步的实现Lesson 0 - 章节概览</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7486173">【Android Training - 15】云同步的实现Lesson 1 - 使用App Engine进行同步</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7487026">【Android Training - 15】云同步的实现Lesson 2 - 使用Google Backup API </a></li>
-</ul>
-
-
-<h2>Building Apps with User Info &amp; Location</h2>
-
-<h3>(16)Remembering Users</h3>
-
-<p>How to remember the user by account, authenticate the user, acquire user permission for the user&#39;s online data, and create custom accounts on the device.</p>
-
-<ul>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7396986">【Android Training - 16】记住登入用户的信息Lesson 0 - 章节概览</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7397720">【Android Training - 16】记住登入用户的信息Lesson 1 - 使用AccountManager来记住用户</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7403672">【Android Training - 16】记住登入用户的信息Lesson 2 - 使用OAuth2来进行身份鉴定</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7405836">【Android Training - 16】记住登入用户的信息Lesson 3 - 创建自定义的账户</a></li>
-</ul>
-
-
-<h3>（17）Making Your App Location Aware</h3>
-
-<p>How to add location-aware features to your app by aqcuiring the user&#39;s current location.<br/>
-<strong> 待学习…… </strong></p>
-
-<h2>Best Practices for User Experience &amp; UI</h2>
-
-<h3>(18）Designing Effective Navigation</h3>
-
-<p>How to plan your app&#39;s screen hierarchy and forms of navigation so users can effectively and intuitively traverse your app content using various navigation patterns.<br/>
-<strong> 待学习…… </strong></p>
-
-<h3>(19）Implementing Effective Navigation</h3>
-
-<p>How to implement various navigation patterns such as swipe views and up navigation.<br/>
-<strong> 待学习…… </strong></p>
-
-<h3>(20）Designing for Multiple Screens</h3>
-
-<p>How to build a user interface that&#39;s flexible enough to fit perfectly on any screen and how to create different interaction patterns that are optimized for different screen sizes.<br/>
-<strong> 待学习…… </strong></p>
-
-<h3>(21）Designing for TV</h3>
-
-<p>How to optimize your app&#39;s user interface and user input for the &quot;ten foot experience&quot; of a TV screen.<br/>
-<strong> 待学习…… </strong></p>
-
-<h3>(22）Adding Search Functionality</h3>
-
-<p>How to properly add a search interface to your app and create a searchable database.<br/>
-<strong> 待学习…… </strong></p>
-
-<h3>(23）Creating Custom Views</h3>
-
-<p>How to build custom UI widgets that are interactive and smooth.<br/>
-<strong> 待学习…… </strong></p>
-
-<h3>(24）Creating Backward-Compatible UIs</h3>
-
-<p>How to use UI components and other APIs from the more recent versions of Android while remaining compatible with older versions of the platform.<br/>
-** 待学习……</p>
-
-<h3>(25）Implementing Accessibility</h3>
-
-<p>How to make your app accessible to users with vision impairment or other physical disabilities.<br/>
-<strong> 待学习……</strong></p>
-
-<h2>Best Practices for Performance</h2>
-
-<h3>(26）Performance Tips</h3>
-
-<p>How to optimize your app&#39;s performance in various ways to improve its responsiveness and battery efficiency.<br/>
-<strong> 待学习…… </strong></p>
-
-<h3>(27）Improving Layout Performance</h3>
-
-<p>How to identify problems in your app&#39;s layout performance and improve the UI responsiveness.</p>
-
-<ul>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7378239">【Android Training - 27】提高显示布局文件的性能Lesson 1 - 优化布局层级</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7380278">【Android Training - 27】提高显示布局文件的性能Lesson 2 - 使用include标签重用Layout</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7380447">【Android Training - 27】提高显示布局文件的性能Lesson 3 - 按需载入视图(ViewStub的使用方法)</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7380577" title="">【Android Training - 27】提高显示布局文件的性能Lesson 4 - 提升ListView的性能</a></li>
-</ul>
-
-
-<h3>(28）Optimizing Battery Life</h3>
-
-<p>How to minimize the amount of power your app requires by adapting to current power conditions and performing power-hungry tasks at proper intervals.</p>
-
-<ul>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7388078">【Android Training - 28】优化电池寿命Lesson 1 - 监测电池的电量与充电状态</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7388439">【Android Training - 28】优化电池寿命Lesson 2 - 判断并监测设备的停驻模式与类型</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7388633">【Android Training - 28】优化电池寿命Lesson 3 - 判断并监测网络连接状态</a></li>
-<li><a href="http://blog.csdn.net/kesenhoo/article/details/7388740">【Android Training - 28】优化电池寿命Lesson 4 - 按需操控Broadcast Receivers是否开启</a></li>
-</ul>
-
-
-<h3>(29）Keeping Your App Responsive</h3>
-
-<p>How to keep your app responsive to user interaction so the UI does not lock-up and display an &quot;Application Not Responding&quot; dialog.<br/>
-<strong> 待学习…… </strong></p>
-
-<h3>(30）JNI Tips</h3>
-
-<p>How to efficiently use the Java Native Interface with the Android NDK.<br/>
-<strong> 待学习…… </strong></p>
-
-<h2>Best Practices for Security &amp; Privacy</h2>
-
-<h3>(31）Security Tips</h3>
-
-<p>How to perform various tasks and keep your app&#39;s data and your user&#39;s data secure.<br/>
-<strong> 待学习…… </strong></p>
-
-<h3>(32）Developing for Enterprise</h3>
-
-<p>How to implement device management policies for enterprise-oriented apps.<br/>
-<strong> 待学习…… </strong></p>
-
-<h2>Using Google Play to Distribute &amp; Monetize</h2>
-
-<h3>(33）Maintaining Multiple APKs</h3>
-
-<p>How to publish your app on Google Play with separate APKs that target different devices, while using a single app listing.<br/>
-<strong> 待学习…… </strong></p>
-
-<h3>(34）Monetizing Your App</h3>
-
-<p>How to implement monetization strategies for your app without compromising the user experience.<br/>
-<strong> 待学习…… </strong></p>
-
-<hr />
-
-<p><strong> 2012年3月 </strong> 希望自己能够坚持把这些官方training的课程在2个月内学习完，借此机会把自己学习的心得与大家一起分享，有不恰当的地方，还请不吝赐教，谢谢！<br/>
-<strong> 2012年6月 </strong> 最近发现Google原来在不断的更新这些课程，还区分出基础课程与高级课程，如果能做到紧跟Google更新的步伐来完善知识体系也是件很不错的事情，加油！<br/>
-<strong> 2012年11月23日 </strong> Google对于这些课程做了重新的整理，显得更加的有条理，有层次，对于学习Android实在是最佳的课程。 对于新添加的课程，我会陆续进行翻译学习，分享给大家，谢谢！<br/>
-<strong> 2012年11月26日 </strong> 整理完所有培训课程之后才发现，Google更新了那么多，我还差很多没有学习，需要加油了。</p>
-
-<hr />
-]]></content>
-  </entry>
-  
-  <entry>
     <title type="html"><![CDATA[Hello, World]]></title>
     <link href="http://kesenhoo.github.com/blog/2012/12/20/hi/"/>
     <updated>2012-12-20T00:57:00+08:00</updated>
@@ -4679,7 +4357,7 @@ Android提供了下面三个方法来解决这个问题：</p>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training Multimedia - 捕获照片(Lesson 3 - 直接操控相机)]]></title>
+    <title type="html"><![CDATA[Android Training[Multimedia] - 捕获照片(Lesson 3 - 直接操控相机)]]></title>
     <link href="http://kesenhoo.github.com/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-3/"/>
     <updated>2012-12-18T23:59:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-3</id>
@@ -5012,7 +4690,7 @@ Android提供了下面三个方法来解决这个问题：</p>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training Multimedia - 捕获照片(Lesson 2 - 简单的录像动作)]]></title>
+    <title type="html"><![CDATA[Android Training[Multimedia] - 捕获照片(Lesson 2 - 简单的录像动作)]]></title>
     <link href="http://kesenhoo.github.com/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-2/"/>
     <updated>2012-12-18T23:21:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-2</id>
@@ -5088,7 +4766,7 @@ Android提供了下面三个方法来解决这个问题：</p>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training Multimedia - 捕获照片(Lesson 1 - 简单的拍照动作)]]></title>
+    <title type="html"><![CDATA[Android Training[Multimedia] - 捕获照片(Lesson 1 - 简单的拍照动作)]]></title>
     <link href="http://kesenhoo.github.com/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-1/"/>
     <updated>2012-12-18T22:21:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-1</id>
@@ -5319,6 +4997,171 @@ Android提供了下面三个方法来解决这个问题：</p>
 
 <p><strong>学习自：<a href="http://developer.android.com/training/camera/photobasics.html">http://developer.android.com/training/camera/photobasics.html</a>，请多指教，谢谢！</strong><br/>
 <strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training 05 - 与其他Apps进行交互(Lesson 3 - 允许其他app启动你的activity)]]></title>
+    <link href="http://kesenhoo.github.com/blog/2012/12/04/android-training-05-interacting-with-other-apps-lesson-3/"/>
+    <updated>2012-12-04T22:12:00+08:00</updated>
+    <id>http://kesenhoo.github.com/blog/2012/12/04/android-training-05-interacting-with-other-apps-lesson-3</id>
+    <content type="html"><![CDATA[<p>前两节课主要讲了从你的app启动另外一个app。但是如果你的app可以响应前面发出的action，那么你的app应该做好响应的准备。例如，如果你创建了一个social app，它可以分享messages 或者 photos 给好友，那么最好你的app能够接收ACTION_SEND 的intent,这样当用户在其他app触发分享功能的时候，你的app能够出现在待选对话框。</p>
+
+<p>为了使得其他的app能够启动你的activity，你需要在你的manifest文件的<activity> 标签下添加<intent-filter> 的属性。</p>
+
+<p>当你的app被安装到设备上时，系统可以识别你的intent filter并把这些信息记录下来。当其他app通过执行 startActivity() 或者 startActivityForResult()方法，并使用implicit intent时，系统可以自动查找出那些可以响应这个intent的activity。</p>
+
+<!-- more -->
+
+
+<h2>Add an Intent Filter(添加Intent Filter)</h2>
+
+<p>为了尽可能确切的定义你的activity能够handle哪些intent，每一个intent filter都应该尽可能详尽的定义好action与data。</p>
+
+<p>主要有下面三个方面需要定义：</p>
+
+<ul>
+<li><strong>Action</strong>:一个想要执行的动作的名称。通常是系统已经定义好的值，例如 ACTION_SEND 或者 ACTION_VIEW。</li>
+<li><strong>Data</strong>:Intent附带数据的描述。可以使用一个或者多个属性，你可以只定义MIME type或者是只指定URI prefix，也可以只定义一个URI scheme，或者是他们综合使用。<strong>Note:</strong> 如果你不想handle Uri 类型的数据，那么你应该指定 android:mimeType 属性。例如 text/plain or image/jpeg.</li>
+<li><strong>Category</strong>:提供一个附加的方法来标识这个activity能够handle的intent。通常与用户的手势或者是启动位置有关。系统有支持几种不同的categories,但是大多数都不怎么用的到。而且，所有的implicit intents都默认是 CATEGORY_DEFAULT 类型的。</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;activity</span> <span class="na">android:name=</span><span class="s">&quot;ShareActivity&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;intent-filter&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;action</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.action.SEND&quot;</span><span class="nt">/&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;category</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.category.DEFAULT&quot;</span><span class="nt">/&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;data</span> <span class="na">android:mimeType=</span><span class="s">&quot;text/plain&quot;</span><span class="nt">/&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;data</span> <span class="na">android:mimeType=</span><span class="s">&quot;image/*&quot;</span><span class="nt">/&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/intent-filter&gt;</span>
+</span><span class='line'><span class="nt">&lt;/activity&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>每一个发送出来的intent只会包含一个action与type，但是handle这个intent的activity的 <intent-filter>是可以声明多个<action>, <category>与 <data> 的。</p>
+
+<p>如果任何的两对action与data是互相矛盾的，你应该创建不同的intent fliter来指定特定的action与type。</p>
+
+<p>例如，假设你的activity可以handle 文本与图片，无论是ACTION_SEND 还是 ACTION_SENDTO 的intent。在这种情况下，你必须为两个action定义两个不同的intent filter。因为ACTION_SENDTO intent 必须使用 Uri 类型来指定接收者使用 send 或 sendto 的地址。例如：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;activity</span> <span class="na">android:name=</span><span class="s">&quot;ShareActivity&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    <span class="c">&lt;!-- filter for sending text; accepts SENDTO action with sms URI schemes --&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;intent-filter&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;action</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.action.SENDTO&quot;</span><span class="nt">/&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;category</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.category.DEFAULT&quot;</span><span class="nt">/&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;data</span> <span class="na">android:scheme=</span><span class="s">&quot;sms&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;data</span> <span class="na">android:scheme=</span><span class="s">&quot;smsto&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/intent-filter&gt;</span>
+</span><span class='line'>    <span class="c">&lt;!-- filter for sending text or images; accepts SEND action and text or image data --&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;intent-filter&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;action</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.action.SEND&quot;</span><span class="nt">/&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;category</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.category.DEFAULT&quot;</span><span class="nt">/&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;data</span> <span class="na">android:mimeType=</span><span class="s">&quot;image/*&quot;</span><span class="nt">/&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;data</span> <span class="na">android:mimeType=</span><span class="s">&quot;text/plain&quot;</span><span class="nt">/&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/intent-filter&gt;</span>
+</span><span class='line'><span class="nt">&lt;/activity&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>Note:</strong>为了接受implicit intents, 你必须在你的intent filter中包含 CATEGORY_DEFAULT 的category。
+关于更多sending 与 receiving ACTION_SEND intents来执行social sharing行为的，请查看<a href="http://developer.android.com/training/sharing/receive.html">Receiving Content from Other Apps.</a>(下一章节内容)</p>
+
+<h2>Handle the Intent in Your Activity [在你的Activity中Handle发送过来的Intent]</h2>
+
+<p>为了决定采用哪个action，你可以读取Intent的内容。</p>
+
+<p>你可以执行 getIntent() 来获取启动你的activity的那个intent。你可以在activity生命周期的任何时候去执行这个方法，当是你最好是在onCreate() 或者 onStart() 里面去执行。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'>@Override
+</span><span class='line'>protected void onCreate(Bundle savedInstanceState) {
+</span><span class='line'>    super.onCreate(savedInstanceState);
+</span><span class='line'>
+</span><span class='line'>    setContentView(R.layout.main);
+</span><span class='line'>
+</span><span class='line'>    // Get the intent that started this activity
+</span><span class='line'>    Intent intent = getIntent();
+</span><span class='line'>    Uri data = intent.getData();
+</span><span class='line'>
+</span><span class='line'>    // Figure out what to do based on the intent type
+</span><span class='line'>    if (intent.getType().indexOf(&quot;image/&quot;) != -1) {
+</span><span class='line'>        // Handle intents with image data ...
+</span><span class='line'>    } else if (intent.getType().equals(&quot;text/plain&quot;)) {
+</span><span class='line'>        // Handle intents with text ...
+</span><span class='line'>    }
+</span><span class='line'>}
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Return a Result(返回Result)</h2>
+
+<p>如果你想返回一个result给启动你的那个activity，仅仅需要执行 setResult() ，通过指定一个result code与result intent。当你的的操作成功之后，用户需要返回到原来的activity，通过执行finish() 来关闭被叫起的activity。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'> <span class="c1">// Create intent to deliver some kind of result data</span>
+</span><span class='line'><span class="n">Intent</span> <span class="n">result</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="s">&quot;com.example.RESULT_ACTION&quot;</span><span class="o">,</span> <span class="n">Uri</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="s">&quot;content://result_uri&quot;</span><span class="o">);</span>
+</span><span class='line'><span class="n">setResult</span><span class="o">(</span><span class="n">Activity</span><span class="o">.</span><span class="na">RESULT_OK</span><span class="o">,</span> <span class="n">result</span><span class="o">);</span>
+</span><span class='line'><span class="n">finish</span><span class="o">();</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>你必须总是指定一个result code。通常不是 RESULT_OK 就是 RESULT_CANCELED。你可以通过Intent 来添加需要返回的数据。</p>
+
+<p><strong>Note:</strong>默认的result code是RESULT_CANCELED.因此，如果用户在没有完成操作之前点击了back key，那么之前的activity接受到的result code就是&#8221;canceled&#8221;。</p>
+
+<p>如果你只是纯粹想要返回一个int来表示某些返回的result数据之一，你可以设置result code为任何大于0的数值。如果你返回的result只是一个int，那么连intent都可以不需要返回了，如下：</p>
+
+<p>setResult(RESULT_COLOR_RED);
+finish();
+<strong>Note:</strong>我们没有必要在意你的activity是被用startActivity() 还是 startActivityForResult()方法所叫起的。系统会自动去判断改如何传递result。在不需要的result的case下，result会被自动忽略。</p>
+
+<hr />
+
+<p><strong>学习自：<a href="http://developer.android.com/training/basics/intents/filters.html">http://developer.android.com/training/basics/intents/filters.html</a>，请多指教，谢谢！</strong><br/>
+<strong>转载请注明出自<a href="http://kesenhoo.github.io">http://kesenhoo.github.io</a>，谢谢配合！</strong></p>
 ]]></content>
   </entry>
   

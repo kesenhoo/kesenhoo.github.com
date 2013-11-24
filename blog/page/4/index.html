@@ -9,8 +9,8 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="下面是我在CSDN博客中开的专栏，分享一下！欢迎交流!
-学习了Android有段时间了，感觉还是官方的英文资料学习起来收获最大。之前看了很多Android Dev Guide里面的文章，也写过几篇文章，可惜没有坚持下去。这次学习官方培训课程，决定把自己所学与大家一起分享， &hellip;">
+  <meta name="description" content=" Hi.This is my first post. By markdown.
+">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -82,58 +82,6 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/12/20/android-training-course-index/">Android Training系列课程索引</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-12-20T01:04:00+08:00" pubdate data-updated="true">Dec 20<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/12/20/android-training-course-index/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><img src="/images/articles/android_trainning.jpg"></p>
-
-<p>下面是我在<a href="http://blog.csdn.net/kesenhoo">CSDN博客</a>中开的专栏，分享一下！欢迎交流!<br/>
-学习了Android有段时间了，感觉还是官方的英文资料学习起来收获最大。之前看了很多Android Dev Guide里面的文章，也写过几篇文章，可惜没有坚持下去。这次学习官方培训课程，决定把自己所学与大家一起分享，写的不好的地方还请多多指教，多多支持，谢谢！</p>
-
-<h1>基础部分</h1>
-
-<h3>(00)Building Your First App</h3>
-
-<p>这部分相对简单，翻译起来又比较繁琐，需要的请<a href="http://developer.android.com/training/basics/firstapp/index.html">点击这里</a>查看原文。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/12/20/android-training-course-index/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
       <h1 class="entry-title"><a href="/blog/2012/12/20/hi/">Hello, World</a></h1>
     
     
@@ -174,7 +122,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-3/">Android Training Multimedia - 捕获照片(Lesson 3 - 直接操控相机)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-3/">Android Training[Multimedia] - 捕获照片(Lesson 3 - 直接操控相机)</a></h1>
     
     
       <p class="meta">
@@ -221,7 +169,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-2/">Android Training Multimedia - 捕获照片(Lesson 2 - 简单的录像动作)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-2/">Android Training[Multimedia] - 捕获照片(Lesson 2 - 简单的录像动作)</a></h1>
     
     
       <p class="meta">
@@ -279,7 +227,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-1/">Android Training Multimedia - 捕获照片(Lesson 1 - 简单的拍照动作)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-1/">Android Training[Multimedia] - 捕获照片(Lesson 1 - 简单的拍照动作)</a></h1>
     
     
       <p class="meta">
@@ -326,6 +274,53 @@
 
     </article>
   
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/12/04/android-training-05-interacting-with-other-apps-lesson-3/">Android Training 05 - 与其他Apps进行交互(Lesson 3 - 允许其他app启动你的activity)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-04T22:12:00+08:00" pubdate data-updated="true">Dec 4<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/12/04/android-training-05-interacting-with-other-apps-lesson-3/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>前两节课主要讲了从你的app启动另外一个app。但是如果你的app可以响应前面发出的action，那么你的app应该做好响应的准备。例如，如果你创建了一个social app，它可以分享messages 或者 photos 给好友，那么最好你的app能够接收ACTION_SEND 的intent,这样当用户在其他app触发分享功能的时候，你的app能够出现在待选对话框。</p>
+
+<p>为了使得其他的app能够启动你的activity，你需要在你的manifest文件的<activity> 标签下添加<intent-filter> 的属性。</p>
+
+<p>当你的app被安装到设备上时，系统可以识别你的intent filter并把这些信息记录下来。当其他app通过执行 startActivity() 或者 startActivityForResult()方法，并使用implicit intent时，系统可以自动查找出那些可以响应这个intent的activity。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/12/04/android-training-05-interacting-with-other-apps-lesson-3/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/5/">&larr; Older</a>
@@ -347,31 +342,31 @@
       </li>
     
       <li class="post">
-        <a href="/blog/2013/10/19/android-training-performance-managing_your_app_memory/">Android Training Performance - 管理应用的内存</a>
+        <a href="/blog/2013/10/19/android-training-performance-managing_your_app_memory/">Android Training[Performance] - 管理应用的内存</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-4/">Android Training UI - 创建自定义的Views(Lesson 4 - 优化Views)</a>
+        <a href="/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-4/">Android Training[UI] - 创建自定义的Views(Lesson 4 - 优化Views)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-3/">Android Training UI - 创建自定义的Views(Lesson 3 - 处理View的交互性)</a>
+        <a href="/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-3/">Android Training[UI] - 创建自定义的Views(Lesson 3 - 处理View的交互性)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-2/">Android Training UI - 创建自定义的Views(Lesson 2 - 自定义Drawing)</a>
+        <a href="/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-2/">Android Training[UI] - 创建自定义的Views(Lesson 2 - 自定义Drawing)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-1/">Android Training UI - 创建自定义的Views(Lesson 1 - 创建一个View类)</a>
+        <a href="/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-1/">Android Training[UI] - 创建自定义的Views(Lesson 1 - 创建一个View类)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-0/">Android Training UI - 创建自定义的Views(Lesson 0 - 章节概览)</a>
+        <a href="/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-0/">Android Training[UI] - 创建自定义的Views(Lesson 0 - 章节概览)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2013/05/19/android-training-graphics-displaying-bitmaps-efficiently-lesson-4/">Android Training Graphics - 高效地显示Bitmap(Lesson 4 - 优化Bitmap的内存使用)</a>
+        <a href="/blog/2013/05/19/android-training-graphics-displaying-bitmaps-efficiently-lesson-4/">Android Training[Graphics] - 高效地显示Bitmap(Lesson 4 - 优化Bitmap的内存使用)</a>
       </li>
     
       <li class="post">

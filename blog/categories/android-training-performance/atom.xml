@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android:Training:Performance | 四方城]]></title>
   <link href="http://kesenhoo.github.com/blog/categories/android-training-performance/atom.xml" rel="self"/>
   <link href="http://kesenhoo.github.com/"/>
-  <updated>2013-11-17T15:39:04+08:00</updated>
+  <updated>2013-11-24T11:39:01+08:00</updated>
   <id>http://kesenhoo.github.com/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Android Training Performance - 管理应用的内存]]></title>
+    <title type="html"><![CDATA[Android Training[Performance] - 管理应用的内存]]></title>
     <link href="http://kesenhoo.github.com/blog/2013/10/19/android-training-performance-managing_your_app_memory/"/>
     <updated>2013-10-19T15:18:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2013/10/19/android-training-performance-managing_your_app_memory</id>
@@ -88,7 +88,7 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training Performance - 代码性能优化小技巧]]></title>
+    <title type="html"><![CDATA[Android Training[Performance] - 代码性能优化小技巧]]></title>
     <link href="http://kesenhoo.github.com/blog/2013/04/06/android-training-performance-tips/"/>
     <updated>2013-04-06T18:27:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2013/04/06/android-training-performance-tips</id>
@@ -283,7 +283,7 @@ Foo$Inner里面有访问外部类的一个变量。这样的做法会给系统�
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training Performance - 优化电池续航能力(Lesson 4 - 判断并监测网络连接状态)]]></title>
+    <title type="html"><![CDATA[Android Training[Performance] - 优化电池续航能力(Lesson 4 - 判断并监测网络连接状态)]]></title>
     <link href="http://kesenhoo.github.com/blog/2012/03/24/android-training-performance-optimiizing-battery-life-lesson-4/"/>
     <updated>2012-03-24T16:37:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2012/03/24/android-training-performance-optimiizing-battery-life-lesson-4</id>
@@ -329,7 +329,7 @@ ComponentName receiver = new ComponentName(context, myReceiver.class);</p>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training Performance - 优化电池续航能力(Lesson 3 - 判断并监测网络连接状态)]]></title>
+    <title type="html"><![CDATA[Android Training[Performance] - 优化电池续航能力(Lesson 3 - 判断并监测网络连接状态)]]></title>
     <link href="http://kesenhoo.github.com/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-3/"/>
     <updated>2012-03-23T21:09:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-3</id>
@@ -380,7 +380,7 @@ boolean isWiFi = activeNetwork.getType() == ConnectivityManager.TYPE_WIFI;
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training Performance - 优化电池续航能力(Lesson 2 - 判断设备的停驻模式)]]></title>
+    <title type="html"><![CDATA[Android Training[Performance] - 优化电池续航能力(Lesson 2 - 判断设备的停驻模式)]]></title>
     <link href="http://kesenhoo.github.com/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-2/"/>
     <updated>2012-03-23T19:53:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-2</id>

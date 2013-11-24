@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android | 四方城]]></title>
   <link href="http://kesenhoo.github.com/blog/categories/android/atom.xml" rel="self"/>
   <link href="http://kesenhoo.github.com/"/>
-  <updated>2013-11-17T15:39:04+08:00</updated>
+  <updated>2013-11-24T11:39:01+08:00</updated>
   <id>http://kesenhoo.github.com/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Android Training Performance - 管理应用的内存]]></title>
+    <title type="html"><![CDATA[Android Training[Performance] - 管理应用的内存]]></title>
     <link href="http://kesenhoo.github.com/blog/2013/10/19/android-training-performance-managing_your_app_memory/"/>
     <updated>2013-10-19T15:18:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2013/10/19/android-training-performance-managing_your_app_memory</id>
@@ -88,7 +88,7 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training UI - 创建自定义的Views(Lesson 4 - 优化Views)]]></title>
+    <title type="html"><![CDATA[Android Training[UI] - 创建自定义的Views(Lesson 4 - 优化Views)]]></title>
     <link href="http://kesenhoo.github.com/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-4/"/>
     <updated>2013-08-18T17:30:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-4</id>
@@ -161,7 +161,7 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training UI - 创建自定义的Views(Lesson 3 - 处理View的交互性)]]></title>
+    <title type="html"><![CDATA[Android Training[UI] - 创建自定义的Views(Lesson 3 - 处理View的交互性)]]></title>
     <link href="http://kesenhoo.github.com/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-3/"/>
     <updated>2013-08-18T15:01:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-3</id>
@@ -306,7 +306,7 @@ animate().rotation(targetAngle).setDuration(ANIM_DURATION).start();
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training UI - 创建自定义的Views(Lesson 2 - 自定义Drawing)]]></title>
+    <title type="html"><![CDATA[Android Training[UI] - 创建自定义的Views(Lesson 2 - 自定义Drawing)]]></title>
     <link href="http://kesenhoo.github.com/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-2/"/>
     <updated>2013-06-30T20:15:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-2</id>
@@ -465,7 +465,7 @@ protected void onDraw(Canvas canvas) {
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training UI - 创建自定义的Views(Lesson 1 - 创建一个View类)]]></title>
+    <title type="html"><![CDATA[Android Training[UI] - 创建自定义的Views(Lesson 1 - 创建一个View类)]]></title>
     <link href="http://kesenhoo.github.com/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-1/"/>
     <updated>2013-06-30T18:47:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-1</id>

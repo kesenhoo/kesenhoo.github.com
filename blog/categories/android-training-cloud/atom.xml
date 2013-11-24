@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android:Training:Cloud | 四方城]]></title>
   <link href="http://kesenhoo.github.com/blog/categories/android-training-cloud/atom.xml" rel="self"/>
   <link href="http://kesenhoo.github.com/"/>
-  <updated>2013-11-17T15:39:04+08:00</updated>
+  <updated>2013-11-24T11:39:01+08:00</updated>
   <id>http://kesenhoo.github.com/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Android Training Cloud - 云同步(Lesson 2 - 使用Backup API)]]></title>
+    <title type="html"><![CDATA[Android Training[Cloud] - 云同步(Lesson 2 - 使用Backup API)]]></title>
     <link href="http://kesenhoo.github.com/blog/2012/04/22/android-training-cloud-syncing-to-the-cloud-lesson-2/"/>
     <updated>2012-04-22T18:27:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2012/04/22/android-training-cloud-syncing-to-the-cloud-lesson-2</id>
@@ -145,7 +145,7 @@ import android.app.backup.BackupManager;<br/>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training Cloud - 云同步(Lesson 1 - 使用App Engine进行同步)]]></title>
+    <title type="html"><![CDATA[Android Training[Cloud] - 云同步(Lesson 1 - 使用App Engine进行同步)]]></title>
     <link href="http://kesenhoo.github.com/blog/2012/04/22/android-training-cloud-syncing-to-the-cloud-lesson-1/"/>
     <updated>2012-04-22T13:56:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2012/04/22/android-training-cloud-syncing-to-the-cloud-lesson-1</id>

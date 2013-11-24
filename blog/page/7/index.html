@@ -9,8 +9,8 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="Building a Dynamic UI with Fragments 学习这章节的先决条件: 了解Activity的基本概念 (see Managing the Activity Lifecycle)
-有使用 XML layouts 的经验 你还需要看的有: Fragments &hellip;">
+  <meta name="description" content="第3课:Parsing XML Data
+Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来记录更新的信息，以便用户进行订阅读取。 那么上传[?]与解析XML数据就成了app的一个常见的功能。 这一课会介绍如何解析XML文档并使用他们的数据 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -82,70 +82,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/11/27/android-training-03-building-a-dynamic-ui-with-fragments-lesson-0/">Android Training 03 - 使用Fragments建立动态的UI(Lesson 0 - 章节概览)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-11-27T14:38:00+08:00" pubdate data-updated="true">Nov 27<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/11/27/android-training-03-building-a-dynamic-ui-with-fragments-lesson-0/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>Building a Dynamic UI with Fragments</h1>
-
-<ul>
-<li>学习这章节的先决条件:
-
-<ul>
-<li>了解Activity的基本概念 (see <a href="http://developer.android.com/training/basics/activity-lifecycle/index.html">Managing the Activity Lifecycle</a>)</li>
-<li>有使用 XML layouts 的经验</li>
-</ul>
-</li>
-<li>你还需要看的有:
-
-<ul>
-<li><a href="http://developer.android.com/guide/components/fragments.html">Fragments</a></li>
-<li><a href="http://developer.android.com/guide/practices/tablets-and-handsets.html">Supporting Tablets and Handsets</a></li>
-</ul>
-</li>
-<li>DEMO:
-<a href="http://developer.android.com/shareables/training/FragmentBasics.zip">FragmentBasics.zip</a></li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/11/27/android-training-03-building-a-dynamic-ui-with-fragments-lesson-0/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/05/07/android-training-connectivity-network-operations-lesson-3/">Android Training Connectivity - 执行网络操作(Lesson 3 - 解析XML数据)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/05/07/android-training-connectivity-network-operations-lesson-3/">Android Training[Connectivity] - 执行网络操作(Lesson 3 - 解析XML数据)</a></h1>
     
     
       <p class="meta">
@@ -205,7 +142,7 @@ Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来�
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/05/07/android-training-connectivity-network-operations-lesson-2/">Android Training Connectivity - 执行网络操作(Lesson 2 - 管理网络使用方法)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/05/07/android-training-connectivity-network-operations-lesson-2/">Android Training[Connectivity] - 执行网络操作(Lesson 2 - 管理网络使用方法)</a></h1>
     
     
       <p class="meta">
@@ -255,7 +192,7 @@ Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来�
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/05/03/android-training-connectivity-network-operations-lesson-1/">Android Training Connectivity - 执行网络操作(Lesson 1 - HTTP连接网络)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/05/03/android-training-connectivity-network-operations-lesson-1/">Android Training[Connectivity] - 执行网络操作(Lesson 1 - HTTP连接网络)</a></h1>
     
     
       <p class="meta">
@@ -354,6 +291,61 @@ Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来�
 
     </article>
   
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/04/28/android-training-01-managing-the-activity-lifecycle-lesson-3/">Android Training 01 - 详解Activity生命周期(Lesson 3 - 停止与重启activity)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-28T18:27:00+08:00" pubdate data-updated="true">Apr 28<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/04/28/android-training-01-managing-the-activity-lifecycle-lesson-3/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><ul>
+<li>恰当的停止与重启你的activity是很重要的，在activity生命周期中，他们能确保用户感知到程序的存在并不会丢失他们的进度。在下面一些关键的场景中会涉及到停止与重启：
+
+<ul>
+<li>用户打开最近使用app的菜单并切换你的app到另外一个app，这个时候你的app是被停止的。如果用户通过统一的办法回到你的app，那么你的activity会重启.</li>
+<li>用户在你的app里面执行启动一个新的activity的操作，当前activity会在第二个activity被创建后停止。如果用户点击back按钮，第一个activtiy会被重启.</li>
+<li>用户在使用你的app时接受到一个来电通话.</li>
+</ul>
+</li>
+<li><a href="http://developer.android.com/reference/android/app/Activity.html">Activity</a>类提供了onStop()与onRestart(), 方法来允许你在activity停止与重启时进行调用。不像暂停状态是部分阻塞UI，停止状态是UI不在可见并且用户的焦点转移到另一个activity中.</li>
+<li><strong>Note:</strong>因为系统在activity停止时会在内存中保存了Activity实例。有些时候你不需要实现onStop(),onRestart()甚至是onStart()方法. 因为大多数的activity相对比较简单，activity会自己停止与重启，你只需要使用onPause()来停止正在运行的动作并断开系统资源链接。</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/04/28/android-training-01-managing-the-activity-lifecycle-lesson-3/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/8/">&larr; Older</a>
@@ -375,31 +367,31 @@ Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来�
       </li>
     
       <li class="post">
-        <a href="/blog/2013/10/19/android-training-performance-managing_your_app_memory/">Android Training Performance - 管理应用的内存</a>
+        <a href="/blog/2013/10/19/android-training-performance-managing_your_app_memory/">Android Training[Performance] - 管理应用的内存</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-4/">Android Training UI - 创建自定义的Views(Lesson 4 - 优化Views)</a>
+        <a href="/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-4/">Android Training[UI] - 创建自定义的Views(Lesson 4 - 优化Views)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-3/">Android Training UI - 创建自定义的Views(Lesson 3 - 处理View的交互性)</a>
+        <a href="/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-3/">Android Training[UI] - 创建自定义的Views(Lesson 3 - 处理View的交互性)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-2/">Android Training UI - 创建自定义的Views(Lesson 2 - 自定义Drawing)</a>
+        <a href="/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-2/">Android Training[UI] - 创建自定义的Views(Lesson 2 - 自定义Drawing)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-1/">Android Training UI - 创建自定义的Views(Lesson 1 - 创建一个View类)</a>
+        <a href="/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-1/">Android Training[UI] - 创建自定义的Views(Lesson 1 - 创建一个View类)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-0/">Android Training UI - 创建自定义的Views(Lesson 0 - 章节概览)</a>
+        <a href="/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-0/">Android Training[UI] - 创建自定义的Views(Lesson 0 - 章节概览)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2013/05/19/android-training-graphics-displaying-bitmaps-efficiently-lesson-4/">Android Training Graphics - 高效地显示Bitmap(Lesson 4 - 优化Bitmap的内存使用)</a>
+        <a href="/blog/2013/05/19/android-training-graphics-displaying-bitmaps-efficiently-lesson-4/">Android Training[Graphics] - 高效地显示Bitmap(Lesson 4 - 优化Bitmap的内存使用)</a>
       </li>
     
       <li class="post">

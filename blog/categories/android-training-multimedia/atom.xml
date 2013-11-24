@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android:Training:Multimedia | 四方城]]></title>
   <link href="http://kesenhoo.github.com/blog/categories/android-training-multimedia/atom.xml" rel="self"/>
   <link href="http://kesenhoo.github.com/"/>
-  <updated>2013-11-17T15:39:04+08:00</updated>
+  <updated>2013-11-24T11:39:01+08:00</updated>
   <id>http://kesenhoo.github.com/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Android Training Multimedia - 捕获照片(Lesson 3 - 直接操控相机)]]></title>
+    <title type="html"><![CDATA[Android Training[Multimedia] - 捕获照片(Lesson 3 - 直接操控相机)]]></title>
     <link href="http://kesenhoo.github.com/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-3/"/>
     <updated>2012-12-18T23:59:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-3</id>
@@ -235,7 +235,7 @@ private void stopPreviewAndFreeCamera() {</p>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training Multimedia - 捕获照片(Lesson 2 - 简单的录像动作)]]></title>
+    <title type="html"><![CDATA[Android Training[Multimedia] - 捕获照片(Lesson 2 - 简单的录像动作)]]></title>
     <link href="http://kesenhoo.github.com/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-2/"/>
     <updated>2012-12-18T23:21:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-2</id>
@@ -301,7 +301,7 @@ mVideoView.setVideoURI(mVideoUri);
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training Multimedia - 捕获照片(Lesson 1 - 简单的拍照动作)]]></title>
+    <title type="html"><![CDATA[Android Training[Multimedia] - 捕获照片(Lesson 1 - 简单的拍照动作)]]></title>
     <link href="http://kesenhoo.github.com/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-1/"/>
     <updated>2012-12-18T22:21:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-1</id>
@@ -475,7 +475,7 @@ mImageView.setImageBitmap(bitmap);
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training Multimedia - 音频播放(Lesson 3 - 音频设备的相关问题)]]></title>
+    <title type="html"><![CDATA[Android Training[Multimedia] - 音频播放(Lesson 3 - 音频设备的相关问题)]]></title>
     <link href="http://kesenhoo.github.com/blog/2012/03/23/android-training-multimedia-managing-audio-playback-lesson-3/"/>
     <updated>2012-03-23T15:28:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2012/03/23/android-training-multimedia-managing-audio-playback-lesson-3</id>
@@ -557,7 +557,7 @@ public void onReceive(Context context, Intent intent) {
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training Multimedia - 音频播放(Lesson 2 - 管理音频焦点Audio Focus)]]></title>
+    <title type="html"><![CDATA[Android Training[Multimedia] - 音频播放(Lesson 2 - 管理音频焦点Audio Focus)]]></title>
     <link href="http://kesenhoo.github.com/blog/2012/03/22/android-training-multimedia-managing-audio-playback-lesson-2/"/>
     <updated>2012-03-22T23:16:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2012/03/22/android-training-multimedia-managing-audio-playback-lesson-2</id>

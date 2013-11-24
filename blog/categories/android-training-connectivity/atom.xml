@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android:Training:Connectivity | 四方城]]></title>
   <link href="http://kesenhoo.github.com/blog/categories/android-training-connectivity/atom.xml" rel="self"/>
   <link href="http://kesenhoo.github.com/"/>
-  <updated>2013-11-17T15:39:04+08:00</updated>
+  <updated>2013-11-24T11:39:01+08:00</updated>
   <id>http://kesenhoo.github.com/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Android Training Connectivity - 执行网络操作(Lesson 3 - 解析XML数据)]]></title>
+    <title type="html"><![CDATA[Android Training[Connectivity] - 执行网络操作(Lesson 3 - 解析XML数据)]]></title>
     <link href="http://kesenhoo.github.com/blog/2012/05/07/android-training-connectivity-network-operations-lesson-3/"/>
     <updated>2012-05-07T17:05:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2012/05/07/android-training-connectivity-network-operations-lesson-3</id>
@@ -466,7 +466,7 @@ return conn.getInputStream();
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training Connectivity - 执行网络操作(Lesson 2 - 管理网络使用方法)]]></title>
+    <title type="html"><![CDATA[Android Training[Connectivity] - 执行网络操作(Lesson 2 - 管理网络使用方法)]]></title>
     <link href="http://kesenhoo.github.com/blog/2012/05/07/android-training-connectivity-network-operations-lesson-2/"/>
     <updated>2012-05-07T13:43:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2012/05/07/android-training-connectivity-network-operations-lesson-2</id>
@@ -783,7 +783,7 @@ if (WIFI.equals(sPref) &amp;&amp; networkInfo != null &amp;&amp; networkInfo.get
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training Connectivity - 执行网络操作(Lesson 1 - HTTP连接网络)]]></title>
+    <title type="html"><![CDATA[Android Training[Connectivity] - 执行网络操作(Lesson 1 - HTTP连接网络)]]></title>
     <link href="http://kesenhoo.github.com/blog/2012/05/03/android-training-connectivity-network-operations-lesson-1/"/>
     <updated>2012-05-03T15:21:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2012/05/03/android-training-connectivity-network-operations-lesson-1</id>
@@ -1004,7 +1004,7 @@ return new String(buffer);
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training Connectivity - 优化下载效率(Lesson 3 - 使用缓存来避免重复下载)]]></title>
+    <title type="html"><![CDATA[Android Training[Connectivity] - 优化下载效率(Lesson 3 - 使用缓存来避免重复下载)]]></title>
     <link href="http://kesenhoo.github.com/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-3/"/>
     <updated>2012-03-26T17:59:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-3</id>
@@ -1086,7 +1086,7 @@ Class.forName("android.net.http.HttpResponseCache")
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training Connectivity - 优化下载效率(Lesson 2 - 调整更新的频率[C2DM与退避算法])]]></title>
+    <title type="html"><![CDATA[Android Training[Connectivity] - 优化下载效率(Lesson 2 - 调整更新的频率[C2DM与退避算法])]]></title>
     <link href="http://kesenhoo.github.com/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-2/"/>
     <updated>2012-03-26T16:51:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-2</id>

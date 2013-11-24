@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android:Training:Graphics | 四方城]]></title>
   <link href="http://kesenhoo.github.com/blog/categories/android-training-graphics/atom.xml" rel="self"/>
   <link href="http://kesenhoo.github.com/"/>
-  <updated>2013-11-17T15:39:04+08:00</updated>
+  <updated>2013-11-24T11:39:01+08:00</updated>
   <id>http://kesenhoo.github.com/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Android Training Graphics - 高效地显示Bitmap(Lesson 4 - 优化Bitmap的内存使用)]]></title>
+    <title type="html"><![CDATA[Android Training[Graphics] - 高效地显示Bitmap(Lesson 4 - 优化Bitmap的内存使用)]]></title>
     <link href="http://kesenhoo.github.com/blog/2013/05/19/android-training-graphics-displaying-bitmaps-efficiently-lesson-4/"/>
     <updated>2013-05-19T14:43:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2013/05/19/android-training-graphics-displaying-bitmaps-efficiently-lesson-4</id>
@@ -263,7 +263,7 @@ return candidate.getWidth() == width &amp;&amp; candidate.getHeight() == height;
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training Graphics - 高效地显示Bitmap(Lesson 5 - 呈现Bitmap到UI上)]]></title>
+    <title type="html"><![CDATA[Android Training[Graphics] - 高效地显示Bitmap(Lesson 5 - 呈现Bitmap到UI上)]]></title>
     <link href="http://kesenhoo.github.com/blog/2012/04/26/android-training-graphics-displaying-bitmaps-efficiently-lesson-5/"/>
     <updated>2012-04-26T22:27:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2012/04/26/android-training-graphics-displaying-bitmaps-efficiently-lesson-5</id>
@@ -606,7 +606,7 @@ private static BitmapWorkerTask getBitmapWorkerTask(ImageView imageView) {
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training Graphics - 高效地显示Bitmap(Lesson 3 - 两种缓存Bitmap的方式)]]></title>
+    <title type="html"><![CDATA[Android Training[Graphics] - 高效地显示Bitmap(Lesson 3 - 两种缓存Bitmap的方式)]]></title>
     <link href="http://kesenhoo.github.com/blog/2012/04/24/android-training-graphics-displaying-bitmaps-efficiently-lesson-3/"/>
     <updated>2012-04-24T12:59:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2012/04/24/android-training-graphics-displaying-bitmaps-efficiently-lesson-3</id>
@@ -875,7 +875,7 @@ public void onCreate(Bundle savedInstanceState) {
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training Graphics - 高效地显示Bitmap(Lesson 2 - 在UI线程之外处理Bitmaps)]]></title>
+    <title type="html"><![CDATA[Android Training[Graphics] - 高效地显示Bitmap(Lesson 2 - 在UI线程之外处理Bitmaps)]]></title>
     <link href="http://kesenhoo.github.com/blog/2012/04/23/android-training-graphics-displaying-bitmaps-efficiently-lesson-2/"/>
     <updated>2012-04-23T19:55:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2012/04/23/android-training-graphics-displaying-bitmaps-efficiently-lesson-2</id>
@@ -1046,7 +1046,7 @@ protected void onPostExecute(Bitmap bitmap) {
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training Graphics - 高效地显示Bitmap(Lesson 1 - 有效地加载大尺寸图片)]]></title>
+    <title type="html"><![CDATA[Android Training[Graphics] - 高效地显示Bitmap(Lesson 1 - 有效地加载大尺寸图片)]]></title>
     <link href="http://kesenhoo.github.com/blog/2012/04/22/android-training-graphics-displaying-bitmaps-efficiently-lesson-1/"/>
     <updated>2012-04-22T11:57:00+08:00</updated>
     <id>http://kesenhoo.github.com/blog/2012/04/22/android-training-graphics-displaying-bitmaps-efficiently-lesson-1</id>
