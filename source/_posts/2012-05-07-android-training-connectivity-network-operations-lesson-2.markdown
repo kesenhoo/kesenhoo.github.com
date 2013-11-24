@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training Connectivity - 执行网络操作(Lesson 2 - 管理网络使用方法)"
+title: "Android Training[Connectivity] - 执行网络操作(Lesson 2 - 管理网络使用方法)"
 date: 2012-05-07 13:43
 comments: true
 sidebar: false

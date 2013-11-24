@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training Performance - 提升布局文件的性能(Lesson 4 - 使用ViewHolder来提升ListView的性能)"
+title: "Android Training[Performance] - 提升布局文件的性能(Lesson 4 - 使用ViewHolder来提升ListView的性能)"
 date: 2012-03-21 21:20
 comments: true
 sidebar: false

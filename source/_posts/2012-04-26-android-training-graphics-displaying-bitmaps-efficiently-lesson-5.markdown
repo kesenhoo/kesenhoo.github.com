@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training Graphics - 高效地显示Bitmap(Lesson 5 - 呈现Bitmap到UI上)"
+title: "Android Training[Graphics] - 高效地显示Bitmap(Lesson 5 - 呈现Bitmap到UI上)"
 date: 2012-04-26 22:27
 comments: true
 sidebar: false

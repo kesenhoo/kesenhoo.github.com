@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training UserInfo - 记住用户的信息(Lesson 1 - 使用AccountManager来记录用户)"
+title: "Android Training[UserInfo] - 记住用户的信息(Lesson 1 - 使用AccountManager来记录用户)"
 date: 2012-03-27 11:12
 comments: true
 sidebar: false

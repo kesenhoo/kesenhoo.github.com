@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training Performance - 优化电池续航能力(Lesson 3 - 判断并监测网络连接状态)"
+title: "Android Training[Performance] - 优化电池续航能力(Lesson 3 - 判断并监测网络连接状态)"
 date: 2012-03-23 21:09
 comments: true
 sidebar: false

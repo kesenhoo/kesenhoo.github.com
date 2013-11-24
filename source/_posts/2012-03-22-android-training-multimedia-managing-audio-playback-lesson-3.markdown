@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training Multimedia - 音频播放(Lesson 3 - 音频设备的相关问题)"
+title: "Android Training[Multimedia] - 音频播放(Lesson 3 - 音频设备的相关问题)"
 date: 2012-03-23 15:28
 comments: true
 sidebar: false

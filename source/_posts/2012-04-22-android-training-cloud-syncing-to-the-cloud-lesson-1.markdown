@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training Cloud - 云同步(Lesson 1 - 使用App Engine进行同步)"
+title: "Android Training[Cloud] - 云同步(Lesson 1 - 使用App Engine进行同步)"
 date: 2012-04-22 13:56
 comments: true
 sidebar: false

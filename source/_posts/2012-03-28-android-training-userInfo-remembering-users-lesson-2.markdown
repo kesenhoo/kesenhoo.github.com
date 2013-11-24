@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training UserInfo - 记住用户的信息(Lesson 2 - 使用OAuth2来进行身份鉴定)"
+title: "Android Training[UserInfo] - 记住用户的信息(Lesson 2 - 使用OAuth2来进行身份鉴定)"
 date: 2012-03-28 18:53
 comments: true
 sidebar: false

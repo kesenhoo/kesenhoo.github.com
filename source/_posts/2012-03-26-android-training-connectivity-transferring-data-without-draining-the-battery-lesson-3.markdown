@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training Connectivity - 优化下载效率(Lesson 3 - 使用缓存来避免重复下载)"
+title: "Android Training[Connectivity] - 优化下载效率(Lesson 3 - 使用缓存来避免重复下载)"
 date: 2012-03-26 17:59
 comments: true
 sidebar: false

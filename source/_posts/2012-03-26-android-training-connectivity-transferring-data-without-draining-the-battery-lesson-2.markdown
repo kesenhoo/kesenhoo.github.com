@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training Connectivity - 优化下载效率(Lesson 2 - 调整更新的频率[C2DM与退避算法])"
+title: "Android Training[Connectivity] - 优化下载效率(Lesson 2 - 调整更新的频率[C2DM与退避算法])"
 date: 2012-03-26 16:51
 comments: true
 sidebar: false

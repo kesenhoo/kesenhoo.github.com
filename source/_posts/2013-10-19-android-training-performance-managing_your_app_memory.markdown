@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training Performance - 管理应用的内存"
+title: "Android Training[Performance] - 管理应用的内存"
 date: 2013-10-19 15:18
 comments: true
 sidebar: false

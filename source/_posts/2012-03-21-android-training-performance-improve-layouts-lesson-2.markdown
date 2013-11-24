@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training Performance - 提升布局文件的性能(Lesson 2 - 使用include标签重用Layout)"
+title: "Android Training[Performance] - 提升布局文件的性能(Lesson 2 - 使用include标签重用Layout)"
 date: 2012-03-21 18:06
 comments: true
 sidebar: false

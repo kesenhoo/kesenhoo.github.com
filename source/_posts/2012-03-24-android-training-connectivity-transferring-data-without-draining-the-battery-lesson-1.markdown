@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training Connectivity - 优化下载效率(Lesson 1 - 用有效率的网络访问方式来优化下载)"
+title: "Android Training[Connectivity] - 优化下载效率(Lesson 1 - 用有效率的网络访问方式来优化下载)"
 date: 2012-03-25 16:54
 comments: true
 sidebar: false

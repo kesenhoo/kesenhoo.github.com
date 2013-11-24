@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training Performance - 优化电池续航能力(Lesson 2 - 判断设备的停驻模式)"
+title: "Android Training[Performance] - 优化电池续航能力(Lesson 2 - 判断设备的停驻模式)"
 date: 2012-03-23 19:53
 comments: true
 sidebar: false

@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training Performance - 优化电池续航能力(Lesson 1 - 监测设备的电量与充电状态)"
+title: "Android Training[Performance] - 优化电池续航能力(Lesson 1 - 监测设备的电量与充电状态)"
 date: 2012-03-23 18:28
 comments: true
 sidebar: false

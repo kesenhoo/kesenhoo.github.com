@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training Multimedia - 捕获照片(Lesson 3 - 直接操控相机)"
+title: "Android Training[Multimedia] - 捕获照片(Lesson 3 - 直接操控相机)"
 date: 2012-12-18 23:59
 comments: true
 sidebar: false

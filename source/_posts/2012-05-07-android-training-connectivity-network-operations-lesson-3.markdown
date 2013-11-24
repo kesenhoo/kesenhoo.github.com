@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training Connectivity - 执行网络操作(Lesson 3 - 解析XML数据)"
+title: "Android Training[Connectivity] - 执行网络操作(Lesson 3 - 解析XML数据)"
 date: 2012-05-07 17:05
 comments: true
 sidebar: false

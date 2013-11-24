@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training Connectivity - 优化下载效率(Lesson 4 - 根据网络类型来切换下载模式)"
+title: "Android Training[Connectivity] - 优化下载效率(Lesson 4 - 根据网络类型来切换下载模式)"
 date: 2012-03-26 21：36
 comments: true
 sidebar: false

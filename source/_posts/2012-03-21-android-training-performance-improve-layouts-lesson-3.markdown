@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training Performance - 提升布局文件的性能(Lesson 3 - 使用viewStub按需载入视图)"
+title: "Android Training[Performance] - 提升布局文件的性能(Lesson 3 - 使用viewStub按需载入视图)"
 date: 2012-03-21 18:47
 comments: true
 sidebar: false

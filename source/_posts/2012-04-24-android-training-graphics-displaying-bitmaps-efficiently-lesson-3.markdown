@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training Graphics - 高效地显示Bitmap(Lesson 3 - 两种缓存Bitmap的方式)"
+title: "Android Training[Graphics] - 高效地显示Bitmap(Lesson 3 - 两种缓存Bitmap的方式)"
 date: 2012-04-24 12:59
 comments: true
 sidebar: false

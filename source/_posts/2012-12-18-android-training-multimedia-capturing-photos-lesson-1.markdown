@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training Multimedia - 捕获照片(Lesson 1 - 简单的拍照动作)"
+title: "Android Training[Multimedia] - 捕获照片(Lesson 1 - 简单的拍照动作)"
 date: 2012-12-18 22:21
 comments: true
 sidebar: false

@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training Multimedia - 音频播放(Lesson 2 - 管理音频焦点Audio Focus)"
+title: "Android Training[Multimedia] - 音频播放(Lesson 2 - 管理音频焦点Audio Focus)"
 date: 2012-03-22 23:16
 comments: true
 sidebar: false

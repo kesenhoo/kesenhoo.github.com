@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training Graphics - 高效地显示Bitmap(Lesson 2 - 在UI线程之外处理Bitmaps)"
+title: "Android Training[Graphics] - 高效地显示Bitmap(Lesson 2 - 在UI线程之外处理Bitmaps)"
 date: 2012-04-23 19:55
 comments: true
 sidebar: false

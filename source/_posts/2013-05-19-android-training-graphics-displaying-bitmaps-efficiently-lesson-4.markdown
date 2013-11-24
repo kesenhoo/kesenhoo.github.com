@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training Graphics - 高效地显示Bitmap(Lesson 4 - 优化Bitmap的内存使用)"
+title: "Android Training[Graphics] - 高效地显示Bitmap(Lesson 4 - 优化Bitmap的内存使用)"
 date: 2013-05-19 14:43
 comments: true
 sidebar: false

@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training UserInfo - 记住用户的信息(Lesson 3 - 创建自定义的账户类型)"
+title: "Android Training[UserInfo] - 记住用户的信息(Lesson 3 - 创建自定义的账户类型)"
 date: 2012-03-29 12:37
 comments: true
 sidebar: false

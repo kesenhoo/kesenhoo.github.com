@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training Performance - 提升布局文件的性能(Lesson 1 - 优化布局的层级)"
+title: "Android Training[Performance] - 提升布局文件的性能(Lesson 1 - 优化布局的层级)"
 date: 2012-03-21 17:14
 comments: true
 sidebar: false

@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training Cloud - 云同步(Lesson 2 - 使用Backup API)"
+title: "Android Training[Cloud] - 云同步(Lesson 2 - 使用Backup API)"
 date: 2012-04-22 18:27
 comments: true
 sidebar: false

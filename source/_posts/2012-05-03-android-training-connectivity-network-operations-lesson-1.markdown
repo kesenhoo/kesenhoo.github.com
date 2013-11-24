@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training Connectivity - 执行网络操作(Lesson 1 - HTTP连接网络)"
+title: "Android Training[Connectivity] - 执行网络操作(Lesson 1 - HTTP连接网络)"
 date: 2012-05-03 15:21
 comments: true
 sidebar: false

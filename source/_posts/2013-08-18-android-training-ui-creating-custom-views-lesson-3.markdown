@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training UI - 创建自定义的Views(Lesson 3 - 处理View的交互性)"
+title: "Android Training[UI] - 创建自定义的Views(Lesson 3 - 处理View的交互性)"
 date: 2013-08-18 15:01
 comments: true
 sidebar: false

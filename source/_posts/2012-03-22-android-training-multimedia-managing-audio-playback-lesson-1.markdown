@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training Multimedia - 音频播放(Lesson 1 - 控制app的音量与播放)"
+title: "Android Training[Multimedia] - 音频播放(Lesson 1 - 控制app的音量与播放)"
 date: 2012-03-21 23:27
 comments: true
 sidebar: false

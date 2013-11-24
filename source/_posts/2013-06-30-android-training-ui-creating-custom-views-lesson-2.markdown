@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training UI - 创建自定义的Views(Lesson 2 - 自定义Drawing)"
+title: "Android Training[UI] - 创建自定义的Views(Lesson 2 - 自定义Drawing)"
 date: 2013-06-30 20:15
 comments: true
 sidebar: false
