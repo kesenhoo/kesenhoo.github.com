@@ -50,7 +50,19 @@ Android通过下面几个方式在不同的Process中来共享RAM:
 更对关于不在foreground的进程是Android是如何决定kill掉哪一类进程的问题，请参考[Processes and Threads](http://developer.android.com/guide/components/processes-and-threads.html).
 
 ## 第2部分:你的应用该如何管理内存 ##
-待续……
+你应该在开发过程的每一个阶段都考虑到RAM的有限性，甚至包括在开发开始之前的设计阶段。有许多种设计与实现方式，他们有着不同的效率，尽管是对同样一种技术的不断组合与演变。
+
+为了使得你的应用效率更高，你应该在设计与实现代码时，遵循下面的技术要点。
+
+### 1)珍惜Services资源 ###
+如果你的app需要在后台使用service，除非它被触发执行一个任务，否则其他时候都应该是非运行状态。同样需要注意当这个service已经完成任务后停止service失败引起的泄漏。
+
+当你启动一个service，系统会倾向为了这个Service而一直保留它的Process。这使得process的运行代价很高，因为系统没有办法把Service所占用的RAM让给其他组件或者被Paged out。这减少了系统能够存放到LRU缓存当中的process数量，它会影响app之间的切换效率。它甚至会导致系统内存使用不稳定，从而无法继续Hold住
+所有目前正在运行的Service。
+
+The best way to limit the lifespan of your service is to use an IntentService, which finishes itself as soon as it's done handling the intent that started it. For more information, read Running in a Background Service .
+
+Leaving a service running when it’s not needed is one of the worst memory-management mistakes an Android app can make. So don’t be greedy by keeping a service for your app running. Not only will it increase the risk of your app performing poorly due to RAM constraints, but users will discover such misbehaving apps and uninstall them.
 
 
 ***
