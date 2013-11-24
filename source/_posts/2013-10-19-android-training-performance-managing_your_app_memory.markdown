@@ -60,9 +60,21 @@ Android通过下面几个方式在不同的Process中来共享RAM:
 当你启动一个service，系统会倾向为了这个Service而一直保留它的Process。这使得process的运行代价很高，因为系统没有办法把Service所占用的RAM让给其他组件或者被Paged out。这减少了系统能够存放到LRU缓存当中的process数量，它会影响app之间的切换效率。它甚至会导致系统内存使用不稳定，从而无法继续Hold住
 所有目前正在运行的Service。
 
-The best way to limit the lifespan of your service is to use an IntentService, which finishes itself as soon as it's done handling the intent that started it. For more information, read Running in a Background Service .
+限制你的service的最好办法是使用[IntentService](http://developer.android.com/reference/android/app/IntentService.html), 它会在处理完扔给它的intent任务之后尽快结束自己。更多信息，请阅读[Running in a Background Service](http://developer.android.com/training/run-background-service/index.html).
 
-Leaving a service running when it’s not needed is one of the worst memory-management mistakes an Android app can make. So don’t be greedy by keeping a service for your app running. Not only will it increase the risk of your app performing poorly due to RAM constraints, but users will discover such misbehaving apps and uninstall them.
+当一个service已经不需要的时候还继续保留它，这对Android应用的内存管理来说是**最糟糕的错误之一**。因此千万不要贪婪的使得一个Service持续保留。不仅仅是因为它会使得你的app因RAM的限制而性能糟糕，而且用户会发现那些行为奇怪的app并且卸载它。
+
+### 2)当你的UI隐藏时释放内存 ###
+当用户切换到其它app并且你的app UI不再可见时，你应该释放你的UI上占用的任何资源。在这个时候释放UI资源可以显著的增加系统cached process的能力，它会对用户的质量体验有着直接的影响。
+
+为了能够接收到用户离开你的UI时的通知，你需要实现Activtiy类里面的[onTrimMemory()](http://developer.android.com/reference/android/content/ComponentCallbacks2.html#onTrimMemory(int))回调方法。你应该使用这个方法来监听到[TRIM_MEMORY_UI_HIDDEN](http://developer.android.com/reference/android/content/ComponentCallbacks2.html#TRIM_MEMORY_UI_HIDDEN)级别, 它意味着你的UI已经隐藏，你应该释放那些仅仅被你的UI使用的资源。
+
+请注意：你的app仅仅会在所有UI组件的被隐藏的时候接收到onTrimMemory()的回调并带有参数TRIM_MEMORY_UI_HIDDEN。这与onStop()的回调是不同的，onStop会在activity的实例隐藏时会执行，例如当用户从你的app的某个activity跳转到另外一个activity时onStop会被执行。因此你应该实现onStop回调，并且在此回调里面释放activity的资源，例如网络连接，unregister广播接收者。除非接收到[onTrimMemory(TRIM_MEMORY_UI_HIDDEN)](http://developer.android.com/reference/android/content/ComponentCallbacks2.html#onTrimMemory(int))的回调，否者你不应该释放你的UI资源。这确保了用户从其他activity切回来时，你的UI资源仍然可用，并且可以迅速恢复activity。
+
+### 3)当内存紧张时释放部分内存 ###
+在你的app生命周期的任何阶段，onTrimMemory回调方法同样可以告诉你整个设备的内存资源已经开始紧张。你应该根据onTrimMemory方法中的内存级别来进一步决定释放哪些资源。
+
+* [TRIM_MEMORY_RUNNING_MODERATE](http://developer.android.com/reference/android/content/ComponentCallbacks2.html#TRIM_MEMORY_RUNNING_MODERATE):你的app正在运行并且不会被列为可杀死的。但是
 
 
 ***
