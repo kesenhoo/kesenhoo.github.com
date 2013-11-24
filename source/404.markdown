@@ -1,0 +1,15 @@
+---
+layout: page
+title: "404 Error"
+date: 2013-11-24 12:05
+comments: false
+footer: false
+sidebar: false
+---
+
+<script type="text/javascript" src="http://www.qq.com/404/search_children,js" charset="utf-8></script>
+
+
+
+
+
