@@ -75,17 +75,13 @@ Android通过下面几个方式在不同的Process中来共享RAM:
 在你的app生命周期的任何阶段，onTrimMemory回调方法同样可以告诉你整个设备的内存资源已经开始紧张。你应该根据onTrimMemory方法中的内存级别来进一步决定释放哪些资源。
 
 * [TRIM_MEMORY_RUNNING_MODERATE](http://developer.android.com/reference/android/content/ComponentCallbacks2.html#TRIM_MEMORY_RUNNING_MODERATE):你的app正在运行并且不会被列为可杀死的。但是设备正运行于低内存状态下，系统开始开始激活杀死LRU Cache中的Process的机制。
-
 * [TRIM_MEMORY_RUNNING_LOW](http://developer.android.com/reference/android/content/ComponentCallbacks2.html#TRIM_MEMORY_RUNNING_LOW):你的app正在运行且没有被列为可杀死的。但是设备正运行于更低内存的状态下，你应该释放不用的资源用来提升系统性能，这会直接影响了你的app的性能。
-
 * [TRIM_MEMORY_RUNNING_CRITICAL](http://developer.android.com/reference/android/content/ComponentCallbacks2.html#TRIM_MEMORY_RUNNING_CRITICAL):你的app仍在运行，但是系统已经把LRU Cache中的大多数进程都已经杀死，因此你应该立即释放所有非必须的资源。如果系统不能回收到足够的RAM数量，系统将会清除所有的LRU缓存中的进程，并且开始杀死那些之前被认为不应该杀死的进程，例如那个进程包含了一个运行中的Service。
 
 同样，当你的app进程正在被cached时，你可能会接受到从onTrimMemory()中返回的下面的值之一:
 
 * [TRIM_MEMORY_BACKGROUND](http://developer.android.com/reference/android/content/ComponentCallbacks2.html#TRIM_MEMORY_BACKGROUND): 系统正运行于低内存状态并且你的进程正处于LRU缓存名单中**最不容易杀掉的位置**。尽管你的app进程并不是处于被杀掉的高危险状态，系统可能已经开始杀掉LRU缓存中的其他进程了。你应该释放那些容易恢复的资源，以便于你的进程可以保留下来，这样当用户回退到你的app的时候才能够迅速恢复。
-
 * [TRIM_MEMORY_MODERATE](http://developer.android.com/reference/android/content/ComponentCallbacks2.html#TRIM_MEMORY_MODERATE): 系统正运行于低内存状态并且你的进程已经已经接近LRU名单的**中部位置**。如果系统开始变得更加内存紧张，你的进程是有可能被杀死的。
-
 * [TRIM_MEMORY_COMPLETE](http://developer.android.com/reference/android/content/ComponentCallbacks2.html#TRIM_MEMORY_COMPLETE): 系统正运行与低内存的状态并且你的进程正处于LRU名单中**最容易被杀掉的位置**。你应该释放任何不影响你的app恢复状态的资源。
 
 因为onTrimMemory()的回调是在**API 14**才被加进来的，对于老的版本，你可以使用[onLowMemory](http://developer.android.com/reference/android/content/ComponentCallbacks.html#onLowMemory())回调来进行兼容。onLowMemory相当与TRIM_MEMORY_COMPLETE。
@@ -120,10 +116,54 @@ Android通过下面几个方式在不同的Process中来共享RAM:
 ### 8)请注意代码“抽象”
 通常, 开发者使用抽象简单的作为"好的编程实践",因为抽象能够提升代码的灵活性与可维护性。然而，抽象会导致一个显著的开销:通常他们需要同等量的代码用于可执行。那些代码会被map到内存中。因此如果你的抽象没有显著的提升效率，应该尽量避免他们。
 
-### 9)Use nano protobufs for serialized data
-未完待续
+### 9)为序列化的数据使用nano protobufs
+[Protocol buffers](https://developers.google.com/protocol-buffers/docs/overview)是由Google为序列化结构数据而设计的，一种语言无关，平台无关，具有良好扩展性的协议。类似XML，却比XML更加轻量，快速，简单。如果你需要为你的数据实现协议化，你应该在客户端的代码中总是使用nano protobufs。通常的协议化操作会生成大量繁琐的代码，这容易给你的app带来许多问题:增加RAM的使用量，显著增加APK的大小，更慢的执行速度，更容易达到DEX的字符限制。
+
+关于更多细节，请参考[protobuf readme](https://android.googlesource.com/platform/external/protobuf/+/master/java/README.txt)的"Nano version"章节。
+
+### 10)Avoid dependency injection frameworks
+使用类似[Guice](https://code.google.com/p/google-guice/)或者[RoboGuice](https://github.com/roboguice/roboguice)等framework injection包是很有效的，因为他们能够简化你的代码。
+
+> RoboGuice 2 smoothes out some of the wrinkles in your Android development experience and makes things simple and fun. Do you always forget to check for null when you getIntent().getExtras()? RoboGuice 2 will help you. Think casting findViewById() to a TextView shouldn’t be necessary? RoboGuice 2 is on it. RoboGuice 2 takes the guesswork out of development. Inject your View, Resource, System Service, or any other object, and let RoboGuice 2 take care of the details.
+
+然而，那些框架会通过扫描你的代码执行许多初始化的操作，这会导致你的代码需要大量的RAM来map代码。但是mapped pages会长时间的被保留在RAM中。
+
+### 11)谨慎使用external libraries
+很多External library的代码都不是为移动网络环境而编写的，在移动客户端则显示的效率不高。至少，当你决定使用一个external library的时候，你应该针对移动网络做繁琐的porting与maintenance的工作。
+
+即使是针对Android而设计的library，也可能是很危险的，因为每一个library所做的事情都是不一样的。例如，其中一个lib使用的是nano protobufs, 而另外一个使用的是micro protobufs。那么这样，在你的app里面就有2种protobuf的实现方式。这样的冲突同样可能发生在输出日志，加载图片，缓存等等模块里面。
+
+同样不要陷入为了1个或者2个功能而导入整个library的陷阱。如果没有一个合适的库与你的需求相吻合，你应该考虑自己去实现，而不是导入一个大而全的解决方案。
+
+### 12)优化整体性能
+官方有列出许多优化整个app性能的文章：[Best Practices for Performance](http://developer.android.com/training/best-performance.html). 这篇文章就是其中之一。有些文章是讲解如何优化app的CPU使用效率，有些是如何优化app的内存使用效率。
+
+你还应该阅读[optimizing your UI](http://developer.android.com/tools/debugging/debugging-ui.html)来为layout进行优化。同样还应该关注lint工具所提出的建议，进行优化。
+
+### 13)使用ProGuard来剔除不需要的代码
+[ProGuard](http://developer.android.com/tools/help/proguard.html)能够通过移除不需要的代码，重命名类，域与方法等方对代码进行压缩,优化与混淆。使用ProGuard可以是的你的代码更加紧凑，这样能够使用更少mapped代码所需要的RAM。
+
+### 14)对最终的APK使用zipalign
+在编写完所有代码，并通过编译系统生成APK之后，你需要使用[zipalign](http://developer.android.com/tools/help/zipalign.html)对APK进行重新校准。如果你不做这个步骤，会导致你的APK需要更多的RAM，因为一些类似图片资源的东西不能被mapped。
+
+**Notes::**Google Play不接受没有经过zipalign的APK。
+
+### 15)分析你的RAM使用情况
+一旦你获取到一个相对稳定的版本后，需要分析你的app整个生命周期内使用的内存情况，并进行优化，更多细节请参考[Investigating Your RAM Usage](http://developer.android.com/tools/debugging/debugging-memory.html).
+
+### 16)使用多进程
+如果合适的话，有一个更高级的技术可以帮助你的app管理内存使用：通过把你的app组件切分成多个组件，运行在不同的进程中。这个技术必须谨慎使用，大多数app都不应该运行在多个进程中。因为如果使用不当，它会显著增加内存的使用，而不是减少。当你的app需要在后台运行与前台一样的大量的任务的时候，可以考虑使用这个技术。
+
+一个典型的例子是创建一个可以长时间后台播放的Music Player。如果整个app运行在一个进程中，当后台播放的时候，前台的那些UI资源也没有办法得到释放。类似这样的app可以切分成2个进程：一个用来操作UI，另外一个用来后台的Service.
+
+你可以通过在manifest文件中声明'android:process'属性来实现某个组件运行在另外一个进程的操作。
+
+```xml
+<service android:name=".PlaybackService"
+         android:process=":background" />
+```
+更多关于使用这个技术的细节，请参考原文，链接如下。
 
 ***
 **文章学习自[http://developer.android.com/training/articles/memory.html](http://developer.android.com/training/articles/memory.html)**
 **转载请注明出自[http://kesenhoo.github.com](http:://kesenhoo.github.com)，谢谢**
-
