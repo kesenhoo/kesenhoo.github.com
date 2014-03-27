@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: Android:Training:Connectivity | 四方城]]></title>
-  <link href="http://kesenhoo.github.com/blog/categories/android-training-connectivity/atom.xml" rel="self"/>
-  <link href="http://kesenhoo.github.com/"/>
-  <updated>2013-12-01T15:14:32+08:00</updated>
-  <id>http://kesenhoo.github.com/</id>
+  <title><![CDATA[Category: Android:Training:Connectivity | 胡凯]]></title>
+  <link href="http://hukai.me/blog/categories/android-training-connectivity/atom.xml" rel="self"/>
+  <link href="http://hukai.me/"/>
+  <updated>2014-03-27T23:56:08+08:00</updated>
+  <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Training[Connectivity] - 执行网络操作(Lesson 3 - 解析XML数据)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2012/05/07/android-training-connectivity-network-operations-lesson-3/"/>
+    <link href="http://hukai.me/blog/2012/05/07/android-training-connectivity-network-operations-lesson-3/"/>
     <updated>2012-05-07T17:05:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2012/05/07/android-training-connectivity-network-operations-lesson-3</id>
+    <id>http://hukai.me/blog/2012/05/07/android-training-connectivity-network-operations-lesson-3</id>
     <content type="html"><![CDATA[<p><strong>第3课:Parsing XML Data</strong>
 Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来记录更新的信息，以便用户进行订阅读取。</p>
 
@@ -467,9 +467,9 @@ return conn.getInputStream();
   
   <entry>
     <title type="html"><![CDATA[Android Training[Connectivity] - 执行网络操作(Lesson 2 - 管理网络使用方法)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2012/05/07/android-training-connectivity-network-operations-lesson-2/"/>
+    <link href="http://hukai.me/blog/2012/05/07/android-training-connectivity-network-operations-lesson-2/"/>
     <updated>2012-05-07T13:43:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2012/05/07/android-training-connectivity-network-operations-lesson-2</id>
+    <id>http://hukai.me/blog/2012/05/07/android-training-connectivity-network-operations-lesson-2</id>
     <content type="html"><![CDATA[<p><strong>第2课:Managing Network Usage</strong></p>
 
 <p>这一课会介绍如何细化管理使用的网络资源。如果你的程序需要执行很多网络操作，你应该提供用户设置选项来允许用户控制程序的数据偏好。例如，同步数据的频率，是否只在连接到WiFi才进行下载与上传操作，是否在漫游时使用套餐数据流量等等。这样用户才能在快到达流量上限时关闭你的程序获取数据功能。</p>
@@ -784,9 +784,9 @@ if (WIFI.equals(sPref) &amp;&amp; networkInfo != null &amp;&amp; networkInfo.get
   
   <entry>
     <title type="html"><![CDATA[Android Training[Connectivity] - 执行网络操作(Lesson 1 - HTTP连接网络)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2012/05/03/android-training-connectivity-network-operations-lesson-1/"/>
+    <link href="http://hukai.me/blog/2012/05/03/android-training-connectivity-network-operations-lesson-1/"/>
     <updated>2012-05-03T15:21:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2012/05/03/android-training-connectivity-network-operations-lesson-1</id>
+    <id>http://hukai.me/blog/2012/05/03/android-training-connectivity-network-operations-lesson-1</id>
     <content type="html"><![CDATA[<p>这一章会介绍一些基本的网络操作，监视网络链接（包括网络改变），让用户来控制app对网络的选择使用。还会介绍如何解析与使用XML数据。</p>
 
 <p><a href="http://developer.android.com/shareables/training/NetworkUsage.zip">NetworkUsage.zip</a></p>
@@ -1005,9 +1005,9 @@ return new String(buffer);
   
   <entry>
     <title type="html"><![CDATA[Android Training[Connectivity] - 优化下载效率(Lesson 3 - 使用缓存来避免重复下载)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-3/"/>
+    <link href="http://hukai.me/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-3/"/>
     <updated>2012-03-26T17:59:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-3</id>
+    <id>http://hukai.me/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-3</id>
     <content type="html"><![CDATA[<h2>Redundant Downloads are Redundant[重复下载是冗余的]</h2>
 
 <p>减少下载的最基本方法是仅仅下载那些你需要的。从数据的角度看，我们可以通过传递类似上次更新时间这样的参数来制定查询数据的条件。同样，在下载图片的时候，server那边最好能够减少图片的大小，而不是让我们下载完整大小的图片。</p>
@@ -1087,9 +1087,9 @@ Class.forName("android.net.http.HttpResponseCache")
   
   <entry>
     <title type="html"><![CDATA[Android Training[Connectivity] - 优化下载效率(Lesson 2 - 调整更新的频率[C2DM与退避算法])]]></title>
-    <link href="http://kesenhoo.github.com/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-2/"/>
+    <link href="http://hukai.me/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-2/"/>
     <updated>2012-03-26T16:51:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-2</id>
+    <id>http://hukai.me/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-2</id>
     <content type="html"><![CDATA[<h2>Minimizing the Effect of Regular Updates[最小化定期更新操作的副作用]</h2>
 
 <p>最佳的定时更新频率是不确定的，通常由设备状态，网络连接状态，用户行为与用户定义明确的偏好而决定。</p>

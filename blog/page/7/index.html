@@ -5,12 +5,12 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>四方城</title>
+  <title>胡凯</title>
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="第3课:Parsing XML Data
-Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来记录更新的信息，以便用户进行订阅读取。 那么上传[?]与解析XML数据就成了app的一个常见的功能。 这一课会介绍如何解析XML文档并使用他们的数据 &hellip;">
+  <meta name="description" content="Authenticating to OAuth2 Services[使用OAuth2来进行鉴权] 为了安全的访问线上服务，用户需要在service上进行鉴定，他们需要提供身份的证明。对于一个程序来说，如果是访问第三方的服务，那么这个安全问题就更加复杂。
+【比如，你有个资料在A服务器上， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -19,13 +19,13 @@ Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来�
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://kesenhoo.github.com/blog/page/7/">
+  <link rel="canonical" href="http://hukai.me/blog/page/7/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
   <script src="/javascripts/ender.js"></script>
   <script src="/javascripts/octopress.js" type="text/javascript"></script>
-  <link href="/atom.xml" rel="alternate" title="四方城" type="application/atom+xml">
+  <link href="/atom.xml" rel="alternate" title="胡凯" type="application/atom+xml">
   <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
 <link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
 <link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
@@ -48,7 +48,7 @@ Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来�
 
 <body   >
   <header role="banner"><hgroup>
-  <h1><a href="/">四方城</a></h1>
+  <h1><a href="/">胡凯</a></h1>
   
 </hgroup>
 
@@ -60,7 +60,7 @@ Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来�
   
 <form action="http://google.com/search" method="get">
   <fieldset role="search">
-    <input type="hidden" name="q" value="site:kesenhoo.github.com" />
+    <input type="hidden" name="q" value="site:hukai.me" />
     <input class="search" type="text" name="q" results="0" placeholder="Search"/>
   </fieldset>
 </form>
@@ -82,7 +82,7 @@ Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来�
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/05/07/android-training-connectivity-network-operations-lesson-3/">Android Training[Connectivity] - 执行网络操作(Lesson 3 - 解析XML数据)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/03/28/android-training-userInfo-remembering-users-lesson-2/">Android Training[UserInfo] - 记住用户的信息(Lesson 2 - 使用OAuth2来进行身份鉴定)</a></h1>
     
     
       <p class="meta">
@@ -98,39 +98,35 @@ Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来�
   
 
 
-<time datetime="2012-05-07T17:05:00+08:00" pubdate data-updated="true">May 7<span>th</span>, 2012</time>
+<time datetime="2012-03-28T18:53:00+08:00" pubdate data-updated="true">Mar 28<span>th</span>, 2012</time>
         
-         | <a href="/blog/2012/05/07/android-training-connectivity-network-operations-lesson-3/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/03/28/android-training-userInfo-remembering-users-lesson-2/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p><strong>第3课:Parsing XML Data</strong>
-Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来记录更新的信息，以便用户进行订阅读取。</p>
+  <div class="entry-content"><h2>Authenticating to OAuth2 Services[使用OAuth2来进行鉴权]</h2>
 
-<p>那么上传[?]与解析XML数据就成了app的一个常见的功能。 这一课会介绍如何解析XML文档并使用他们的数据。</p>
+<p>为了安全的访问线上服务，用户需要在service上进行鉴定，他们需要提供身份的证明。对于一个程序来说，如果是访问第三方的服务，那么这个安全问题就更加复杂。
+【比如，你有个资料在A服务器上，但是你需要在B上面对A里面的数据进行操作，这个时候如果把登入A的帐号与密码给B去直接操作就不够安全，简单的方法是先把A上的资料拿下来，再弄到B上面去，然后B再做操作，这又显得很不方便，就是为了解决这样类似的问题，才诞生了OAuth。关于OAuth2的详情，请参考：<a href="http://oauth.net/2/">http://oauth.net/2/</a>，谢谢！】
+目前行业内解决这种第三方服务身份鉴定的方法是使用OAuth2协议。OAuth2提供了auth token，它代表用户身份与用户对于程序的授权。这一课演示了如何使用OAuth2连接到Google Server。同样在其他支持OAuth2协议的服务上都可以使用类似的方法。</p>
 
-<p><em>([?]这里很奇怪，为什么是Upload，看文章最后一段代码示例的注释，应该是Download才对)</em></p>
-
-<h2>Choose a Parser(选择一个解析器)</h2>
-
-<p>我们推荐<a href="http://developer.android.com/reference/org/xmlpull/v1/XmlPullParser.html">XmlPullParser</a>, 它是在Android上一个高效且可维护的解析XML方法。 Android 上有这个接口的两种实现方式：</p>
+<p>使用OAuth2有利于:</p>
 
 <ul>
-<li><a href="http://kxml.sourceforge.net/">KXmlParser</a> via <a href="http://developer.android.com/reference/org/xmlpull/v1/XmlPullParserFactory.html#newPullParser(">XmlPullParserFactory.newPullParser()</a>).</li>
-<li>ExpatPullParser, via <a href="http://developer.android.com/reference/android/util/Xml.html#newPullParser(">Xml.newPullParser()</a>).</li>
+<li>从用户那得到授权，使用账户信息来访问online service。</li>
+<li>对online service进行鉴定，保护用户利益。</li>
+<li>处理认证错误。</li>
 </ul>
 
 
-<p>两个选择都是比较好的。下面的示例中是使用ExpatPullParser, via Xml.newPullParser().</p>
-
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/05/07/android-training-connectivity-network-operations-lesson-3/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/03/28/android-training-userInfo-remembering-users-lesson-2/">Read on &rarr;</a>
     </footer>
   
 
@@ -142,7 +138,7 @@ Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来�
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/05/07/android-training-connectivity-network-operations-lesson-2/">Android Training[Connectivity] - 执行网络操作(Lesson 2 - 管理网络使用方法)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/03/27/android-training-userInfo-remembering-users-lesson-1/">Android Training[UserInfo] - 记住用户的信息(Lesson 1 - 使用AccountManager来记录用户)</a></h1>
     
     
       <p class="meta">
@@ -158,77 +154,26 @@ Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来�
   
 
 
-<time datetime="2012-05-07T13:43:00+08:00" pubdate data-updated="true">May 7<span>th</span>, 2012</time>
+<time datetime="2012-03-27T11:12:00+08:00" pubdate data-updated="true">Mar 27<span>th</span>, 2012</time>
         
-         | <a href="/blog/2012/05/07/android-training-connectivity-network-operations-lesson-2/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><strong>第2课:Managing Network Usage</strong></p>
-
-<p>这一课会介绍如何细化管理使用的网络资源。如果你的程序需要执行很多网络操作，你应该提供用户设置选项来允许用户控制程序的数据偏好。例如，同步数据的频率，是否只在连接到WiFi才进行下载与上传操作，是否在漫游时使用套餐数据流量等等。这样用户才能在快到达流量上限时关闭你的程序获取数据功能。</p>
-
-<p>关于如何编写一个最小化下载与网络操作对电量影响的程序，请参考：</p>
-
-<p><a href="http://developer.android.com/training/monitoring-device-state/index.html">Optimizing Battery Life</a>:
-<a href="http://developer.android.com/training/efficient-downloads/index.html">Transferring Data Without Draining the Battery</a>:</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/05/07/android-training-connectivity-network-operations-lesson-2/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/05/03/android-training-connectivity-network-operations-lesson-1/">Android Training[Connectivity] - 执行网络操作(Lesson 1 - HTTP连接网络)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-05-03T15:21:00+08:00" pubdate data-updated="true">May 3<span>rd</span>, 2012</time>
-        
-         | <a href="/blog/2012/05/03/android-training-connectivity-network-operations-lesson-1/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/03/27/android-training-userInfo-remembering-users-lesson-1/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>这一章会介绍一些基本的网络操作，监视网络链接（包括网络改变），让用户来控制app对网络的选择使用。还会介绍如何解析与使用XML数据。</p>
+  <div class="entry-content"><p><strong>章节概览:Remembering Users</strong></p>
 
-<p><a href="http://developer.android.com/shareables/training/NetworkUsage.zip">NetworkUsage.zip</a></p>
+<p>Android用户希望把自己的信息绑定到喜欢的app与设备上，那么使得你的程序更加令人喜爱的一个方法是使得它更加的人性化。Android设备知道你的使用者是谁，他们都使用过哪些服务，在哪里存储了你的数据。在得到你的用户授权的前提下，你可以使用那些信息来使得你的app更加丰富，更加人性化。</p>
 
-<p>通过学习这章节的课程，你已经会学习一些基础知识，如何在最小化网络阻塞的情况下，创建一个高效的app，用来下载数据与解析数据。</p>
-
-<p>你还可以参考下面文章进阶学习:</p>
+<p>在这一章节，你将学习到鉴定用户信息的多种技术，你可以:</p>
 
 <ul>
-<li><a href="http://developer.android.com/training/monitoring-device-state/index.html">Optimizing Battery Life</a></li>
-<li><a href="http://developer.android.com/training/efficient-downloads/index.html">Transferring Data Without Draining the Battery</a></li>
-<li><a href="http://developer.android.com/guide/webapps/index.html">Web Apps Overview</a></li>
+<li>通过记住用户账户名来人性化你的appd。</li>
+<li>鉴定用户以确保是否是那个人。</li>
+<li>通过service来获取访问用户线上数据的权限，例如Google APIs。</li>
+<li>增加一个自定义的账户来鉴定自己后台的服务。</li>
 </ul>
 
 
@@ -236,7 +181,7 @@ Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来�
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/05/03/android-training-connectivity-network-operations-lesson-1/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/03/27/android-training-userInfo-remembering-users-lesson-1/">Read on &rarr;</a>
     </footer>
   
 
@@ -248,7 +193,7 @@ Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来�
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/04/30/android-training-01-managing-the-activity-lifecycle-lesson-4/">Android Training 01 - 详解Activity生命周期(Lesson 4 - 重新创建销毁的activity)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-3/">Android Training[Connectivity] - 优化下载效率(Lesson 3 - 使用缓存来避免重复下载)</a></h1>
     
     
       <p class="meta">
@@ -264,27 +209,28 @@ Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来�
   
 
 
-<time datetime="2012-04-30T16:51:00+08:00" pubdate data-updated="true">Apr 30<span>th</span>, 2012</time>
+<time datetime="2012-03-26T17:59:00+08:00" pubdate data-updated="true">Mar 26<span>th</span>, 2012</time>
         
-         | <a href="/blog/2012/04/30/android-training-01-managing-the-activity-lifecycle-lesson-4/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-3/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><ul>
-<li>有几个场景中,Activity是由于正常的程序行为而被Destory的，例如当用户点击返回按钮或者是你的Activity通过调用finish()来发出停止信号。系统也有可能会在你的Activity处于stop状态且长时间不被使用，或者是在前台activity需要更多系统资源的时候把关闭后台进程，这样来获取更多的内存。</li>
-<li>当你的Activity是因为用户点击Back按钮或者是activity通过调用finish()结束自己时，系统就丢失了Activity实例这个概念，因为前面的行为意味着不再需要这个activity了。然而，如果因为系统资源紧张而导致Activity的Destory, 系统会在用户回到这个Activity时有这个Activity存在过的记录，系统会使用那些保存的记录数据（描述了当Activity被Destory时的状态）来重新创建一个新的Account实例。那些被系统用来恢复之前状态而保存的数据被叫做 &#8220;instance state&#8221; ，它是一些存放在 Bundle 对象中的key-value pairs.</li>
-<li><strong>Caution:</strong>你的Activity会在每次旋转屏幕时被destroyed与recreated。当屏幕改变方向时，系统会Destory与Recreate前台的activity，因为屏幕配置被改变，你的Activity可能需要加载一些alternative的资源(例如layout).</li>
-</ul>
+  <div class="entry-content"><h2>Redundant Downloads are Redundant[重复下载是冗余的]</h2>
 
+<p>减少下载的最基本方法是仅仅下载那些你需要的。从数据的角度看，我们可以通过传递类似上次更新时间这样的参数来制定查询数据的条件。同样，在下载图片的时候，server那边最好能够减少图片的大小，而不是让我们下载完整大小的图片。</p>
+
+<h2>1.Cache Files Locally[缓存文件到本地]</h2>
+
+<p>避免下载重复的数据是很重要的。可以使用缓存机制来处理这个问题。缓存static的资源，例如完整的图片。这些缓存的资源需要分开存放。为了保证app不会因为缓存而导致显示的是旧数据，请从缓存中获取最新的数据，当数据过期的时候，会提示进行刷新。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/04/30/android-training-01-managing-the-activity-lifecycle-lesson-4/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-3/">Read on &rarr;</a>
     </footer>
   
 
@@ -296,7 +242,7 @@ Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来�
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/04/28/android-training-01-managing-the-activity-lifecycle-lesson-3/">Android Training 01 - 详解Activity生命周期(Lesson 3 - 停止与重启activity)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-2/">Android Training[Connectivity] - 优化下载效率(Lesson 2 - 调整更新的频率[C2DM与退避算法])</a></h1>
     
     
       <p class="meta">
@@ -312,26 +258,134 @@ Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来�
   
 
 
-<time datetime="2012-04-28T18:27:00+08:00" pubdate data-updated="true">Apr 28<span>th</span>, 2012</time>
+<time datetime="2012-03-26T16:51:00+08:00" pubdate data-updated="true">Mar 26<span>th</span>, 2012</time>
         
-         | <a href="/blog/2012/04/28/android-training-01-managing-the-activity-lifecycle-lesson-3/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-2/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><ul>
-<li>恰当的停止与重启你的activity是很重要的，在activity生命周期中，他们能确保用户感知到程序的存在并不会丢失他们的进度。在下面一些关键的场景中会涉及到停止与重启：
+  <div class="entry-content"><h2>Minimizing the Effect of Regular Updates[最小化定期更新操作的副作用]</h2>
+
+<p>最佳的定时更新频率是不确定的，通常由设备状态，网络连接状态，用户行为与用户定义明确的偏好而决定。</p>
+
+<p><a href="http://developer.android.com/training/monitoring-device-state/index.html">Optimizing Battery Life</a>这一章有讨论如何根据设备状态来修改更新频率。里面介绍了当断开网络连接的时候去关闭后台服务，在电量比较低的时候减少更新的频率。</p>
+
+<p>这一课会介绍更新频率是多少才会使得更新操作对无线电状态机的影响最小。(C2DM与指数退避算法的使用)</p>
+
+<h2>Use Google Cloud Messaging as an Alternative to Polling[使用C2DM作为轮询方式之一]</h2>
+
+<p>关于<code>Android Cloud to Device Messaging</code> (C2DM)详情 ,请参考:<a href="http://code.google.com/intl/zh-CN/android/c2dm/">http://code.google.com/intl/zh-CN/android/c2dm/</a></p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-2/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-4/">Android Training[Connectivity] - 优化下载效率(Lesson 4 - 根据网络类型来切换下载模式)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-26T00:00:00+08:00" pubdate data-updated="true">Mar 26<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-4/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Modifying your Download Patterns Based on the Connectivity Type</h2>
+
+<p>并不是所有的网络类型(Wi-Fi,3G,2G,etc)对电量的消耗是同等的。不仅仅Wi-Fi电波比无线电波消耗的电量要少很多，而且不同的无线电波(3G,2G,LTE……)也存在使用不同电量的区别。</p>
+
+<h2>1.Use Wi-Fi[使用Wi-Fi]</h2>
+
+<p>在大多数情况下，Wi-Fi电波会在使用相对较低的电量的情况下提供一个相对较大的带宽。因此，我们需要努力争取尽量使用Wi-Fi来传递数据。
+我们可以使用Broadcast Receiver来监听当网络连接切换为Wi-Fi，这个时候我们可以进行大量的数据传递操作，例如下载，执行定时的更新操作，甚至是在这个时候加大更新的频率。这些内容都可以在前面的课程中找到。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-4/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/03/25/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-1/">Android Training[Connectivity] - 优化下载效率(Lesson 1 - 用有效率的网络访问方式来优化下载)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-25T16:54:00+08:00" pubdate data-updated="true">Mar 25<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/03/25/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-1/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>在这一章，我们将学习为了最小化某些操作对电量的影响是如何处理下载，网络连接，尤其是无线电连接的。
+下面几节课会演示了如何使用缓存caching，轮询polling，预取prefetching等技术来计划与执行下载操作。
+我们还会学习无线电波的power-use属性配置是如何影响我们对于在何时，用什么，以何种方式来传输数据的选择。
+当然这些选择是为了最小化对电池寿命的影响。</p>
+
+<p><strong>Dependencies and prerequisites</strong><br/>
+Android 2.0 (API Level 5) or higher</p>
+
+<p><strong>You should also read</strong><br/>
+<a href="http://developer.android.com/training/monitoring-device-state/index.html">Optimizing Battery Life</a></p>
+
+<h2>Lessons</h2>
 
 <ul>
-<li>用户打开最近使用app的菜单并切换你的app到另外一个app，这个时候你的app是被停止的。如果用户通过统一的办法回到你的app，那么你的activity会重启.</li>
-<li>用户在你的app里面执行启动一个新的activity的操作，当前activity会在第二个activity被创建后停止。如果用户点击back按钮，第一个activtiy会被重启.</li>
-<li>用户在使用你的app时接受到一个来电通话.</li>
-</ul>
-</li>
-<li><a href="http://developer.android.com/reference/android/app/Activity.html">Activity</a>类提供了onStop()与onRestart(), 方法来允许你在activity停止与重启时进行调用。不像暂停状态是部分阻塞UI，停止状态是UI不在可见并且用户的焦点转移到另一个activity中.</li>
-<li><strong>Note:</strong>因为系统在activity停止时会在内存中保存了Activity实例。有些时候你不需要实现onStop(),onRestart()甚至是onStart()方法. 因为大多数的activity相对比较简单，activity会自己停止与重启，你只需要使用onPause()来停止正在运行的动作并断开系统资源链接。</li>
+<li><strong>Optimizing Downloads for Efficient Network Access[使用有效的网络连接方式来最优化下载]</strong><br/>
+This lesson introduces the wireless radio state machine, explains how your app’s connectivity model interacts with it, and how you can minimize your data connection and use prefetching and bundling to minimize the battery drain associated with your data transfers.</li>
 </ul>
 
 
@@ -339,7 +393,105 @@ Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来�
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/04/28/android-training-01-managing-the-activity-lifecycle-lesson-3/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/03/25/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-1/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/03/24/android-training-performance-optimiizing-battery-life-lesson-4/">Android Training[Performance] - 优化电池续航能力(Lesson 4 - 判断并监测网络连接状态)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-24T16:37:00+08:00" pubdate data-updated="true">Mar 24<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/03/24/android-training-performance-optimiizing-battery-life-lesson-4/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Manipulating Broadcast Receivers On Demand[按需操控广播接收者]</h2>
+
+<p>简单的方法是为我们监测的状态创建一个BroadcastReceiver，并在manifest中为每一个状态进行注册监听。然后，每一个Receiver根据当前设备的状态来简单重新安排下一步执行的任务。[这句话感觉理解有点问题]</p>
+
+<p>上面那个方法的副作用是，设备会在每次收到广播都被唤醒，这有点超出期望，因为有些广播是不希望唤醒设备的。</p>
+
+<p>更好的方法是根据程序运行情况开启或者关闭广播接收者。这样的话，那些在manifest中注册的receivers仅仅会在需要的时候才被激活。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/03/24/android-training-performance-optimiizing-battery-life-lesson-4/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-3/">Android Training[Performance] - 优化电池续航能力(Lesson 3 - 判断并监测网络连接状态)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-23T21:09:00+08:00" pubdate data-updated="true">Mar 23<span>rd</span>, 2012</time>
+        
+         | <a href="/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-3/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Determining and Monitoring the Connectivity Status[判断并监测网络连接状态]</h2>
+
+<p>通常我们会有一些计划的任务，比如重复闹钟，后台定时启动的任务等。但是如果我们的网络没有连接上，那么就没有必要启动那些需要连接网络的任务。我们可以使用ConnectivityManager来检查是否连接上网络，是何种网络。[通过网络的连接状况改变，相应的改变app的行为，减少无谓的操作，从而延长设备的续航能力]</p>
+
+<h2>1)Determine if You Have an Internet Connection[判断当前是否有网络连接]</h2>
+
+<p>显然如果没有网络连接，那么就没有必要做那些需要联网的事情。下面是一个检查是否有网络连接的例子：</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-3/">Read on &rarr;</a>
     </footer>
   
 
@@ -424,6 +576,36 @@ Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来�
 </ul>
 </section>
 
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="https://github.com/kesenhoo">@kesenhoo</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'kesenhoo',
+            count: 6,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
 <section>
   <h1>License</h1>
   <p>
@@ -436,7 +618,7 @@ Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来�
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2013 - Kesen Hoo -
+  Copyright &copy; 2014 - Kesen Hoo -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 

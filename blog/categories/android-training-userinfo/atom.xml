@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: Android:Training:UserInfo | 四方城]]></title>
-  <link href="http://kesenhoo.github.com/blog/categories/android-training-userinfo/atom.xml" rel="self"/>
-  <link href="http://kesenhoo.github.com/"/>
-  <updated>2013-12-01T15:14:32+08:00</updated>
-  <id>http://kesenhoo.github.com/</id>
+  <title><![CDATA[Category: Android:Training:UserInfo | 胡凯]]></title>
+  <link href="http://hukai.me/blog/categories/android-training-userinfo/atom.xml" rel="self"/>
+  <link href="http://hukai.me/"/>
+  <updated>2014-03-27T23:56:08+08:00</updated>
+  <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Training[UserInfo] - 记住用户的信息(Lesson 3 - 创建自定义的账户类型)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2012/03/29/android-training-userInfo-remembering-users-lesson-3/"/>
+    <link href="http://hukai.me/blog/2012/03/29/android-training-userInfo-remembering-users-lesson-3/"/>
     <updated>2012-03-29T12:37:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2012/03/29/android-training-userInfo-remembering-users-lesson-3</id>
+    <id>http://hukai.me/blog/2012/03/29/android-training-userInfo-remembering-users-lesson-3</id>
     <content type="html"><![CDATA[<h2>Creating a Custom Account Type</h2>
 
 <p>到目前为止，我们讨论了如何使用Google APIs。但是我们应该不仅仅是只需要Google的服务而已，比如增加QQ账户，Sina账户等。那么这一课会讲述如何创建一个自定义的账户，并且像内置的账户那样进行工作。</p>
@@ -108,9 +108,9 @@ mAccountManager.addAccountExplicitly(account, mPassword, null);
   
   <entry>
     <title type="html"><![CDATA[Android Training[UserInfo] - 记住用户的信息(Lesson 2 - 使用OAuth2来进行身份鉴定)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2012/03/28/android-training-userInfo-remembering-users-lesson-2/"/>
+    <link href="http://hukai.me/blog/2012/03/28/android-training-userInfo-remembering-users-lesson-2/"/>
     <updated>2012-03-28T18:53:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2012/03/28/android-training-userInfo-remembering-users-lesson-2</id>
+    <id>http://hukai.me/blog/2012/03/28/android-training-userInfo-remembering-users-lesson-2</id>
     <content type="html"><![CDATA[<h2>Authenticating to OAuth2 Services[使用OAuth2来进行鉴权]</h2>
 
 <p>为了安全的访问线上服务，用户需要在service上进行鉴定，他们需要提供身份的证明。对于一个程序来说，如果是访问第三方的服务，那么这个安全问题就更加复杂。
@@ -258,9 +258,9 @@ conn.setRequestProperty("Authorization", "OAuth " + token);
   
   <entry>
     <title type="html"><![CDATA[Android Training[UserInfo] - 记住用户的信息(Lesson 1 - 使用AccountManager来记录用户)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2012/03/27/android-training-userInfo-remembering-users-lesson-1/"/>
+    <link href="http://hukai.me/blog/2012/03/27/android-training-userInfo-remembering-users-lesson-1/"/>
     <updated>2012-03-27T11:12:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2012/03/27/android-training-userInfo-remembering-users-lesson-1</id>
+    <id>http://hukai.me/blog/2012/03/27/android-training-userInfo-remembering-users-lesson-1</id>
     <content type="html"><![CDATA[<p><strong>章节概览:Remembering Users</strong></p>
 
 <p>Android用户希望把自己的信息绑定到喜欢的app与设备上，那么使得你的程序更加令人喜爱的一个方法是使得它更加的人性化。Android设备知道你的使用者是谁，他们都使用过哪些服务，在哪里存储了你的数据。在得到你的用户授权的前提下，你可以使用那些信息来使得你的app更加丰富，更加人性化。</p>

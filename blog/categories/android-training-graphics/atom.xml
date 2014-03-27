@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: Android:Training:Graphics | 四方城]]></title>
-  <link href="http://kesenhoo.github.com/blog/categories/android-training-graphics/atom.xml" rel="self"/>
-  <link href="http://kesenhoo.github.com/"/>
-  <updated>2013-12-01T15:14:32+08:00</updated>
-  <id>http://kesenhoo.github.com/</id>
+  <title><![CDATA[Category: Android:Training:Graphics | 胡凯]]></title>
+  <link href="http://hukai.me/blog/categories/android-training-graphics/atom.xml" rel="self"/>
+  <link href="http://hukai.me/"/>
+  <updated>2014-03-27T23:56:08+08:00</updated>
+  <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Training[Graphics] - 高效地显示Bitmap(Lesson 4 - 优化Bitmap的内存使用)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2013/05/19/android-training-graphics-displaying-bitmaps-efficiently-lesson-4/"/>
+    <link href="http://hukai.me/blog/2013/05/19/android-training-graphics-displaying-bitmaps-efficiently-lesson-4/"/>
     <updated>2013-05-19T14:43:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2013/05/19/android-training-graphics-displaying-bitmaps-efficiently-lesson-4</id>
+    <id>http://hukai.me/blog/2013/05/19/android-training-graphics-displaying-bitmaps-efficiently-lesson-4</id>
     <content type="html"><![CDATA[<p>作为缓存Bitmaps的进一步延伸, 为了促进GC与bitmap的重用，你还有一些特定的事情可以做. 推荐的策略会根据Android的版本不同而有所差异. <a href="http://developer.android.com/shareables/training/BitmapFun.zip">BitmapFun</a>的示例程序会演示如何设计你的程序使得能够在不同的Android平台上高效的运行.</p>
 
 <p>我们首先要知道Android管理bitmap memory的演变进程:</p>
@@ -264,9 +264,9 @@ return candidate.getWidth() == width &amp;&amp; candidate.getHeight() == height;
   
   <entry>
     <title type="html"><![CDATA[Android Training[Graphics] - 高效地显示Bitmap(Lesson 5 - 呈现Bitmap到UI上)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2012/04/26/android-training-graphics-displaying-bitmaps-efficiently-lesson-5/"/>
+    <link href="http://hukai.me/blog/2012/04/26/android-training-graphics-displaying-bitmaps-efficiently-lesson-5/"/>
     <updated>2012-04-26T22:27:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2012/04/26/android-training-graphics-displaying-bitmaps-efficiently-lesson-5</id>
+    <id>http://hukai.me/blog/2012/04/26/android-training-graphics-displaying-bitmaps-efficiently-lesson-5</id>
     <content type="html"><![CDATA[<p>这一课会演示如何运用前面几节课的内容，使用后台线程与Cache机制来加载图片到 ViewPager 与 GridView 组件，并且学习处理并发与配置改变问题。(<em>并发问题的处理确实需要好好考虑，大多数App都没有仔细考虑到这个问题，会导致浪费更多的资源，效率不够</em>)</p>
 
 <!-- more -->
@@ -607,9 +607,9 @@ private static BitmapWorkerTask getBitmapWorkerTask(ImageView imageView) {
   
   <entry>
     <title type="html"><![CDATA[Android Training[Graphics] - 高效地显示Bitmap(Lesson 3 - 两种缓存Bitmap的方式)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2012/04/24/android-training-graphics-displaying-bitmaps-efficiently-lesson-3/"/>
+    <link href="http://hukai.me/blog/2012/04/24/android-training-graphics-displaying-bitmaps-efficiently-lesson-3/"/>
     <updated>2012-04-24T12:59:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2012/04/24/android-training-graphics-displaying-bitmaps-efficiently-lesson-3</id>
+    <id>http://hukai.me/blog/2012/04/24/android-training-graphics-displaying-bitmaps-efficiently-lesson-3</id>
     <content type="html"><![CDATA[<p>加载单个Bitmap到UI是简单直接的，但是如果你需要一次加载大量的图片，事情则会变得复杂起来。在大多数情况下(例如在ListView,GridView or ViewPager), 显示图片的数量通常是没有限制的。</p>
 
 <p>通过循环利用子视图可以抑制内存的使用，GC(garbage collector)也会释放那些不再需要使用的bitmap。这些机制都非常好，但是为了保持一个流畅的用户体验，你想要在屏幕滑回来时避免每次重复处理那些图片。内存与磁盘缓存通常可以起到帮助的作用，允许组件快速的重新加载那些处理过的图片。</p>
@@ -876,9 +876,9 @@ public void onCreate(Bundle savedInstanceState) {
   
   <entry>
     <title type="html"><![CDATA[Android Training[Graphics] - 高效地显示Bitmap(Lesson 2 - 在UI线程之外处理Bitmaps)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2012/04/23/android-training-graphics-displaying-bitmaps-efficiently-lesson-2/"/>
+    <link href="http://hukai.me/blog/2012/04/23/android-training-graphics-displaying-bitmaps-efficiently-lesson-2/"/>
     <updated>2012-04-23T19:55:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2012/04/23/android-training-graphics-displaying-bitmaps-efficiently-lesson-2</id>
+    <id>http://hukai.me/blog/2012/04/23/android-training-graphics-displaying-bitmaps-efficiently-lesson-2</id>
     <content type="html"><![CDATA[<p>在上一课中有介绍一系列的BitmapFactory.decode* 方法，当数据源是网络或者是磁盘时(或者是任何实际源不在内存的)，这些方法都不应该在main UI 线程中执行。那些情况下加载数据是不可以预知的，它依赖于许多因素(从网络或者硬盘读取数据的速度, 图片的大小, CPU的速度, etc.)。如果其中任何一个任务卡住了UI thread, 系统会出现ANR的错误。</p>
 
 <p>这一节课会介绍如何使用 AsyncTask 在后台线程中处理bitmap并且演示了如何处理并发(concurrency)的问题。</p>
@@ -1047,9 +1047,9 @@ protected void onPostExecute(Bitmap bitmap) {
   
   <entry>
     <title type="html"><![CDATA[Android Training[Graphics] - 高效地显示Bitmap(Lesson 1 - 有效地加载大尺寸图片)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2012/04/22/android-training-graphics-displaying-bitmaps-efficiently-lesson-1/"/>
+    <link href="http://hukai.me/blog/2012/04/22/android-training-graphics-displaying-bitmaps-efficiently-lesson-1/"/>
     <updated>2012-04-22T11:57:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2012/04/22/android-training-graphics-displaying-bitmaps-efficiently-lesson-1</id>
+    <id>http://hukai.me/blog/2012/04/22/android-training-graphics-displaying-bitmaps-efficiently-lesson-1</id>
     <content type="html"><![CDATA[<h1>章节概要</h1>
 
 <p>这一章节会介绍一些通用的用来处理与加载Bitmap对象的方法，这些技术能够使得不会卡到程序的UI并且避免程序消耗过度内存.如果你不注意这些，Bitmaps会迅速的消耗你可用的内存而导致程序crash,出现下面的异常:java.lang.OutofMemoryError: bitmap size exceeds VM budget.</p>

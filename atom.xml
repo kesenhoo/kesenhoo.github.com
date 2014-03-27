@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[四方城]]></title>
-  <link href="http://kesenhoo.github.com/atom.xml" rel="self"/>
-  <link href="http://kesenhoo.github.com/"/>
-  <updated>2013-12-01T15:14:32+08:00</updated>
-  <id>http://kesenhoo.github.com/</id>
+  <title><![CDATA[胡凯]]></title>
+  <link href="http://hukai.me/atom.xml" rel="self"/>
+  <link href="http://hukai.me/"/>
+  <updated>2014-03-27T23:55:51+08:00</updated>
+  <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Java Notes - Singleton Pattern(单例总结)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2013/11/17/java-notes-00-singleton-pattern/"/>
+    <link href="http://hukai.me/blog/2013/11/17/java-notes-00-singleton-pattern/"/>
     <updated>2013-11-17T14:21:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2013/11/17/java-notes-00-singleton-pattern</id>
+    <id>http://hukai.me/blog/2013/11/17/java-notes-00-singleton-pattern</id>
     <content type="html"><![CDATA[<p>这里不赘述单例模式的概念了，直接演示几种不同的实现方式。</p>
 
 <h2>0)Eager initialization</h2>
@@ -410,9 +410,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Training[Performance] - 管理应用的内存]]></title>
-    <link href="http://kesenhoo.github.com/blog/2013/10/19/android-training-performance-managing_your_app_memory/"/>
+    <link href="http://hukai.me/blog/2013/10/19/android-training-performance-managing_your_app_memory/"/>
     <updated>2013-10-19T15:18:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2013/10/19/android-training-performance-managing_your_app_memory</id>
+    <id>http://hukai.me/blog/2013/10/19/android-training-performance-managing_your_app_memory</id>
     <content type="html"><![CDATA[<p>Random Access Memory(RAM)在任何软件开发环境中都是一个很宝贵的资源。这一点在物理内存通常很有限的移动操作系统上，显得尤为突出。尽管Android的Dalvik虚拟机扮演了常规的垃圾回收的角色，但这并不意味着你可以忽视app的内存分配与释放的时机与地点。</p>
 
 <p>为了GC能够从你的app中及时回收内存，你需要避免Memory Leaks(这通常由引用的不能释放而导致)并且在适当的时机(下面会讲到的lifecycle callbacks)来释放引用。对于大多数apps来说，Dalvik的GC会自动把离开活动线程的对象进行回收。</p>
@@ -624,9 +624,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Training[UI] - 创建自定义的Views(Lesson 4 - 优化Views)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-4/"/>
+    <link href="http://hukai.me/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-4/"/>
     <updated>2013-08-18T17:30:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-4</id>
+    <id>http://hukai.me/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-4</id>
     <content type="html"><![CDATA[<p>前面的课程学习到了如何创建设计良好的View，并且能够使之在手势与状态切换时得到正确的反馈。下面要介绍的是如何使得view能够执行更快。为了避免UI显得卡顿，你必须确保动画能够保持在60fps以上。</p>
 
 <!-- more -->
@@ -726,9 +726,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Training[UI] - 创建自定义的Views(Lesson 3 - 处理View的交互性)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-3/"/>
+    <link href="http://hukai.me/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-3/"/>
     <updated>2013-08-18T15:01:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-3</id>
+    <id>http://hukai.me/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-3</id>
     <content type="html"><![CDATA[<p>绘制UI仅仅是创建自定义View的一部分。你还需要使得你的View能够以模拟现实世界的方式来进行反馈。Objects应该总是与现实情景能够保持一致。例如，图片不应该突然消失又从另外一个地方出现，因为在现实世界里面不会发生那样的事情。正确的应该是，图片从一个地方移动到另外一个地方。</p>
 
 <p>用户应该可以感受到UI上的微小变化，并对这些变化反馈到现实世界中。例如，当用户做fling(迅速滑动)的动作，应该再滑动开始与结束的时候给用户一定的反馈。</p>
@@ -911,9 +911,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Training[UI] - 创建自定义的Views(Lesson 2 - 自定义Drawing)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-2/"/>
+    <link href="http://hukai.me/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-2/"/>
     <updated>2013-06-30T20:15:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-2</id>
+    <id>http://hukai.me/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-2</id>
     <content type="html"><![CDATA[<p>自定义view的最重要的一个部分是自定义它的外观。根据你的程序的需求，自定义绘制动作可能简单也可能很复杂。这节课会演示一些最常见的操作。</p>
 
 <h2>Override onDraw()</h2>
@@ -1130,9 +1130,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Training[UI] - 创建自定义的Views(Lesson 1 - 创建一个View类)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-1/"/>
+    <link href="http://hukai.me/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-1/"/>
     <updated>2013-06-30T18:47:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-1</id>
+    <id>http://hukai.me/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-1</id>
     <content type="html"><![CDATA[<p>设计良好的类总是相似的。它使用一个好用的接口来封装一个特定的功能，它有效的使用CPU与内存，等等。为了成为一个设计良好的类，自定义的view应该:</p>
 
 <ul>
@@ -1327,9 +1327,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Training[UI] - 创建自定义的Views(Lesson 0 - 章节概览)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-0/"/>
+    <link href="http://hukai.me/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-0/"/>
     <updated>2013-06-30T18:23:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-0</id>
+    <id>http://hukai.me/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-0</id>
     <content type="html"><![CDATA[<p>Android的framework有大量的Views用来与用户进行交互并显示不同种类的数据。但是有时候你的程序有个特殊的需求，而Android内置的views组件并不能实现。这一章节会演示如何创建你自己的views，并使得它们是robust与reusable的。</p>
 
 <p><strong>Dependencies and Prerequisites</strong></p>
@@ -1380,9 +1380,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Training[Graphics] - 高效地显示Bitmap(Lesson 4 - 优化Bitmap的内存使用)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2013/05/19/android-training-graphics-displaying-bitmaps-efficiently-lesson-4/"/>
+    <link href="http://hukai.me/blog/2013/05/19/android-training-graphics-displaying-bitmaps-efficiently-lesson-4/"/>
     <updated>2013-05-19T14:43:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2013/05/19/android-training-graphics-displaying-bitmaps-efficiently-lesson-4</id>
+    <id>http://hukai.me/blog/2013/05/19/android-training-graphics-displaying-bitmaps-efficiently-lesson-4</id>
     <content type="html"><![CDATA[<p>作为缓存Bitmaps的进一步延伸, 为了促进GC与bitmap的重用，你还有一些特定的事情可以做. 推荐的策略会根据Android的版本不同而有所差异. <a href="http://developer.android.com/shareables/training/BitmapFun.zip">BitmapFun</a>的示例程序会演示如何设计你的程序使得能够在不同的Android平台上高效的运行.</p>
 
 <p>我们首先要知道Android管理bitmap memory的演变进程:</p>
@@ -1754,9 +1754,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Notes 05 - Tasks and Back Stack]]></title>
-    <link href="http://kesenhoo.github.com/blog/2013/04/20/android-notes-05-task-and-back-stack/"/>
+    <link href="http://hukai.me/blog/2013/04/20/android-notes-05-task-and-back-stack/"/>
     <updated>2013-04-20T20:42:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2013/04/20/android-notes-05-task-and-back-stack</id>
+    <id>http://hukai.me/blog/2013/04/20/android-notes-05-task-and-back-stack</id>
     <content type="html"><![CDATA[<ul>
 <li>所有的activities都归属于一个task。</li>
 <li>一个task包含了一些activities，这些activities以用户与他们的交互前后为顺序存放在task中。</li>
@@ -1779,13 +1779,13 @@
 
 <p>当目前的activity启动另外一个activity时，新的activity被压入栈中作为栈顶并且获取到了focus。前面的那个activity则以stopped的状态继续保留在stack中。当一个activity stops时，系统会保留它的UI状态。当用户点击back按钮时，当前的activity从栈顶退出并被destroyed，之前的activity则resume(之前保存的UI状态得到恢复). 在栈中的Activities的是不会被重新排序的，仅仅是做入栈与出栈的动作。当被启动时入栈，用户点击后退时出栈。下图演示了上面提到的情况：</p>
 
-<p><img src="http://kesenhoo.github.com/images/articles/diagram_backstack.png" title="Figure 1. A representation of how each new activity in a task adds an item to the back stack. When the user presses the Back button, the current activity is destroyed and the previous activity resumes." alt="diagram_backstack.png" /></p>
+<p><img src="http://hukai.me/images/articles/diagram_backstack.png" title="Figure 1. A representation of how each new activity in a task adds an item to the back stack. When the user presses the Back button, the current activity is destroyed and the previous activity resumes." alt="diagram_backstack.png" /></p>
 
 <p>如果用户持续点击back按钮，那么在栈中的每一个activity都会做退栈并显示之前activity的动作, 直到用户退回到Home界面(或者是用户开始task的地方).当所有的activities都从栈中被移除之后，这个task也就消失了。</p>
 
 <p>一个task是一个紧密结合的单元，当用户开始一个新的task或者通过点击Home按钮回到Home桌面时，之前的task会整体移动到background。当在background时，在task中的所有的activity都是stopped状态的。但是这个task的回退栈仍然保留了与系统交互的特质，仅仅是失去了focus而已。如下图所示：</p>
 
-<p><img src="http://kesenhoo.github.com/images/articles/diagram_multitasking.png" title="Figure 2. Two tasks: Task B receives user interaction in the foreground, while Task A is in the background, waiting to be resumed." alt="diagram_multitasking.png" /></p>
+<p><img src="http://hukai.me/images/articles/diagram_multitasking.png" title="Figure 2. Two tasks: Task B receives user interaction in the foreground, while Task A is in the background, waiting to be resumed." alt="diagram_multitasking.png" /></p>
 
 <p>一个task可以返回到&#8221;foreground&#8221;，这样用户可以从他们离开的地方重新开始操作。例如，当前task(Task A)的栈中有三个activities. 用户点击Home按钮，然后从桌面启动一个新的程序. 当Home界面出现时，Task A变成了background的. 当新的程序启动，系统为它启动一个新的task，里面包含了它自己的activites. 在用户与那个程序交互完之后，重新退回桌面并选择之前启动的task A. 这个时候，Task A重新回到foreground, 在stack中的那三个activities被重新选中，栈顶的那个activity被resume. 此时，用户仍然可以选择通过切回Home，再次启动task B.( 或者通过长按Home按钮触发最近使用的task界面进行选择). 这便是Android中的多任务的一个例子.</p>
 
@@ -1793,7 +1793,7 @@
 
 <p>因为在back stack中的activities是不会被重新调整顺序的。如果你的程序中的某个特定的activity可以被多个activity所叫起，那么将会为那个特定activity创建一个新的实例并压入栈中(而不是把那个activity之前的实例移动到栈顶). 如下图所示:你程序中的一个activity可以被多次实例化(即使是在不同的task中)。如果用户通过点击Back按钮回退，每一个实例都将以他们被打开的顺序依次被重新呈现。然而，如果你不想一个activity被重复实例化，你可以修改这种行为。关于如何修改这种行为，将在下面的Managing Tasks中讲到.</p>
 
-<p><img src="http://kesenhoo.github.com/images/articles/diagram_multiple_instances.png" title="Figure 3. A single activity is instantiated multiple times." alt="diagram_multiple_instances.png" /></p>
+<p><img src="http://hukai.me/images/articles/diagram_multiple_instances.png" title="Figure 3. A single activity is instantiated multiple times." alt="diagram_multiple_instances.png" /></p>
 
 <p><strong>总结一下系统默认的activities与tasks的行为:</strong></p>
 
@@ -1898,7 +1898,7 @@
 
 <p>不管是启动一个新的task还是在原来的task中，Back按钮都可以回退到前面的activity. 然而，如果你启动的activity的launch mode定义为singleTask, 然后如果那个activity的某个实例已经存在于一个background的task中，那么这个background的task的所有activites会<strong>整个全部</strong>被带到foreground的. 下图Figure 4 演示了这种情况：</p>
 
-<p><img src="http://kesenhoo.github.com/images/articles/diagram_backstack_singletask_multiactivity.png" title="Figure 4. A representation of how an activity with launch mode &quot;singleTask&quot; is added to the back stack. If the activity is already a part of a background task with its own back stack, then the entire back stack also comes forward, on top of the current task." alt="diagram_backstack_singletask_multiactivity.png" /></p>
+<p><img src="http://hukai.me/images/articles/diagram_backstack_singletask_multiactivity.png" title="Figure 4. A representation of how an activity with launch mode &quot;singleTask&quot; is added to the back stack. If the activity is already a part of a background task with its own back stack, then the entire back stack also comes forward, on top of the current task." alt="diagram_backstack_singletask_multiactivity.png" /></p>
 
 <p><strong>Note:</strong> 通过manifest中launchMode属性设置的方式定义的启动模式可以被intent中的flag所覆盖，请看下面的解释.</p>
 
@@ -1993,9 +1993,9 @@ For example, suppose that an activity that reports weather conditions in selecte
   
   <entry>
     <title type="html"><![CDATA[Android Notes 04 - Intents and Intent Filters]]></title>
-    <link href="http://kesenhoo.github.com/blog/2013/04/12/android-notes-04-intent-and-intentFilter/"/>
+    <link href="http://hukai.me/blog/2013/04/12/android-notes-04-intent-and-intentFilter/"/>
     <updated>2013-04-12T18:27:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2013/04/12/android-notes-04-intent-and-intentFilter</id>
+    <id>http://hukai.me/blog/2013/04/12/android-notes-04-intent-and-intentFilter</id>
     <content type="html"><![CDATA[<h2>Intent与Intent Filter</h2>
 
 <p>Android其中的三大组件，Activity,Service与broadcast receivers是通过Intent来触发彼此的。Intent本身会携带一些信息，它是一种组件内部或者组件间进行交互的中介。<br/>
@@ -2279,12 +2279,12 @@ Flags用来表示，如何启动一个activity(例如，指定activity应该属�
   
   <entry>
     <title type="html"><![CDATA[Android Training[Performance] - 代码性能优化小技巧]]></title>
-    <link href="http://kesenhoo.github.com/blog/2013/04/06/android-training-performance-tips/"/>
+    <link href="http://hukai.me/blog/2013/04/06/android-training-performance-tips/"/>
     <updated>2013-04-06T18:27:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2013/04/06/android-training-performance-tips</id>
+    <id>http://hukai.me/blog/2013/04/06/android-training-performance-tips</id>
     <content type="html"><![CDATA[<h2>Performance Tips</h2>
 
-<p><img src="http://kesenhoo.github.com/images/articles/performance_improve.jpg"></p>
+<p><img src="http://hukai.me/images/articles/performance_improve.jpg"></p>
 
 <p>这篇文章主要是介绍了一些小细节的优化技巧，当这些小技巧综合使用起来的时候，对于整个App的性能提升还是有作用的，只是不能较大幅度的提升性能而已。选择合适的算法与数据结构才应该是你首要考虑的因素，在这篇文章中不会涉及这方面。你应该使用这篇文章中的小技巧作为平时写代码的习惯，这样能够提升代码的效率。</p>
 
@@ -2516,10 +2516,10 @@ Flags用来表示，如何启动一个activity(例如，指定activity应该属�
   
   <entry>
     <title type="html"><![CDATA[Android Notes 03 - Process and Thread]]></title>
-    <link href="http://kesenhoo.github.com/blog/2013/03/31/android-notes-03-process-and-thread/"/>
+    <link href="http://hukai.me/blog/2013/03/31/android-notes-03-process-and-thread/"/>
     <updated>2013-03-31T16:27:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2013/03/31/android-notes-03-process-and-thread</id>
-    <content type="html"><![CDATA[<p><img src="http://kesenhoo.github.com/images/articles/process_and_thread.jpg"></p>
+    <id>http://hukai.me/blog/2013/03/31/android-notes-03-process-and-thread</id>
+    <content type="html"><![CDATA[<p><img src="http://hukai.me/images/articles/process_and_thread.jpg"></p>
 
 <p>当程序的第一个组件开始启动时，Android系统会为这个程序启动一个新的Linux进程。默认的，程序中的后续其他组件都是运行在这个进程的线程中(这个线程被成为&#8221;主&#8221;线程:main thread)。如果程序的组件在启动时发现已经存在这个程序的进程了(因为其他组件正在运行)， 那么这个组件将启动在该进程中，并使用同一线程。然而，你可以安排程序中的不同组件运行在另外一个进程中，而且你可以为任何进程创建其它的线程。</p>
 
@@ -2730,9 +2730,9 @@ Android提供了下面三个方法来解决这个问题：</p>
   
   <entry>
     <title type="html"><![CDATA[Android Notes 02 - AIDL]]></title>
-    <link href="http://kesenhoo.github.com/blog/2013/02/19/android-notes-02-aidl/"/>
+    <link href="http://hukai.me/blog/2013/02/19/android-notes-02-aidl/"/>
     <updated>2013-02-19T21:18:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2013/02/19/android-notes-02-aidl</id>
+    <id>http://hukai.me/blog/2013/02/19/android-notes-02-aidl</id>
     <content type="html"><![CDATA[<ul>
 <li>在Android process之间不能用通常的方式去访问彼此的内存数据。 他们把需要传递的数据解析成基础对象，使得系统能够识别并处理这些对象。因为这个处理过程很难写，所以Android使用AIDL来解决这个问题。</li>
 <li>在定义AIDL接口之前，请意识到call这些接口是direct function call。 请不要认为这些call 接口的行为是发生在另外一个线程里面的。具体的不同因这个调用是发生在local process还是remote process而异。
@@ -3452,9 +3452,9 @@ Android提供了下面三个方法来解决这个问题：</p>
   
   <entry>
     <title type="html"><![CDATA[Android Notes 01 - Bound Services]]></title>
-    <link href="http://kesenhoo.github.com/blog/2013/02/18/android-notes-01-bound-services/"/>
+    <link href="http://hukai.me/blog/2013/02/18/android-notes-01-bound-services/"/>
     <updated>2013-02-18T22:30:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2013/02/18/android-notes-01-bound-services</id>
+    <id>http://hukai.me/blog/2013/02/18/android-notes-01-bound-services</id>
     <content type="html"><![CDATA[<ul>
 <li>一个bound的service是C/S的接口。它允许其他组件绑定到service,发送请求，接收回应并执行IPC。通常是需要给其他程序组件提供服务。
 
@@ -3984,7 +3984,7 @@ Android提供了下面三个方法来解决这个问题：</p>
 </ul>
 
 
-<p><img src="http://kesenhoo.github.com/images/articles/service_binding_tree_lifecycle.png" alt="service_binding_tree_lifecycle.png" /></p>
+<p><img src="http://hukai.me/images/articles/service_binding_tree_lifecycle.png" alt="service_binding_tree_lifecycle.png" /></p>
 
 <hr />
 
@@ -3995,9 +3995,9 @@ Android提供了下面三个方法来解决这个问题：</p>
   
   <entry>
     <title type="html"><![CDATA[Android Notes 00 - Services]]></title>
-    <link href="http://kesenhoo.github.com/blog/2013/02/04/android-notes-00-services/"/>
+    <link href="http://hukai.me/blog/2013/02/04/android-notes-00-services/"/>
     <updated>2013-02-04T18:37:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2013/02/04/android-notes-00-services</id>
+    <id>http://hukai.me/blog/2013/02/04/android-notes-00-services</id>
     <content type="html"><![CDATA[<h2>概要</h2>
 
 <ul>
@@ -4474,7 +4474,7 @@ Android提供了下面三个方法来解决这个问题：</p>
 
 <h4>两种service的lifecycle图示：</h4>
 
-<p><img src="http://kesenhoo.github.com/images/articles/service_lifecycle.png" alt="service_lifecycle.png" /></p>
+<p><img src="http://hukai.me/images/articles/service_lifecycle.png" alt="service_lifecycle.png" /></p>
 
 <p>onCreate与onDestory负责创建与释放一些资源。例如开的线程等。</p>
 
@@ -4487,10 +4487,10 @@ Android提供了下面三个方法来解决这个问题：</p>
   
   <entry>
     <title type="html"><![CDATA[Hello, World]]></title>
-    <link href="http://kesenhoo.github.com/blog/2012/12/20/hi/"/>
+    <link href="http://hukai.me/blog/2012/12/20/hi/"/>
     <updated>2012-12-20T00:57:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2012/12/20/hi</id>
-    <content type="html"><![CDATA[<p><img src="http://kesenhoo.github.com/images/articles/hello_world.jpg"></p>
+    <id>http://hukai.me/blog/2012/12/20/hi</id>
+    <content type="html"><![CDATA[<p><img src="http://hukai.me/images/articles/hello_world.jpg"></p>
 
 <p>Hi.This is my first post. <strong>By markdown.</strong></p>
 ]]></content>
@@ -4498,9 +4498,9 @@ Android提供了下面三个方法来解决这个问题：</p>
   
   <entry>
     <title type="html"><![CDATA[Android Training[Multimedia] - 捕获照片(Lesson 3 - 直接操控相机)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-3/"/>
+    <link href="http://hukai.me/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-3/"/>
     <updated>2012-12-18T23:59:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-3</id>
+    <id>http://hukai.me/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-3</id>
     <content type="html"><![CDATA[<p>在这一节课，我们会讨论如何通过使用framework的APIs来直接控制相机的硬件。直接控制设备的相机，相比起拍照与录像来说，要复杂一些。然而，如果你想要创建一个专业的特殊的相机程序，这节课会演示这部分内容。</p>
 
 <h2>Open the Camera Object(打开相机对象)</h2>
@@ -4831,9 +4831,9 @@ Android提供了下面三个方法来解决这个问题：</p>
   
   <entry>
     <title type="html"><![CDATA[Android Training[Multimedia] - 捕获照片(Lesson 2 - 简单的录像动作)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-2/"/>
+    <link href="http://hukai.me/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-2/"/>
     <updated>2012-12-18T23:21:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-2</id>
+    <id>http://hukai.me/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-2</id>
     <content type="html"><![CDATA[<p>这节课会介绍如何使用现有的Camera程序来录制一个视频。和拍照一样，我们没有必要去重新发明录像程序。大多数的Android程序都有自带Camera来进行录像。(<em>这一课的内容大多数与前面一课类似，简要带过，一些细节不赘述了</em>)</p>
 
 <h2>Request Camera Permission [请求权限]</h2>
@@ -4907,9 +4907,9 @@ Android提供了下面三个方法来解决这个问题：</p>
   
   <entry>
     <title type="html"><![CDATA[Android Training[Multimedia] - 捕获照片(Lesson 1 - 简单的拍照动作)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-1/"/>
+    <link href="http://hukai.me/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-1/"/>
     <updated>2012-12-18T22:21:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-1</id>
+    <id>http://hukai.me/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-1</id>
     <content type="html"><![CDATA[<p>在多媒体流行之前，世界是沉闷(dismal)并且特色稀少(featureless)的。还记得Gopher? (<em>Gopher是计算机上的一个工具软件，是Internet提供的一种由菜单式驱动的信息查询工具，采用客户机/服务器模式</em>)。因为你的app将要成为你的用户的生活的一部分，请赋予你的app能够把用户生活装进去的功能。使用内置的Camera，你的程序可以使得用户扩展（augment）他们所看的事物，生成唯一的头像，查找角落的人偶（zombies）,或者仅仅是分享他们的经验。</p>
 
 <p>这一章节，会教你如何简单的使用已经存在的Camera程序。在后面的课程中，你会更加深入的（ dive deeper ）学习如何直接控制Camera的硬件。</p>
@@ -5142,9 +5142,9 @@ Android提供了下面三个方法来解决这个问题：</p>
   
   <entry>
     <title type="html"><![CDATA[Android Training 05 - 与其他Apps进行交互(Lesson 3 - 允许其他app启动你的activity)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2012/12/04/android-training-05-interacting-with-other-apps-lesson-3/"/>
+    <link href="http://hukai.me/blog/2012/12/04/android-training-05-interacting-with-other-apps-lesson-3/"/>
     <updated>2012-12-04T22:12:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2012/12/04/android-training-05-interacting-with-other-apps-lesson-3</id>
+    <id>http://hukai.me/blog/2012/12/04/android-training-05-interacting-with-other-apps-lesson-3</id>
     <content type="html"><![CDATA[<p>前两节课主要讲了从你的app启动另外一个app。但是如果你的app可以响应前面发出的action，那么你的app应该做好响应的准备。例如，如果你创建了一个social app，它可以分享messages 或者 photos 给好友，那么最好你的app能够接收ACTION_SEND 的intent,这样当用户在其他app触发分享功能的时候，你的app能够出现在待选对话框。</p>
 
 <p>为了使得其他的app能够启动你的activity，你需要在你的manifest文件的<activity> 标签下添加<intent-filter> 的属性。</p>

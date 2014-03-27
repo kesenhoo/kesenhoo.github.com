@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>四方城</title>
+  <title>胡凯</title>
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="在上一课中有介绍一系列的BitmapFactory.decode* 方法，当数据源是网络或者是磁盘时(或者是任何实际源不在内存的)，这些方法都不应该在main UI 线程中执行。那些情况下加载数据是不可以预知的，它依赖于许多因素(从网络或者硬盘读取数据的速度, 图片的大小, CPU的速度, etc &hellip;">
+  <meta name="description" content="Optimizing Layout Hierarchies Layout是Android程序影响用户体验最关键的一部分。如果布局文件不好会使得程序比较卡。SDK里面包含了一些工具用来帮助我们发现布局文件的性能问题 使用基本的Layout结构是最有效的。但是，每一个添加到系统的组件都需要初始化， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,13 +18,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://kesenhoo.github.com/blog/page/9/">
+  <link rel="canonical" href="http://hukai.me/blog/page/9/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
   <script src="/javascripts/ender.js"></script>
   <script src="/javascripts/octopress.js" type="text/javascript"></script>
-  <link href="/atom.xml" rel="alternate" title="四方城" type="application/atom+xml">
+  <link href="/atom.xml" rel="alternate" title="胡凯" type="application/atom+xml">
   <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
 <link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
 <link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
@@ -47,7 +47,7 @@
 
 <body   >
   <header role="banner"><hgroup>
-  <h1><a href="/">四方城</a></h1>
+  <h1><a href="/">胡凯</a></h1>
   
 </hgroup>
 
@@ -59,7 +59,7 @@
   
 <form action="http://google.com/search" method="get">
   <fieldset role="search">
-    <input type="hidden" name="q" value="site:kesenhoo.github.com" />
+    <input type="hidden" name="q" value="site:hukai.me" />
     <input class="search" type="text" name="q" results="0" placeholder="Search"/>
   </fieldset>
 </form>
@@ -81,7 +81,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/04/23/android-training-graphics-displaying-bitmaps-efficiently-lesson-2/">Android Training[Graphics] - 高效地显示Bitmap(Lesson 2 - 在UI线程之外处理Bitmaps)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/03/21/android-training-performance-improve-layouts-lesson-1/">Android Training[Performance] - 提升布局文件的性能(Lesson 1 - 优化布局的层级)</a></h1>
     
     
       <p class="meta">
@@ -97,24 +97,28 @@
   
 
 
-<time datetime="2012-04-23T19:55:00+08:00" pubdate data-updated="true">Apr 23<span>rd</span>, 2012</time>
+<time datetime="2012-03-21T17:14:00+08:00" pubdate data-updated="true">Mar 21<span>st</span>, 2012</time>
         
-         | <a href="/blog/2012/04/23/android-training-graphics-displaying-bitmaps-efficiently-lesson-2/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/03/21/android-training-performance-improve-layouts-lesson-1/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>在上一课中有介绍一系列的BitmapFactory.decode* 方法，当数据源是网络或者是磁盘时(或者是任何实际源不在内存的)，这些方法都不应该在main UI 线程中执行。那些情况下加载数据是不可以预知的，它依赖于许多因素(从网络或者硬盘读取数据的速度, 图片的大小, CPU的速度, etc.)。如果其中任何一个任务卡住了UI thread, 系统会出现ANR的错误。</p>
+  <div class="entry-content"><h2>Optimizing Layout Hierarchies</h2>
 
-<p>这一节课会介绍如何使用 AsyncTask 在后台线程中处理bitmap并且演示了如何处理并发(concurrency)的问题。</p>
+<p>Layout是Android程序影响用户体验最关键的一部分。如果布局文件不好会使得程序比较卡。SDK里面包含了一些工具用来帮助我们发现布局文件的性能问题</p>
+
+<p>使用基本的Layout结构是最有效的。但是，每一个添加到系统的组件都需要初始化，进行布局，绘制的过程。比如，使用在LinearLayout里面使用子组件会导致一个过于deep的层级结构。而且内嵌使用包含layout_weight属性的LinearLayout会在绘制时花费昂贵的系统资源，因为每一个子组件都需要被测量两次。在使用ListView与GridView的时候，这个问题显的尤其重要，因为子组件会重复被创建</p>
+
+<p>这一课我们会学习使用Hierarchy Viewer and Lint 来检查并最优化布局文件。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/04/23/android-training-graphics-displaying-bitmaps-efficiently-lesson-2/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/03/21/android-training-performance-improve-layouts-lesson-1/">Read on &rarr;</a>
     </footer>
   
 
@@ -126,7 +130,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/04/22/android-training-cloud-syncing-to-the-cloud-lesson-2/">Android Training[Cloud] - 云同步(Lesson 2 - 使用Backup API)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/03/21/android-training-02-supporting-different-device-lesson-3/">Android Training 02 - 适配不同的屏幕(Lesson 3 - 实现可适配的UI流程)</a></h1>
     
     
       <p class="meta">
@@ -142,30 +146,27 @@
   
 
 
-<time datetime="2012-04-22T18:27:00+08:00" pubdate data-updated="true">Apr 22<span>nd</span>, 2012</time>
+<time datetime="2012-03-21T14:38:00+08:00" pubdate data-updated="true">Mar 21<span>st</span>, 2012</time>
         
-         | <a href="/blog/2012/04/22/android-training-cloud-syncing-to-the-cloud-lesson-2/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/03/21/android-training-02-supporting-different-device-lesson-3/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h2>Using the Backup API[使用Backup API]</h2>
+  <div class="entry-content"><h1>Implementing Adaptative UI Flows</h1>
 
-<p>当一个用户购买了新的设备或者是把当前的设备做了的恢复出厂设置的操作，用户希望在进行初始化设置的时候，Google Play能够把之前安装过的应用恢复到设备上。默认情况是，那些操作不会发生，用户之前的设置与数据都会丢失.</p>
+<p>根据显示不同的layout，我们需要设计不同的UI flow。比如如果你的AP是dual-pane的模式，点击左边list的item的时候，会在右边直接显示对应的内容，如果是single-pane的模式，那么需要跳转到另外一个Activity来显示对于的内容</p>
 
-<p>对于一些数据量相对较少的情况下(通常少于1MB)，例如用户偏好设置，笔记，游戏分数或者是其他的一些状态数据，可以使用Backup API来提供一个轻量级的解决方案。这一课会介绍如何使用Backup API.</p>
-
-<h2>(1)Register for the Android Backup Service[为Android备份服务进行注册]</h2>
-
-<p>这一课会使用Android Backup Service, 它需要进行注册. 点击这个链接进行注册:<a href="http://code.google.com/android/backup/signup.html">register here</a>. 注册成功后，服务器会提供一段类似下面的代码用来添加到程序的Manifest文件中:</p>
+<p><strong>注：</strong>个人认为目前很多AP都会针对比较大的屏幕设计一个对于的版本，比如QQ Pad版，QQ HD版，QQ Pad Mini版，这些信息可以看出来大多数情况，还是不太会采取同一份代码适应所有屏幕的方案。
+这一课主要就是讲如何在运行的时候判断当前的布局，从而让AP选择不同行为。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/04/22/android-training-cloud-syncing-to-the-cloud-lesson-2/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/03/21/android-training-02-supporting-different-device-lesson-3/">Read on &rarr;</a>
     </footer>
   
 
@@ -177,7 +178,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/04/22/android-training-cloud-syncing-to-the-cloud-lesson-1/">Android Training[Cloud] - 云同步(Lesson 1 - 使用App Engine进行同步)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/03/20/android-training-02-supporting-different-device-lesson-2/">Android Training 02 - 适配不同的屏幕(Lesson 2 - 适配不同屏幕密度)</a></h1>
     
     
       <p class="meta">
@@ -193,30 +194,30 @@
   
 
 
-<time datetime="2012-04-22T13:56:00+08:00" pubdate data-updated="true">Apr 22<span>nd</span>, 2012</time>
+<time datetime="2012-03-20T20:32:00+08:00" pubdate data-updated="true">Mar 20<span>th</span>, 2012</time>
         
-         | <a href="/blog/2012/04/22/android-training-cloud-syncing-to-the-cloud-lesson-1/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/03/20/android-training-02-supporting-different-device-lesson-2/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h2>Syncing with App Engine[使用App Engine进行同步]</h2>
+  <div class="entry-content"><h1>Supporting Different Densities</h1>
 
-<p>写一个能够同步到云端的app是具有挑战性的。那存在许多细节需要处理，例如服务端身份验证，客户端身份验证，分享数据的模块，还有API。简化这些操作的一个方法是使用<strong>Google Plugin for Eclipse</strong>，这个插件帮你垂直整合处理了那些Android系统与App Engine程序交互的操作。这一课会介绍如何创建那样一个项目。</p>
+<p>上一篇文章和大家分享了如何适配不同大小的屏幕，有个概念需要提前弄清楚，屏幕大的不一定就分辨率高，详细请看下面的内容。<br/>
+This lesson shows you how to support different screen densities by providing different resources and using resolution-independent units of measurements.<br/>
+我们需要通过提供不同的resources来support不同的屏幕密度，使用一种独立与分辨率的测量单元来表示（也就是dp）</p>
 
-<p>关于App Engine，请参考：https://developers.google.com/appengine/docs/whatisgoogleappengine?hl=zh-CN</p>
+<h2>Use Density-independent Pixels[使用设备独立像素dp/sp]</h2>
 
-<p>下面会介绍:  <br/>
-* 建立Android与App engine apps能够交互的程序。<br/>
-* 利用Cloud to Device Messaging(C2DM)的优势，这样app就不需要使用轮询机制去更新。[关于C2DM的详情请参考前面课程与http://code.google.com/intl/zh-CN/android/c2dm/)]</p>
+<p>前一节，我们就提到过，一定要避免使用绝对pixels(像素)的方式来设计layout的大小或者距离，因为不同的的屏幕有不同的像素密度，所以相同的像素在不同的设备上物理大小会有区别。通常我们都会在需要的时候使用dp，或者sp来表示大小</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/04/22/android-training-cloud-syncing-to-the-cloud-lesson-1/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/03/20/android-training-02-supporting-different-device-lesson-2/">Read on &rarr;</a>
     </footer>
   
 
@@ -228,7 +229,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/04/22/android-training-graphics-displaying-bitmaps-efficiently-lesson-1/">Android Training[Graphics] - 高效地显示Bitmap(Lesson 1 - 有效地加载大尺寸图片)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/03/16/android-training-02-supporting-different-device-lesson-1/">Android Training 02 - 适配不同的屏幕(Lesson 1 - 支持不同的屏幕大小)</a></h1>
     
     
       <p class="meta">
@@ -244,25 +245,38 @@
   
 
 
-<time datetime="2012-04-22T11:57:00+08:00" pubdate data-updated="true">Apr 22<span>nd</span>, 2012</time>
+<time datetime="2012-03-16T21:09:00+08:00" pubdate data-updated="true">Mar 16<span>th</span>, 2012</time>
         
-         | <a href="/blog/2012/04/22/android-training-graphics-displaying-bitmaps-efficiently-lesson-1/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/03/16/android-training-02-supporting-different-device-lesson-1/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h1>章节概要</h1>
-
-<p>这一章节会介绍一些通用的用来处理与加载Bitmap对象的方法，这些技术能够使得不会卡到程序的UI并且避免程序消耗过度内存.如果你不注意这些，Bitmaps会迅速的消耗你可用的内存而导致程序crash,出现下面的异常:java.lang.OutofMemoryError: bitmap size exceeds VM budget.</p>
-
-<p>有许多原因说明在你的Android程序中加载Bitmaps是非常棘手的，需要你特别注意:</p>
+  <div class="entry-content"><p><strong>Android设备屏幕不一，为了更好的用户体验，我们必须做适配不同屏幕的操作</strong></p>
 
 <ul>
-<li>移动设备的系统资源有限。Android设备对于单个程序至少需要16MB的内存。<a href="http://source.android.com/compatibility/downloads.html">Android Compatibility Definition Document (CDD)</a>, Section 3.7. Virtual Machine Compatibility 给出了对于不同大小与密度的屏幕的最低内存需求. 程序应该在这个最低内存限制下最优化程序的效率。当然，大多数设备的都有更高的限制需求.</li>
-<li>Bitmap会消耗很多内存，特别是对于类似照片等更加丰富的图片. 例如，Galaxy Nexus的照相机能够拍摄2592x1936 pixels (5 MB)的图片. 如果bitmap的配置是使用ARGB_8888 (the default from the Android 2.3 onward) ，那么加载这张照片到内存会大概需要19MB(2592<em>1936</em>4 bytes) 的内存, 这样的话会迅速消耗掉设备的整个内存.</li>
-<li>Android app的UI通常会在一次操作中立即加载许多张bitmaps. 例如在ListView, GridView 与 ViewPager 等组件中通常会需要一次加载许多张bitmaps，而且需要多加载一些内容为了用户可能的滑动操作。</li>
+<li>Dependencies and prerequisites<br/>
+Android 1.6 or higher (2.1+ for the sample app)<br/>
+Basic knowledge of Activities and Fragment<br/>
+Experience building an Android User Interface<br/>
+Several features require the use of the support library</li>
+<li>You should also read<br/>
+<a href="http://developer.android.com/guide/practices/screens_support.html">Supporting Multiple Screens</a></li>
+<li>Download the sample app<br/>
+<a href="http://developer.android.com/shareables/training/NewsReader.zip">NewsReader.zip</a></li>
+</ul>
+
+
+<h1>Supporting Different Screen Sizes</h1>
+
+<h2>Use &#8220;wrap_content&#8221; and &#8220;match_parent&#8221;[使用wrap_content与match_parent]</h2>
+
+<ul>
+<li>wrap_content：宽高根据内容大小调整</li>
+<li>match_parent：伸展至与父控件一致<br/>
+显然我们不能hard-coded（写死大小）</li>
 </ul>
 
 
@@ -270,52 +284,7 @@
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/04/22/android-training-graphics-displaying-bitmaps-efficiently-lesson-1/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/03/31/android-training-content-sharing-share-simple-data-lesson-3/">Android Training[Content Sharing] - 分享简单数据(Lesson 3 - 在Actionbar上添加分享功能)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-31T19:16:00+08:00" pubdate data-updated="true">Mar 31<span>st</span>, 2012</time>
-        
-         | <a href="/blog/2012/03/31/android-training-content-sharing-share-simple-data-lesson-3/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>这一课会介绍在ActionBar 中添加一个高效率且比较友好的Share功能，会使用到ActionProvider(在Android 4.0上才被引进)。它会handle出现share功能的appearance与hehavior。在ShareActionProvider的例子里面，你之需要提供一个share intent，剩下的就交给<a href="https://developer.android.com/reference/android/widget/ShareActionProvider.html">ShareActionProvider</a>来做。</p>
-
-<p><img src="/images/articles/actionbar-shareaction.png" title="Figure 1. The ShareActionProvider in the Gallery app." alt="actionbar-shareaction.png" /></p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/03/31/android-training-content-sharing-share-simple-data-lesson-3/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/03/16/android-training-02-supporting-different-device-lesson-1/">Read on &rarr;</a>
     </footer>
   
 
@@ -323,8 +292,6 @@
     </article>
   
   <div class="pagination">
-    
-      <a class="prev" href="/blog/page/10/">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
@@ -400,6 +367,36 @@
 </ul>
 </section>
 
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating&#8230;</li>
+  </ul>
+  
+  <a href="https://github.com/kesenhoo">@kesenhoo</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'kesenhoo',
+            count: 6,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
 <section>
   <h1>License</h1>
   <p>
@@ -412,7 +409,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2013 - Kesen Hoo -
+  Copyright &copy; 2014 - Kesen Hoo -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 

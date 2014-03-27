@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: Android:Training:Performance | 四方城]]></title>
-  <link href="http://kesenhoo.github.com/blog/categories/android-training-performance/atom.xml" rel="self"/>
-  <link href="http://kesenhoo.github.com/"/>
-  <updated>2013-12-01T15:14:32+08:00</updated>
-  <id>http://kesenhoo.github.com/</id>
+  <title><![CDATA[Category: Android:Training:Performance | 胡凯]]></title>
+  <link href="http://hukai.me/blog/categories/android-training-performance/atom.xml" rel="self"/>
+  <link href="http://hukai.me/"/>
+  <updated>2014-03-27T23:56:08+08:00</updated>
+  <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Training[Performance] - 管理应用的内存]]></title>
-    <link href="http://kesenhoo.github.com/blog/2013/10/19/android-training-performance-managing_your_app_memory/"/>
+    <link href="http://hukai.me/blog/2013/10/19/android-training-performance-managing_your_app_memory/"/>
     <updated>2013-10-19T15:18:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2013/10/19/android-training-performance-managing_your_app_memory</id>
+    <id>http://hukai.me/blog/2013/10/19/android-training-performance-managing_your_app_memory</id>
     <content type="html"><![CDATA[<p>Random Access Memory(RAM)在任何软件开发环境中都是一个很宝贵的资源。这一点在物理内存通常很有限的移动操作系统上，显得尤为突出。尽管Android的Dalvik虚拟机扮演了常规的垃圾回收的角色，但这并不意味着你可以忽视app的内存分配与释放的时机与地点。</p>
 
 <p>为了GC能够从你的app中及时回收内存，你需要避免Memory Leaks(这通常由引用的不能释放而导致)并且在适当的时机(下面会讲到的lifecycle callbacks)来释放引用。对于大多数apps来说，Dalvik的GC会自动把离开活动线程的对象进行回收。</p>
@@ -229,12 +229,12 @@
   
   <entry>
     <title type="html"><![CDATA[Android Training[Performance] - 代码性能优化小技巧]]></title>
-    <link href="http://kesenhoo.github.com/blog/2013/04/06/android-training-performance-tips/"/>
+    <link href="http://hukai.me/blog/2013/04/06/android-training-performance-tips/"/>
     <updated>2013-04-06T18:27:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2013/04/06/android-training-performance-tips</id>
+    <id>http://hukai.me/blog/2013/04/06/android-training-performance-tips</id>
     <content type="html"><![CDATA[<h2>Performance Tips</h2>
 
-<p><img src="/images/articles/performance_improve.jpg"></p>
+<p>{% img /images/articles/performance_improve.jpg %}</p>
 
 <p>这篇文章主要是介绍了一些小细节的优化技巧，当这些小技巧综合使用起来的时候，对于整个App的性能提升还是有作用的，只是不能较大幅度的提升性能而已。选择合适的算法与数据结构才应该是你首要考虑的因素，在这篇文章中不会涉及这方面。你应该使用这篇文章中的小技巧作为平时写代码的习惯，这样能够提升代码的效率。</p>
 
@@ -424,9 +424,9 @@ Foo$Inner里面有访问外部类的一个变量。这样的做法会给系统�
   
   <entry>
     <title type="html"><![CDATA[Android Training[Performance] - 优化电池续航能力(Lesson 4 - 判断并监测网络连接状态)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2012/03/24/android-training-performance-optimiizing-battery-life-lesson-4/"/>
+    <link href="http://hukai.me/blog/2012/03/24/android-training-performance-optimiizing-battery-life-lesson-4/"/>
     <updated>2012-03-24T16:37:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2012/03/24/android-training-performance-optimiizing-battery-life-lesson-4</id>
+    <id>http://hukai.me/blog/2012/03/24/android-training-performance-optimiizing-battery-life-lesson-4</id>
     <content type="html"><![CDATA[<h2>Manipulating Broadcast Receivers On Demand[按需操控广播接收者]</h2>
 
 <p>简单的方法是为我们监测的状态创建一个BroadcastReceiver，并在manifest中为每一个状态进行注册监听。然后，每一个Receiver根据当前设备的状态来简单重新安排下一步执行的任务。[这句话感觉理解有点问题]</p>
@@ -470,9 +470,9 @@ ComponentName receiver = new ComponentName(context, myReceiver.class);</p>
   
   <entry>
     <title type="html"><![CDATA[Android Training[Performance] - 优化电池续航能力(Lesson 3 - 判断并监测网络连接状态)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-3/"/>
+    <link href="http://hukai.me/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-3/"/>
     <updated>2012-03-23T21:09:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-3</id>
+    <id>http://hukai.me/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-3</id>
     <content type="html"><![CDATA[<h2>Determining and Monitoring the Connectivity Status[判断并监测网络连接状态]</h2>
 
 <p>通常我们会有一些计划的任务，比如重复闹钟，后台定时启动的任务等。但是如果我们的网络没有连接上，那么就没有必要启动那些需要连接网络的任务。我们可以使用ConnectivityManager来检查是否连接上网络，是何种网络。[通过网络的连接状况改变，相应的改变app的行为，减少无谓的操作，从而延长设备的续航能力]</p>
@@ -521,9 +521,9 @@ boolean isWiFi = activeNetwork.getType() == ConnectivityManager.TYPE_WIFI;
   
   <entry>
     <title type="html"><![CDATA[Android Training[Performance] - 优化电池续航能力(Lesson 2 - 判断设备的停驻模式)]]></title>
-    <link href="http://kesenhoo.github.com/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-2/"/>
+    <link href="http://hukai.me/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-2/"/>
     <updated>2012-03-23T19:53:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-2</id>
+    <id>http://hukai.me/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-2</id>
     <content type="html"><![CDATA[<h2>Determining and Monitoring the Docking State and Type[判断并监测设备的停驻状态与类型]</h2>
 
 <p>在上一课中有这样一句话：In many cases, the act of charging a device is coincident with putting it into a dock.</p>

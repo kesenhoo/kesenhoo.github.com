@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: Android:Note | 四方城]]></title>
-  <link href="http://kesenhoo.github.com/blog/categories/android-note/atom.xml" rel="self"/>
-  <link href="http://kesenhoo.github.com/"/>
-  <updated>2013-12-01T15:14:32+08:00</updated>
-  <id>http://kesenhoo.github.com/</id>
+  <title><![CDATA[Category: Android:Note | 胡凯]]></title>
+  <link href="http://hukai.me/blog/categories/android-note/atom.xml" rel="self"/>
+  <link href="http://hukai.me/"/>
+  <updated>2014-03-27T23:56:08+08:00</updated>
+  <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Notes 05 - Tasks and Back Stack]]></title>
-    <link href="http://kesenhoo.github.com/blog/2013/04/20/android-notes-05-task-and-back-stack/"/>
+    <link href="http://hukai.me/blog/2013/04/20/android-notes-05-task-and-back-stack/"/>
     <updated>2013-04-20T20:42:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2013/04/20/android-notes-05-task-and-back-stack</id>
+    <id>http://hukai.me/blog/2013/04/20/android-notes-05-task-and-back-stack</id>
     <content type="html"><![CDATA[<ul>
 <li>所有的activities都归属于一个task。</li>
 <li>一个task包含了一些activities，这些activities以用户与他们的交互前后为顺序存放在task中。</li>
@@ -248,9 +248,9 @@ For example, suppose that an activity that reports weather conditions in selecte
   
   <entry>
     <title type="html"><![CDATA[Android Notes 04 - Intents and Intent Filters]]></title>
-    <link href="http://kesenhoo.github.com/blog/2013/04/12/android-notes-04-intent-and-intentFilter/"/>
+    <link href="http://hukai.me/blog/2013/04/12/android-notes-04-intent-and-intentFilter/"/>
     <updated>2013-04-12T18:27:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2013/04/12/android-notes-04-intent-and-intentFilter</id>
+    <id>http://hukai.me/blog/2013/04/12/android-notes-04-intent-and-intentFilter</id>
     <content type="html"><![CDATA[<h2>Intent与Intent Filter</h2>
 
 <p>Android其中的三大组件，Activity,Service与broadcast receivers是通过Intent来触发彼此的。Intent本身会携带一些信息，它是一种组件内部或者组件间进行交互的中介。<br/>
@@ -489,10 +489,10 @@ scheme://host:port/path
   
   <entry>
     <title type="html"><![CDATA[Android Notes 03 - Process and Thread]]></title>
-    <link href="http://kesenhoo.github.com/blog/2013/03/31/android-notes-03-process-and-thread/"/>
+    <link href="http://hukai.me/blog/2013/03/31/android-notes-03-process-and-thread/"/>
     <updated>2013-03-31T16:27:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2013/03/31/android-notes-03-process-and-thread</id>
-    <content type="html"><![CDATA[<p><img src="/images/articles/process_and_thread.jpg"></p>
+    <id>http://hukai.me/blog/2013/03/31/android-notes-03-process-and-thread</id>
+    <content type="html"><![CDATA[<p>{% img /images/articles/process_and_thread.jpg %}</p>
 
 <p>当程序的第一个组件开始启动时，Android系统会为这个程序启动一个新的Linux进程。默认的，程序中的后续其他组件都是运行在这个进程的线程中(这个线程被成为"主"线程:main thread)。如果程序的组件在启动时发现已经存在这个程序的进程了(因为其他组件正在运行)， 那么这个组件将启动在该进程中，并使用同一线程。然而，你可以安排程序中的不同组件运行在另外一个进程中，而且你可以为任何进程创建其它的线程。</p>
 
@@ -666,9 +666,9 @@ private class DownloadImageTask extends AsyncTask&lt;String, Void, Bitmap&gt; {
   
   <entry>
     <title type="html"><![CDATA[Android Notes 02 - AIDL]]></title>
-    <link href="http://kesenhoo.github.com/blog/2013/02/19/android-notes-02-aidl/"/>
+    <link href="http://hukai.me/blog/2013/02/19/android-notes-02-aidl/"/>
     <updated>2013-02-19T21:18:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2013/02/19/android-notes-02-aidl</id>
+    <id>http://hukai.me/blog/2013/02/19/android-notes-02-aidl</id>
     <content type="html"><![CDATA[<ul>
 <li>在Android process之间不能用通常的方式去访问彼此的内存数据。 他们把需要传递的数据解析成基础对象，使得系统能够识别并处理这些对象。因为这个处理过程很难写，所以Android使用AIDL来解决这个问题。</li>
 <li>在定义AIDL接口之前，请意识到call这些接口是direct function call。 请不要认为这些call 接口的行为是发生在另外一个线程里面的。具体的不同因这个调用是发生在local process还是remote process而异。
@@ -1142,9 +1142,9 @@ public void valueChanged(int value) {
   
   <entry>
     <title type="html"><![CDATA[Android Notes 01 - Bound Services]]></title>
-    <link href="http://kesenhoo.github.com/blog/2013/02/18/android-notes-01-bound-services/"/>
+    <link href="http://hukai.me/blog/2013/02/18/android-notes-01-bound-services/"/>
     <updated>2013-02-18T22:30:00+08:00</updated>
-    <id>http://kesenhoo.github.com/blog/2013/02/18/android-notes-01-bound-services</id>
+    <id>http://hukai.me/blog/2013/02/18/android-notes-01-bound-services</id>
     <content type="html"><![CDATA[<ul>
 <li>一个bound的service是C/S的接口。它允许其他组件绑定到service,发送请求，接收回应并执行IPC。通常是需要给其他程序组件提供服务。
 
