@@ -9,7 +9,8 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="章节概要： 虽然可以在onPause()的时候保存一些信息以免用户的使用进度被丢失，但是大多数Android app仍然是需要做保存数据的动作。大多数比较好的apps都需要保存用户的设置信息，而且有一些apps必须维护大量的文件信息与DB信息。 &hellip;">
+  <meta name="description" content="Authenticating to OAuth2 Services[使用OAuth2来进行鉴权] 为了安全的访问线上服务，用户需要在service上进行鉴定，他们需要提供身份的证明。对于一个程序来说，如果是访问第三方的服务，那么这个安全问题就更加复杂。
+【比如，你有个资料在A服务器上， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +19,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://hukai.me/blog/page/7/">
+  <link rel="canonical" href="http://hukai.me/blog/page/13/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -81,7 +82,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/11/29/android-training-04-saving-data-lesson-1/">Android Training 04 - 保存数据(Lesson 1 - 保存Key-Value)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/03/28/android-training-userInfo-remembering-users-lesson-2/">Android Training[UserInfo] - 记住用户的信息(Lesson 2 - 使用OAuth2来进行身份鉴定)</a></h1>
     
     
       <p class="meta">
@@ -97,23 +98,27 @@
   
 
 
-<time datetime="2012-11-29T13:59:00+08:00" pubdate data-updated="true">Nov 29<span>th</span>, 2012</time>
+<time datetime="2012-03-28T18:53:00+08:00" pubdate data-updated="true">Mar 28<span>th</span>, 2012</time>
         
-         | <a href="/blog/2012/11/29/android-training-04-saving-data-lesson-1/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/03/28/android-training-userInfo-remembering-users-lesson-2/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p><strong>章节概要：</strong></p>
+  <div class="entry-content"><h2>Authenticating to OAuth2 Services[使用OAuth2来进行鉴权]</h2>
 
-<p>虽然可以在onPause()的时候保存一些信息以免用户的使用进度被丢失，但是大多数Android app仍然是需要做保存数据的动作。大多数比较好的apps都需要保存用户的设置信息，而且有一些apps必须维护大量的文件信息与DB信息。这一章节会介绍给你在Android中一些重要的数据存储方法，例如：</p>
+<p>为了安全的访问线上服务，用户需要在service上进行鉴定，他们需要提供身份的证明。对于一个程序来说，如果是访问第三方的服务，那么这个安全问题就更加复杂。
+【比如，你有个资料在A服务器上，但是你需要在B上面对A里面的数据进行操作，这个时候如果把登入A的帐号与密码给B去直接操作就不够安全，简单的方法是先把A上的资料拿下来，再弄到B上面去，然后B再做操作，这又显得很不方便，就是为了解决这样类似的问题，才诞生了OAuth。关于OAuth2的详情，请参考：<a href="http://oauth.net/2/">http://oauth.net/2/</a>，谢谢！】
+目前行业内解决这种第三方服务身份鉴定的方法是使用OAuth2协议。OAuth2提供了auth token，它代表用户身份与用户对于程序的授权。这一课演示了如何使用OAuth2连接到Google Server。同样在其他支持OAuth2协议的服务上都可以使用类似的方法。</p>
+
+<p>使用OAuth2有利于:</p>
 
 <ul>
-<li>以key-value的方式保存一些简单的数据到shared preferences文件中</li>
-<li>在Android文件系统中保存任意格式的文件</li>
-<li>通过SQLite来使用DB</li>
+<li>从用户那得到授权，使用账户信息来访问online service。</li>
+<li>对online service进行鉴定，保护用户利益。</li>
+<li>处理认证错误。</li>
 </ul>
 
 
@@ -121,7 +126,7 @@
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/11/29/android-training-04-saving-data-lesson-1/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/03/28/android-training-userInfo-remembering-users-lesson-2/">Read on &rarr;</a>
     </footer>
   
 
@@ -133,7 +138,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/11/28/android-training-03-building-a-dynamic-ui-with-fragments-lesson-3/">Android Training 03 - 使用Fragments建立动态的UI(Lesson 4 - Fragment之间的通信)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/03/27/android-training-userInfo-remembering-users-lesson-1/">Android Training[UserInfo] - 记住用户的信息(Lesson 1 - 使用AccountManager来记录用户)</a></h1>
     
     
       <p class="meta">
@@ -149,115 +154,26 @@
   
 
 
-<time datetime="2012-11-28T18:33:00+08:00" pubdate data-updated="true">Nov 28<span>th</span>, 2012</time>
+<time datetime="2012-03-27T11:12:00+08:00" pubdate data-updated="true">Mar 27<span>th</span>, 2012</time>
         
-         | <a href="/blog/2012/11/28/android-training-03-building-a-dynamic-ui-with-fragments-lesson-3/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>为了重用fragment的UI组件，你必须为每个fragment建立自己的container，模块化自己的layout与行为。一旦你定义了那些可重用的fragment，你可以使用activity与他们建立联系，对那些UI组件做组合动作等。</p>
-
-<p>通常，你也会想要fragment-s之间能够交流。例如，基于用户事件来改变内容。所有的Fragment-to-Fragment之间的交互都是基于activity进行操作的。两个fragment之间没有办法直接交互。</p>
-
-<h2>Define an Interface[定义接口]</h2>
-
-<p>为了允许fragment与activity进行交互，你可以在fragment中定义一个interface，然后在activity中去implement它。Fragment在它的onAttach()方法里面捕获接口的实现，然后call接口的方法来与activity进行交互。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/11/28/android-training-03-building-a-dynamic-ui-with-fragments-lesson-3/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/11/28/android-training-03-building-a-dynamic-ui-with-fragments-lesson-4/">Android Training 03 - 使用Fragments建立动态的UI(Lesson 3 - 创建灵活可变的UI)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-11-28T18:00:00+08:00" pubdate data-updated="true">Nov 28<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/11/28/android-training-03-building-a-dynamic-ui-with-fragments-lesson-4/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/03/27/android-training-userInfo-remembering-users-lesson-1/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h1>Building a Flexible UI</h1>
+  <div class="entry-content"><p><strong>章节概览:Remembering Users</strong></p>
 
-<p>当把你的程序设计成可以适配一系列大小各异的屏幕时，你可以基于可使用的屏幕空间来为你的fragments设置不同的参数，从而达到重用的目的。<br/>
-例如：在手持设备上，一次显示一个fragment会比较合适。对应的，在平板这样屏幕比较大的设备上，你可以用多个fragment的方式来呈现出side-by-side的效果。这样能够一次显示更多的信息给用户。如下图所示：</p>
+<p>Android用户希望把自己的信息绑定到喜欢的app与设备上，那么使得你的程序更加令人喜爱的一个方法是使得它更加的人性化。Android设备知道你的使用者是谁，他们都使用过哪些服务，在哪里存储了你的数据。在得到你的用户授权的前提下，你可以使用那些信息来使得你的app更加丰富，更加人性化。</p>
 
-<p><img src="/images/articles/fragments-screen-mock.png" alt="fragments-screen-mock.png" /></p>
+<p>在这一章节，你将学习到鉴定用户信息的多种技术，你可以:</p>
 
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/11/28/android-training-03-building-a-dynamic-ui-with-fragments-lesson-4/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/11/27/android-training-03-building-a-dynamic-ui-with-fragments-lesson-2/">Android Training 03 - 使用Fragments建立动态的UI(Lesson 2 - 新建一个Fragment)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-11-27T16:48:00+08:00" pubdate data-updated="true">Nov 27<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/11/27/android-training-03-building-a-dynamic-ui-with-fragments-lesson-2/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><ul>
-<li>你可以把fragment当作activity的一部分，它有自己的lifecycle,它会接受自己的输入事件。你可以在activity运行的时候增加或者拿掉fragment。（类似子activity，你可以在不同的activity中重用fragment）。这节课演示如何使用support library来创建一个继承自 Fragment 的类。</li>
-<li>Note: 如果你的app决定跑在Level 11或者更高的系统上，你不需要添加这个support library,你可以使用那个版本的系统自带的API来实现。请注意这节课是专注于使用support library里面的API，这里面的API名称与那些本身就包含这些功能的平台上的名称有可能不一样。</li>
+<ul>
+<li>通过记住用户账户名来人性化你的appd。</li>
+<li>鉴定用户以确保是否是那个人。</li>
+<li>通过service来获取访问用户线上数据的权限，例如Google APIs。</li>
+<li>增加一个自定义的账户来鉴定自己后台的服务。</li>
 </ul>
 
 
@@ -265,7 +181,109 @@
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/11/27/android-training-03-building-a-dynamic-ui-with-fragments-lesson-2/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/03/27/android-training-userInfo-remembering-users-lesson-1/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-3/">Android Training[Connectivity] - 优化下载效率(Lesson 3 - 使用缓存来避免重复下载)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-26T17:59:00+08:00" pubdate data-updated="true">Mar 26<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-3/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Redundant Downloads are Redundant[重复下载是冗余的]</h2>
+
+<p>减少下载的最基本方法是仅仅下载那些你需要的。从数据的角度看，我们可以通过传递类似上次更新时间这样的参数来制定查询数据的条件。同样，在下载图片的时候，server那边最好能够减少图片的大小，而不是让我们下载完整大小的图片。</p>
+
+<h2>1.Cache Files Locally[缓存文件到本地]</h2>
+
+<p>避免下载重复的数据是很重要的。可以使用缓存机制来处理这个问题。缓存static的资源，例如完整的图片。这些缓存的资源需要分开存放。为了保证app不会因为缓存而导致显示的是旧数据，请从缓存中获取最新的数据，当数据过期的时候，会提示进行刷新。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-3/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-2/">Android Training[Connectivity] - 优化下载效率(Lesson 2 - 调整更新的频率[C2DM与退避算法])</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-26T16:51:00+08:00" pubdate data-updated="true">Mar 26<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-2/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Minimizing the Effect of Regular Updates[最小化定期更新操作的副作用]</h2>
+
+<p>最佳的定时更新频率是不确定的，通常由设备状态，网络连接状态，用户行为与用户定义明确的偏好而决定。</p>
+
+<p><a href="http://developer.android.com/training/monitoring-device-state/index.html">Optimizing Battery Life</a>这一章有讨论如何根据设备状态来修改更新频率。里面介绍了当断开网络连接的时候去关闭后台服务，在电量比较低的时候减少更新的频率。</p>
+
+<p>这一课会介绍更新频率是多少才会使得更新操作对无线电状态机的影响最小。(C2DM与指数退避算法的使用)</p>
+
+<h2>Use Google Cloud Messaging as an Alternative to Polling[使用C2DM作为轮询方式之一]</h2>
+
+<p>关于<code>Android Cloud to Device Messaging</code> (C2DM)详情 ,请参考:<a href="http://code.google.com/intl/zh-CN/android/c2dm/">http://code.google.com/intl/zh-CN/android/c2dm/</a></p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-2/">Read on &rarr;</a>
     </footer>
   
 
@@ -274,11 +292,11 @@
   
   <div class="pagination">
     
-      <a class="prev" href="/blog/page/8/">&larr; Older</a>
+      <a class="prev" href="/blog/page/14/">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
-    <a class="next" href="/blog/page/6/">Newer &rarr;</a>
+    <a class="next" href="/blog/page/12/">Newer &rarr;</a>
     
   </div>
 </div>

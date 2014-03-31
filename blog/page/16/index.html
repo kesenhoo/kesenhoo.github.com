@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="章节概要： 虽然可以在onPause()的时候保存一些信息以免用户的使用进度被丢失，但是大多数Android app仍然是需要做保存数据的动作。大多数比较好的apps都需要保存用户的设置信息，而且有一些apps必须维护大量的文件信息与DB信息。 &hellip;">
+  <meta name="description" content="如果你的App在播放音频，显然用户能够以预期的方式来控制音频是很重要的。为了保证好的用户体验，同样App能够获取音频焦点是很重要的，这样才能确保不会在同一时刻出现多个App的声音。在学习这个课程后，你将能够创建对硬件音量按钮进行响应的App，当按下音量按钮的时候需要获取到当前音频的焦点， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://hukai.me/blog/page/7/">
+  <link rel="canonical" href="http://hukai.me/blog/page/16/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -81,7 +81,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/11/29/android-training-04-saving-data-lesson-1/">Android Training 04 - 保存数据(Lesson 1 - 保存Key-Value)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/03/21/android-training-multimedia-managing-audio-playback-lesson-1/">Android Training[Multimedia] - 音频播放(Lesson 1 - 控制app的音量与播放)</a></h1>
     
     
       <p class="meta">
@@ -97,31 +97,27 @@
   
 
 
-<time datetime="2012-11-29T13:59:00+08:00" pubdate data-updated="true">Nov 29<span>th</span>, 2012</time>
+<time datetime="2012-03-21T23:27:00+08:00" pubdate data-updated="true">Mar 21<span>st</span>, 2012</time>
         
-         | <a href="/blog/2012/11/29/android-training-04-saving-data-lesson-1/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/03/21/android-training-multimedia-managing-audio-playback-lesson-1/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p><strong>章节概要：</strong></p>
+  <div class="entry-content"><p>如果你的App在播放音频，显然用户能够以预期的方式来控制音频是很重要的。为了保证好的用户体验，同样App能够获取音频焦点是很重要的，这样才能确保不会在同一时刻出现多个App的声音。在学习这个课程后，你将能够创建对硬件音量按钮进行响应的App，当按下音量按钮的时候需要获取到当前音频的焦点，然后以适当的方式改变音量从而进行响应用户的行为。</p>
 
-<p>虽然可以在onPause()的时候保存一些信息以免用户的使用进度被丢失，但是大多数Android app仍然是需要做保存数据的动作。大多数比较好的apps都需要保存用户的设置信息，而且有一些apps必须维护大量的文件信息与DB信息。这一章节会介绍给你在Android中一些重要的数据存储方法，例如：</p>
+<hr />
 
-<ul>
-<li>以key-value的方式保存一些简单的数据到shared preferences文件中</li>
-<li>在Android文件系统中保存任意格式的文件</li>
-<li>通过SQLite来使用DB</li>
-</ul>
-
+<p>一个好的用户体验是可预期可控的。如果App是在播放音频，那么显然我们需要做到能够通过硬件按钮，软件按钮，蓝牙耳麦等来控制音量。
+同样的，我们需要能够进行play, stop, pause, skip, and previous等动作，并且进行对应的响应。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/11/29/android-training-04-saving-data-lesson-1/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/03/21/android-training-multimedia-managing-audio-playback-lesson-1/">Read on &rarr;</a>
     </footer>
   
 
@@ -133,7 +129,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/11/28/android-training-03-building-a-dynamic-ui-with-fragments-lesson-3/">Android Training 03 - 使用Fragments建立动态的UI(Lesson 4 - Fragment之间的通信)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/03/21/android-training-performance-improve-layouts-lesson-4/">Android Training[Performance] - 提升布局文件的性能(Lesson 4 - 使用ViewHolder来提升ListView的性能)</a></h1>
     
     
       <p class="meta">
@@ -149,28 +145,25 @@
   
 
 
-<time datetime="2012-11-28T18:33:00+08:00" pubdate data-updated="true">Nov 28<span>th</span>, 2012</time>
+<time datetime="2012-03-21T21:20:00+08:00" pubdate data-updated="true">Mar 21<span>st</span>, 2012</time>
         
-         | <a href="/blog/2012/11/28/android-training-03-building-a-dynamic-ui-with-fragments-lesson-3/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/03/21/android-training-performance-improve-layouts-lesson-4/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>为了重用fragment的UI组件，你必须为每个fragment建立自己的container，模块化自己的layout与行为。一旦你定义了那些可重用的fragment，你可以使用activity与他们建立联系，对那些UI组件做组合动作等。</p>
+  <div class="entry-content"><h2>Making ListView Scrolling Smooth</h2>
 
-<p>通常，你也会想要fragment-s之间能够交流。例如，基于用户事件来改变内容。所有的Fragment-to-Fragment之间的交互都是基于activity进行操作的。两个fragment之间没有办法直接交互。</p>
-
-<h2>Define an Interface[定义接口]</h2>
-
-<p>为了允许fragment与activity进行交互，你可以在fragment中定义一个interface，然后在activity中去implement它。Fragment在它的onAttach()方法里面捕获接口的实现，然后call接口的方法来与activity进行交互。</p>
+<p>使得滚动ListView平滑的关键在与保持APP的UI thread与复杂的操作隔离。确保另起一个Thread来处理Disk IO，network access或者SQL access.
+为了测试AP的状态，可以enable <a href="http://developer.android.com/reference/android/os/StrictMode.html">StrictMode</a>.(Android ICS 4.0上已经默认开启了StrickMode)</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/11/28/android-training-03-building-a-dynamic-ui-with-fragments-lesson-3/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/03/21/android-training-performance-improve-layouts-lesson-4/">Read on &rarr;</a>
     </footer>
   
 
@@ -182,7 +175,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/11/28/android-training-03-building-a-dynamic-ui-with-fragments-lesson-4/">Android Training 03 - 使用Fragments建立动态的UI(Lesson 3 - 创建灵活可变的UI)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/03/21/android-training-performance-improve-layouts-lesson-3/">Android Training[Performance] - 提升布局文件的性能(Lesson 3 - 使用viewStub按需载入视图)</a></h1>
     
     
       <p class="meta">
@@ -198,27 +191,30 @@
   
 
 
-<time datetime="2012-11-28T18:00:00+08:00" pubdate data-updated="true">Nov 28<span>th</span>, 2012</time>
+<time datetime="2012-03-21T18:47:00+08:00" pubdate data-updated="true">Mar 21<span>st</span>, 2012</time>
         
-         | <a href="/blog/2012/11/28/android-training-03-building-a-dynamic-ui-with-fragments-lesson-4/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/03/21/android-training-performance-improve-layouts-lesson-3/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h1>Building a Flexible UI</h1>
+  <div class="entry-content"><h2>Loading Views On Demand</h2>
 
-<p>当把你的程序设计成可以适配一系列大小各异的屏幕时，你可以基于可使用的屏幕空间来为你的fragments设置不同的参数，从而达到重用的目的。<br/>
-例如：在手持设备上，一次显示一个fragment会比较合适。对应的，在平板这样屏幕比较大的设备上，你可以用多个fragment的方式来呈现出side-by-side的效果。这样能够一次显示更多的信息给用户。如下图所示：</p>
+<p>某些时候，我们需要一些很复杂的视图却仅仅很少用到。如果我们在它仅仅需要的时候再载入，这样可以减少内存的使用并且给用户带来流畅的体验。</p>
 
-<p><img src="/images/articles/fragments-screen-mock.png" alt="fragments-screen-mock.png" /></p>
+<h2>1)Define a ViewStub</h2>
+
+<p><a href="http://developer.android.com/reference/android/view/ViewStub.html">ViewStub</a>是一个轻量级的view，没有占有空间，没有花费draw的资源，也没有参与在任何一个layout的计算与绘制里面。</p>
+
+<p>创建它仅需要很少的系统资源，而且存留在View的层级也是个比较不花费资源的动作。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/11/28/android-training-03-building-a-dynamic-ui-with-fragments-lesson-4/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/03/21/android-training-performance-improve-layouts-lesson-3/">Read on &rarr;</a>
     </footer>
   
 
@@ -230,7 +226,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/11/27/android-training-03-building-a-dynamic-ui-with-fragments-lesson-2/">Android Training 03 - 使用Fragments建立动态的UI(Lesson 2 - 新建一个Fragment)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/03/21/android-training-performance-improve-layouts-lesson-2/">Android Training[Performance] - 提升布局文件的性能(Lesson 2 - 使用include标签重用Layout)</a></h1>
     
     
       <p class="meta">
@@ -246,26 +242,26 @@
   
 
 
-<time datetime="2012-11-27T16:48:00+08:00" pubdate data-updated="true">Nov 27<span>th</span>, 2012</time>
+<time datetime="2012-03-21T18:06:00+08:00" pubdate data-updated="true">Mar 21<span>st</span>, 2012</time>
         
-         | <a href="/blog/2012/11/27/android-training-03-building-a-dynamic-ui-with-fragments-lesson-2/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/03/21/android-training-performance-improve-layouts-lesson-2/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><ul>
-<li>你可以把fragment当作activity的一部分，它有自己的lifecycle,它会接受自己的输入事件。你可以在activity运行的时候增加或者拿掉fragment。（类似子activity，你可以在不同的activity中重用fragment）。这节课演示如何使用support library来创建一个继承自 Fragment 的类。</li>
-<li>Note: 如果你的app决定跑在Level 11或者更高的系统上，你不需要添加这个support library,你可以使用那个版本的系统自带的API来实现。请注意这节课是专注于使用support library里面的API，这里面的API名称与那些本身就包含这些功能的平台上的名称有可能不一样。</li>
-</ul>
+  <div class="entry-content"><h2>Re-using Layouts with <include/></h2>
 
+<p>尽管Android提供了很多种小的组件可以重用，我们还需要自定义一些稍微复杂一点的小组件进行重用。我们可以使用<code>&lt;include/&gt;</code> 与 <code>&lt;merge/&gt;</code> 标签来对当前的layout嵌入一些其他的layout.</p>
+
+<p>在创建一个稍微复杂一点的layout时，重用layout是个很给力的方法。比如我们需要一个YES/NO的控制栏，包含文字提示的Progress bar。像这种的布局会在很多地方需要重用到.</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/11/27/android-training-03-building-a-dynamic-ui-with-fragments-lesson-2/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/03/21/android-training-performance-improve-layouts-lesson-2/">Read on &rarr;</a>
     </footer>
   
 
@@ -274,11 +270,11 @@
   
   <div class="pagination">
     
-      <a class="prev" href="/blog/page/8/">&larr; Older</a>
+      <a class="prev" href="/blog/page/17/">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
-    <a class="next" href="/blog/page/6/">Newer &rarr;</a>
+    <a class="next" href="/blog/page/15/">Newer &rarr;</a>
     
   </div>
 </div>

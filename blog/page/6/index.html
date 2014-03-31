@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="在上一课中有介绍一系列的BitmapFactory.decode* 方法，当数据源是网络或者是磁盘时(或者是任何实际源不在内存的)，这些方法都不应该在main UI 线程中执行。那些情况下加载数据是不可以预知的，它依赖于许多因素(从网络或者硬盘读取数据的速度, 图片的大小, CPU的速度, etc &hellip;">
+  <meta name="description" content="启动另外一个activity并不一定是单向的。你也可以启动另外一个activity然后接受一个result回来。为了接受这个result,你需要使用startActivityForResult()) (而不是startActivity()))。 例如， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,7 +81,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/04/23/android-training-graphics-displaying-bitmaps-efficiently-lesson-2/">Android Training[Graphics] - 高效地显示Bitmap(Lesson 2 - 在UI线程之外处理Bitmaps)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/12/03/android-training-05-interacting-with-other-apps-lesson-2/">Android Training 05 - 与其他Apps进行交互(Lesson 2 - 从activity获取Result)</a></h1>
     
     
       <p class="meta">
@@ -97,24 +97,28 @@
   
 
 
-<time datetime="2012-04-23T19:55:00+08:00" pubdate data-updated="true">Apr 23<span>rd</span>, 2012</time>
+<time datetime="2012-12-03T22:39:00+08:00" pubdate data-updated="true">Dec 3<span>rd</span>, 2012</time>
         
-         | <a href="/blog/2012/04/23/android-training-graphics-displaying-bitmaps-efficiently-lesson-2/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/12/03/android-training-05-interacting-with-other-apps-lesson-2/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>在上一课中有介绍一系列的BitmapFactory.decode* 方法，当数据源是网络或者是磁盘时(或者是任何实际源不在内存的)，这些方法都不应该在main UI 线程中执行。那些情况下加载数据是不可以预知的，它依赖于许多因素(从网络或者硬盘读取数据的速度, 图片的大小, CPU的速度, etc.)。如果其中任何一个任务卡住了UI thread, 系统会出现ANR的错误。</p>
+  <div class="entry-content"><p>启动另外一个activity并不一定是单向的。你也可以启动另外一个activity然后接受一个result回来。为了接受这个result,你需要使用<a href="http://developer.android.com/reference/android/app/Activity.html#startActivityForResult(android.content.Intent,%20int">startActivityForResult()</a>) (而不是<a href="http://developer.android.com/reference/android/app/Activity.html#startActivity(android.content.Intent">startActivity()</a>))。</p>
 
-<p>这一节课会介绍如何使用 AsyncTask 在后台线程中处理bitmap并且演示了如何处理并发(concurrency)的问题。</p>
+<p>例如，你的app可以启动一个camera程序并接受拍的照片作为result。或者你可以启动People程序并获取其中联系的人的详情作为result。</p>
+
+<p>当然，被启动的activity需要指定返回的result。它需要把这个result作为另外一个intent对象返回，你的activity需要在<a href="http://developer.android.com/reference/android/app/Activity.html#onActivityResult(int,%20int,%20android.content.Intent">onActivityResult()</a>)的回调方法里面去接收result。</p>
+
+<p><strong>Note:</strong>在执行 startActivityForResult()时，你可以使用explicit 或者 implicit 的intent。当你启动另外一个位于你的程序中的activity时，你应该使用explicit intent来确保你可以接收到期待的结果。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/04/23/android-training-graphics-displaying-bitmaps-efficiently-lesson-2/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/12/03/android-training-05-interacting-with-other-apps-lesson-2/">Read on &rarr;</a>
     </footer>
   
 
@@ -126,7 +130,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/04/22/android-training-cloud-syncing-to-the-cloud-lesson-2/">Android Training[Cloud] - 云同步(Lesson 2 - 使用Backup API)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/12/03/android-training-05-interacting-with-other-apps-lesson-1/">Android Training 05 - 与其他Apps进行交互(Lesson 1 - 启动到另外一个app)</a></h1>
     
     
       <p class="meta">
@@ -142,127 +146,21 @@
   
 
 
-<time datetime="2012-04-22T18:27:00+08:00" pubdate data-updated="true">Apr 22<span>nd</span>, 2012</time>
+<time datetime="2012-12-03T20:55:00+08:00" pubdate data-updated="true">Dec 3<span>rd</span>, 2012</time>
         
-         | <a href="/blog/2012/04/22/android-training-cloud-syncing-to-the-cloud-lesson-2/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Using the Backup API[使用Backup API]</h2>
-
-<p>当一个用户购买了新的设备或者是把当前的设备做了的恢复出厂设置的操作，用户希望在进行初始化设置的时候，Google Play能够把之前安装过的应用恢复到设备上。默认情况是，那些操作不会发生，用户之前的设置与数据都会丢失.</p>
-
-<p>对于一些数据量相对较少的情况下(通常少于1MB)，例如用户偏好设置，笔记，游戏分数或者是其他的一些状态数据，可以使用Backup API来提供一个轻量级的解决方案。这一课会介绍如何使用Backup API.</p>
-
-<h2>(1)Register for the Android Backup Service[为Android备份服务进行注册]</h2>
-
-<p>这一课会使用Android Backup Service, 它需要进行注册. 点击这个链接进行注册:<a href="http://code.google.com/android/backup/signup.html">register here</a>. 注册成功后，服务器会提供一段类似下面的代码用来添加到程序的Manifest文件中:</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/04/22/android-training-cloud-syncing-to-the-cloud-lesson-2/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/04/22/android-training-cloud-syncing-to-the-cloud-lesson-1/">Android Training[Cloud] - 云同步(Lesson 1 - 使用App Engine进行同步)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-04-22T13:56:00+08:00" pubdate data-updated="true">Apr 22<span>nd</span>, 2012</time>
-        
-         | <a href="/blog/2012/04/22/android-training-cloud-syncing-to-the-cloud-lesson-1/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/12/03/android-training-05-interacting-with-other-apps-lesson-1/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h2>Syncing with App Engine[使用App Engine进行同步]</h2>
-
-<p>写一个能够同步到云端的app是具有挑战性的。那存在许多细节需要处理，例如服务端身份验证，客户端身份验证，分享数据的模块，还有API。简化这些操作的一个方法是使用<strong>Google Plugin for Eclipse</strong>，这个插件帮你垂直整合处理了那些Android系统与App Engine程序交互的操作。这一课会介绍如何创建那样一个项目。</p>
-
-<p>关于App Engine，请参考：https://developers.google.com/appengine/docs/whatisgoogleappengine?hl=zh-CN</p>
-
-<p>下面会介绍:  <br/>
-* 建立Android与App engine apps能够交互的程序。<br/>
-* 利用Cloud to Device Messaging(C2DM)的优势，这样app就不需要使用轮询机制去更新。[关于C2DM的详情请参考前面课程与http://code.google.com/intl/zh-CN/android/c2dm/)]</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/04/22/android-training-cloud-syncing-to-the-cloud-lesson-1/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/04/22/android-training-graphics-displaying-bitmaps-efficiently-lesson-1/">Android Training[Graphics] - 高效地显示Bitmap(Lesson 1 - 有效地加载大尺寸图片)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-04-22T11:57:00+08:00" pubdate data-updated="true">Apr 22<span>nd</span>, 2012</time>
-        
-         | <a href="/blog/2012/04/22/android-training-graphics-displaying-bitmaps-efficiently-lesson-1/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>章节概要</h1>
-
-<p>这一章节会介绍一些通用的用来处理与加载Bitmap对象的方法，这些技术能够使得不会卡到程序的UI并且避免程序消耗过度内存.如果你不注意这些，Bitmaps会迅速的消耗你可用的内存而导致程序crash,出现下面的异常:java.lang.OutofMemoryError: bitmap size exceeds VM budget.</p>
-
-<p>有许多原因说明在你的Android程序中加载Bitmaps是非常棘手的，需要你特别注意:</p>
+  <div class="entry-content"><p><strong>章节概要：</strong></p>
 
 <ul>
-<li>移动设备的系统资源有限。Android设备对于单个程序至少需要16MB的内存。<a href="http://source.android.com/compatibility/downloads.html">Android Compatibility Definition Document (CDD)</a>, Section 3.7. Virtual Machine Compatibility 给出了对于不同大小与密度的屏幕的最低内存需求. 程序应该在这个最低内存限制下最优化程序的效率。当然，大多数设备的都有更高的限制需求.</li>
-<li>Bitmap会消耗很多内存，特别是对于类似照片等更加丰富的图片. 例如，Galaxy Nexus的照相机能够拍摄2592x1936 pixels (5 MB)的图片. 如果bitmap的配置是使用ARGB_8888 (the default from the Android 2.3 onward) ，那么加载这张照片到内存会大概需要19MB(2592<em>1936</em>4 bytes) 的内存, 这样的话会迅速消耗掉设备的整个内存.</li>
-<li>Android app的UI通常会在一次操作中立即加载许多张bitmaps. 例如在ListView, GridView 与 ViewPager 等组件中通常会需要一次加载许多张bitmaps，而且需要多加载一些内容为了用户可能的滑动操作。</li>
+<li>一个Android app通常都会有好几个activities. 每一个activity的界面都可能允许用户执行一些特殊任务（例如查看地图或者是开始拍照等）。为了让用户从一个activity跳到另外一个activity，你的app必须使用Intent来定义你的app想做的事情。当你使用startActivity()的方法，而且参数是intent时，系统会使用这个 Intent 来定义并启动合适的app组件。使用intents还可以让你的app来启动另外一个app里面的activity。</li>
+<li>一个 Intent 可以显式的指明需要启动的模块，也可以隐式的指明自己可以处理哪种类型的动作。<em>(一个主动叫起别人，一个被特定类型的别人叫起)</em></li>
+<li>这一章节会演示如何使用Intent 来做一些与其他app之间的简单交互。类似，启动另外一个app,从其他app接受数据，并且使得你的app能够响应从其他发出的intent。</li>
 </ul>
 
 
@@ -270,7 +168,7 @@
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/04/22/android-training-graphics-displaying-bitmaps-efficiently-lesson-1/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/12/03/android-training-05-interacting-with-other-apps-lesson-1/">Read on &rarr;</a>
     </footer>
   
 
@@ -282,7 +180,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/03/31/android-training-content-sharing-share-simple-data-lesson-3/">Android Training[Content Sharing] - 分享简单数据(Lesson 3 - 在Actionbar上添加分享功能)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/11/30/android-training-04-saving-data-lesson-3/">Android Training 04 - 保存数据(Lesson 3 - 保存到SQLite)</a></h1>
     
     
       <p class="meta">
@@ -298,24 +196,26 @@
   
 
 
-<time datetime="2012-03-31T19:16:00+08:00" pubdate data-updated="true">Mar 31<span>st</span>, 2012</time>
+<time datetime="2012-11-30T21:46:00+08:00" pubdate data-updated="true">Nov 30<span>th</span>, 2012</time>
         
-         | <a href="/blog/2012/03/31/android-training-content-sharing-share-simple-data-lesson-3/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/11/30/android-training-04-saving-data-lesson-3/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>这一课会介绍在ActionBar 中添加一个高效率且比较友好的Share功能，会使用到ActionProvider(在Android 4.0上才被引进)。它会handle出现share功能的appearance与hehavior。在ShareActionProvider的例子里面，你之需要提供一个share intent，剩下的就交给<a href="https://developer.android.com/reference/android/widget/ShareActionProvider.html">ShareActionProvider</a>来做。</p>
+  <div class="entry-content"><p>对于重复或者结构化的数据（如联系人信息）等保存到DB是个不错的主意。这节课假定你已经熟悉SQL数据库的操作。在Android上可能会使用到的APIs，可以从<a href="http://developer.android.com/reference/android/database/sqlite/package-summary.html">android.database.sqlite</a>包中找到。</p>
 
-<p><img src="/images/articles/actionbar-shareaction.png" title="Figure 1. The ShareActionProvider in the Gallery app." alt="actionbar-shareaction.png" /></p>
+<h2>Define a Schema and Contract[定义Schema与Contract]</h2>
+
+<p>SQL中一个中重要的概念是schema：一种DB结构的正式声明。schema是从你创建DB的SQL语句中生成的。你可能会发现创建一个创建一个伴随类（companion class）是很有益的，这个类成为合约类（contract class）,它用一种系统化并且自动生成文档的方式，显示指定了你的schema样式。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/03/31/android-training-content-sharing-share-simple-data-lesson-3/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/11/30/android-training-04-saving-data-lesson-3/">Read on &rarr;</a>
     </footer>
   
 
@@ -327,7 +227,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/03/31/android-training-content-sharing-share-simple-data-lesson-2/">Android Training[Content Sharing] - 分享简单数据(Lesson 2 - 接收从其它Apps分享过来的简单数据)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/11/29/android-training-04-saving-data-lesson-2/">Android Training 04 - 保存数据(Lesson 2 - 保存到文件)</a></h1>
     
     
       <p class="meta">
@@ -343,118 +243,22 @@
   
 
 
-<time datetime="2012-03-31T18:28:00+08:00" pubdate data-updated="true">Mar 31<span>st</span>, 2012</time>
+<time datetime="2012-11-29T20:37:00+08:00" pubdate data-updated="true">Nov 29<span>th</span>, 2012</time>
         
-         | <a href="/blog/2012/03/31/android-training-content-sharing-share-simple-data-lesson-2/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>就像你的程序能够发送数据到其他程序一样，其他程序也能够方便的接收发送过来的数据。需要考虑的是用户与你的程序如何进行交互，你想要从其他程序接收哪些数据类型。例如，一个社交网络程序会希望能够从其他程序接受文本数据，像一个有趣的网址链接。Google+的Android客户端会接受文本数据与单张或者多张图片。用这个app，用户可以简单的从Gallery程序选择一张图片来启动Google+进行发布。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/03/31/android-training-content-sharing-share-simple-data-lesson-2/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/03/31/android-training-content-sharing-share-simple-data-lesson-1/">Android Training[Content Sharing] - 分享简单数据(Lesson 1 - 发送简单数据到其他Apps)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-31T14:00:00+08:00" pubdate data-updated="true">Mar 31<span>st</span>, 2012</time>
-        
-         | <a href="/blog/2012/03/31/android-training-content-sharing-share-simple-data-lesson-1/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/11/29/android-training-04-saving-data-lesson-2/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p><strong>章节序言</strong></p>
-
-<p>Android程序中很炫的一个功能是程序之间可以互相通信。为什么要重新发明一个已经存在于另外一个程序中的功能呢，而且这个功能并非自己程序的核心部分。</p>
-
-<p>这一章节会讲述一些通常使用的方法来在不同程序之间通过使用<a href="https://developer.android.com/reference/android/content/Intent.html">Intent</a> APIs与<a href="https://developer.android.com/reference/android/view/ActionProvider.html">ActionProvider</a>对象来发送与接受content。</p>
+  <div class="entry-content"><p>Android使用与其他平台类似的基于磁盘文件系统(disk-based file systems)。这节课会描述如何在Android文件系统上使用 <a href="http://developer.android.com/reference/java/io/File.html">File</a> 的读写APIs。File 对象非常适合用来读写那种流式顺序的数据。例如，很适合用来读写图片文件或者是网络中交换的数据。这节课会演示在app中如何执行基本的文件操作任务。假定你已经对linux的文件系统与java.io中标准的I/O APIs有一定认识。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/03/31/android-training-content-sharing-share-simple-data-lesson-1/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/03/29/android-training-userInfo-remembering-users-lesson-3/">Android Training[UserInfo] - 记住用户的信息(Lesson 3 - 创建自定义的账户类型)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-29T12:37:00+08:00" pubdate data-updated="true">Mar 29<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/03/29/android-training-userInfo-remembering-users-lesson-3/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Creating a Custom Account Type</h2>
-
-<p>到目前为止，我们讨论了如何使用Google APIs。但是我们应该不仅仅是只需要Google的服务而已，比如增加QQ账户，Sina账户等。那么这一课会讲述如何创建一个自定义的账户，并且像内置的账户那样进行工作。</p>
-
-<h2>(1)Implement Your Custom Account Code</h2>
-
-<p>首先需要做的是从用户那获取证书[输入账户与密码后进行验证],这个过程也许只是简单的显示一个对话框来输入用户名与密码，或者是比较复杂的操作来获取证书，比如一次性的密码口令或者精密的扫描。不管怎么样，你需要实现下面的操作:</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/03/29/android-training-userInfo-remembering-users-lesson-3/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/11/29/android-training-04-saving-data-lesson-2/">Read on &rarr;</a>
     </footer>
   
 
@@ -507,14 +311,6 @@
     
       <li class="post">
         <a href="/blog/2013/05/19/android-training-graphics-displaying-bitmaps-efficiently-lesson-4/">Android Training[Graphics] - 高效地显示Bitmap(Lesson 4 - 优化Bitmap的内存使用)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/04/20/android-notes-05-task-and-back-stack/">Android Notes 05 - Tasks and Back Stack</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/04/12/android-notes-04-intent-and-intentFilter/">Android Notes 04 - Intents and Intent Filters</a>
       </li>
     
   </ul>

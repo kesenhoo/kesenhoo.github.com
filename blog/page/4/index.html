@@ -9,7 +9,8 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="章节概要： 虽然可以在onPause()的时候保存一些信息以免用户的使用进度被丢失，但是大多数Android app仍然是需要做保存数据的动作。大多数比较好的apps都需要保存用户的设置信息，而且有一些apps必须维护大量的文件信息与DB信息。 &hellip;">
+  <meta name="description" content="在Android process之间不能用通常的方式去访问彼此的内存数据。 他们把需要传递的数据解析成基础对象，使得系统能够识别并处理这些对象。因为这个处理过程很难写，所以Android使用AIDL来解决这个问题。
+在定义AIDL接口之前，请意识到call这些接口是direct function &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,7 +82,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/11/29/android-training-04-saving-data-lesson-1/">Android Training 04 - 保存数据(Lesson 1 - 保存Key-Value)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2013/02/19/android-notes-02-aidl/">Android Notes 02 - AIDL</a></h1>
     
     
       <p class="meta">
@@ -97,158 +98,9 @@
   
 
 
-<time datetime="2012-11-29T13:59:00+08:00" pubdate data-updated="true">Nov 29<span>th</span>, 2012</time>
+<time datetime="2013-02-19T21:18:00+08:00" pubdate data-updated="true">Feb 19<span>th</span>, 2013</time>
         
-         | <a href="/blog/2012/11/29/android-training-04-saving-data-lesson-1/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><strong>章节概要：</strong></p>
-
-<p>虽然可以在onPause()的时候保存一些信息以免用户的使用进度被丢失，但是大多数Android app仍然是需要做保存数据的动作。大多数比较好的apps都需要保存用户的设置信息，而且有一些apps必须维护大量的文件信息与DB信息。这一章节会介绍给你在Android中一些重要的数据存储方法，例如：</p>
-
-<ul>
-<li>以key-value的方式保存一些简单的数据到shared preferences文件中</li>
-<li>在Android文件系统中保存任意格式的文件</li>
-<li>通过SQLite来使用DB</li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/11/29/android-training-04-saving-data-lesson-1/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/11/28/android-training-03-building-a-dynamic-ui-with-fragments-lesson-3/">Android Training 03 - 使用Fragments建立动态的UI(Lesson 4 - Fragment之间的通信)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-11-28T18:33:00+08:00" pubdate data-updated="true">Nov 28<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/11/28/android-training-03-building-a-dynamic-ui-with-fragments-lesson-3/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>为了重用fragment的UI组件，你必须为每个fragment建立自己的container，模块化自己的layout与行为。一旦你定义了那些可重用的fragment，你可以使用activity与他们建立联系，对那些UI组件做组合动作等。</p>
-
-<p>通常，你也会想要fragment-s之间能够交流。例如，基于用户事件来改变内容。所有的Fragment-to-Fragment之间的交互都是基于activity进行操作的。两个fragment之间没有办法直接交互。</p>
-
-<h2>Define an Interface[定义接口]</h2>
-
-<p>为了允许fragment与activity进行交互，你可以在fragment中定义一个interface，然后在activity中去implement它。Fragment在它的onAttach()方法里面捕获接口的实现，然后call接口的方法来与activity进行交互。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/11/28/android-training-03-building-a-dynamic-ui-with-fragments-lesson-3/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/11/28/android-training-03-building-a-dynamic-ui-with-fragments-lesson-4/">Android Training 03 - 使用Fragments建立动态的UI(Lesson 3 - 创建灵活可变的UI)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-11-28T18:00:00+08:00" pubdate data-updated="true">Nov 28<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/11/28/android-training-03-building-a-dynamic-ui-with-fragments-lesson-4/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>Building a Flexible UI</h1>
-
-<p>当把你的程序设计成可以适配一系列大小各异的屏幕时，你可以基于可使用的屏幕空间来为你的fragments设置不同的参数，从而达到重用的目的。<br/>
-例如：在手持设备上，一次显示一个fragment会比较合适。对应的，在平板这样屏幕比较大的设备上，你可以用多个fragment的方式来呈现出side-by-side的效果。这样能够一次显示更多的信息给用户。如下图所示：</p>
-
-<p><img src="/images/articles/fragments-screen-mock.png" alt="fragments-screen-mock.png" /></p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/11/28/android-training-03-building-a-dynamic-ui-with-fragments-lesson-4/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/11/27/android-training-03-building-a-dynamic-ui-with-fragments-lesson-2/">Android Training 03 - 使用Fragments建立动态的UI(Lesson 2 - 新建一个Fragment)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-11-27T16:48:00+08:00" pubdate data-updated="true">Nov 27<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/11/27/android-training-03-building-a-dynamic-ui-with-fragments-lesson-2/#disqus_thread">Comments</a>
+         | <a href="/blog/2013/02/19/android-notes-02-aidl/#disqus_thread">Comments</a>
         
       </p>
     
@@ -256,128 +108,71 @@
 
 
   <div class="entry-content"><ul>
-<li>你可以把fragment当作activity的一部分，它有自己的lifecycle,它会接受自己的输入事件。你可以在activity运行的时候增加或者拿掉fragment。（类似子activity，你可以在不同的activity中重用fragment）。这节课演示如何使用support library来创建一个继承自 Fragment 的类。</li>
-<li>Note: 如果你的app决定跑在Level 11或者更高的系统上，你不需要添加这个support library,你可以使用那个版本的系统自带的API来实现。请注意这节课是专注于使用support library里面的API，这里面的API名称与那些本身就包含这些功能的平台上的名称有可能不一样。</li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/11/27/android-training-03-building-a-dynamic-ui-with-fragments-lesson-2/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/11/27/android-training-03-building-a-dynamic-ui-with-fragments-lesson-1/">Android Training 03 - 使用Fragments建立动态的UI(Lesson 1 - 使用Support Library)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-11-27T15:08:00+08:00" pubdate data-updated="true">Nov 27<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/11/27/android-training-03-building-a-dynamic-ui-with-fragments-lesson-1/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>Using the Support Library</h1>
+<li>在Android process之间不能用通常的方式去访问彼此的内存数据。 他们把需要传递的数据解析成基础对象，使得系统能够识别并处理这些对象。因为这个处理过程很难写，所以Android使用AIDL来解决这个问题。</li>
+<li>在定义AIDL接口之前，请意识到call这些接口是direct function call。 请不要认为这些call 接口的行为是发生在另外一个线程里面的。具体的不同因这个调用是发生在local process还是remote process而异。
 
 <ul>
-<li>Android Support Library 提供了一个包含了API库的JAR 文件，它可以允许你在你的app在更老的Android平台上使用一些比较新的API。例如，它提供了一些fragment的API，这样你可以在1.6或者更高的平台上使用fragment。</li>
-<li>这节课会演示如何使用fragment来建立一个动态的app UI。</li>
-</ul>
-
-
-<h3>使用Support Library来建立你的Project</h3>
-
-<ul>
-<li>使用SDK Manager来下载Android Support Library。</li>
-<li>在Android项目的根目录下创建 libs的目录。</li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/11/27/android-training-03-building-a-dynamic-ui-with-fragments-lesson-1/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/11/27/android-training-03-building-a-dynamic-ui-with-fragments-lesson-0/">Android Training 03 - 使用Fragments建立动态的UI(Lesson 0 - 章节概览)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-11-27T14:38:00+08:00" pubdate data-updated="true">Nov 27<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/11/27/android-training-03-building-a-dynamic-ui-with-fragments-lesson-0/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>Building a Dynamic UI with Fragments</h1>
-
-<ul>
-<li>学习这章节的先决条件:
-
-<ul>
-<li>了解Activity的基本概念 (see <a href="http://developer.android.com/training/basics/activity-lifecycle/index.html">Managing the Activity Lifecycle</a>)</li>
-<li>有使用 XML layouts 的经验</li>
+<li>发生在local process里面的调用会跑在这个local process的thread里面。如果这是你的主UI线程，那么AIDL接口的调用也会发生在这个UI thread里面。如果这是发生在另外一个thread，那么调用会发生在service里面。因此，如果仅仅是发生在local process的调用，则你可以完全控制这些调用，当然这样的话，也就不需要用AIDL了。因为你完全可以使用Bound Service的第一种方式去实现。</li>
+<li>发生在remote process里面的调用是会跑在你自己的process所维护的一个thread pool里面。那么你需要注意可能会在同一时刻接受到多个请求。所以AIDL的操作需要做到thread-safe。(<em>每次请求，都会交给Service，在线程池里面启动一个thread去执行那些请求，所以那些方法需要是线程安全的</em>)</li>
+<li>oneway关键字改变了remote call的行为。当使用这个关键字时，remote call不会被阻塞住，它仅仅是发送交互数据后再立即返回。IBinder thread pool 之后会把它当作一个通常的remote call呼叫。</li>
 </ul>
 </li>
-<li>你还需要看的有:
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/02/19/android-notes-02-aidl/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/02/18/android-notes-01-bound-services/">Android Notes 01 - Bound Services</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-18T22:30:00+08:00" pubdate data-updated="true">Feb 18<span>th</span>, 2013</time>
+        
+         | <a href="/blog/2013/02/18/android-notes-01-bound-services/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><ul>
+<li>一个bound的service是C/S的接口。它允许其他组件绑定到service,发送请求，接收回应并执行IPC。通常是需要给其他程序组件提供服务。
 
 <ul>
-<li><a href="http://developer.android.com/guide/components/fragments.html">Fragments</a></li>
-<li><a href="http://developer.android.com/guide/practices/tablets-and-handsets.html">Supporting Tablets and Handsets</a></li>
+<li>A bound service allows other components to bind to it, in order to interact with it and perform interprocess communication。</li>
+<li>A bound service is destroyed once all clients unbind, unless the service was also started。</li>
 </ul>
 </li>
-<li>DEMO:
-<a href="http://developer.android.com/shareables/training/FragmentBasics.zip">FragmentBasics.zip</a></li>
+<li>客户端通过执行 bindService()绑定到service。这样的话，客户端需要实现一个ServiceConnection, 它可以监视与service的连接状态。bindService() 并不会有返回值，但是Android系统会在client与service连接上时，执行onServiceConnected() 的callback。在这个回调方法里面传递IBinder给client用来与service进行交互。</li>
+<li>前面提到可以有多个Client同时bind到service。然而，系统只会在第一个client做绑定时才会执行service的onBind() 方法。对于随后需要绑定的客户端，系统会直接传递同一个 IBinder 对象给Client，而不是去再次执行onBind方法。(<em>那么也就是onBind方法只会被执行一次</em>)</li>
+<li>通常来说，Music程序需要实现service的两种方式，这样既可以在activity被销毁之后(<em>假设只实现bound的方式的话，这个时候，unbind了，Music会停止</em>)音乐可以继续播放，当重新进入activity时又会重新bind上。这刚好验证了下面的说法：</li>
+<li>如果一个service既可以started与bound。当一个service是started的，系统并不会在所有的Client都unbind之后去杀死这个service，我们需要显示的去停止这个service，通过stopSelf或者stopService的方式。</li>
 </ul>
 
 
@@ -385,7 +180,7 @@
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/11/27/android-training-03-building-a-dynamic-ui-with-fragments-lesson-0/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2013/02/18/android-notes-01-bound-services/">Read on &rarr;</a>
     </footer>
   
 
@@ -397,7 +192,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/05/07/android-training-connectivity-network-operations-lesson-3/">Android Training[Connectivity] - 执行网络操作(Lesson 3 - 解析XML数据)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2013/02/04/android-notes-00-services/">Android Notes 00 - Services</a></h1>
     
     
       <p class="meta">
@@ -413,39 +208,34 @@
   
 
 
-<time datetime="2012-05-07T17:05:00+08:00" pubdate data-updated="true">May 7<span>th</span>, 2012</time>
+<time datetime="2013-02-04T18:37:00+08:00" pubdate data-updated="true">Feb 4<span>th</span>, 2013</time>
         
-         | <a href="/blog/2012/05/07/android-training-connectivity-network-operations-lesson-3/#disqus_thread">Comments</a>
+         | <a href="/blog/2013/02/04/android-notes-00-services/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p><strong>第3课:Parsing XML Data</strong>
-Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来记录更新的信息，以便用户进行订阅读取。</p>
-
-<p>那么上传[?]与解析XML数据就成了app的一个常见的功能。 这一课会介绍如何解析XML文档并使用他们的数据。</p>
-
-<p><em>([?]这里很奇怪，为什么是Upload，看文章最后一段代码示例的注释，应该是Download才对)</em></p>
-
-<h2>Choose a Parser(选择一个解析器)</h2>
-
-<p>我们推荐<a href="http://developer.android.com/reference/org/xmlpull/v1/XmlPullParser.html">XmlPullParser</a>, 它是在Android上一个高效且可维护的解析XML方法。 Android 上有这个接口的两种实现方式：</p>
+  <div class="entry-content"><h2>概要</h2>
 
 <ul>
-<li><a href="http://kxml.sourceforge.net/">KXmlParser</a> via <a href="http://developer.android.com/reference/org/xmlpull/v1/XmlPullParserFactory.html#newPullParser(">XmlPullParserFactory.newPullParser()</a>).</li>
-<li>ExpatPullParser, via <a href="http://developer.android.com/reference/android/util/Xml.html#newPullParser(">Xml.newPullParser()</a>).</li>
+<li>Service是一个可以在后台长时间进行工作的一个程序组件。这个组件并没有提供UI。其他的程序组件可以Start一个Service，并且可以在用户切换到另外一个程序的时候继续工作。另外，某个组件可以Bind到一个Service上，并与他进行交互，甚至是进行IPC操作。例如，一个Service可以处理网络交互，播放音乐，执行I/O操作，或者与Content Provider进行交互，他们都是在后台的。
+
+<ul>
+<li>Service可以跑在后台进行工作，即使用户在切换到另外一个程序。</li>
+<li>Service可以允许其他组件与它进行Bind，从而进行IPC操作。</li>
+<li>Service默认是跑在host程序的main thread。</li>
+</ul>
+</li>
 </ul>
 
-
-<p>两个选择都是比较好的。下面的示例中是使用ExpatPullParser, via Xml.newPullParser().</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/05/07/android-training-connectivity-network-operations-lesson-3/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2013/02/04/android-notes-00-services/">Read on &rarr;</a>
     </footer>
   
 
@@ -457,7 +247,7 @@ Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来�
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/05/07/android-training-connectivity-network-operations-lesson-2/">Android Training[Connectivity] - 执行网络操作(Lesson 2 - 管理网络使用方法)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/12/20/hi/">Hello, World</a></h1>
     
     
       <p class="meta">
@@ -473,30 +263,20 @@ Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来�
   
 
 
-<time datetime="2012-05-07T13:43:00+08:00" pubdate data-updated="true">May 7<span>th</span>, 2012</time>
+<time datetime="2012-12-20T00:57:00+08:00" pubdate data-updated="true">Dec 20<span>th</span>, 2012</time>
         
-         | <a href="/blog/2012/05/07/android-training-connectivity-network-operations-lesson-2/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/12/20/hi/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p><strong>第2课:Managing Network Usage</strong></p>
+  <div class="entry-content"><p><img src="/images/articles/hello_world.jpg"></p>
 
-<p>这一课会介绍如何细化管理使用的网络资源。如果你的程序需要执行很多网络操作，你应该提供用户设置选项来允许用户控制程序的数据偏好。例如，同步数据的频率，是否只在连接到WiFi才进行下载与上传操作，是否在漫游时使用套餐数据流量等等。这样用户才能在快到达流量上限时关闭你的程序获取数据功能。</p>
-
-<p>关于如何编写一个最小化下载与网络操作对电量影响的程序，请参考：</p>
-
-<p><a href="http://developer.android.com/training/monitoring-device-state/index.html">Optimizing Battery Life</a>:
-<a href="http://developer.android.com/training/efficient-downloads/index.html">Transferring Data Without Draining the Battery</a>:</p>
-
+<p>Hi.This is my first post. <strong>By markdown.</strong></p>
 </div>
   
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/05/07/android-training-connectivity-network-operations-lesson-2/">Read on &rarr;</a>
-    </footer>
   
 
 
@@ -548,14 +328,6 @@ Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来�
     
       <li class="post">
         <a href="/blog/2013/05/19/android-training-graphics-displaying-bitmaps-efficiently-lesson-4/">Android Training[Graphics] - 高效地显示Bitmap(Lesson 4 - 优化Bitmap的内存使用)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/04/20/android-notes-05-task-and-back-stack/">Android Notes 05 - Tasks and Back Stack</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/04/12/android-notes-04-intent-and-intentFilter/">Android Notes 04 - Intents and Intent Filters</a>
       </li>
     
   </ul>

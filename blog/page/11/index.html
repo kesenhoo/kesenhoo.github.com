@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="章节概要： 虽然可以在onPause()的时候保存一些信息以免用户的使用进度被丢失，但是大多数Android app仍然是需要做保存数据的动作。大多数比较好的apps都需要保存用户的设置信息，而且有一些apps必须维护大量的文件信息与DB信息。 &hellip;">
+  <meta name="description" content="在上一课中有介绍一系列的BitmapFactory.decode* 方法，当数据源是网络或者是磁盘时(或者是任何实际源不在内存的)，这些方法都不应该在main UI 线程中执行。那些情况下加载数据是不可以预知的，它依赖于许多因素(从网络或者硬盘读取数据的速度, 图片的大小, CPU的速度, etc &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://hukai.me/blog/page/7/">
+  <link rel="canonical" href="http://hukai.me/blog/page/11/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -81,7 +81,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/11/29/android-training-04-saving-data-lesson-1/">Android Training 04 - 保存数据(Lesson 1 - 保存Key-Value)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/04/23/android-training-graphics-displaying-bitmaps-efficiently-lesson-2/">Android Training[Graphics] - 高效地显示Bitmap(Lesson 2 - 在UI线程之外处理Bitmaps)</a></h1>
     
     
       <p class="meta">
@@ -97,23 +97,172 @@
   
 
 
-<time datetime="2012-11-29T13:59:00+08:00" pubdate data-updated="true">Nov 29<span>th</span>, 2012</time>
+<time datetime="2012-04-23T19:55:00+08:00" pubdate data-updated="true">Apr 23<span>rd</span>, 2012</time>
         
-         | <a href="/blog/2012/11/29/android-training-04-saving-data-lesson-1/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/04/23/android-training-graphics-displaying-bitmaps-efficiently-lesson-2/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p><strong>章节概要：</strong></p>
+  <div class="entry-content"><p>在上一课中有介绍一系列的BitmapFactory.decode* 方法，当数据源是网络或者是磁盘时(或者是任何实际源不在内存的)，这些方法都不应该在main UI 线程中执行。那些情况下加载数据是不可以预知的，它依赖于许多因素(从网络或者硬盘读取数据的速度, 图片的大小, CPU的速度, etc.)。如果其中任何一个任务卡住了UI thread, 系统会出现ANR的错误。</p>
 
-<p>虽然可以在onPause()的时候保存一些信息以免用户的使用进度被丢失，但是大多数Android app仍然是需要做保存数据的动作。大多数比较好的apps都需要保存用户的设置信息，而且有一些apps必须维护大量的文件信息与DB信息。这一章节会介绍给你在Android中一些重要的数据存储方法，例如：</p>
+<p>这一节课会介绍如何使用 AsyncTask 在后台线程中处理bitmap并且演示了如何处理并发(concurrency)的问题。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/04/23/android-training-graphics-displaying-bitmaps-efficiently-lesson-2/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/04/22/android-training-cloud-syncing-to-the-cloud-lesson-2/">Android Training[Cloud] - 云同步(Lesson 2 - 使用Backup API)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-22T18:27:00+08:00" pubdate data-updated="true">Apr 22<span>nd</span>, 2012</time>
+        
+         | <a href="/blog/2012/04/22/android-training-cloud-syncing-to-the-cloud-lesson-2/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Using the Backup API[使用Backup API]</h2>
+
+<p>当一个用户购买了新的设备或者是把当前的设备做了的恢复出厂设置的操作，用户希望在进行初始化设置的时候，Google Play能够把之前安装过的应用恢复到设备上。默认情况是，那些操作不会发生，用户之前的设置与数据都会丢失.</p>
+
+<p>对于一些数据量相对较少的情况下(通常少于1MB)，例如用户偏好设置，笔记，游戏分数或者是其他的一些状态数据，可以使用Backup API来提供一个轻量级的解决方案。这一课会介绍如何使用Backup API.</p>
+
+<h2>(1)Register for the Android Backup Service[为Android备份服务进行注册]</h2>
+
+<p>这一课会使用Android Backup Service, 它需要进行注册. 点击这个链接进行注册:<a href="http://code.google.com/android/backup/signup.html">register here</a>. 注册成功后，服务器会提供一段类似下面的代码用来添加到程序的Manifest文件中:</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/04/22/android-training-cloud-syncing-to-the-cloud-lesson-2/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/04/22/android-training-cloud-syncing-to-the-cloud-lesson-1/">Android Training[Cloud] - 云同步(Lesson 1 - 使用App Engine进行同步)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-22T13:56:00+08:00" pubdate data-updated="true">Apr 22<span>nd</span>, 2012</time>
+        
+         | <a href="/blog/2012/04/22/android-training-cloud-syncing-to-the-cloud-lesson-1/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Syncing with App Engine[使用App Engine进行同步]</h2>
+
+<p>写一个能够同步到云端的app是具有挑战性的。那存在许多细节需要处理，例如服务端身份验证，客户端身份验证，分享数据的模块，还有API。简化这些操作的一个方法是使用<strong>Google Plugin for Eclipse</strong>，这个插件帮你垂直整合处理了那些Android系统与App Engine程序交互的操作。这一课会介绍如何创建那样一个项目。</p>
+
+<p>关于App Engine，请参考：https://developers.google.com/appengine/docs/whatisgoogleappengine?hl=zh-CN</p>
+
+<p>下面会介绍:  <br/>
+* 建立Android与App engine apps能够交互的程序。<br/>
+* 利用Cloud to Device Messaging(C2DM)的优势，这样app就不需要使用轮询机制去更新。[关于C2DM的详情请参考前面课程与http://code.google.com/intl/zh-CN/android/c2dm/)]</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/04/22/android-training-cloud-syncing-to-the-cloud-lesson-1/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/04/22/android-training-graphics-displaying-bitmaps-efficiently-lesson-1/">Android Training[Graphics] - 高效地显示Bitmap(Lesson 1 - 有效地加载大尺寸图片)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-22T11:57:00+08:00" pubdate data-updated="true">Apr 22<span>nd</span>, 2012</time>
+        
+         | <a href="/blog/2012/04/22/android-training-graphics-displaying-bitmaps-efficiently-lesson-1/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>章节概要</h1>
+
+<p>这一章节会介绍一些通用的用来处理与加载Bitmap对象的方法，这些技术能够使得不会卡到程序的UI并且避免程序消耗过度内存.如果你不注意这些，Bitmaps会迅速的消耗你可用的内存而导致程序crash,出现下面的异常:java.lang.OutofMemoryError: bitmap size exceeds VM budget.</p>
+
+<p>有许多原因说明在你的Android程序中加载Bitmaps是非常棘手的，需要你特别注意:</p>
 
 <ul>
-<li>以key-value的方式保存一些简单的数据到shared preferences文件中</li>
-<li>在Android文件系统中保存任意格式的文件</li>
-<li>通过SQLite来使用DB</li>
+<li>移动设备的系统资源有限。Android设备对于单个程序至少需要16MB的内存。<a href="http://source.android.com/compatibility/downloads.html">Android Compatibility Definition Document (CDD)</a>, Section 3.7. Virtual Machine Compatibility 给出了对于不同大小与密度的屏幕的最低内存需求. 程序应该在这个最低内存限制下最优化程序的效率。当然，大多数设备的都有更高的限制需求.</li>
+<li>Bitmap会消耗很多内存，特别是对于类似照片等更加丰富的图片. 例如，Galaxy Nexus的照相机能够拍摄2592x1936 pixels (5 MB)的图片. 如果bitmap的配置是使用ARGB_8888 (the default from the Android 2.3 onward) ，那么加载这张照片到内存会大概需要19MB(2592<em>1936</em>4 bytes) 的内存, 这样的话会迅速消耗掉设备的整个内存.</li>
+<li>Android app的UI通常会在一次操作中立即加载许多张bitmaps. 例如在ListView, GridView 与 ViewPager 等组件中通常会需要一次加载许多张bitmaps，而且需要多加载一些内容为了用户可能的滑动操作。</li>
 </ul>
 
 
@@ -121,151 +270,7 @@
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/11/29/android-training-04-saving-data-lesson-1/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/11/28/android-training-03-building-a-dynamic-ui-with-fragments-lesson-3/">Android Training 03 - 使用Fragments建立动态的UI(Lesson 4 - Fragment之间的通信)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-11-28T18:33:00+08:00" pubdate data-updated="true">Nov 28<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/11/28/android-training-03-building-a-dynamic-ui-with-fragments-lesson-3/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>为了重用fragment的UI组件，你必须为每个fragment建立自己的container，模块化自己的layout与行为。一旦你定义了那些可重用的fragment，你可以使用activity与他们建立联系，对那些UI组件做组合动作等。</p>
-
-<p>通常，你也会想要fragment-s之间能够交流。例如，基于用户事件来改变内容。所有的Fragment-to-Fragment之间的交互都是基于activity进行操作的。两个fragment之间没有办法直接交互。</p>
-
-<h2>Define an Interface[定义接口]</h2>
-
-<p>为了允许fragment与activity进行交互，你可以在fragment中定义一个interface，然后在activity中去implement它。Fragment在它的onAttach()方法里面捕获接口的实现，然后call接口的方法来与activity进行交互。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/11/28/android-training-03-building-a-dynamic-ui-with-fragments-lesson-3/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/11/28/android-training-03-building-a-dynamic-ui-with-fragments-lesson-4/">Android Training 03 - 使用Fragments建立动态的UI(Lesson 3 - 创建灵活可变的UI)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-11-28T18:00:00+08:00" pubdate data-updated="true">Nov 28<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/11/28/android-training-03-building-a-dynamic-ui-with-fragments-lesson-4/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>Building a Flexible UI</h1>
-
-<p>当把你的程序设计成可以适配一系列大小各异的屏幕时，你可以基于可使用的屏幕空间来为你的fragments设置不同的参数，从而达到重用的目的。<br/>
-例如：在手持设备上，一次显示一个fragment会比较合适。对应的，在平板这样屏幕比较大的设备上，你可以用多个fragment的方式来呈现出side-by-side的效果。这样能够一次显示更多的信息给用户。如下图所示：</p>
-
-<p><img src="/images/articles/fragments-screen-mock.png" alt="fragments-screen-mock.png" /></p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/11/28/android-training-03-building-a-dynamic-ui-with-fragments-lesson-4/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/11/27/android-training-03-building-a-dynamic-ui-with-fragments-lesson-2/">Android Training 03 - 使用Fragments建立动态的UI(Lesson 2 - 新建一个Fragment)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-11-27T16:48:00+08:00" pubdate data-updated="true">Nov 27<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/11/27/android-training-03-building-a-dynamic-ui-with-fragments-lesson-2/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><ul>
-<li>你可以把fragment当作activity的一部分，它有自己的lifecycle,它会接受自己的输入事件。你可以在activity运行的时候增加或者拿掉fragment。（类似子activity，你可以在不同的activity中重用fragment）。这节课演示如何使用support library来创建一个继承自 Fragment 的类。</li>
-<li>Note: 如果你的app决定跑在Level 11或者更高的系统上，你不需要添加这个support library,你可以使用那个版本的系统自带的API来实现。请注意这节课是专注于使用support library里面的API，这里面的API名称与那些本身就包含这些功能的平台上的名称有可能不一样。</li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/11/27/android-training-03-building-a-dynamic-ui-with-fragments-lesson-2/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/04/22/android-training-graphics-displaying-bitmaps-efficiently-lesson-1/">Read on &rarr;</a>
     </footer>
   
 
@@ -274,11 +279,11 @@
   
   <div class="pagination">
     
-      <a class="prev" href="/blog/page/8/">&larr; Older</a>
+      <a class="prev" href="/blog/page/12/">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
-    <a class="next" href="/blog/page/6/">Newer &rarr;</a>
+    <a class="next" href="/blog/page/10/">Newer &rarr;</a>
     
   </div>
 </div>
