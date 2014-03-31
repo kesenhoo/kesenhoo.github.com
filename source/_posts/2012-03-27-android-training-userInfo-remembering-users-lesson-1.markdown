@@ -4,7 +4,7 @@ title: "Android Training[UserInfo] - 记住用户的信息(Lesson 1 - 使用Acco
 date: 2012-03-27 11:12
 comments: true
 sidebar: false
-categories: Android Android:Training Android:Training:UserInfo
+categories: Android Android:Training
 ---
 
 **章节概览:Remembering Users**

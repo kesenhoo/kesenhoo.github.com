@@ -4,7 +4,7 @@ title: "Android Training[Performance] - 代码性能优化小技巧"
 date: 2013-04-06 18:27
 comments: true
 sidebar: false
-categories: Android Android:Training Android:Training:Performance
+categories: Android Android:Training
 ---
 
 ## Performance Tips

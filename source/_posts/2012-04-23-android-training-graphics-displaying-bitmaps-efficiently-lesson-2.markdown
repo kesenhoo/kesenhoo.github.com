@@ -4,7 +4,7 @@ title: "Android Training[Graphics] - 高效地显示Bitmap(Lesson 2 - 在UI线�
 date: 2012-04-23 19:55
 comments: true
 sidebar: false
-categories: Android Android:Training Android:Training:Graphics
+categories: Android Android:Training
 ---
 
 在上一课中有介绍一系列的BitmapFactory.decode* 方法，当数据源是网络或者是磁盘时(或者是任何实际源不在内存的)，这些方法都不应该在main UI 线程中执行。那些情况下加载数据是不可以预知的，它依赖于许多因素(从网络或者硬盘读取数据的速度, 图片的大小, CPU的速度, etc.)。如果其中任何一个任务卡住了UI thread, 系统会出现ANR的错误。

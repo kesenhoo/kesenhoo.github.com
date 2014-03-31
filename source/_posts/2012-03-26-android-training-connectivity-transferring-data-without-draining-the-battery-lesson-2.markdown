@@ -4,7 +4,7 @@ title: "Android Training[Connectivity] - 优化下载效率(Lesson 2 - 调整更
 date: 2012-03-26 16:51
 comments: true
 sidebar: false
-categories: Android Android:Training Android:Training:Connectivity
+categories: Android Android:Training
 ---
 
 ## Minimizing the Effect of Regular Updates[最小化定期更新操作的副作用]

@@ -4,7 +4,7 @@ title: "Android Training[Connectivity] - 执行网络操作(Lesson 2 - 管理网
 date: 2012-05-07 13:43
 comments: true
 sidebar: false
-categories: Android Android:Training Android:Training:Connectivity
+categories: Android Android:Training
 ---
 
 **第2课:Managing Network Usage**

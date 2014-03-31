@@ -4,7 +4,7 @@ title: "Android Training[Connectivity] - 执行网络操作(Lesson 3 - 解析XML
 date: 2012-05-07 17:05
 comments: true
 sidebar: false
-categories: Android Android:Training Android:Training:Connectivity
+categories: Android Android:Training
 ---
 
 **第3课:Parsing XML Data**

@@ -4,7 +4,7 @@ title: "Android Training[Performance] - 提升布局文件的性能(Lesson 1 - �
 date: 2012-03-21 17:14
 comments: true
 sidebar: false
-categories: Android Android:Training Android:Training:Performance
+categories: Android Android:Training
 ---
 
 ## Optimizing Layout Hierarchies

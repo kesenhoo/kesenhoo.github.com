@@ -4,7 +4,7 @@ title: "Android Training[UI] - 创建自定义的Views(Lesson 0 - 章节概览)"
 date: 2013-06-30 18:23
 comments: true
 sidebar: false
-categories: Android Android:Training Android:Training:UI
+categories: Android Android:Training
 ---
 
 Android的framework有大量的Views用来与用户进行交互并显示不同种类的数据。但是有时候你的程序有个特殊的需求，而Android内置的views组件并不能实现。这一章节会演示如何创建你自己的views，并使得它们是robust与reusable的。

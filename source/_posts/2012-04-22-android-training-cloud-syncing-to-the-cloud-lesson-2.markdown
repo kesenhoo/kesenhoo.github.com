@@ -4,7 +4,7 @@ title: "Android Training[Cloud] - 云同步(Lesson 2 - 使用Backup API)"
 date: 2012-04-22 18:27
 comments: true
 sidebar: false
-categories: Android Android:Training Android:Training:Cloud
+categories: Android Android:Training
 ---
 
 ## Using the Backup API[使用Backup API]

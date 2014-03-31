@@ -4,7 +4,7 @@ title: "Android Training[Content Sharing] - 分享简单数据(Lesson 3 - 在Act
 date: 2012-03-31 19:16
 comments: true
 sidebar: false
-categories: Android Android:Training Android:Training:Sharing
+categories: Android Android:Training
 ---
 
 这一课会介绍在ActionBar 中添加一个高效率且比较友好的Share功能，会使用到ActionProvider(在Android 4.0上才被引进)。它会handle出现share功能的appearance与hehavior。在ShareActionProvider的例子里面，你之需要提供一个share intent，剩下的就交给[ShareActionProvider](https://developer.android.com/reference/android/widget/ShareActionProvider.html)来做。

@@ -4,7 +4,7 @@ title: "Android Training[Connectivity] - 执行网络操作(Lesson 1 - HTTP连�
 date: 2012-05-03 15:21
 comments: true
 sidebar: false
-categories: Android Android:Training Android:Training:Connectivity
+categories: Android Android:Training
 ---
 
 这一章会介绍一些基本的网络操作，监视网络链接（包括网络改变），让用户来控制app对网络的选择使用。还会介绍如何解析与使用XML数据。

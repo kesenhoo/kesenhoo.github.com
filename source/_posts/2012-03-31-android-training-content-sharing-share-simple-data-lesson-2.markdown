@@ -4,7 +4,7 @@ title: "Android Training[Content Sharing] - 分享简单数据(Lesson 2 - 接收
 date: 2012-03-31 18:28
 comments: true
 sidebar: false
-categories: Android Android:Training Android:Training:Sharing
+categories: Android Android:Training
 ---
 
 就像你的程序能够发送数据到其他程序一样，其他程序也能够方便的接收发送过来的数据。需要考虑的是用户与你的程序如何进行交互，你想要从其他程序接收哪些数据类型。例如，一个社交网络程序会希望能够从其他程序接受文本数据，像一个有趣的网址链接。Google+的Android客户端会接受文本数据与单张或者多张图片。用这个app，用户可以简单的从Gallery程序选择一张图片来启动Google+进行发布。

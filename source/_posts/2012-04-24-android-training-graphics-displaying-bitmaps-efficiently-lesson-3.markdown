@@ -4,7 +4,7 @@ title: "Android Training[Graphics] - 高效地显示Bitmap(Lesson 3 - 两种缓�
 date: 2012-04-24 12:59
 comments: true
 sidebar: false
-categories: Android Android:Training Android:Training:Graphics
+categories: Android Android:Training
 ---
 
 加载单个Bitmap到UI是简单直接的，但是如果你需要一次加载大量的图片，事情则会变得复杂起来。在大多数情况下(例如在ListView,GridView or ViewPager), 显示图片的数量通常是没有限制的。

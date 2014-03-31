@@ -4,7 +4,7 @@ title: "Android Training[Connectivity] - 优化下载效率(Lesson 1 - 用有效
 date: 2012-03-25 16:54
 comments: true
 sidebar: false
-categories: Android Android:Training Android:Training:Connectivity
+categories: Android Android:Training
 ---
 
 在这一章，我们将学习为了最小化某些操作对电量的影响是如何处理下载，网络连接，尤其是无线电连接的。

@@ -4,7 +4,7 @@ title: "Android Training[Connectivity] - 优化下载效率(Lesson 3 - 使用缓
 date: 2012-03-26 17:59
 comments: true
 sidebar: false
-categories: Android Android:Training Android:Training:Connectivity
+categories: Android Android:Training
 ---
 
 ## Redundant Downloads are Redundant[重复下载是冗余的]

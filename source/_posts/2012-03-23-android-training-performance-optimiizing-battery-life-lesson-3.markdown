@@ -4,7 +4,7 @@ title: "Android Training[Performance] - 优化电池续航能力(Lesson 3 - 判�
 date: 2012-03-23 21:09
 comments: true
 sidebar: false
-categories: Android Android:Training Android:Training:Performance
+categories: Android Android:Training
 ---
 
 ## Determining and Monitoring the Connectivity Status[判断并监测网络连接状态]

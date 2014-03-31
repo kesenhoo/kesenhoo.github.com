@@ -4,7 +4,7 @@ title: "Android Training[Multimedia] - 音频播放(Lesson 3 - 音频设备的�
 date: 2012-03-23 15:28
 comments: true
 sidebar: false
-categories: Android Android:Training Android:Training:Multimedia
+categories: Android Android:Training
 ---
 
 用户在播放音乐的时候有多个选择，可以使用内置的扬声器，有线耳机或者是支持A2DP的蓝牙耳机。

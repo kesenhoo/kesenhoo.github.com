@@ -1,10 +1,10 @@
 ---
 layout: post
 title: "Android Training[Graphics] - 高效地显示Bitmap(Lesson 1 - 有效地加载大尺寸图片)"
-date: 2012-04-22 11:57
+date: 2012-04-23 11:57
 comments: true
 sidebar: false
-categories: Android Android:Training Android:Training:Graphics
+categories: Android Android:Training
 ---
 
 # 章节概要

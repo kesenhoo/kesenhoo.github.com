@@ -4,7 +4,7 @@ title: "Android Training[UI] - 创建自定义的Views(Lesson 1 - 创建一个Vi
 date: 2013-06-30 18:47
 comments: true
 sidebar: false
-categories: Android Android:Training Android:Training:UI
+categories: Android Android:Training
 ---
 
 设计良好的类总是相似的。它使用一个好用的接口来封装一个特定的功能，它有效的使用CPU与内存，等等。为了成为一个设计良好的类，自定义的view应该:

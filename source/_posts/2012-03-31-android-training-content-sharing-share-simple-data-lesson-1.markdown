@@ -4,7 +4,7 @@ title: "Android Training[Content Sharing] - 分享简单数据(Lesson 1 - 发送
 date: 2012-03-31 14:00
 comments: true
 sidebar: false
-categories: Android Android:Training Android:Training:Sharing
+categories: Android Android:Training
 ---
 
 **章节序言**

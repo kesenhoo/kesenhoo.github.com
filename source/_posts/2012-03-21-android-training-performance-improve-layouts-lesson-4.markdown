@@ -4,7 +4,7 @@ title: "Android Training[Performance] - 提升布局文件的性能(Lesson 4 - �
 date: 2012-03-21 21:20
 comments: true
 sidebar: false
-categories: Android Android:Training Android:Training:Performance
+categories: Android Android:Training
 ---
 
 ## Making ListView Scrolling Smooth

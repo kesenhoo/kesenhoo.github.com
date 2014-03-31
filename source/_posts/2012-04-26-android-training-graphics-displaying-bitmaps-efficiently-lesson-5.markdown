@@ -4,7 +4,7 @@ title: "Android Training[Graphics] - 高效地显示Bitmap(Lesson 5 - 呈现Bitm
 date: 2012-04-26 22:27
 comments: true
 sidebar: false
-categories: Android Android:Training Android:Training:Graphics
+categories: Android Android:Training
 ---
 
 这一课会演示如何运用前面几节课的内容，使用后台线程与Cache机制来加载图片到 ViewPager 与 GridView 组件，并且学习处理并发与配置改变问题。(*并发问题的处理确实需要好好考虑，大多数App都没有仔细考虑到这个问题，会导致浪费更多的资源，效率不够*)

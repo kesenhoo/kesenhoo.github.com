@@ -4,7 +4,7 @@ title: "Android Training[Multimedia] - 捕获照片(Lesson 2 - 简单的录像�
 date: 2012-12-18 23:21
 comments: true
 sidebar: false
-categories: Android Android:Training Android:Training:Multimedia
+categories: Android Android:Training
 ---
 
 这节课会介绍如何使用现有的Camera程序来录制一个视频。和拍照一样，我们没有必要去重新发明录像程序。大多数的Android程序都有自带Camera来进行录像。(*这一课的内容大多数与前面一课类似，简要带过，一些细节不赘述了*)

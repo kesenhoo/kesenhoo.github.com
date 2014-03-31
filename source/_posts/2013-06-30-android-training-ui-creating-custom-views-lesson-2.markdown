@@ -4,7 +4,7 @@ title: "Android Training[UI] - 创建自定义的Views(Lesson 2 - 自定义Drawi
 date: 2013-06-30 20:15
 comments: true
 sidebar: false
-categories: Android Android:Training Android:Training:UI
+categories: Android Android:Training
 ---
 
 自定义view的最重要的一个部分是自定义它的外观。根据你的程序的需求，自定义绘制动作可能简单也可能很复杂。这节课会演示一些最常见的操作。

@@ -4,7 +4,7 @@ title: "Android Training[Multimedia] - 捕获照片(Lesson 3 - 直接操控相�
 date: 2012-12-18 23:59
 comments: true
 sidebar: false
-categories: Android Android:Training Android:Training:Multimedia
+categories: Android Android:Training
 ---
 
 在这一节课，我们会讨论如何通过使用framework的APIs来直接控制相机的硬件。直接控制设备的相机，相比起拍照与录像来说，要复杂一些。然而，如果你想要创建一个专业的特殊的相机程序，这节课会演示这部分内容。

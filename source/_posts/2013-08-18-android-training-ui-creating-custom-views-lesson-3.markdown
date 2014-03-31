@@ -4,7 +4,7 @@ title: "Android Training[UI] - 创建自定义的Views(Lesson 3 - 处理View的�
 date: 2013-08-18 15:01
 comments: true
 sidebar: false
-categories: Android Android:Training Android:Training:UI
+categories: Android Android:Training
 ---
 
 绘制UI仅仅是创建自定义View的一部分。你还需要使得你的View能够以模拟现实世界的方式来进行反馈。Objects应该总是与现实情景能够保持一致。例如，图片不应该突然消失又从另外一个地方出现，因为在现实世界里面不会发生那样的事情。正确的应该是，图片从一个地方移动到另外一个地方。

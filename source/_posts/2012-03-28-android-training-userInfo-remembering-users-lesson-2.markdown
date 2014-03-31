@@ -4,7 +4,7 @@ title: "Android Training[UserInfo] - 记住用户的信息(Lesson 2 - 使用OAut
 date: 2012-03-28 18:53
 comments: true
 sidebar: false
-categories: Android Android:Training Android:Training:UserInfo
+categories: Android Android:Training
 ---
 
 ## Authenticating to OAuth2 Services[使用OAuth2来进行鉴权]

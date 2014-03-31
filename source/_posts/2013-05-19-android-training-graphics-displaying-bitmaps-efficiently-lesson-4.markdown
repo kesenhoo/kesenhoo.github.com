@@ -4,7 +4,7 @@ title: "Android Training[Graphics] - 高效地显示Bitmap(Lesson 4 - 优化Bitm
 date: 2013-05-19 14:43
 comments: true
 sidebar: false
-categories: Android Android:Training Android:Training:Graphics
+categories: Android Android:Training
 ---
 
 作为缓存Bitmaps的进一步延伸, 为了促进GC与bitmap的重用，你还有一些特定的事情可以做. 推荐的策略会根据Android的版本不同而有所差异. [BitmapFun](http://developer.android.com/shareables/training/BitmapFun.zip)的示例程序会演示如何设计你的程序使得能够在不同的Android平台上高效的运行.

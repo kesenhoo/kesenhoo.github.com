@@ -4,7 +4,7 @@ title: "Android Training[Cloud] - 云同步(Lesson 1 - 使用App Engine进行同
 date: 2012-04-22 13:56
 comments: true
 sidebar: false
-categories: Android Android:Training Android:Training:Cloud
+categories: Android Android:Training
 ---
 
 ## Syncing with App Engine[使用App Engine进行同步]
