@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android:Training:Performance | 胡凯]]></title>
   <link href="http://hukai.me/blog/categories/android-training-performance/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2014-03-31T13:32:44+08:00</updated>
+  <updated>2014-03-31T13:45:41+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -234,7 +234,7 @@
     <id>http://hukai.me/blog/2013/04/06/android-training-performance-tips</id>
     <content type="html"><![CDATA[<h2>Performance Tips</h2>
 
-<p><img src="/images/articles/performance_improve.jpg"></p>
+<p>{% img /images/articles/performance_improve.jpg %}</p>
 
 <p>这篇文章主要是介绍了一些小细节的优化技巧，当这些小技巧综合使用起来的时候，对于整个App的性能提升还是有作用的，只是不能较大幅度的提升性能而已。选择合适的算法与数据结构才应该是你首要考虑的因素，在这篇文章中不会涉及这方面。你应该使用这篇文章中的小技巧作为平时写代码的习惯，这样能够提升代码的效率。</p>
 
