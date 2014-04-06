@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "Android Notes 05 - Tasks and Back Stack"
+title: "Android Notes(05) - Tasks and Back Stack"
 date: 2013-04-20 20:42
 comments: true
 sidebar: false
-categories: Android Android:Note
+categories: Android Android:Notes
 ---
 
 * 所有的activities都归属于一个task。

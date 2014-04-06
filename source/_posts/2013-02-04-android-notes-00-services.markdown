@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "Android Notes 00 - Services"
+title: "Android Notes(00) - Services"
 date: 2013-02-04 18:37
 comments: true
 sidebar: false
-categories: Android Android:Note
+categories: Android Android:Notes
 ---
 
 ## 概要

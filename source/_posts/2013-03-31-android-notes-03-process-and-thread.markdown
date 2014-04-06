@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "Android Notes 03 - Process and Thread"
+title: "Android Notes(03) - Process and Thread"
 date: 2013-03-31 16:27
 comments: true
 sidebar: false
-categories: Android Android:Note
+categories: Android Android:Notes
 ---
 
 {% img /images/articles/process_and_thread.jpg %}

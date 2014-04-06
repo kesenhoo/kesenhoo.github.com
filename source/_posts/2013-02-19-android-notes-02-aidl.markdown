@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "Android Notes 02 - AIDL"
+title: "Android Notes(02) - AIDL"
 date: 2013-02-19 21:18
 comments: true
 sidebar: false
-categories: Android Android:Note
+categories: Android Android:Notes
 ---
 
 * 在Android process之间不能用通常的方式去访问彼此的内存数据。 他们把需要传递的数据解析成基础对象，使得系统能够识别并处理这些对象。因为这个处理过程很难写，所以Android使用AIDL来解决这个问题。

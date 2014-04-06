@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "Android Notes 04 - Intents and Intent Filters"
+title: "Android Notes(04) - Intents and Intent Filters"
 date: 2013-04-12 18:27
 comments: true
 sidebar: false
-categories: Android Android:Note
+categories: Android Android:Notes
 ---
 
 ## Intent与Intent Filter

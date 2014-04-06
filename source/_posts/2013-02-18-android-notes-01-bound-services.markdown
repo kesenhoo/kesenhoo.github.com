@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "Android Notes 01 - Bound Services"
+title: "Android Notes(01) - Bound Services"
 date: 2013-02-18 22:30
 comments: true
 sidebar: false
-categories: Android Android:Note
+categories: Android Android:Notes
 ---
 
 * 一个bound的service是C/S的接口。它允许其他组件绑定到service,发送请求，接收回应并执行IPC。通常是需要给其他程序组件提供服务。

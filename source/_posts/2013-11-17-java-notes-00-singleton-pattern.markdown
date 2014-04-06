@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Java Notes - Singleton Pattern(单例总结)"
+title: "Java Notes 00 - Singleton Pattern(单例总结)"
 date: 2013-11-17 14:21
 comments: true
 sidebar: false
