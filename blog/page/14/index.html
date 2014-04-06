@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="Modifying your Download Patterns Based on the Connectivity Type 并不是所有的网络类型(Wi-Fi,3G,2G,etc)对电量的消耗是同等的。不仅仅Wi-Fi电波比无线电波消耗的电量要少很多，而且不同的无线电波(3G,2G,LTE……) &hellip;">
+  <meta name="description" content="Minimizing the Effect of Regular Updates[最小化定期更新操作的副作用] 最佳的定时更新频率是不确定的，通常由设备状态，网络连接状态，用户行为与用户定义明确的偏好而决定。 Optimizing Battery Life这一章有讨论如何根据设备状态来修改更新频率 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,59 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-2/">Android Training[Connectivity] - 优化下载效率(Lesson 2 - 调整更新的频率[C2DM与退避算法])</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-26T16:51:00+08:00" pubdate data-updated="true">Mar 26<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-2/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Minimizing the Effect of Regular Updates[最小化定期更新操作的副作用]</h2>
+
+<p>最佳的定时更新频率是不确定的，通常由设备状态，网络连接状态，用户行为与用户定义明确的偏好而决定。</p>
+
+<p><a href="http://developer.android.com/training/monitoring-device-state/index.html">Optimizing Battery Life</a>这一章有讨论如何根据设备状态来修改更新频率。里面介绍了当断开网络连接的时候去关闭后台服务，在电量比较低的时候减少更新的频率。</p>
+
+<p>这一课会介绍更新频率是多少才会使得更新操作对无线电状态机的影响最小。(C2DM与指数退避算法的使用)</p>
+
+<h2>Use Google Cloud Messaging as an Alternative to Polling[使用C2DM作为轮询方式之一]</h2>
+
+<p>关于<code>Android Cloud to Device Messaging</code> (C2DM)详情 ,请参考:<a href="http://code.google.com/intl/zh-CN/android/c2dm/">http://code.google.com/intl/zh-CN/android/c2dm/</a></p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-2/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -235,55 +288,6 @@ This lesson introduces the wireless radio state machine, explains how your app�
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-3/">Android Training[Performance] - 优化电池续航能力(Lesson 3 - 判断并监测网络连接状态)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-23T21:09:00+08:00" pubdate data-updated="true">Mar 23<span>rd</span>, 2012</time>
-        
-         | <a href="/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-3/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Determining and Monitoring the Connectivity Status[判断并监测网络连接状态]</h2>
-
-<p>通常我们会有一些计划的任务，比如重复闹钟，后台定时启动的任务等。但是如果我们的网络没有连接上，那么就没有必要启动那些需要连接网络的任务。我们可以使用ConnectivityManager来检查是否连接上网络，是何种网络。[通过网络的连接状况改变，相应的改变app的行为，减少无谓的操作，从而延长设备的续航能力]</p>
-
-<h2>1)Determine if You Have an Internet Connection[判断当前是否有网络连接]</h2>
-
-<p>显然如果没有网络连接，那么就没有必要做那些需要联网的事情。下面是一个检查是否有网络连接的例子：</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-3/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/15/">&larr; Older</a>
@@ -301,7 +305,11 @@ This lesson introduces the wireless radio state machine, explains how your app�
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2013/11/17/java-notes-00-singleton-pattern/">Java Notes - Singleton Pattern(单例总结)</a>
+        <a href="/blog/2014/04/05/android-notes-06-touch-event-dispatch-process/">Android Notes(06) - Touch事件分发响应机制</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/17/java-notes-00-singleton-pattern/">Java Notes 00 - Singleton Pattern(单例总结)</a>
       </li>
     
       <li class="post">
@@ -328,18 +336,14 @@ This lesson introduces the wireless radio state machine, explains how your app�
         <a href="/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-0/">Android Training[UI] - 创建自定义的Views(Lesson 0 - 章节概览)</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2013/05/19/android-training-graphics-displaying-bitmaps-efficiently-lesson-4/">Android Training[Graphics] - 高效地显示Bitmap(Lesson 4 - 优化Bitmap的内存使用)</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (66)</a></li>
-  <li><a href='/blog/categories/android-note'>Android:note (6)</a></li>
+  <li><a href='/blog/categories/android'>Android (67)</a></li>
+  <li><a href='/blog/categories/android-notes'>Android:notes (7)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (60)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>

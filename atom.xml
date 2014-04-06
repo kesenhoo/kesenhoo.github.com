@@ -4,7 +4,7 @@
   <title><![CDATA[胡凯]]></title>
   <link href="http://hukai.me/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2014-04-01T00:39:00+08:00</updated>
+  <updated>2014-04-06T21:26:24+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -14,7 +14,404 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Java Notes - Singleton Pattern(单例总结)]]></title>
+    <title type="html"><![CDATA[Android Notes(06) - Touch事件分发响应机制]]></title>
+    <link href="http://hukai.me/blog/2014/04/05/android-notes-06-touch-event-dispatch-process/"/>
+    <updated>2014-04-05T13:13:00+08:00</updated>
+    <id>http://hukai.me/blog/2014/04/05/android-notes-06-touch-event-dispatch-process</id>
+    <content type="html"><![CDATA[<h2>1)概述</h2>
+
+<p>Android的TouchEvent通常包含三个动作,ACTION_DOWN,ACTION_MOVE与ACTION_UP。发出的顺序是DOWN->MOVE->MOVE->&#8230;->UP(注意MOVE事件是否能够被触发取决于操作手势里面是否包含了移动的动作)。</p>
+
+<p>消息分发流程，从上到下，从父到子：Activity->ViewGroup1->ViewGroup1的子ViewGroup2->&#8230;->Target View<br/>
+消息响应流程，从下到上，从子到父：Target View->&#8230;->ViewGroup1的子ViewGroup2->ViewGroup1->Activity</p>
+
+<ul>
+<li><p><strong>public boolean dispatchTouchEvent(MotionEvent ev);</strong><br/>
+事件分发处理函数，通常会在Activity层根据UI的显示情况，把事件传递给相应的ViewGroup。下面的演示代码中，为了方便模拟，会直接return true，解说中称之为“丢弃”。(因为事件实际上没有传递给任何组件，没有被消费，而且是主动的行为，故称之为丢弃)</p></li>
+<li><p><strong>public boolean onInterceptTouchEvent(MotionEvent ev);</strong><br/>
+对分发的事件进行拦截，注意拦截ACION_DOWN与其他ACTION的差异。<br/>
+第1种情况：如果ACTION_DOWN的事件没有被拦截，顺利找到了TargetView，那么后续的MOVE与UP都能够下发。如果后续的MOVE与UP下发时还有继续拦截的话，事件只能传递到拦截层，并且发出ACTION_CANCEL。<br/>
+第2种情况：如果ACITON_DOWN的事件下发时被拦截，导致没有找到TargetView，那么后续的MOVE与UP都无法向下派发了，在Activity层就终止了传递。</p></li>
+<li><p><strong>public boolean onTouchEvent(MotionEvent ev);</strong><br/>
+响应处理函数,如果有设置对应listener的话,这里还会与onTouch,onClick,onLongClick有关联。具体执行顺序是onTouch()->onTouchEvent()->onClick()->onLongClick()。是否能够顺序执行，取决于每个方法的返回值是true还是false。具体这里不展开说。</p></li>
+</ul>
+
+
+<p><strong>强关注点：dispatch与intercept的差异，ACTION_DOWN与其他ACITON会对寻找target组件带来差异，而是否寻找到Target组件对整个流程有着重大的的影响。</strong></p>
+
+<!-- More -->
+
+
+<h2>2)dispatchTouchEvent()的源码解读</h2>
+
+<figure class='code'><figcaption><span>Android 4.4 ViewGroup.dispatchTouchEvent()源码解读</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+<span class='line-number'>113</span>
+<span class='line-number'>114</span>
+<span class='line-number'>115</span>
+<span class='line-number'>116</span>
+<span class='line-number'>117</span>
+<span class='line-number'>118</span>
+<span class='line-number'>119</span>
+<span class='line-number'>120</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">dispatchTouchEvent</span><span class="o">(</span><span class="n">MotionEvent</span> <span class="n">ev</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="o">......</span>
+</span><span class='line'>    <span class="kt">boolean</span> <span class="n">handled</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">......</span>
+</span><span class='line'>    <span class="kd">final</span> <span class="kt">int</span> <span class="n">action</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="na">getAction</span><span class="o">();</span>
+</span><span class='line'>    <span class="kd">final</span> <span class="kt">int</span> <span class="n">actionMasked</span> <span class="o">=</span> <span class="n">action</span> <span class="o">&amp;</span> <span class="n">MotionEvent</span><span class="o">.</span><span class="na">ACTION_MASK</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// 1)处理初始的ACTION_DOWN</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">actionMasked</span> <span class="o">==</span> <span class="n">MotionEvent</span><span class="o">.</span><span class="na">ACTION_DOWN</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// 把ACTION_DOWN作为一个Touch手势的始点，清除之前的手势状态。</span>
+</span><span class='line'>        <span class="n">cancelAndClearTouchTargets</span><span class="o">(</span><span class="n">ev</span><span class="o">);</span> <span class="c1">//清除前一个手势，*关键操作:mFirstTouchTarget重置为null*</span>
+</span><span class='line'>        <span class="n">resetTouchState</span><span class="o">();</span> <span class="c1">//重置Touch状态标识</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// 2)检查是否会被拦截</span>
+</span><span class='line'>    <span class="kd">final</span> <span class="kt">boolean</span> <span class="n">intercepted</span><span class="o">;</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">actionMasked</span> <span class="o">==</span> <span class="n">MotionEvent</span><span class="o">.</span><span class="na">ACTION_DOWN</span> <span class="o">||</span> <span class="n">mFirstTouchTarget</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// 是ACTION_DOWN的事件，或者mFirstTouchTarget不为null(已经找到能够接收touch事件的目标组件)</span>
+</span><span class='line'>        <span class="kd">final</span> <span class="kt">boolean</span> <span class="n">disallowIntercept</span> <span class="o">=</span> <span class="o">(</span><span class="n">mGroupFlags</span> <span class="o">&amp;</span> <span class="n">FLAG_DISALLOW_INTERCEPT</span><span class="o">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="o">;</span>
+</span><span class='line'>        <span class="c1">// 判断禁止拦截的FLAG，因为requestDisallowInterceptTouchEvent(boolean disallowIntercept)方法可以禁止执行是否需要拦截的判断</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(!</span><span class="n">disallowIntercept</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="c1">// 禁止拦截的FLAG为false，说明可以执行拦截判断，则执行此ViewGroup的onInterceptTouchEvent方法</span>
+</span><span class='line'>            <span class="n">intercepted</span> <span class="o">=</span> <span class="n">onInterceptTouchEvent</span><span class="o">(</span><span class="n">ev</span><span class="o">);</span> <span class="c1">// 此方法默认返回false，如果想修改默认的行为，需要override此方法，修改返回值。</span>
+</span><span class='line'>            <span class="n">ev</span><span class="o">.</span><span class="na">setAction</span><span class="o">(</span><span class="n">action</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>            <span class="c1">// 禁止拦截的FLAG为ture，说明没有必要去执行是否需要拦截了，这个事件是无法拦截的，能够顺利通过，所以设置拦截变量为false</span>
+</span><span class='line'>            <span class="n">intercepted</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// 当不是ACTION_DOWN事件并且mFirstTouchTarget为null(意味着没有touch的目标组件)时，这个ViewGroup应该继续执行拦截的操作。</span>
+</span><span class='line'>        <span class="n">intercepted</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="c1">// 通过前面的逻辑处理，得到了是否需要进行拦截的变量值</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">final</span> <span class="kt">boolean</span> <span class="n">canceled</span> <span class="o">=</span> <span class="n">resetCancelNextUpFlag</span><span class="o">(</span><span class="k">this</span><span class="o">)</span> <span class="o">||</span> <span class="n">actionMasked</span> <span class="o">==</span> <span class="n">MotionEvent</span><span class="o">.</span><span class="na">ACTION_CANCEL</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">final</span> <span class="kt">boolean</span> <span class="n">split</span> <span class="o">=</span> <span class="o">(</span><span class="n">mGroupFlags</span> <span class="o">&amp;</span> <span class="n">FLAG_SPLIT_MOTION_EVENTS</span><span class="o">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="o">;</span>
+</span><span class='line'>    <span class="n">TouchTarget</span> <span class="n">newTouchTarget</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>    <span class="kt">boolean</span> <span class="n">alreadyDispatchedToNewTouchTarget</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(!</span><span class="n">canceled</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">intercepted</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// 不是ACTION_CANCEL并且拦截变量为false</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">actionMasked</span> <span class="o">==</span> <span class="n">MotionEvent</span><span class="o">.</span><span class="na">ACTION_DOWN</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="c1">// 在ACTION_DOWN时去寻找这次DOWN事件新出现的TouchTarget</span>
+</span><span class='line'>            <span class="kd">final</span> <span class="kt">int</span> <span class="n">actionIndex</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="na">getActionIndex</span><span class="o">();</span> <span class="c1">// always 0 for down</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="o">.....</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="kd">final</span> <span class="kt">int</span> <span class="n">childrenCount</span> <span class="o">=</span> <span class="n">mChildrenCount</span><span class="o">;</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">newTouchTarget</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">childrenCount</span> <span class="o">!=</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="c1">// 根据触摸的坐标寻找能够接收这个事件的子组件</span>
+</span><span class='line'>                <span class="kd">final</span> <span class="kt">float</span> <span class="n">x</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="na">getX</span><span class="o">(</span><span class="n">actionIndex</span><span class="o">);</span>
+</span><span class='line'>                <span class="kd">final</span> <span class="kt">float</span> <span class="n">y</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="na">getY</span><span class="o">(</span><span class="n">actionIndex</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>                <span class="kd">final</span> <span class="n">View</span><span class="o">[]</span> <span class="n">children</span> <span class="o">=</span> <span class="n">mChildren</span><span class="o">;</span>
+</span><span class='line'>                <span class="c1">// 逆序遍历所有子组件</span>
+</span><span class='line'>                <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">childrenCount</span> <span class="o">-</span> <span class="mi">1</span><span class="o">;</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">--)</span> <span class="o">{</span>
+</span><span class='line'>                    <span class="kd">final</span> <span class="kt">int</span> <span class="n">childIndex</span> <span class="o">=</span> <span class="n">i</span><span class="o">;</span>
+</span><span class='line'>                    <span class="kd">final</span> <span class="n">View</span> <span class="n">child</span> <span class="o">=</span> <span class="n">children</span><span class="o">[</span><span class="n">childIndex</span><span class="o">];</span>
+</span><span class='line'>                    <span class="c1">// 寻找可接收这个事件并且组件区域内包含点击坐标的子View</span>
+</span><span class='line'>                    <span class="k">if</span> <span class="o">(!</span><span class="n">canViewReceivePointerEvents</span><span class="o">(</span><span class="n">child</span><span class="o">)</span> <span class="o">||</span> <span class="o">!</span><span class="n">isTransformedTouchPointInView</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">y</span><span class="o">,</span> <span class="n">child</span><span class="o">,</span> <span class="kc">null</span><span class="o">))</span> <span class="o">{</span>
+</span><span class='line'>                        <span class="k">continue</span><span class="o">;</span>
+</span><span class='line'>                    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>                    <span class="n">newTouchTarget</span> <span class="o">=</span> <span class="n">getTouchTarget</span><span class="o">(</span><span class="n">child</span><span class="o">);</span> <span class="c1">// 找到了符合条件的子组件，赋值给newTouchTarget</span>
+</span><span class='line'>
+</span><span class='line'>                    <span class="o">......</span>
+</span><span class='line'>
+</span><span class='line'>                    <span class="c1">// 把ACTION_DOWN事件传递给子组件进行处理</span>
+</span><span class='line'>                    <span class="k">if</span> <span class="o">(</span><span class="n">dispatchTransformedTouchEvent</span><span class="o">(</span><span class="n">ev</span><span class="o">,</span> <span class="kc">false</span><span class="o">,</span> <span class="n">child</span><span class="o">,</span> <span class="n">idBitsToAssign</span><span class="o">))</span> <span class="o">{</span>
+</span><span class='line'>                        <span class="c1">// 如果此子ViewGroup消费了这个touch事件</span>
+</span><span class='line'>                        <span class="n">mLastTouchDownTime</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="na">getDownTime</span><span class="o">();</span>
+</span><span class='line'>                        <span class="n">mLastTouchDownIndex</span> <span class="o">=</span> <span class="n">childIndex</span><span class="o">;</span>
+</span><span class='line'>                        <span class="n">mLastTouchDownX</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="na">getX</span><span class="o">();</span>
+</span><span class='line'>                        <span class="n">mLastTouchDownY</span> <span class="o">=</span> <span class="n">ev</span><span class="o">.</span><span class="na">getY</span><span class="o">();</span>
+</span><span class='line'>                        <span class="c1">// 则为mFirstTouchTarget赋值为newTouchTarget，此子组件成为新的touch事件的起点</span>
+</span><span class='line'>                        <span class="n">newTouchTarget</span> <span class="o">=</span> <span class="n">addTouchTarget</span><span class="o">(</span><span class="n">child</span><span class="o">,</span> <span class="n">idBitsToAssign</span><span class="o">);</span>
+</span><span class='line'>                        <span class="n">alreadyDispatchedToNewTouchTarget</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>                        <span class="k">break</span><span class="o">;</span>
+</span><span class='line'>                    <span class="o">}</span>
+</span><span class='line'>                <span class="o">}</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>            <span class="o">......</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// 经过前面的ACTION_DOWN的处理，有两种情况。</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">mFirstTouchTarget</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// 情况1：(mFirstTouchTarget为null) 没有找到能够消费touch事件的子组件或者是touch事件被拦截了，</span>
+</span><span class='line'>        <span class="c1">// 那么在ViewGroup的dispatchTransformedTouchEvent方法里面，处理Touch事件则和普通View一样，</span>
+</span><span class='line'>        <span class="c1">// 自己无法消费，调用super.dispatchOnTouchEvent()把事件回递给父ViewGroup进行处理</span>
+</span><span class='line'>        <span class="n">handled</span> <span class="o">=</span> <span class="n">dispatchTransformedTouchEvent</span><span class="o">(</span><span class="n">ev</span><span class="o">,</span> <span class="n">canceled</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="n">TouchTarget</span><span class="o">.</span><span class="na">ALL_POINTER_IDS</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// 情况2：(mFirstTouchTarget!=null) 找到了能够消费touch事件的子组件，那么后续的touch事件都可以传递到子View</span>
+</span><span class='line'>        <span class="n">TouchTarget</span> <span class="n">target</span> <span class="o">=</span> <span class="n">mFirstTouchTarget</span><span class="o">;</span>
+</span><span class='line'>        <span class="c1">// (这里为了理解简单，省略了一个Target List的概念，有需要的同学再查看源码)</span>
+</span><span class='line'>        <span class="k">while</span> <span class="o">(</span><span class="n">target</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">alreadyDispatchedToNewTouchTarget</span> <span class="o">&amp;&amp;</span> <span class="n">target</span> <span class="o">==</span> <span class="n">newTouchTarget</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="c1">// 如果前面利用ACTION_DOWN事件寻找符合接收条件的子组件的同时消费掉了ACTION_DOWN事件，这里直接返回true</span>
+</span><span class='line'>                <span class="n">handled</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>            <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>                <span class="kd">final</span> <span class="kt">boolean</span> <span class="n">cancelChild</span> <span class="o">=</span> <span class="n">resetCancelNextUpFlag</span><span class="o">(</span><span class="n">target</span><span class="o">.</span><span class="na">child</span><span class="o">)</span> <span class="o">||</span> <span class="n">intercepted</span><span class="o">;</span>
+</span><span class='line'>                <span class="c1">// 对于非ACTION_DOWN事件，则继续传递给目标子组件进行处理(注意这里的非ACTION_DOWN事件已经不需要再判断是否拦截)</span>
+</span><span class='line'>                <span class="k">if</span> <span class="o">(</span><span class="n">dispatchTransformedTouchEvent</span><span class="o">(</span><span class="n">ev</span><span class="o">,</span> <span class="n">cancelChild</span><span class="o">,</span> <span class="n">target</span><span class="o">.</span><span class="na">child</span><span class="o">,</span> <span class="n">target</span><span class="o">.</span><span class="na">pointerIdBits</span><span class="o">))</span> <span class="o">{</span>
+</span><span class='line'>                    <span class="c1">// 如果target子组件进行处理，符合某些条件的话，会传递ACTION_CANCEL给target子组件</span>
+</span><span class='line'>                    <span class="c1">// 条件是：如果ACTION_DOWN时没有被拦截，而后面的touch事件被拦截，则需要发送ACTION_CANCEL给target子组件</span>
+</span><span class='line'>                    <span class="n">handled</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>                <span class="o">}</span>
+</span><span class='line'>                <span class="o">......</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">canceled</span> <span class="o">||</span> <span class="n">actionMasked</span> <span class="o">==</span> <span class="n">MotionEvent</span><span class="o">.</span><span class="na">ACTION_UP</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// 如果是ACTION_CANCEL或者ACTION_UP，重置Touch状态标识，mFirstTouchTarget赋值为null，后面的Touch事件都无法派发给子View</span>
+</span><span class='line'>        <span class="n">resetTouchState</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="o">......</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">return</span> <span class="n">handled</span><span class="o">;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>3)dispatchTouchEvent()流程图</h2>
+
+<p><img src="http://hukai.me/images/articles/dispatchtouchevent_process.jpg" title="演示ViewGroup中的dispatchTouchEvent的流程" alt="dispatchtouchevent_process.jpg" /></p>
+
+<h2>4)代码举例说明</h2>
+
+<p><img src="http://hukai.me/images/articles/dispatchtouchevent_demo.jpg" title="Demo的layout层级" alt="dispatchtouchevent_demo.jpg" /></p>
+
+<p><a href="https://github.com/kesenhoo/TouchEventDemo.git">Demo Source Code</a>下面是截取的片段</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">dispatchTouchEvent</span><span class="o">(</span><span class="n">MotionEvent</span> <span class="n">ev</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">switch</span> <span class="o">(</span><span class="n">ev</span><span class="o">.</span><span class="na">getAction</span><span class="o">())</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">case</span> <span class="n">MotionEvent</span><span class="o">.</span><span class="na">ACTION_DOWN</span><span class="o">:</span>
+</span><span class='line'>            <span class="n">Log</span><span class="o">.</span><span class="na">d</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span> <span class="s">&quot;[dispatchTouchEvent] -&gt; ACTION_DOWN&quot;</span><span class="o">);</span>
+</span><span class='line'>            <span class="k">break</span><span class="o">;</span>
+</span><span class='line'>            <span class="c1">//Log.i(TAG, &quot;[dispatchTouchEvent] -&gt; ACTION_DOWN, return true&quot;);</span>
+</span><span class='line'>            <span class="c1">//return true;</span>
+</span><span class='line'>        <span class="k">case</span> <span class="n">MotionEvent</span><span class="o">.</span><span class="na">ACTION_MOVE</span><span class="o">:</span>
+</span><span class='line'>            <span class="n">Log</span><span class="o">.</span><span class="na">d</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span> <span class="s">&quot;[dispatchTouchEvent] -&gt; ACTION_MOVE&quot;</span><span class="o">);</span>
+</span><span class='line'>            <span class="k">break</span><span class="o">;</span>
+</span><span class='line'>            <span class="c1">//Log.i(TAG, &quot;[dispatchTouchEvent] -&gt; ACTION_MOVE, return true&quot;);</span>
+</span><span class='line'>            <span class="c1">//return true;</span>
+</span><span class='line'>        <span class="k">case</span> <span class="n">MotionEvent</span><span class="o">.</span><span class="na">ACTION_UP</span><span class="o">:</span>
+</span><span class='line'>            <span class="n">Log</span><span class="o">.</span><span class="na">d</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span> <span class="s">&quot;[dispatchTouchEvent] -&gt; ACTION_UP&quot;</span><span class="o">);</span>
+</span><span class='line'>            <span class="k">break</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">case</span> <span class="n">MotionEvent</span><span class="o">.</span><span class="na">ACTION_CANCEL</span><span class="o">:</span>
+</span><span class='line'>            <span class="n">Log</span><span class="o">.</span><span class="na">d</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span> <span class="s">&quot;[dispatchTouchEvent] -&gt; ACTION_CANCEL&quot;</span><span class="o">);</span>
+</span><span class='line'>            <span class="k">break</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">default</span><span class="o">:</span>
+</span><span class='line'>            <span class="k">break</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="kt">boolean</span> <span class="n">superReturn</span> <span class="o">=</span> <span class="kd">super</span><span class="o">.</span><span class="na">dispatchTouchEvent</span><span class="o">(</span><span class="n">ev</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">Log</span><span class="o">.</span><span class="na">i</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span> <span class="s">&quot;[dispatchTouchEvent] return super. = &quot;</span> <span class="o">+</span> <span class="n">superReturn</span><span class="o">);</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">superReturn</span><span class="o">;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>下面演示的每一种情况，操作均为点击中间的Button，然后松开。请仔细看下面的案例，里面均有对应的解释。</p>
+
+<h3>Case 0:没有任何的分发丢弃，也没有任何的拦截</h3>
+
+<p><img src="http://hukai.me/images/articles/Touch_Case_0_All_Normal.png" title="CASE 0" alt="Touch_Case_0_All_Normal.png" /></p>
+
+<h3>Case 1:Activity层的dispatch函数对ACTION_DOWN进行return true.</h3>
+
+<p><img src="http://hukai.me/images/articles/Touch_Case_1_Activity_Dispatch_Down_Return_True.png" title="CASE 1" alt="Touch_Case_1_Activity_Dispatch_Down_Return_True.png" /></p>
+
+<h3>Case 2:ParentLayout层的dispatch函数对ACTION_DOWN进行return true.</h3>
+
+<p><img src="http://hukai.me/images/articles/Touch_Case_2_Parent_Dispatch_Down_Return_True.png" title="CASE 2" alt="Touch_Case_2_Parent_Dispatch_Down_Return_True.png" /></p>
+
+<p>因为ChildLayout层的dispatch函数对ACITON_DOWN进行return true和在activity层,ParentLayout层是类似的逻辑，因为都没有找到Target组件，又没有拦截的因素影响，所以后续的MOVE与UP都只传递到DOWN被return true的那一层截至，然后都回传，也都没有被消费掉。(注意发生在ChildLayout层的return true与ParentLayout层的差异在于：回传时，只有return层与activity层才可以接收到onTouchEvent()的回调，但是默认都无法消费)。</p>
+
+<h3>Case 3:Activity层的dispatch函数对ACTION_MOVE进行return true.</h3>
+
+<p><img src="http://hukai.me/images/articles/Touch_Case_3_Activity_Dispatch_Move_Return_True.png" title="CASE 3" alt="Touch_Case_2_Activity_Dispatch_Move_Return_True.png" /></p>
+
+<p>因为ParentLayout层的dispatch函数对ACITON_MOVE进行return true和在activity层是类似的道理，不做新的分析</p>
+
+<h3>Case 4:ParentLayout层的intercept函数对ACTION_DOWN进行return true.</h3>
+
+<p><img src="http://hukai.me/images/articles/Touch_Case_4_Parent_Intercept_Down_Return_True.png" title="CASE 4" alt="Touch_Case_4_Parent_Intercept_Down_Return_True.png" /></p>
+
+<h3>Case 5:ChildLayout层的intercept函数对ACTION_DOWN进行return true.</h3>
+
+<p><img src="http://hukai.me/images/articles/Touch_Case_5_Child_Intercept_Down_Return_True.png" title="CASE 5" alt="Touch_Case_5_Child_Intercept_Down_Return_True.png" /></p>
+
+<h3>Case 6:ChildLayout层的intercept函数对ACTION_MOVE进行return true.</h3>
+
+<p><img src="http://hukai.me/images/articles/Touch_Case_6_Child_Intercept_Move_Return_True.png" title="CASE 6" alt="Touch_Case_6_Child_Intercept_Move_Return_True.png" /></p>
+
+<h2>5)写在最后</h2>
+
+<ul>
+<li>对于dispatch分发某个事件的情况：
+
+<ul>
+<li>如果是ACTION_DOWN被return true,那么在哪一层return的，后续的MOVE与UP都只传递到该层，然后回传(<strong>Case 1,2</strong>)(注意在回传的过程中只有在return层与activity层才会触发onTouchEvent，中间若是有其他层，均会被跳过。这一规律暂时没有找到比较有力的解释，需要查看更多的源码。)</li>
+<li>如果非ACTION_DOWN被return true,意味着DOWN事件正常被下发并找到Target组件，那么后续只有被return的事件会无法正常下发，并只传递到return层，没有return的事件还能够正常下方到Target组件并被Target消费。(<strong>Case 3</strong>)</li>
+</ul>
+</li>
+<li>对于intercept拦截某个事件的情况：
+
+<ul>
+<li>如果ACTION_DOWN被拦截，无论拦截发生在哪一层，都会导致Target组件都无法找到，那么后续的MOVE与UP事件都只在Activity层处理，不会下发(<strong>Case 4,5</strong>)。</li>
+<li>如果ACTION_DOWN没被拦截，此时可以找到Target组件，DOWN事件是正常被消费。后续的MOVE如果被拦截，会对子组件触发CANCEL的事件，并且UP事件只能传递到拦截MOVE的那一层，无法消费并返回(<strong>Case 6</strong>)。Ps:因为Case 6演示的是在ChildLayout层对MOVE进行拦截，所以看到的效果是Button直接收到了CANCEL,实际上如果是ParentLayout对MOVE进行拦截，那么CANCEL事件需要经过ChildLayout(如果有需要的话，可以在这里继续拦截CANCEL)，最终CANCEL事件都是由Button进行消费。</li>
+</ul>
+</li>
+</ul>
+
+
+<p><strong>经过上面的描述，对Android的Touch事件传递机制应该有更深入的了解，理解错误或者有偏差的地方，欢迎提出一起讨论，谢谢！</strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Java Notes 00 - Singleton Pattern(单例总结)]]></title>
     <link href="http://hukai.me/blog/2013/11/17/java-notes-00-singleton-pattern/"/>
     <updated>2013-11-17T14:21:00+08:00</updated>
     <id>http://hukai.me/blog/2013/11/17/java-notes-00-singleton-pattern</id>
@@ -1753,7 +2150,7 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Notes 05 - Tasks and Back Stack]]></title>
+    <title type="html"><![CDATA[Android Notes(05) - Tasks and Back Stack]]></title>
     <link href="http://hukai.me/blog/2013/04/20/android-notes-05-task-and-back-stack/"/>
     <updated>2013-04-20T20:42:00+08:00</updated>
     <id>http://hukai.me/blog/2013/04/20/android-notes-05-task-and-back-stack</id>
@@ -1992,7 +2389,7 @@ For example, suppose that an activity that reports weather conditions in selecte
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Notes 04 - Intents and Intent Filters]]></title>
+    <title type="html"><![CDATA[Android Notes(04) - Intents and Intent Filters]]></title>
     <link href="http://hukai.me/blog/2013/04/12/android-notes-04-intent-and-intentFilter/"/>
     <updated>2013-04-12T18:27:00+08:00</updated>
     <id>http://hukai.me/blog/2013/04/12/android-notes-04-intent-and-intentFilter</id>
@@ -2515,7 +2912,7 @@ Flags用来表示，如何启动一个activity(例如，指定activity应该属�
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Notes 03 - Process and Thread]]></title>
+    <title type="html"><![CDATA[Android Notes(03) - Process and Thread]]></title>
     <link href="http://hukai.me/blog/2013/03/31/android-notes-03-process-and-thread/"/>
     <updated>2013-03-31T16:27:00+08:00</updated>
     <id>http://hukai.me/blog/2013/03/31/android-notes-03-process-and-thread</id>
@@ -2729,7 +3126,7 @@ Android提供了下面三个方法来解决这个问题：</p>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Notes 02 - AIDL]]></title>
+    <title type="html"><![CDATA[Android Notes(02) - AIDL]]></title>
     <link href="http://hukai.me/blog/2013/02/19/android-notes-02-aidl/"/>
     <updated>2013-02-19T21:18:00+08:00</updated>
     <id>http://hukai.me/blog/2013/02/19/android-notes-02-aidl</id>
@@ -3451,7 +3848,7 @@ Android提供了下面三个方法来解决这个问题：</p>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Notes 01 - Bound Services]]></title>
+    <title type="html"><![CDATA[Android Notes(01) - Bound Services]]></title>
     <link href="http://hukai.me/blog/2013/02/18/android-notes-01-bound-services/"/>
     <updated>2013-02-18T22:30:00+08:00</updated>
     <id>http://hukai.me/blog/2013/02/18/android-notes-01-bound-services</id>
@@ -3994,7 +4391,7 @@ Android提供了下面三个方法来解决这个问题：</p>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Notes 00 - Services]]></title>
+    <title type="html"><![CDATA[Android Notes(00) - Services]]></title>
     <link href="http://hukai.me/blog/2013/02/04/android-notes-00-services/"/>
     <updated>2013-02-04T18:37:00+08:00</updated>
     <id>http://hukai.me/blog/2013/02/04/android-notes-00-services</id>
@@ -5137,171 +5534,6 @@ Android提供了下面三个方法来解决这个问题：</p>
 
 <p><strong>学习自：<a href="http://developer.android.com/training/camera/photobasics.html">http://developer.android.com/training/camera/photobasics.html</a>，请多指教，谢谢！</strong><br/>
 <strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Training 05 - 与其他Apps进行交互(Lesson 3 - 允许其他app启动你的activity)]]></title>
-    <link href="http://hukai.me/blog/2012/12/04/android-training-05-interacting-with-other-apps-lesson-3/"/>
-    <updated>2012-12-04T22:12:00+08:00</updated>
-    <id>http://hukai.me/blog/2012/12/04/android-training-05-interacting-with-other-apps-lesson-3</id>
-    <content type="html"><![CDATA[<p>前两节课主要讲了从你的app启动另外一个app。但是如果你的app可以响应前面发出的action，那么你的app应该做好响应的准备。例如，如果你创建了一个social app，它可以分享messages 或者 photos 给好友，那么最好你的app能够接收ACTION_SEND 的intent,这样当用户在其他app触发分享功能的时候，你的app能够出现在待选对话框。</p>
-
-<p>为了使得其他的app能够启动你的activity，你需要在你的manifest文件的<activity> 标签下添加<intent-filter> 的属性。</p>
-
-<p>当你的app被安装到设备上时，系统可以识别你的intent filter并把这些信息记录下来。当其他app通过执行 startActivity() 或者 startActivityForResult()方法，并使用implicit intent时，系统可以自动查找出那些可以响应这个intent的activity。</p>
-
-<!-- more -->
-
-
-<h2>Add an Intent Filter(添加Intent Filter)</h2>
-
-<p>为了尽可能确切的定义你的activity能够handle哪些intent，每一个intent filter都应该尽可能详尽的定义好action与data。</p>
-
-<p>主要有下面三个方面需要定义：</p>
-
-<ul>
-<li><strong>Action</strong>:一个想要执行的动作的名称。通常是系统已经定义好的值，例如 ACTION_SEND 或者 ACTION_VIEW。</li>
-<li><strong>Data</strong>:Intent附带数据的描述。可以使用一个或者多个属性，你可以只定义MIME type或者是只指定URI prefix，也可以只定义一个URI scheme，或者是他们综合使用。<strong>Note:</strong> 如果你不想handle Uri 类型的数据，那么你应该指定 android:mimeType 属性。例如 text/plain or image/jpeg.</li>
-<li><strong>Category</strong>:提供一个附加的方法来标识这个activity能够handle的intent。通常与用户的手势或者是启动位置有关。系统有支持几种不同的categories,但是大多数都不怎么用的到。而且，所有的implicit intents都默认是 CATEGORY_DEFAULT 类型的。</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;activity</span> <span class="na">android:name=</span><span class="s">&quot;ShareActivity&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;intent-filter&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;action</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.action.SEND&quot;</span><span class="nt">/&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;category</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.category.DEFAULT&quot;</span><span class="nt">/&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;data</span> <span class="na">android:mimeType=</span><span class="s">&quot;text/plain&quot;</span><span class="nt">/&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;data</span> <span class="na">android:mimeType=</span><span class="s">&quot;image/*&quot;</span><span class="nt">/&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;/intent-filter&gt;</span>
-</span><span class='line'><span class="nt">&lt;/activity&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>每一个发送出来的intent只会包含一个action与type，但是handle这个intent的activity的 <intent-filter>是可以声明多个<action>, <category>与 <data> 的。</p>
-
-<p>如果任何的两对action与data是互相矛盾的，你应该创建不同的intent fliter来指定特定的action与type。</p>
-
-<p>例如，假设你的activity可以handle 文本与图片，无论是ACTION_SEND 还是 ACTION_SENDTO 的intent。在这种情况下，你必须为两个action定义两个不同的intent filter。因为ACTION_SENDTO intent 必须使用 Uri 类型来指定接收者使用 send 或 sendto 的地址。例如：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;activity</span> <span class="na">android:name=</span><span class="s">&quot;ShareActivity&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>    <span class="c">&lt;!-- filter for sending text; accepts SENDTO action with sms URI schemes --&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;intent-filter&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;action</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.action.SENDTO&quot;</span><span class="nt">/&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;category</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.category.DEFAULT&quot;</span><span class="nt">/&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;data</span> <span class="na">android:scheme=</span><span class="s">&quot;sms&quot;</span> <span class="nt">/&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;data</span> <span class="na">android:scheme=</span><span class="s">&quot;smsto&quot;</span> <span class="nt">/&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;/intent-filter&gt;</span>
-</span><span class='line'>    <span class="c">&lt;!-- filter for sending text or images; accepts SEND action and text or image data --&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;intent-filter&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;action</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.action.SEND&quot;</span><span class="nt">/&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;category</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.category.DEFAULT&quot;</span><span class="nt">/&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;data</span> <span class="na">android:mimeType=</span><span class="s">&quot;image/*&quot;</span><span class="nt">/&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;data</span> <span class="na">android:mimeType=</span><span class="s">&quot;text/plain&quot;</span><span class="nt">/&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;/intent-filter&gt;</span>
-</span><span class='line'><span class="nt">&lt;/activity&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><strong>Note:</strong>为了接受implicit intents, 你必须在你的intent filter中包含 CATEGORY_DEFAULT 的category。
-关于更多sending 与 receiving ACTION_SEND intents来执行social sharing行为的，请查看<a href="http://developer.android.com/training/sharing/receive.html">Receiving Content from Other Apps.</a>(下一章节内容)</p>
-
-<h2>Handle the Intent in Your Activity [在你的Activity中Handle发送过来的Intent]</h2>
-
-<p>为了决定采用哪个action，你可以读取Intent的内容。</p>
-
-<p>你可以执行 getIntent() 来获取启动你的activity的那个intent。你可以在activity生命周期的任何时候去执行这个方法，当是你最好是在onCreate() 或者 onStart() 里面去执行。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='xml'><span class='line'>@Override
-</span><span class='line'>protected void onCreate(Bundle savedInstanceState) {
-</span><span class='line'>    super.onCreate(savedInstanceState);
-</span><span class='line'>
-</span><span class='line'>    setContentView(R.layout.main);
-</span><span class='line'>
-</span><span class='line'>    // Get the intent that started this activity
-</span><span class='line'>    Intent intent = getIntent();
-</span><span class='line'>    Uri data = intent.getData();
-</span><span class='line'>
-</span><span class='line'>    // Figure out what to do based on the intent type
-</span><span class='line'>    if (intent.getType().indexOf(&quot;image/&quot;) != -1) {
-</span><span class='line'>        // Handle intents with image data ...
-</span><span class='line'>    } else if (intent.getType().equals(&quot;text/plain&quot;)) {
-</span><span class='line'>        // Handle intents with text ...
-</span><span class='line'>    }
-</span><span class='line'>}
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Return a Result(返回Result)</h2>
-
-<p>如果你想返回一个result给启动你的那个activity，仅仅需要执行 setResult() ，通过指定一个result code与result intent。当你的的操作成功之后，用户需要返回到原来的activity，通过执行finish() 来关闭被叫起的activity。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'> <span class="c1">// Create intent to deliver some kind of result data</span>
-</span><span class='line'><span class="n">Intent</span> <span class="n">result</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="s">&quot;com.example.RESULT_ACTION&quot;</span><span class="o">,</span> <span class="n">Uri</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="s">&quot;content://result_uri&quot;</span><span class="o">);</span>
-</span><span class='line'><span class="n">setResult</span><span class="o">(</span><span class="n">Activity</span><span class="o">.</span><span class="na">RESULT_OK</span><span class="o">,</span> <span class="n">result</span><span class="o">);</span>
-</span><span class='line'><span class="n">finish</span><span class="o">();</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>你必须总是指定一个result code。通常不是 RESULT_OK 就是 RESULT_CANCELED。你可以通过Intent 来添加需要返回的数据。</p>
-
-<p><strong>Note:</strong>默认的result code是RESULT_CANCELED.因此，如果用户在没有完成操作之前点击了back key，那么之前的activity接受到的result code就是&#8221;canceled&#8221;。</p>
-
-<p>如果你只是纯粹想要返回一个int来表示某些返回的result数据之一，你可以设置result code为任何大于0的数值。如果你返回的result只是一个int，那么连intent都可以不需要返回了，如下：</p>
-
-<p>setResult(RESULT_COLOR_RED);
-finish();
-<strong>Note:</strong>我们没有必要在意你的activity是被用startActivity() 还是 startActivityForResult()方法所叫起的。系统会自动去判断改如何传递result。在不需要的result的case下，result会被自动忽略。</p>
-
-<hr />
-
-<p><strong>学习自：<a href="http://developer.android.com/training/basics/intents/filters.html">http://developer.android.com/training/basics/intents/filters.html</a>，请多指教，谢谢！</strong><br/>
-<strong>转载请注明出自<a href="http://kesenhoo.github.io">http://kesenhoo.github.io</a>，谢谢配合！</strong></p>
 ]]></content>
   </entry>
   

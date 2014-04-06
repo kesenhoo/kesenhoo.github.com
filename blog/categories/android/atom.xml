@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android | 胡凯]]></title>
   <link href="http://hukai.me/blog/categories/android/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2014-04-01T00:39:00+08:00</updated>
+  <updated>2014-04-06T21:26:40+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -12,6 +12,261 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Android Notes(06) - Touch事件分发响应机制]]></title>
+    <link href="http://hukai.me/blog/2014/04/05/android-notes-06-touch-event-dispatch-process/"/>
+    <updated>2014-04-05T13:13:00+08:00</updated>
+    <id>http://hukai.me/blog/2014/04/05/android-notes-06-touch-event-dispatch-process</id>
+    <content type="html"><![CDATA[<h2>1)概述</h2>
+
+<p>Android的TouchEvent通常包含三个动作,ACTION_DOWN,ACTION_MOVE与ACTION_UP。发出的顺序是DOWN->MOVE->MOVE->...->UP(注意MOVE事件是否能够被触发取决于操作手势里面是否包含了移动的动作)。</p>
+
+<p>消息分发流程，从上到下，从父到子：Activity->ViewGroup1->ViewGroup1的子ViewGroup2->...->Target View<br/>
+消息响应流程，从下到上，从子到父：Target View->...->ViewGroup1的子ViewGroup2->ViewGroup1->Activity</p>
+
+<ul>
+<li><p><strong>public boolean dispatchTouchEvent(MotionEvent ev);</strong><br/>
+事件分发处理函数，通常会在Activity层根据UI的显示情况，把事件传递给相应的ViewGroup。下面的演示代码中，为了方便模拟，会直接return true，解说中称之为“丢弃”。(因为事件实际上没有传递给任何组件，没有被消费，而且是主动的行为，故称之为丢弃)</p></li>
+<li><p><strong>public boolean onInterceptTouchEvent(MotionEvent ev);</strong><br/>
+对分发的事件进行拦截，注意拦截ACION_DOWN与其他ACTION的差异。<br/>
+第1种情况：如果ACTION_DOWN的事件没有被拦截，顺利找到了TargetView，那么后续的MOVE与UP都能够下发。如果后续的MOVE与UP下发时还有继续拦截的话，事件只能传递到拦截层，并且发出ACTION_CANCEL。<br/>
+第2种情况：如果ACITON_DOWN的事件下发时被拦截，导致没有找到TargetView，那么后续的MOVE与UP都无法向下派发了，在Activity层就终止了传递。</p></li>
+<li><p><strong>public boolean onTouchEvent(MotionEvent ev);</strong><br/>
+响应处理函数,如果有设置对应listener的话,这里还会与onTouch,onClick,onLongClick有关联。具体执行顺序是onTouch()->onTouchEvent()->onClick()->onLongClick()。是否能够顺序执行，取决于每个方法的返回值是true还是false。具体这里不展开说。</p></li>
+</ul>
+
+
+<p><strong>强关注点：dispatch与intercept的差异，ACTION_DOWN与其他ACITON会对寻找target组件带来差异，而是否寻找到Target组件对整个流程有着重大的的影响。</strong></p>
+
+<!-- More -->
+
+
+<h2>2)dispatchTouchEvent()的源码解读</h2>
+
+<p>```java Android 4.4 ViewGroup.dispatchTouchEvent()源码解读
+@Override
+public boolean dispatchTouchEvent(MotionEvent ev) {</p>
+
+<pre><code>......
+boolean handled = false;
+......
+final int action = ev.getAction();
+final int actionMasked = action &amp; MotionEvent.ACTION_MASK;
+
+// 1)处理初始的ACTION_DOWN
+if (actionMasked == MotionEvent.ACTION_DOWN) {
+    // 把ACTION_DOWN作为一个Touch手势的始点，清除之前的手势状态。
+    cancelAndClearTouchTargets(ev); //清除前一个手势，*关键操作:mFirstTouchTarget重置为null*
+    resetTouchState(); //重置Touch状态标识
+}
+
+// 2)检查是否会被拦截
+final boolean intercepted;
+if (actionMasked == MotionEvent.ACTION_DOWN || mFirstTouchTarget != null) {
+    // 是ACTION_DOWN的事件，或者mFirstTouchTarget不为null(已经找到能够接收touch事件的目标组件)
+    final boolean disallowIntercept = (mGroupFlags &amp; FLAG_DISALLOW_INTERCEPT) != 0; 
+    // 判断禁止拦截的FLAG，因为requestDisallowInterceptTouchEvent(boolean disallowIntercept)方法可以禁止执行是否需要拦截的判断
+    if (!disallowIntercept) {
+        // 禁止拦截的FLAG为false，说明可以执行拦截判断，则执行此ViewGroup的onInterceptTouchEvent方法
+        intercepted = onInterceptTouchEvent(ev); // 此方法默认返回false，如果想修改默认的行为，需要override此方法，修改返回值。
+        ev.setAction(action);
+    } else {
+        // 禁止拦截的FLAG为ture，说明没有必要去执行是否需要拦截了，这个事件是无法拦截的，能够顺利通过，所以设置拦截变量为false
+        intercepted = false; 
+    }
+} else {
+    // 当不是ACTION_DOWN事件并且mFirstTouchTarget为null(意味着没有touch的目标组件)时，这个ViewGroup应该继续执行拦截的操作。
+    intercepted = true;
+}
+// 通过前面的逻辑处理，得到了是否需要进行拦截的变量值
+
+final boolean canceled = resetCancelNextUpFlag(this) || actionMasked == MotionEvent.ACTION_CANCEL;
+final boolean split = (mGroupFlags &amp; FLAG_SPLIT_MOTION_EVENTS) != 0;
+TouchTarget newTouchTarget = null;
+boolean alreadyDispatchedToNewTouchTarget = false;
+if (!canceled &amp;&amp; !intercepted) {
+    // 不是ACTION_CANCEL并且拦截变量为false
+    if (actionMasked == MotionEvent.ACTION_DOWN) {
+        // 在ACTION_DOWN时去寻找这次DOWN事件新出现的TouchTarget
+        final int actionIndex = ev.getActionIndex(); // always 0 for down
+
+        .....
+
+        final int childrenCount = mChildrenCount;
+        if (newTouchTarget == null &amp;&amp; childrenCount != 0) {
+            // 根据触摸的坐标寻找能够接收这个事件的子组件
+            final float x = ev.getX(actionIndex);
+            final float y = ev.getY(actionIndex);
+
+            final View[] children = mChildren;
+            // 逆序遍历所有子组件
+            for (int i = childrenCount - 1; i &gt;= 0; i--) {
+                final int childIndex = i;
+                final View child = children[childIndex];
+                // 寻找可接收这个事件并且组件区域内包含点击坐标的子View
+                if (!canViewReceivePointerEvents(child) || !isTransformedTouchPointInView(x, y, child, null)) {
+                    continue;
+                }
+
+                newTouchTarget = getTouchTarget(child); // 找到了符合条件的子组件，赋值给newTouchTarget
+
+                ......
+
+                // 把ACTION_DOWN事件传递给子组件进行处理
+                if (dispatchTransformedTouchEvent(ev, false, child, idBitsToAssign)) {
+                    // 如果此子ViewGroup消费了这个touch事件
+                    mLastTouchDownTime = ev.getDownTime();
+                    mLastTouchDownIndex = childIndex;
+                    mLastTouchDownX = ev.getX();
+                    mLastTouchDownY = ev.getY();
+                    // 则为mFirstTouchTarget赋值为newTouchTarget，此子组件成为新的touch事件的起点
+                    newTouchTarget = addTouchTarget(child, idBitsToAssign); 
+                    alreadyDispatchedToNewTouchTarget = true;
+                    break;
+                }
+            }
+        }
+        ......
+    }
+}
+
+// 经过前面的ACTION_DOWN的处理，有两种情况。
+if (mFirstTouchTarget == null) {
+    // 情况1：(mFirstTouchTarget为null) 没有找到能够消费touch事件的子组件或者是touch事件被拦截了，
+    // 那么在ViewGroup的dispatchTransformedTouchEvent方法里面，处理Touch事件则和普通View一样，
+    // 自己无法消费，调用super.dispatchOnTouchEvent()把事件回递给父ViewGroup进行处理
+    handled = dispatchTransformedTouchEvent(ev, canceled, null, TouchTarget.ALL_POINTER_IDS);
+} else {
+    // 情况2：(mFirstTouchTarget!=null) 找到了能够消费touch事件的子组件，那么后续的touch事件都可以传递到子View
+    TouchTarget target = mFirstTouchTarget;
+    // (这里为了理解简单，省略了一个Target List的概念，有需要的同学再查看源码)
+    while (target != null) {
+        if (alreadyDispatchedToNewTouchTarget &amp;&amp; target == newTouchTarget) {
+            // 如果前面利用ACTION_DOWN事件寻找符合接收条件的子组件的同时消费掉了ACTION_DOWN事件，这里直接返回true
+            handled = true;
+        } else {
+            final boolean cancelChild = resetCancelNextUpFlag(target.child) || intercepted;
+            // 对于非ACTION_DOWN事件，则继续传递给目标子组件进行处理(注意这里的非ACTION_DOWN事件已经不需要再判断是否拦截)
+            if (dispatchTransformedTouchEvent(ev, cancelChild, target.child, target.pointerIdBits)) {
+                // 如果target子组件进行处理，符合某些条件的话，会传递ACTION_CANCEL给target子组件
+                // 条件是：如果ACTION_DOWN时没有被拦截，而后面的touch事件被拦截，则需要发送ACTION_CANCEL给target子组件
+                handled = true;
+            }
+            ......
+        }
+    }
+}
+
+if (canceled || actionMasked == MotionEvent.ACTION_UP) {
+    // 如果是ACTION_CANCEL或者ACTION_UP，重置Touch状态标识，mFirstTouchTarget赋值为null，后面的Touch事件都无法派发给子View
+    resetTouchState();
+}
+......
+
+return handled;
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>3)dispatchTouchEvent()流程图</h2>
+
+<p><img src="/images/articles/dispatchtouchevent_process.jpg" title="演示ViewGroup中的dispatchTouchEvent的流程" alt="dispatchtouchevent_process.jpg" /></p>
+
+<h2>4)代码举例说明</h2>
+
+<p><img src="/images/articles/dispatchtouchevent_demo.jpg" title="Demo的layout层级" alt="dispatchtouchevent_demo.jpg" /></p>
+
+<p><a href="https://github.com/kesenhoo/TouchEventDemo.git">Demo Source Code</a>下面是截取的片段
+```java
+@Override
+public boolean dispatchTouchEvent(MotionEvent ev) {</p>
+
+<pre><code>switch (ev.getAction()) {
+    case MotionEvent.ACTION_DOWN:
+        Log.d(TAG, "[dispatchTouchEvent] -&gt; ACTION_DOWN");
+        break;
+        //Log.i(TAG, "[dispatchTouchEvent] -&gt; ACTION_DOWN, return true");
+        //return true;
+    case MotionEvent.ACTION_MOVE:
+        Log.d(TAG, "[dispatchTouchEvent] -&gt; ACTION_MOVE");
+        break;
+        //Log.i(TAG, "[dispatchTouchEvent] -&gt; ACTION_MOVE, return true");
+        //return true;
+    case MotionEvent.ACTION_UP:
+        Log.d(TAG, "[dispatchTouchEvent] -&gt; ACTION_UP");
+        break;
+    case MotionEvent.ACTION_CANCEL:
+        Log.d(TAG, "[dispatchTouchEvent] -&gt; ACTION_CANCEL");
+        break;
+    default:
+        break;
+}
+boolean superReturn = super.dispatchTouchEvent(ev);
+Log.i(TAG, "[dispatchTouchEvent] return super. = " + superReturn);
+return superReturn;
+</code></pre>
+
+<p>}
+```
+下面演示的每一种情况，操作均为点击中间的Button，然后松开。请仔细看下面的案例，里面均有对应的解释。</p>
+
+<h3>Case 0:没有任何的分发丢弃，也没有任何的拦截</h3>
+
+<p><img src="/images/articles/Touch_Case_0_All_Normal.png" title="CASE 0" alt="Touch_Case_0_All_Normal.png" /></p>
+
+<h3>Case 1:Activity层的dispatch函数对ACTION_DOWN进行return true.</h3>
+
+<p><img src="/images/articles/Touch_Case_1_Activity_Dispatch_Down_Return_True.png" title="CASE 1" alt="Touch_Case_1_Activity_Dispatch_Down_Return_True.png" /></p>
+
+<h3>Case 2:ParentLayout层的dispatch函数对ACTION_DOWN进行return true.</h3>
+
+<p><img src="/images/articles/Touch_Case_2_Parent_Dispatch_Down_Return_True.png" title="CASE 2" alt="Touch_Case_2_Parent_Dispatch_Down_Return_True.png" /></p>
+
+<p>因为ChildLayout层的dispatch函数对ACITON_DOWN进行return true和在activity层,ParentLayout层是类似的逻辑，因为都没有找到Target组件，又没有拦截的因素影响，所以后续的MOVE与UP都只传递到DOWN被return true的那一层截至，然后都回传，也都没有被消费掉。(注意发生在ChildLayout层的return true与ParentLayout层的差异在于：回传时，只有return层与activity层才可以接收到onTouchEvent()的回调，但是默认都无法消费)。</p>
+
+<h3>Case 3:Activity层的dispatch函数对ACTION_MOVE进行return true.</h3>
+
+<p><img src="/images/articles/Touch_Case_3_Activity_Dispatch_Move_Return_True.png" title="CASE 3" alt="Touch_Case_2_Activity_Dispatch_Move_Return_True.png" /></p>
+
+<p>因为ParentLayout层的dispatch函数对ACITON_MOVE进行return true和在activity层是类似的道理，不做新的分析</p>
+
+<h3>Case 4:ParentLayout层的intercept函数对ACTION_DOWN进行return true.</h3>
+
+<p><img src="/images/articles/Touch_Case_4_Parent_Intercept_Down_Return_True.png" title="CASE 4" alt="Touch_Case_4_Parent_Intercept_Down_Return_True.png" /></p>
+
+<h3>Case 5:ChildLayout层的intercept函数对ACTION_DOWN进行return true.</h3>
+
+<p><img src="/images/articles/Touch_Case_5_Child_Intercept_Down_Return_True.png" title="CASE 5" alt="Touch_Case_5_Child_Intercept_Down_Return_True.png" /></p>
+
+<h3>Case 6:ChildLayout层的intercept函数对ACTION_MOVE进行return true.</h3>
+
+<p><img src="/images/articles/Touch_Case_6_Child_Intercept_Move_Return_True.png" title="CASE 6" alt="Touch_Case_6_Child_Intercept_Move_Return_True.png" /></p>
+
+<h2>5)写在最后</h2>
+
+<ul>
+<li>对于dispatch分发某个事件的情况：
+
+<ul>
+<li>如果是ACTION_DOWN被return true,那么在哪一层return的，后续的MOVE与UP都只传递到该层，然后回传(<strong>Case 1,2</strong>)(注意在回传的过程中只有在return层与activity层才会触发onTouchEvent，中间若是有其他层，均会被跳过。这一规律暂时没有找到比较有力的解释，需要查看更多的源码。)</li>
+<li>如果非ACTION_DOWN被return true,意味着DOWN事件正常被下发并找到Target组件，那么后续只有被return的事件会无法正常下发，并只传递到return层，没有return的事件还能够正常下方到Target组件并被Target消费。(<strong>Case 3</strong>)</li>
+</ul>
+</li>
+<li>对于intercept拦截某个事件的情况：
+
+<ul>
+<li>如果ACTION_DOWN被拦截，无论拦截发生在哪一层，都会导致Target组件都无法找到，那么后续的MOVE与UP事件都只在Activity层处理，不会下发(<strong>Case 4,5</strong>)。</li>
+<li>如果ACTION_DOWN没被拦截，此时可以找到Target组件，DOWN事件是正常被消费。后续的MOVE如果被拦截，会对子组件触发CANCEL的事件，并且UP事件只能传递到拦截MOVE的那一层，无法消费并返回(<strong>Case 6</strong>)。Ps:因为Case 6演示的是在ChildLayout层对MOVE进行拦截，所以看到的效果是Button直接收到了CANCEL,实际上如果是ParentLayout对MOVE进行拦截，那么CANCEL事件需要经过ChildLayout(如果有需要的话，可以在这里继续拦截CANCEL)，最终CANCEL事件都是由Button进行消费。</li>
+</ul>
+</li>
+</ul>
+
+
+<p><strong>经过上面的描述，对Android的Touch事件传递机制应该有更深入的了解，理解错误或者有偏差的地方，欢迎提出一起讨论，谢谢！</strong></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Android Training[Performance] - 管理应用的内存]]></title>
@@ -600,167 +855,6 @@ protected void onDraw(Canvas canvas) {
 <hr />
 
 <p><strong>学习自：<a href="http://developer.android.com/training/custom-views/custom-drawing.html">http://developer.android.com/training/custom-views/custom-drawing.html</a>，请多指教，谢谢！</strong><br/>
-<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Training[UI] - 创建自定义的Views(Lesson 1 - 创建一个View类)]]></title>
-    <link href="http://hukai.me/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-1/"/>
-    <updated>2013-06-30T18:47:00+08:00</updated>
-    <id>http://hukai.me/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-1</id>
-    <content type="html"><![CDATA[<p>设计良好的类总是相似的。它使用一个好用的接口来封装一个特定的功能，它有效的使用CPU与内存，等等。为了成为一个设计良好的类，自定义的view应该:</p>
-
-<ul>
-<li>遵守Android标准规则。</li>
-<li>提供自定义的风格属性值并能够被Android XML Layout所识别。</li>
-<li>发出可访问的事件。</li>
-<li>能够兼容Android的不同平台。</li>
-</ul>
-
-
-<p>Android的framework提供了许多基类与XML标签用来帮助你创建一个符合上面要求的View。这节课会介绍如何使用Android framework来创建一个view的核心功能。</p>
-
-<!-- more -->
-
-
-<h2>Subclass a View</h2>
-
-<p>Android framework里面定义的view类都继承自View。你自定义的view也可以直接继承View，或者你可以通过继承既有的一个子类(例如Button)来节约一点时间。</p>
-
-<p>为了允许Android Developer Tools能够识别你的view，你必须至少提供一个constructor，它包含一个Contenx与一个AttributeSet对象作为参数。这个constructor允许layout editor创建并编辑你的view的实例。
-```java
-class PieChart extends View {</p>
-
-<pre><code>public PieChart(Context context, AttributeSet attrs) {
-    super(context, attrs);
-}
-</code></pre>
-
-<p>}
-```</p>
-
-<h2>Define Custom Attributes</h2>
-
-<p>为了添加一个内置的View到你的UI上，你需要通过XML属性来指定它的样式与行为。为了实现自定义的view的行为，你应该:</p>
-
-<ul>
-<li>为你的view在<declare-styleable>资源标签下定义自设的属性</li>
-<li>在你的XML layout中指定属性值</li>
-<li>在运行时获取属性值</li>
-<li>把获取到的属性值应用在你的view上</li>
-</ul>
-
-
-<p>为了定义自设的属性，添加 <declare-styleable> 资源到你的项目中。放置于res/values/attrs.xml文件中。下面是一个attrs.xml文件的示例:
-```xml
-<resources>
-   <declare-styleable name="PieChart"></p>
-
-<pre><code>   &lt;attr name="showText" format="boolean" /&gt;
-   &lt;attr name="labelPosition" format="enum"&gt;
-       &lt;enum name="left" value="0"/&gt;
-       &lt;enum name="right" value="1"/&gt;
-   &lt;/attr&gt;
-</code></pre>
-
-<p>   </declare-styleable>
-</resources>
-```
-上面的代码声明了2个自设的属性，<strong>showText</strong>与<strong>labelPosition</strong>，它们都归属于PieChart的项目下的styleable实例。styleable实例的名字，通常与自定义的view名字一致。尽管这并没有严格规定要遵守这个convention，但是许多流行的代码编辑器都依靠这个命名规则来提供statement completion。</p>
-
-<p>一旦你定义了自设的属性，你可以在layout XML文件中使用它们。唯一不同的是你自设的属性是归属于不同的命名空间。不是属于http://schemas.android.com/apk/res/android的命名空间，它们归属于http://schemas.android.com/apk/res/[your package name]。例如，下面演示了如何为PieChart使用上面定义的属性：
-```xml
-&lt;?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-   xmlns:custom="http://schemas.android.com/apk/res/com.example.customviews">
- &lt;com.example.customviews.charting.PieChart</p>
-
-<pre><code> custom:showText="true"
- custom:labelPosition="left" /&gt;
-</code></pre>
-
-<p></LinearLayout>
-```
-为了避免输入长串的namespace名字，示例上面使用了:custom作为别名，你也可以选择其他的名称所为你的namespace。</p>
-
-<p>请注意，如果你的view是一个inner class，你必须指定这个view的outer class。同样的，如果PieChart有一个inner class叫做PieView。为了使用这个类中自设的属性，你应该使用com.example.customviews.charting.PieChart$PieView.</p>
-
-<h2>Apply Custom Attributes</h2>
-
-<p>当view从XML layout被创建的时候，在xml标签下的属性值都是从resource下读取出来并传递到view的constructor作为一个AttributeSet参数。尽管可以从AttributeSet中直接读取数值，可是这样做有些弊端（<em>没有看懂下面的两个原因</em>）：</p>
-
-<ul>
-<li>拥有属性的资源并没有经过分解</li>
-<li>Styles并没有运用上</li>
-</ul>
-
-
-<p>取而代之的是，通过obtainStyledAttributes()来获取属性值。这个方法会传递一个<a href="http://developer.android.com/reference/android/content/res/TypedArray.html">TypedArray</a>对象，它是间接referenced并且styled的。</p>
-
-<p>请看下面的示例：
-```java
-public PieChart(Context context, AttributeSet attrs) {
-   super(context, attrs);
-   TypedArray a = context.getTheme().obtainStyledAttributes(</p>
-
-<pre><code>    attrs,
-    R.styleable.PieChart,
-    0, 0);
-</code></pre>
-
-<p>   try {</p>
-
-<pre><code>   mShowText = a.getBoolean(R.styleable.PieChart_showText, false);
-   mTextPos = a.getInteger(R.styleable.PieChart_labelPosition, 0);
-</code></pre>
-
-<p>   } finally {</p>
-
-<pre><code>   a.recycle();
-</code></pre>
-
-<p>   }
-}
-```
-清注意TypedArray对象是一个shared资源，必须被在使用后进行回收。</p>
-
-<h2>Add Properties and Events</h2>
-
-<p>Attributes是一个强大的控制view的行为与外观的方法，但是他们仅仅能够在view被初始化的时候被读取到。为了提供一个动态的行为，需要暴露出一些合适的getter 与setter方法。下面的代码演示了如何使用这个技巧:
-```java
-public boolean isShowText() {
-   return mShowText;
-}</p>
-
-<p>public void setShowText(boolean showText) {
-   mShowText = showText;
-   invalidate();
-   requestLayout();
-}
-```
-请注意，在setShowText方法里面有调用<a href="http://developer.android.com/reference/android/view/View.html#invalidate(">invalidate()</a>) and <a href="http://developer.android.com/reference/android/view/View.html#requestLayout(">requestLayout()</a>). 当view的某些内容发生变化的时候，需要调用invalidate来通知系统对这个view进行redraw，当某些元素变化会引起组件大小变化时，需要调用requestLayout方法。</p>
-
-<p>自定义的view也需要能够支持响应事件的监听器。例如，PieChart暴露了一个自设的事件OnCurrentItemChanged来通知监听器，用户已经切换了焦点到一个新的组件上。</p>
-
-<p>我们很容易忘记了暴露属性与事件，特别是当你是这个view的唯一用户时。请花费一些时间来仔细定义你的view的交互。一个好的规则是总是暴露任何属性与事件。</p>
-
-<h2>Design For Accessibility</h2>
-
-<p>Your custom view should support the widest range of users. This includes users with disabilities that prevent them from seeing or using a touchscreen. To support users with disabilities, you should:</p>
-
-<ul>
-<li>Label your input fields using the android:contentDescription attribute</li>
-<li>Send accessibility events by calling sendAccessibilityEvent() when appropriate.</li>
-<li>Support alternate controllers, such as D-pad and trackball</li>
-</ul>
-
-
-<p>For more information on creating accessible views, see <a href="http://developer.android.com/guide/topics/ui/accessibility/apps.html#custom-views">Making Applications Accessible</a> in the Android Developers Guide.</p>
-
-<hr />
-
-<p><strong>学习自：<a href="http://developer.android.com/training/custom-views/create-view.html">http://developer.android.com/training/custom-views/create-view.html</a>，请多指教，谢谢！</strong><br/>
 <strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
 ]]></content>
   </entry>
