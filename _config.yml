@@ -86,6 +86,9 @@ github_skip_forks: true
 # Share Function
 share_function: true
 
+# uiian Function
+ujian_function: false
+
 # Twitter
 twitter_user: kesenhoo
 twitter_tweet_count: 3
