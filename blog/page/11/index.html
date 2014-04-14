@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="加载单个Bitmap到UI是简单直接的，但是如果你需要一次加载大量的图片，事情则会变得复杂起来。在大多数情况下(例如在ListView,GridView or ViewPager), 显示图片的数量通常是没有限制的。 通过循环利用子视图可以抑制内存的使用，GC(garbage collector) &hellip;">
+  <meta name="description" content="这一课会演示如何运用前面几节课的内容，使用后台线程与Cache机制来加载图片到 ViewPager 与 GridView 组件，并且学习处理并发与配置改变问题。(并发问题的处理确实需要好好考虑，大多数App都没有仔细考虑到这个问题，会导致浪费更多的资源，效率不够) ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,49 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/04/26/android-training-graphics-displaying-bitmaps-efficiently-lesson-5/">Android Training[Graphics] - 高效地显示Bitmap(Lesson 5 - 呈现Bitmap到UI上)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-26T22:27:00+08:00" pubdate data-updated="true">Apr 26<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/04/26/android-training-graphics-displaying-bitmaps-efficiently-lesson-5/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>这一课会演示如何运用前面几节课的内容，使用后台线程与Cache机制来加载图片到 ViewPager 与 GridView 组件，并且学习处理并发与配置改变问题。(<em>并发问题的处理确实需要好好考虑，大多数App都没有仔细考虑到这个问题，会导致浪费更多的资源，效率不够</em>)</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/04/26/android-training-graphics-displaying-bitmaps-efficiently-lesson-5/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -222,57 +265,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/04/22/android-training-cloud-syncing-to-the-cloud-lesson-2/">Android Training[Cloud] - 云同步(Lesson 2 - 使用Backup API)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-04-22T18:27:00+08:00" pubdate data-updated="true">Apr 22<span>nd</span>, 2012</time>
-        
-         | <a href="/blog/2012/04/22/android-training-cloud-syncing-to-the-cloud-lesson-2/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Using the Backup API[使用Backup API]</h2>
-
-<p>当一个用户购买了新的设备或者是把当前的设备做了的恢复出厂设置的操作，用户希望在进行初始化设置的时候，Google Play能够把之前安装过的应用恢复到设备上。默认情况是，那些操作不会发生，用户之前的设置与数据都会丢失.</p>
-
-<p>对于一些数据量相对较少的情况下(通常少于1MB)，例如用户偏好设置，笔记，游戏分数或者是其他的一些状态数据，可以使用Backup API来提供一个轻量级的解决方案。这一课会介绍如何使用Backup API.</p>
-
-<h2>(1)Register for the Android Backup Service[为Android备份服务进行注册]</h2>
-
-<p>这一课会使用Android Backup Service, 它需要进行注册. 点击这个链接进行注册:<a href="http://code.google.com/android/backup/signup.html">register here</a>. 注册成功后，服务器会提供一段类似下面的代码用来添加到程序的Manifest文件中:</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/04/22/android-training-cloud-syncing-to-the-cloud-lesson-2/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/12/">&larr; Older</a>
@@ -288,6 +280,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/04/14/android-training-running-background-service-lesson-1/">Android Training - 使用IntentService执行任务(Lesson 1 - 创建IntentService)</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2014/04/05/android-notes-06-touch-event-dispatch-process/">Android Notes(06) - Touch事件分发响应机制</a>
@@ -317,19 +313,15 @@
         <a href="/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-1/">Android Training[UI] - 创建自定义的Views(Lesson 1 - 创建一个View类)</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-0/">Android Training[UI] - 创建自定义的Views(Lesson 0 - 章节概览)</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (67)</a></li>
+  <li><a href='/blog/categories/android'>Android (68)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (7)</a></li>
-  <li><a href='/blog/categories/android-training'>Android:training (60)</a></li>
+  <li><a href='/blog/categories/android-training'>Android:training (61)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
 </ul>

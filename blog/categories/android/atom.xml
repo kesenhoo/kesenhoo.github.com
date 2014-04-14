@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android | 胡凯]]></title>
   <link href="http://hukai.me/blog/categories/android/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2014-04-12T11:17:55+08:00</updated>
+  <updated>2014-04-14T18:49:02+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -12,6 +12,94 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training - 使用IntentService执行任务(Lesson 1 - 创建IntentService)]]></title>
+    <link href="http://hukai.me/blog/2014/04/14/android-training-running-background-service-lesson-1/"/>
+    <updated>2014-04-14T18:30:00+08:00</updated>
+    <id>http://hukai.me/blog/2014/04/14/android-training-running-background-service-lesson-1</id>
+    <content type="html"><![CDATA[<p><strong>写在开始：</strong>接下去的一段时间会学习专题《Background Jobs》的几篇文章，演示如何在后台执行任务，以此加速程序的性能并降低能耗的使用。第一章节会学习如何通过发送任务到后台的Service中执行，从而提示UI的表现性能。</p>
+
+<p>除非你特意指定，否则大部分在前台的操作都执行在一个叫做UI Thread的特殊线程中。这可能会导致某些问题，因为耗时操作可能会干扰界面的响应性能。为了避免这样的问题，Android Framework提供了几个类，用来帮助你把那些耗时操作移动到后台线程中执行。那些类中最常用的就是<a href="http://developer.android.com/reference/android/app/IntentService.html">IntentService</a>.</p>
+
+<p>这一章节会讲到如何实现一个IntentService，向它发送任务并反馈它的结果给其他模块。</p>
+
+<h2>0)概述</h2>
+
+<p>IntentService为执行一个操作在单个后台线程，提供了一种直接的实现方式。它可以处理一个长时间操作的任务并确保不影响到UI的响应性。而且IntentService的执行并不受UI的生命周期的影响。</p>
+
+<p>IntentService有下面几个局限性：</p>
+
+<ul>
+<li>不可以直接和UI做交互。为了把他执行的结果体现在UI上，需要发送给Activity。</li>
+<li>工作任务队列是顺序执行的，如果一个任务正在IntentService中执行，此时你再发送一个任务请求，这个任务会一直等待直到前面一个任务执行完毕。</li>
+<li>正在执行的任务无法打断。</li>
+</ul>
+
+
+<p>然而，在大多数情况下，IntentService都是简单后台任务操作的理想选择。</p>
+
+<p>这节课会演示如何创建继承的IntentService。同样也会演示如何创建必须实现的回调<a href="http://developer.android.com/reference/android/app/IntentService.html#onHandleIntent(android.content.Intent">onHandleIntent()</a>)。最后，还会解释如何在manifest文件中定义这个IntentService。</p>
+
+<!-- More -->
+
+
+<h2>1)创建IntentService</h2>
+
+<p>为了给你的app创建一个IntentService，定义一个类，extends IntentService，在里面override onHandleIntent()方法，如下所示：</p>
+
+<p>```java
+public class RSSPullService extends IntentService {</p>
+
+<pre><code>@Override
+protected void onHandleIntent(Intent workIntent) {
+    // Gets data from the incoming Intent
+    String dataString = workIntent.getDataString();
+    ...
+    // Do work here, based on the contents of dataString
+    ...
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>注意一个普通Service组件的其他回调，例如<code>onStartCommand()</code>会被IntentService自动触发。在IntentService中，要避免override那些回调。</p>
+
+<h2>2)在Manifest文件中定义IntentService</h2>
+
+<p>IntentService需要在manifest文件的<application>标签下进行定义，如下所示：</p>
+
+<p>```xml
+&lt;application</p>
+
+<pre><code>    android:icon="@drawable/icon"
+    android:label="@string/app_name"&gt;
+    ...
+    &lt;!--
+        Because android:exported is set to "false",
+        the service is only available to this app.
+    --&gt;
+    &lt;service
+        android:name=".RSSPullService"
+        android:exported="false"/&gt;
+    ...
+</code></pre>
+
+<p><application/>
+```</p>
+
+<p><code>android:name</code>属性指明了IntentService的名字。</p>
+
+<p>注意<service>标签并没有包含任何intent filter。因为发送任务给IntentService的Activity需要使用显式Intent，所以不需要filter。这也意味着只有在同一个app或者其他使用同一个UserID的组件才能够访问到这个Service。</p>
+
+<p>至此，已经学习了IntentService的基础知识，下节会学习如何发送任务到IntentService。</p>
+
+<hr />
+
+<p><strong>学习自<a href="http://developer.android.com/training/run-background-service/create-service.html">http://developer.android.com/training/run-background-service/create-service.html</a>,欢迎交流讨论</strong></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Android Notes(06) - Touch事件分发响应机制]]></title>
@@ -696,165 +784,6 @@ animate().rotation(targetAngle).setDuration(ANIM_DURATION).start();
 <hr />
 
 <p><strong>学习自：<a href="http://developer.android.com/training/custom-views/making-interactive.html">http://developer.android.com/training/custom-views/making-interactive.html</a>，请多指教，谢谢！</strong><br/>
-<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Training[UI] - 创建自定义的Views(Lesson 2 - 自定义Drawing)]]></title>
-    <link href="http://hukai.me/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-2/"/>
-    <updated>2013-06-30T20:15:00+08:00</updated>
-    <id>http://hukai.me/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-2</id>
-    <content type="html"><![CDATA[<p>自定义view的最重要的一个部分是自定义它的外观。根据你的程序的需求，自定义绘制动作可能简单也可能很复杂。这节课会演示一些最常见的操作。</p>
-
-<h2>Override onDraw()</h2>
-
-<p>重绘一个自定义的view的最重要的步骤是重写onDraw()方法。onDraw()的参数是一个Canvas对象。Canvas类定义了绘制文本，线条，图像与许多其他图形的方法。你可以在onDraw方法里面使用那些方法来创建你的UI。</p>
-
-<p>在你调用任何绘制方法之前，你需要创建一个Paint对象。</p>
-
-<!-- more -->
-
-
-<h2>Create Drawing Objects</h2>
-
-<p>android.graphics framework把绘制定义为下面两类:</p>
-
-<ul>
-<li>绘制什么，由Canvas控制</li>
-<li>如何绘制，由Paint控制</li>
-</ul>
-
-
-<p>例如Canvas提供绘制一条直线的方法，Paint提供直线颜色。所以在绘制之前，你需要创建一个或者多个Paint对象。
-```java
-private void init() {
-   mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-   mTextPaint.setColor(mTextColor);
-   if (mTextHeight == 0) {</p>
-
-<pre><code>   mTextHeight = mTextPaint.getTextSize();
-</code></pre>
-
-<p>   } else {</p>
-
-<pre><code>   mTextPaint.setTextSize(mTextHeight);
-</code></pre>
-
-<p>   }</p>
-
-<p>   mPiePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-   mPiePaint.setStyle(Paint.Style.FILL);
-   mPiePaint.setTextSize(mTextHeight);</p>
-
-<p>   mShadowPaint = new Paint(0);
-   mShadowPaint.setColor(0xff101010);
-   mShadowPaint.setMaskFilter(new BlurMaskFilter(8, BlurMaskFilter.Blur.NORMAL));</p>
-
-<p>   ...
-```
-刚开始就创建对象是一个重要的优化技巧。Views会被频繁的重新绘制，初始化许多绘制对象需要花费昂贵的代价。在onDraw方法里面创建绘制对象会严重影响到性能并使得你的UI显得卡顿。</p>
-
-<h2>Handle Layout Events</h2>
-
-<p>为了正确的绘制你的view，你需要知道view的大小。复杂的自定义view通常需要根据在屏幕上的大小与形状执行多次layout计算。你不应该去估算这个view在屏幕上的显示大小。即使只有一个程序会使用你的view，仍然是需要处理屏幕大小不同，密度不同，方向不同所带来的影响。</p>
-
-<p>尽管view有许多方法是用来计算大小的，但是大多数是不需要重写的。如果你的view不需要特别的控制它的大小，唯一需要重写的方法是<a href="http://developer.android.com/reference/android/view/View.html#onSizeChanged(int,%20int,%20int,%20int">onSizeChanged()</a>).</p>
-
-<p>onSizeChanged()，当你的view第一次被赋予一个大小时，或者你的view大小被更改时会被执行。在onSizeChanged方法里面计算位置，间距等其他与你的view大小值。
-```java</p>
-
-<pre><code>   // Account for padding
-   float xpad = (float)(getPaddingLeft() + getPaddingRight());
-   float ypad = (float)(getPaddingTop() + getPaddingBottom());
-
-   // Account for the label
-   if (mShowText) xpad += mTextWidth;
-
-   float ww = (float)w - xpad;
-   float hh = (float)h - ypad;
-
-   // Figure out how big we can make the pie.
-   float diameter = Math.min(ww, hh);
-</code></pre>
-
-<p><code>
-如果你想更加精确的控制你的view的大小，需要重写[onMeasure()](http://developer.android.com/reference/android/view/View.html#onMeasure(int, int))方法。这个方法的参数是View.MeasureSpec，它会告诉你的view的夫控件的大小。那些值被包装成int类型，你可以使用静态方法来获取其中的信息。
-</code>java
-@Override
-protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-   // Try for a width based on our minimum
-   int minw = getPaddingLeft() + getPaddingRight() + getSuggestedMinimumWidth();
-   int w = resolveSizeAndState(minw, widthMeasureSpec, 1);</p>
-
-<p>   // Whatever the width ends up being, ask for a height that would let the pie
-   // get as big as it can
-   int minh = MeasureSpec.getSize(w) - (int)mTextWidth + getPaddingBottom() + getPaddingTop();
-   int h = resolveSizeAndState(MeasureSpec.getSize(w) - (int)mTextWidth, heightMeasureSpec, 0);</p>
-
-<p>   setMeasuredDimension(w, h);
-}
-```
-上面的代码有三个重要的事情需要注意:</p>
-
-<ul>
-<li>计算的过程有把view的padding考虑进去。这个在后面会提到，这部分是view所控制的。</li>
-<li>帮助方法resolveSizeAndState()是用来创建最终的宽高值的。这个方法会通过比较view的需求大小与spec值返回一个合适的View.MeasureSpec值，并传递到onMeasure方法中。</li>
-<li>onMeasure()没有返回值。它通过调用setMeasuredDimension()来获取结果。调用这个方法是强制执行的，如果你遗漏了这个方法，会出现运行时异常。</li>
-</ul>
-
-
-<h2>Draw!</h2>
-
-<p>每个view的onDraw都是不同的，但是有下面一些常见的操作：</p>
-
-<ul>
-<li>绘制文字使用drawText()。指定字体通过调用setTypeface(), 通过setColor()来设置文字颜色.</li>
-<li>绘制基本图形使用drawRect(), drawOval(), drawArc(). 通过setStyle()来指定形状是否需要filled, outlined.</li>
-<li>绘制一些复杂的图形，使用Path类. 通过给Path对象添加直线与曲线, 然后使用drawPath()来绘制图形. 和基本图形一样，paths也可以通过setStyle来设置是outlined, filled, both.</li>
-<li>通过创建LinearGradient对象来定义渐变。调用setShader()来使用LinearGradient。</li>
-<li>通过使用drawBitmap来绘制图片.</li>
-</ul>
-
-
-<p>```java
-protected void onDraw(Canvas canvas) {
-   super.onDraw(canvas);</p>
-
-<p>   // Draw the shadow
-   canvas.drawOval(</p>
-
-<pre><code>       mShadowBounds,
-       mShadowPaint
-</code></pre>
-
-<p>   );</p>
-
-<p>   // Draw the label text
-   canvas.drawText(mData.get(mCurrentItem).mLabel, mTextX, mTextY, mTextPaint);</p>
-
-<p>   // Draw the pie slices
-   for (int i = 0; i &lt; mData.size(); ++i) {</p>
-
-<pre><code>   Item it = mData.get(i);
-   mPiePaint.setShader(it.mShader);
-   canvas.drawArc(mBounds,
-           360 - it.mEndAngle,
-           it.mEndAngle - it.mStartAngle,
-           true, mPiePaint);
-</code></pre>
-
-<p>   }</p>
-
-<p>   // Draw the pointer
-   canvas.drawLine(mTextX, mPointerY, mPointerX, mPointerY, mTextPaint);
-   canvas.drawCircle(mPointerX, mPointerY, mPointerSize, mTextPaint);
-}
-```</p>
-
-<hr />
-
-<p><strong>学习自：<a href="http://developer.android.com/training/custom-views/custom-drawing.html">http://developer.android.com/training/custom-views/custom-drawing.html</a>，请多指教，谢谢！</strong><br/>
 <strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
 ]]></content>
   </entry>
