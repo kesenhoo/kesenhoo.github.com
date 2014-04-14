@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="Manipulating Broadcast Receivers On Demand[按需操控广播接收者] 简单的方法是为我们监测的状态创建一个BroadcastReceiver，并在manifest中为每一个状态进行注册监听。然后， &hellip;">
+  <meta name="description" content="很多App都可以播放音频，因此在播放前如何获取到音频焦点就显得很重要了，这样可以避免同时出现多个声音，Android使用audio focus来节制音频的播放，仅仅是获取到audio focus的App才能够播放音频。 在App开始播放音频之前，它需要经过发出请求[request]->接受请求[ &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,7 +81,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/03/24/android-training-performance-optimiizing-battery-life-lesson-4/">Android Training[Performance] - 优化电池续航能力(Lesson 4 - 判断并监测网络连接状态)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/03/22/android-training-03-managing-audio-playback-lesson-2/">Android Training(03) - 音频播放(Lesson 2 - 管理音频焦点Audio Focus)</a></h1>
     
     
       <p class="meta">
@@ -97,28 +97,24 @@
   
 
 
-<time datetime="2012-03-24T16:37:00+08:00" pubdate data-updated="true">Mar 24<span>th</span>, 2012</time>
+<time datetime="2012-03-22T23:16:00+08:00" pubdate data-updated="true">Mar 22<span>nd</span>, 2012</time>
         
-         | <a href="/blog/2012/03/24/android-training-performance-optimiizing-battery-life-lesson-4/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/03/22/android-training-03-managing-audio-playback-lesson-2/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h2>Manipulating Broadcast Receivers On Demand[按需操控广播接收者]</h2>
+  <div class="entry-content"><p>很多App都可以播放音频，因此在播放前如何获取到音频焦点就显得很重要了，这样可以避免同时出现多个声音，Android使用audio focus来节制音频的播放，仅仅是获取到audio focus的App才能够播放音频。</p>
 
-<p>简单的方法是为我们监测的状态创建一个BroadcastReceiver，并在manifest中为每一个状态进行注册监听。然后，每一个Receiver根据当前设备的状态来简单重新安排下一步执行的任务。[这句话感觉理解有点问题]</p>
-
-<p>上面那个方法的副作用是，设备会在每次收到广播都被唤醒，这有点超出期望，因为有些广播是不希望唤醒设备的。</p>
-
-<p>更好的方法是根据程序运行情况开启或者关闭广播接收者。这样的话，那些在manifest中注册的receivers仅仅会在需要的时候才被激活。</p>
+<p>在App开始播放音频之前，它需要经过发出请求[request]->接受请求[receive]->音频焦点锁定[Audio Focus]的过程。同样，它需要知道如何监听失去音频焦点[lose of audio focus]的事件并进行合适的响应。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/03/24/android-training-performance-optimiizing-battery-life-lesson-4/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/03/22/android-training-03-managing-audio-playback-lesson-2/">Read on &rarr;</a>
     </footer>
   
 
@@ -130,7 +126,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-3/">Android Training[Performance] - 优化电池续航能力(Lesson 3 - 判断并监测网络连接状态)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/03/21/android-training-03-managing-audio-playback-lesson-1/">Android Training(03) - 音频播放(Lesson 1 - 控制app的音量与播放)</a></h1>
     
     
       <p class="meta">
@@ -146,28 +142,27 @@
   
 
 
-<time datetime="2012-03-23T21:09:00+08:00" pubdate data-updated="true">Mar 23<span>rd</span>, 2012</time>
+<time datetime="2012-03-21T23:27:00+08:00" pubdate data-updated="true">Mar 21<span>st</span>, 2012</time>
         
-         | <a href="/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-3/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/03/21/android-training-03-managing-audio-playback-lesson-1/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h2>Determining and Monitoring the Connectivity Status[判断并监测网络连接状态]</h2>
+  <div class="entry-content"><p>如果你的App在播放音频，显然用户能够以预期的方式来控制音频是很重要的。为了保证好的用户体验，同样App能够获取音频焦点是很重要的，这样才能确保不会在同一时刻出现多个App的声音。在学习这个课程后，你将能够创建对硬件音量按钮进行响应的App，当按下音量按钮的时候需要获取到当前音频的焦点，然后以适当的方式改变音量从而进行响应用户的行为。</p>
 
-<p>通常我们会有一些计划的任务，比如重复闹钟，后台定时启动的任务等。但是如果我们的网络没有连接上，那么就没有必要启动那些需要连接网络的任务。我们可以使用ConnectivityManager来检查是否连接上网络，是何种网络。[通过网络的连接状况改变，相应的改变app的行为，减少无谓的操作，从而延长设备的续航能力]</p>
+<hr />
 
-<h2>1)Determine if You Have an Internet Connection[判断当前是否有网络连接]</h2>
-
-<p>显然如果没有网络连接，那么就没有必要做那些需要联网的事情。下面是一个检查是否有网络连接的例子：</p>
+<p>一个好的用户体验是可预期可控的。如果App是在播放音频，那么显然我们需要做到能够通过硬件按钮，软件按钮，蓝牙耳麦等来控制音量。
+同样的，我们需要能够进行play, stop, pause, skip, and previous等动作，并且进行对应的响应。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-3/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/03/21/android-training-03-managing-audio-playback-lesson-1/">Read on &rarr;</a>
     </footer>
   
 
@@ -179,7 +174,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-2/">Android Training[Performance] - 优化电池续航能力(Lesson 2 - 判断设备的停驻模式)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/03/21/android-training-02-improve-layouts-lesson-4/">Android Training(02) - 提升布局文件的性能(Lesson 4 - 使用ViewHolder来提升ListView的性能)</a></h1>
     
     
       <p class="meta">
@@ -195,30 +190,25 @@
   
 
 
-<time datetime="2012-03-23T19:53:00+08:00" pubdate data-updated="true">Mar 23<span>rd</span>, 2012</time>
+<time datetime="2012-03-21T21:20:00+08:00" pubdate data-updated="true">Mar 21<span>st</span>, 2012</time>
         
-         | <a href="/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-2/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/03/21/android-training-02-improve-layouts-lesson-4/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h2>Determining and Monitoring the Docking State and Type[判断并监测设备的停驻状态与类型]</h2>
+  <div class="entry-content"><h2>Making ListView Scrolling Smooth</h2>
 
-<p>在上一课中有这样一句话：In many cases, the act of charging a device is coincident with putting it into a dock.</p>
-
-<p>在很多情况下，为设备充电也是一种设备停驻方式</p>
-
-<p>Android设备能够有好几种停驻状态。包括车载模式，家庭模式与数字对战模拟模式[这个有点奇怪]。停驻状态通常与充电状态是非常密切关联的。</p>
-
-<p>停驻模式会如何影响更新频率这完全取决于app的设置。我们可以选择在桌面模式下频繁的更新数据也可以选择在车载模式下关闭更新操作。相反的，你也可以选择在车载模式下最大化更新交通数据频率。</p>
+<p>使得滚动ListView平滑的关键在与保持APP的UI thread与复杂的操作隔离。确保另起一个Thread来处理Disk IO，network access或者SQL access.
+为了测试AP的状态，可以enable <a href="http://developer.android.com/reference/android/os/StrictMode.html">StrictMode</a>.(Android ICS 4.0上已经默认开启了StrickMode)</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-2/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/03/21/android-training-02-improve-layouts-lesson-4/">Read on &rarr;</a>
     </footer>
   
 
@@ -230,7 +220,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-1/">Android Training[Performance] - 优化电池续航能力(Lesson 1 - 监测设备的电量与充电状态)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/03/21/android-training-02-improve-layouts-lesson-3/">Android Training(02) - 提升布局文件的性能(Lesson 3 - 使用viewStub按需载入视图)</a></h1>
     
     
       <p class="meta">
@@ -246,32 +236,30 @@
   
 
 
-<time datetime="2012-03-23T18:28:00+08:00" pubdate data-updated="true">Mar 23<span>rd</span>, 2012</time>
+<time datetime="2012-03-21T18:47:00+08:00" pubdate data-updated="true">Mar 21<span>st</span>, 2012</time>
         
-         | <a href="/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-1/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/03/21/android-training-02-improve-layouts-lesson-3/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>显然，手持设备的电量需要引起很大的重视。通过这一系列的课程，可以学会如何根据设备电池状态来改变App的某些行为与功能。</p>
+  <div class="entry-content"><h2>Loading Views On Demand</h2>
 
-<p>通过在断开连接时关闭后台服务，在电量减少时减少更新数据的频率等等操作可以在不影响用户体验的前提下，确保App对电池寿命的影响减到最小。</p>
+<p>某些时候，我们需要一些很复杂的视图却仅仅很少用到。如果我们在它仅仅需要的时候再载入，这样可以减少内存的使用并且给用户带来流畅的体验。</p>
 
-<h2>Monitoring the Battery Level and Charging State[监测电池的电量与充电状态]</h2>
+<h2>1)Define a ViewStub</h2>
 
-<p>当你想通过改变后台更新操作的频率来减少对电池寿命的影响，那么先手需要检查当前电量与充电状态。</p>
+<p><a href="http://developer.android.com/reference/android/view/ViewStub.html">ViewStub</a>是一个轻量级的view，没有占有空间，没有花费draw的资源，也没有参与在任何一个layout的计算与绘制里面。</p>
 
-<p>电池的电量与是否在充电状态会影响到一个程序去执行更新的操作。当设备在进行AC充电时，程序做任何操作都不太会受到电量的影响，所以在大多数时候，我们可以在设备充电时做很多想做的事情（刷新数据，下载文件等），相反的，如果设备没有在充电状态，那么我们就需要尽量减少设备的更新操作等来延长电池的续航能力。</p>
-
-<p>同样的，我们可以通过检查电池目前的电量来减少甚至停止一些更新操作。</p>
+<p>创建它仅需要很少的系统资源，而且存留在View的层级也是个比较不花费资源的动作。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/03/23/android-training-performance-optimiizing-battery-life-lesson-1/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/03/21/android-training-02-improve-layouts-lesson-3/">Read on &rarr;</a>
     </footer>
   
 
@@ -295,7 +283,7 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/04/14/android-training-running-background-service-lesson-1/">Android Training - 使用IntentService执行任务(Lesson 1 - 创建IntentService)</a>
+        <a href="/blog/2014/04/14/android-training-18-running-background-service-lesson-1/">Android Training(18) - 使用IntentService执行任务(Lesson 1 - 创建IntentService)</a>
       </li>
     
       <li class="post">
@@ -307,23 +295,23 @@
       </li>
     
       <li class="post">
-        <a href="/blog/2013/10/19/android-training-performance-managing_your_app_memory/">Android Training[Performance] - 管理应用的内存</a>
+        <a href="/blog/2013/10/19/android-training-17-managing_your_app_memory/">Android Training(18) - 管理应用的内存</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-4/">Android Training[UI] - 创建自定义的Views(Lesson 4 - 优化Views)</a>
+        <a href="/blog/2013/08/18/android-training-16-creating-custom-views-lesson-4/">Android Training(16) - 创建自定义的Views(Lesson 4 - 优化Views)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-3/">Android Training[UI] - 创建自定义的Views(Lesson 3 - 处理View的交互性)</a>
+        <a href="/blog/2013/08/18/android-training-16-creating-custom-views-lesson-3/">Android Training(16) - 创建自定义的Views(Lesson 3 - 处理View的交互性)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-2/">Android Training[UI] - 创建自定义的Views(Lesson 2 - 自定义Drawing)</a>
+        <a href="/blog/2013/06/30/android-training-16-creating-custom-views-lesson-2/">Android Training(16) - 创建自定义的Views(Lesson 2 - 自定义Drawing)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-1/">Android Training[UI] - 创建自定义的Views(Lesson 1 - 创建一个View类)</a>
+        <a href="/blog/2013/06/30/android-training-16-creating-custom-views-lesson-1/">Android Training(16) - 创建自定义的Views(Lesson 1 - 创建一个View类)</a>
       </li>
     
   </ul>

@@ -4,7 +4,7 @@
   <title><![CDATA[胡凯]]></title>
   <link href="http://hukai.me/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2014-04-14T18:49:02+08:00</updated>
+  <updated>2014-04-15T00:21:36+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -14,10 +14,10 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Android Training - 使用IntentService执行任务(Lesson 1 - 创建IntentService)]]></title>
-    <link href="http://hukai.me/blog/2014/04/14/android-training-running-background-service-lesson-1/"/>
+    <title type="html"><![CDATA[Android Training(18) - 使用IntentService执行任务(Lesson 1 - 创建IntentService)]]></title>
+    <link href="http://hukai.me/blog/2014/04/14/android-training-18-running-background-service-lesson-1/"/>
     <updated>2014-04-14T18:30:00+08:00</updated>
-    <id>http://hukai.me/blog/2014/04/14/android-training-running-background-service-lesson-1</id>
+    <id>http://hukai.me/blog/2014/04/14/android-training-18-running-background-service-lesson-1</id>
     <content type="html"><![CDATA[<p><strong>写在开始：</strong>接下去的一段时间会学习专题《Background Jobs》的几篇文章，演示如何在后台执行任务，以此加速程序的性能并降低能耗的使用。第一章节会学习如何通过发送任务到后台的Service中执行，从而提示UI的表现性能。</p>
 
 <p>除非你特意指定，否则大部分在前台的操作都执行在一个叫做UI Thread的特殊线程中。这可能会导致某些问题，因为耗时操作可能会干扰界面的响应性能。为了避免这样的问题，Android Framework提供了几个类，用来帮助你把那些耗时操作移动到后台线程中执行。那些类中最常用的就是<a href="http://developer.android.com/reference/android/app/IntentService.html">IntentService</a>.</p>
@@ -911,10 +911,10 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training[Performance] - 管理应用的内存]]></title>
-    <link href="http://hukai.me/blog/2013/10/19/android-training-performance-managing_your_app_memory/"/>
+    <title type="html"><![CDATA[Android Training(18) - 管理应用的内存]]></title>
+    <link href="http://hukai.me/blog/2013/10/19/android-training-17-managing_your_app_memory/"/>
     <updated>2013-10-19T15:18:00+08:00</updated>
-    <id>http://hukai.me/blog/2013/10/19/android-training-performance-managing_your_app_memory</id>
+    <id>http://hukai.me/blog/2013/10/19/android-training-17-managing_your_app_memory</id>
     <content type="html"><![CDATA[<p>Random Access Memory(RAM)在任何软件开发环境中都是一个很宝贵的资源。这一点在物理内存通常很有限的移动操作系统上，显得尤为突出。尽管Android的Dalvik虚拟机扮演了常规的垃圾回收的角色，但这并不意味着你可以忽视app的内存分配与释放的时机与地点。</p>
 
 <p>为了GC能够从你的app中及时回收内存，你需要避免Memory Leaks(这通常由引用的不能释放而导致)并且在适当的时机(下面会讲到的lifecycle callbacks)来释放引用。对于大多数apps来说，Dalvik的GC会自动把离开活动线程的对象进行回收。</p>
@@ -1125,10 +1125,10 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training[UI] - 创建自定义的Views(Lesson 4 - 优化Views)]]></title>
-    <link href="http://hukai.me/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-4/"/>
+    <title type="html"><![CDATA[Android Training(16) - 创建自定义的Views(Lesson 4 - 优化Views)]]></title>
+    <link href="http://hukai.me/blog/2013/08/18/android-training-16-creating-custom-views-lesson-4/"/>
     <updated>2013-08-18T17:30:00+08:00</updated>
-    <id>http://hukai.me/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-4</id>
+    <id>http://hukai.me/blog/2013/08/18/android-training-16-creating-custom-views-lesson-4</id>
     <content type="html"><![CDATA[<p>前面的课程学习到了如何创建设计良好的View，并且能够使之在手势与状态切换时得到正确的反馈。下面要介绍的是如何使得view能够执行更快。为了避免UI显得卡顿，你必须确保动画能够保持在60fps以上。</p>
 
 <!-- more -->
@@ -1227,10 +1227,10 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training[UI] - 创建自定义的Views(Lesson 3 - 处理View的交互性)]]></title>
-    <link href="http://hukai.me/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-3/"/>
+    <title type="html"><![CDATA[Android Training(16) - 创建自定义的Views(Lesson 3 - 处理View的交互性)]]></title>
+    <link href="http://hukai.me/blog/2013/08/18/android-training-16-creating-custom-views-lesson-3/"/>
     <updated>2013-08-18T15:01:00+08:00</updated>
-    <id>http://hukai.me/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-3</id>
+    <id>http://hukai.me/blog/2013/08/18/android-training-16-creating-custom-views-lesson-3</id>
     <content type="html"><![CDATA[<p>绘制UI仅仅是创建自定义View的一部分。你还需要使得你的View能够以模拟现实世界的方式来进行反馈。Objects应该总是与现实情景能够保持一致。例如，图片不应该突然消失又从另外一个地方出现，因为在现实世界里面不会发生那样的事情。正确的应该是，图片从一个地方移动到另外一个地方。</p>
 
 <p>用户应该可以感受到UI上的微小变化，并对这些变化反馈到现实世界中。例如，当用户做fling(迅速滑动)的动作，应该再滑动开始与结束的时候给用户一定的反馈。</p>
@@ -1412,10 +1412,10 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training[UI] - 创建自定义的Views(Lesson 2 - 自定义Drawing)]]></title>
-    <link href="http://hukai.me/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-2/"/>
+    <title type="html"><![CDATA[Android Training(16) - 创建自定义的Views(Lesson 2 - 自定义Drawing)]]></title>
+    <link href="http://hukai.me/blog/2013/06/30/android-training-16-creating-custom-views-lesson-2/"/>
     <updated>2013-06-30T20:15:00+08:00</updated>
-    <id>http://hukai.me/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-2</id>
+    <id>http://hukai.me/blog/2013/06/30/android-training-16-creating-custom-views-lesson-2</id>
     <content type="html"><![CDATA[<p>自定义view的最重要的一个部分是自定义它的外观。根据你的程序的需求，自定义绘制动作可能简单也可能很复杂。这节课会演示一些最常见的操作。</p>
 
 <h2>Override onDraw()</h2>
@@ -1631,10 +1631,10 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training[UI] - 创建自定义的Views(Lesson 1 - 创建一个View类)]]></title>
-    <link href="http://hukai.me/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-1/"/>
+    <title type="html"><![CDATA[Android Training(16) - 创建自定义的Views(Lesson 1 - 创建一个View类)]]></title>
+    <link href="http://hukai.me/blog/2013/06/30/android-training-16-creating-custom-views-lesson-1/"/>
     <updated>2013-06-30T18:47:00+08:00</updated>
-    <id>http://hukai.me/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-1</id>
+    <id>http://hukai.me/blog/2013/06/30/android-training-16-creating-custom-views-lesson-1</id>
     <content type="html"><![CDATA[<p>设计良好的类总是相似的。它使用一个好用的接口来封装一个特定的功能，它有效的使用CPU与内存，等等。为了成为一个设计良好的类，自定义的view应该:</p>
 
 <ul>
@@ -1828,10 +1828,10 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training[UI] - 创建自定义的Views(Lesson 0 - 章节概览)]]></title>
-    <link href="http://hukai.me/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-0/"/>
+    <title type="html"><![CDATA[Android Training(16) - 创建自定义的Views(Lesson 0 - 章节概览)]]></title>
+    <link href="http://hukai.me/blog/2013/06/30/android-training-16-creating-custom-views-lesson-0/"/>
     <updated>2013-06-30T18:23:00+08:00</updated>
-    <id>http://hukai.me/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-0</id>
+    <id>http://hukai.me/blog/2013/06/30/android-training-16-creating-custom-views-lesson-0</id>
     <content type="html"><![CDATA[<p>Android的framework有大量的Views用来与用户进行交互并显示不同种类的数据。但是有时候你的程序有个特殊的需求，而Android内置的views组件并不能实现。这一章节会演示如何创建你自己的views，并使得它们是robust与reusable的。</p>
 
 <p><strong>Dependencies and Prerequisites</strong></p>
@@ -1881,10 +1881,10 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training[Graphics] - 高效地显示Bitmap(Lesson 4 - 优化Bitmap的内存使用)]]></title>
-    <link href="http://hukai.me/blog/2013/05/19/android-training-graphics-displaying-bitmaps-efficiently-lesson-4/"/>
+    <title type="html"><![CDATA[Android Training(09) - 高效地显示Bitmap(Lesson 4 - 优化Bitmap的内存使用)]]></title>
+    <link href="http://hukai.me/blog/2013/05/19/android-training-09-displaying-bitmaps-efficiently-lesson-4/"/>
     <updated>2013-05-19T14:43:00+08:00</updated>
-    <id>http://hukai.me/blog/2013/05/19/android-training-graphics-displaying-bitmaps-efficiently-lesson-4</id>
+    <id>http://hukai.me/blog/2013/05/19/android-training-09-displaying-bitmaps-efficiently-lesson-4</id>
     <content type="html"><![CDATA[<p>作为缓存Bitmaps的进一步延伸, 为了促进GC与bitmap的重用，你还有一些特定的事情可以做. 推荐的策略会根据Android的版本不同而有所差异. <a href="http://developer.android.com/shareables/training/BitmapFun.zip">BitmapFun</a>的示例程序会演示如何设计你的程序使得能够在不同的Android平台上高效的运行.</p>
 
 <p>我们首先要知道Android管理bitmap memory的演变进程:</p>
@@ -2780,10 +2780,10 @@ Flags用来表示，如何启动一个activity(例如，指定activity应该属�
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training[Performance] - 代码性能优化小技巧]]></title>
-    <link href="http://hukai.me/blog/2013/04/06/android-training-performance-tips/"/>
+    <title type="html"><![CDATA[Android Training(15) - 代码性能优化小技巧]]></title>
+    <link href="http://hukai.me/blog/2013/04/06/android-training-15-performance-tips/"/>
     <updated>2013-04-06T18:27:00+08:00</updated>
-    <id>http://hukai.me/blog/2013/04/06/android-training-performance-tips</id>
+    <id>http://hukai.me/blog/2013/04/06/android-training-15-performance-tips</id>
     <content type="html"><![CDATA[<h2>Performance Tips</h2>
 
 <p><img src="http://hukai.me/images/articles/performance_improve.jpg"></p>
@@ -4999,10 +4999,10 @@ Android提供了下面三个方法来解决这个问题：</p>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training[Multimedia] - 捕获照片(Lesson 3 - 直接操控相机)]]></title>
-    <link href="http://hukai.me/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-3/"/>
+    <title type="html"><![CDATA[Android Training(14) - 捕获照片(Lesson 3 - 直接操控相机)]]></title>
+    <link href="http://hukai.me/blog/2012/12/18/android-training-14-capturing-photos-lesson-3/"/>
     <updated>2012-12-18T23:59:00+08:00</updated>
-    <id>http://hukai.me/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-3</id>
+    <id>http://hukai.me/blog/2012/12/18/android-training-14-capturing-photos-lesson-3</id>
     <content type="html"><![CDATA[<p>在这一节课，我们会讨论如何通过使用framework的APIs来直接控制相机的硬件。直接控制设备的相机，相比起拍照与录像来说，要复杂一些。然而，如果你想要创建一个专业的特殊的相机程序，这节课会演示这部分内容。</p>
 
 <h2>Open the Camera Object(打开相机对象)</h2>
@@ -5332,10 +5332,10 @@ Android提供了下面三个方法来解决这个问题：</p>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training[Multimedia] - 捕获照片(Lesson 2 - 简单的录像动作)]]></title>
-    <link href="http://hukai.me/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-2/"/>
+    <title type="html"><![CDATA[Android Training(14) - 捕获照片(Lesson 2 - 简单的录像动作)]]></title>
+    <link href="http://hukai.me/blog/2012/12/18/android-training-14-capturing-photos-lesson-2/"/>
     <updated>2012-12-18T23:21:00+08:00</updated>
-    <id>http://hukai.me/blog/2012/12/18/android-training-multimedia-capturing-photos-lesson-2</id>
+    <id>http://hukai.me/blog/2012/12/18/android-training-14-capturing-photos-lesson-2</id>
     <content type="html"><![CDATA[<p>这节课会介绍如何使用现有的Camera程序来录制一个视频。和拍照一样，我们没有必要去重新发明录像程序。大多数的Android程序都有自带Camera来进行录像。(<em>这一课的内容大多数与前面一课类似，简要带过，一些细节不赘述了</em>)</p>
 
 <h2>Request Camera Permission [请求权限]</h2>

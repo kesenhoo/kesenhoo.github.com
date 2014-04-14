@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="Redundant Downloads are Redundant[重复下载是冗余的] 减少下载的最基本方法是仅仅下载那些你需要的。从数据的角度看，我们可以通过传递类似上次更新时间这样的参数来制定查询数据的条件。同样，在下载图片的时候，server那边最好能够减少图片的大小， &hellip;">
+  <meta name="description" content="Determining and Monitoring the Connectivity Status[判断并监测网络连接状态] 通常我们会有一些计划的任务，比如重复闹钟，后台定时启动的任务等。但是如果我们的网络没有连接上，那么就没有必要启动那些需要连接网络的任务。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,7 +81,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-3/">Android Training[Connectivity] - 优化下载效率(Lesson 3 - 使用缓存来避免重复下载)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/03/23/android-training-04-optimiizing-battery-life-lesson-3/">Android Training(04) - 优化电池续航能力(Lesson 3 - 判断并监测网络连接状态)</a></h1>
     
     
       <p class="meta">
@@ -97,28 +97,28 @@
   
 
 
-<time datetime="2012-03-26T17:59:00+08:00" pubdate data-updated="true">Mar 26<span>th</span>, 2012</time>
+<time datetime="2012-03-23T21:09:00+08:00" pubdate data-updated="true">Mar 23<span>rd</span>, 2012</time>
         
-         | <a href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-3/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/03/23/android-training-04-optimiizing-battery-life-lesson-3/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h2>Redundant Downloads are Redundant[重复下载是冗余的]</h2>
+  <div class="entry-content"><h2>Determining and Monitoring the Connectivity Status[判断并监测网络连接状态]</h2>
 
-<p>减少下载的最基本方法是仅仅下载那些你需要的。从数据的角度看，我们可以通过传递类似上次更新时间这样的参数来制定查询数据的条件。同样，在下载图片的时候，server那边最好能够减少图片的大小，而不是让我们下载完整大小的图片。</p>
+<p>通常我们会有一些计划的任务，比如重复闹钟，后台定时启动的任务等。但是如果我们的网络没有连接上，那么就没有必要启动那些需要连接网络的任务。我们可以使用ConnectivityManager来检查是否连接上网络，是何种网络。[通过网络的连接状况改变，相应的改变app的行为，减少无谓的操作，从而延长设备的续航能力]</p>
 
-<h2>1.Cache Files Locally[缓存文件到本地]</h2>
+<h2>1)Determine if You Have an Internet Connection[判断当前是否有网络连接]</h2>
 
-<p>避免下载重复的数据是很重要的。可以使用缓存机制来处理这个问题。缓存static的资源，例如完整的图片。这些缓存的资源需要分开存放。为了保证app不会因为缓存而导致显示的是旧数据，请从缓存中获取最新的数据，当数据过期的时候，会提示进行刷新。</p>
+<p>显然如果没有网络连接，那么就没有必要做那些需要联网的事情。下面是一个检查是否有网络连接的例子：</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-3/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/03/23/android-training-04-optimiizing-battery-life-lesson-3/">Read on &rarr;</a>
     </footer>
   
 
@@ -130,7 +130,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-2/">Android Training[Connectivity] - 优化下载效率(Lesson 2 - 调整更新的频率[C2DM与退避算法])</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/03/23/android-training-04-optimiizing-battery-life-lesson-2/">Android Training(04) - 优化电池续航能力(Lesson 2 - 判断设备的停驻模式)</a></h1>
     
     
       <p class="meta">
@@ -146,32 +146,30 @@
   
 
 
-<time datetime="2012-03-26T16:51:00+08:00" pubdate data-updated="true">Mar 26<span>th</span>, 2012</time>
+<time datetime="2012-03-23T19:53:00+08:00" pubdate data-updated="true">Mar 23<span>rd</span>, 2012</time>
         
-         | <a href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-2/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/03/23/android-training-04-optimiizing-battery-life-lesson-2/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h2>Minimizing the Effect of Regular Updates[最小化定期更新操作的副作用]</h2>
+  <div class="entry-content"><h2>Determining and Monitoring the Docking State and Type[判断并监测设备的停驻状态与类型]</h2>
 
-<p>最佳的定时更新频率是不确定的，通常由设备状态，网络连接状态，用户行为与用户定义明确的偏好而决定。</p>
+<p>在上一课中有这样一句话：In many cases, the act of charging a device is coincident with putting it into a dock.</p>
 
-<p><a href="http://developer.android.com/training/monitoring-device-state/index.html">Optimizing Battery Life</a>这一章有讨论如何根据设备状态来修改更新频率。里面介绍了当断开网络连接的时候去关闭后台服务，在电量比较低的时候减少更新的频率。</p>
+<p>在很多情况下，为设备充电也是一种设备停驻方式</p>
 
-<p>这一课会介绍更新频率是多少才会使得更新操作对无线电状态机的影响最小。(C2DM与指数退避算法的使用)</p>
+<p>Android设备能够有好几种停驻状态。包括车载模式，家庭模式与数字对战模拟模式[这个有点奇怪]。停驻状态通常与充电状态是非常密切关联的。</p>
 
-<h2>Use Google Cloud Messaging as an Alternative to Polling[使用C2DM作为轮询方式之一]</h2>
-
-<p>关于<code>Android Cloud to Device Messaging</code> (C2DM)详情 ,请参考:<a href="http://code.google.com/intl/zh-CN/android/c2dm/">http://code.google.com/intl/zh-CN/android/c2dm/</a></p>
+<p>停驻模式会如何影响更新频率这完全取决于app的设置。我们可以选择在桌面模式下频繁的更新数据也可以选择在车载模式下关闭更新操作。相反的，你也可以选择在车载模式下最大化更新交通数据频率。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-2/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/03/23/android-training-04-optimiizing-battery-life-lesson-2/">Read on &rarr;</a>
     </footer>
   
 
@@ -183,7 +181,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-4/">Android Training[Connectivity] - 优化下载效率(Lesson 4 - 根据网络类型来切换下载模式)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/03/23/android-training-04-optimiizing-battery-life-lesson-1/">Android Training(04) - 优化电池续航能力(Lesson 1 - 监测设备的电量与充电状态)</a></h1>
     
     
       <p class="meta">
@@ -199,29 +197,32 @@
   
 
 
-<time datetime="2012-03-26T00:00:00+08:00" pubdate data-updated="true">Mar 26<span>th</span>, 2012</time>
+<time datetime="2012-03-23T18:28:00+08:00" pubdate data-updated="true">Mar 23<span>rd</span>, 2012</time>
         
-         | <a href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-4/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/03/23/android-training-04-optimiizing-battery-life-lesson-1/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h2>Modifying your Download Patterns Based on the Connectivity Type</h2>
+  <div class="entry-content"><p>显然，手持设备的电量需要引起很大的重视。通过这一系列的课程，可以学会如何根据设备电池状态来改变App的某些行为与功能。</p>
 
-<p>并不是所有的网络类型(Wi-Fi,3G,2G,etc)对电量的消耗是同等的。不仅仅Wi-Fi电波比无线电波消耗的电量要少很多，而且不同的无线电波(3G,2G,LTE……)也存在使用不同电量的区别。</p>
+<p>通过在断开连接时关闭后台服务，在电量减少时减少更新数据的频率等等操作可以在不影响用户体验的前提下，确保App对电池寿命的影响减到最小。</p>
 
-<h2>1.Use Wi-Fi[使用Wi-Fi]</h2>
+<h2>Monitoring the Battery Level and Charging State[监测电池的电量与充电状态]</h2>
 
-<p>在大多数情况下，Wi-Fi电波会在使用相对较低的电量的情况下提供一个相对较大的带宽。因此，我们需要努力争取尽量使用Wi-Fi来传递数据。
-我们可以使用Broadcast Receiver来监听当网络连接切换为Wi-Fi，这个时候我们可以进行大量的数据传递操作，例如下载，执行定时的更新操作，甚至是在这个时候加大更新的频率。这些内容都可以在前面的课程中找到。</p>
+<p>当你想通过改变后台更新操作的频率来减少对电池寿命的影响，那么先手需要检查当前电量与充电状态。</p>
+
+<p>电池的电量与是否在充电状态会影响到一个程序去执行更新的操作。当设备在进行AC充电时，程序做任何操作都不太会受到电量的影响，所以在大多数时候，我们可以在设备充电时做很多想做的事情（刷新数据，下载文件等），相反的，如果设备没有在充电状态，那么我们就需要尽量减少设备的更新操作等来延长电池的续航能力。</p>
+
+<p>同样的，我们可以通过检查电池目前的电量来减少甚至停止一些更新操作。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/03/26/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-4/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/03/23/android-training-04-optimiizing-battery-life-lesson-1/">Read on &rarr;</a>
     </footer>
   
 
@@ -233,7 +234,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/03/25/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-1/">Android Training[Connectivity] - 优化下载效率(Lesson 1 - 用有效率的网络访问方式来优化下载)</a></h1>
+      <h1 class="entry-title"><a href="/blog/2012/03/23/android-training-03-managing-audio-playback-lesson-3/">Android Training(03) - 音频播放(Lesson 3 - 音频设备的相关问题)</a></h1>
     
     
       <p class="meta">
@@ -249,39 +250,23 @@
   
 
 
-<time datetime="2012-03-25T16:54:00+08:00" pubdate data-updated="true">Mar 25<span>th</span>, 2012</time>
+<time datetime="2012-03-23T15:28:00+08:00" pubdate data-updated="true">Mar 23<span>rd</span>, 2012</time>
         
-         | <a href="/blog/2012/03/25/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-1/#disqus_thread">Comments</a>
+         | <a href="/blog/2012/03/23/android-training-03-managing-audio-playback-lesson-3/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>在这一章，我们将学习为了最小化某些操作对电量的影响是如何处理下载，网络连接，尤其是无线电连接的。
-下面几节课会演示了如何使用缓存caching，轮询polling，预取prefetching等技术来计划与执行下载操作。
-我们还会学习无线电波的power-use属性配置是如何影响我们对于在何时，用什么，以何种方式来传输数据的选择。
-当然这些选择是为了最小化对电池寿命的影响。</p>
-
-<p><strong>Dependencies and prerequisites</strong><br/>
-Android 2.0 (API Level 5) or higher</p>
-
-<p><strong>You should also read</strong><br/>
-<a href="http://developer.android.com/training/monitoring-device-state/index.html">Optimizing Battery Life</a></p>
-
-<h2>Lessons</h2>
-
-<ul>
-<li><strong>Optimizing Downloads for Efficient Network Access[使用有效的网络连接方式来最优化下载]</strong><br/>
-This lesson introduces the wireless radio state machine, explains how your app’s connectivity model interacts with it, and how you can minimize your data connection and use prefetching and bundling to minimize the battery drain associated with your data transfers.</li>
-</ul>
-
+  <div class="entry-content"><p>用户在播放音乐的时候有多个选择，可以使用内置的扬声器，有线耳机或者是支持A2DP的蓝牙耳机。
+【补充：A2DP全名是Advanced Audio Distribution Profile 蓝牙音频传输模型协定! A2DP是能够采用耳机内的芯片来堆栈数据，达到声音的高清晰度。有A2DP的耳机就是蓝牙立体声耳机。声音能达到44.1kHz，一般的耳机只能达到8kHz。如果手机支持蓝牙，只要装载A2DP协议，就能使用A2DP耳机了。还有消费者看到技术参数提到蓝牙V1.0 V1.1 V1.2 V2.0——这些是指蓝牙的技术版本，是指通过蓝牙传输的速度，他们是否支持A2DP具体要看蓝牙产品制造商是否使用这个技术。来自<a href="http://baike.baidu.com/view/551149.htm">百度百科</a>】</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/2012/03/25/android-training-connectivity-transferring-data-without-draining-the-battery-lesson-1/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2012/03/23/android-training-03-managing-audio-playback-lesson-3/">Read on &rarr;</a>
     </footer>
   
 
@@ -305,7 +290,7 @@ This lesson introduces the wireless radio state machine, explains how your app�
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/04/14/android-training-running-background-service-lesson-1/">Android Training - 使用IntentService执行任务(Lesson 1 - 创建IntentService)</a>
+        <a href="/blog/2014/04/14/android-training-18-running-background-service-lesson-1/">Android Training(18) - 使用IntentService执行任务(Lesson 1 - 创建IntentService)</a>
       </li>
     
       <li class="post">
@@ -317,23 +302,23 @@ This lesson introduces the wireless radio state machine, explains how your app�
       </li>
     
       <li class="post">
-        <a href="/blog/2013/10/19/android-training-performance-managing_your_app_memory/">Android Training[Performance] - 管理应用的内存</a>
+        <a href="/blog/2013/10/19/android-training-17-managing_your_app_memory/">Android Training(18) - 管理应用的内存</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-4/">Android Training[UI] - 创建自定义的Views(Lesson 4 - 优化Views)</a>
+        <a href="/blog/2013/08/18/android-training-16-creating-custom-views-lesson-4/">Android Training(16) - 创建自定义的Views(Lesson 4 - 优化Views)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2013/08/18/android-training-ui-creating-custom-views-lesson-3/">Android Training[UI] - 创建自定义的Views(Lesson 3 - 处理View的交互性)</a>
+        <a href="/blog/2013/08/18/android-training-16-creating-custom-views-lesson-3/">Android Training(16) - 创建自定义的Views(Lesson 3 - 处理View的交互性)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-2/">Android Training[UI] - 创建自定义的Views(Lesson 2 - 自定义Drawing)</a>
+        <a href="/blog/2013/06/30/android-training-16-creating-custom-views-lesson-2/">Android Training(16) - 创建自定义的Views(Lesson 2 - 自定义Drawing)</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2013/06/30/android-training-ui-creating-custom-views-lesson-1/">Android Training[UI] - 创建自定义的Views(Lesson 1 - 创建一个View类)</a>
+        <a href="/blog/2013/06/30/android-training-16-creating-custom-views-lesson-1/">Android Training(16) - 创建自定义的Views(Lesson 1 - 创建一个View类)</a>
       </li>
     
   </ul>
