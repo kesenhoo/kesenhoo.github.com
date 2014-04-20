@@ -367,12 +367,24 @@
         <lastmod>2014-04-15T00:14:29+08:00</lastmod>
     </url>
     <url>
+        <loc>
+            http://hukai.me/blog/2014/04/20/android-training-18-running-background-service-lesson-2/
+        </loc>
+        <lastmod>2014-04-20T21:10:39+08:00</lastmod>
+    </url>
+    <url>
+        <loc>
+            http://hukai.me/blog/2014/04/20/android-training-18-running-background-service-lesson-3/
+        </loc>
+        <lastmod>2014-04-20T22:01:37+08:00</lastmod>
+    </url>
+    <url>
         <loc>http://hukai.me/404.html</loc>
         <lastmod>2014-04-10T23:47:10+08:00</lastmod>
     </url>
     <url>
         <loc>http://hukai.me/about/</loc>
-        <lastmod>2014-04-18T20:13:12+08:00</lastmod>
+        <lastmod>2014-04-20T22:01:37+08:00</lastmod>
     </url>
     <url>
         <loc>
@@ -382,10 +394,10 @@
     </url>
     <url>
         <loc>http://hukai.me/blog/archives/</loc>
-        <lastmod>2014-04-18T20:13:12+08:00</lastmod>
+        <lastmod>2014-04-20T22:01:37+08:00</lastmod>
     </url>
     <url>
         <loc>http://hukai.me/</loc>
-        <lastmod>2014-04-18T20:13:12+08:00</lastmod>
+        <lastmod>2014-04-20T22:01:37+08:00</lastmod>
     </url>
 </urlset>

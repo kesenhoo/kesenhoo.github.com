@@ -4,7 +4,7 @@
   <title><![CDATA[胡凯]]></title>
   <link href="http://hukai.me/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2014-04-18T20:13:40+08:00</updated>
+  <updated>2014-04-20T22:01:46+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -12,6 +12,271 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training(18) - 使用IntentService执行任务(Lesson 3 - 回传任务状态给发送方)]]></title>
+    <link href="http://hukai.me/blog/2014/04/20/android-training-18-running-background-service-lesson-3/"/>
+    <updated>2014-04-20T22:01:00+08:00</updated>
+    <id>http://hukai.me/blog/2014/04/20/android-training-18-running-background-service-lesson-3</id>
+    <content type="html"><![CDATA[<p>这章节会演示如何回传IntentService中执行的任务状态与结果给发送方。 例如，回传任务的状态给Activity并进行更新UI。推荐的方式是使用<a href="http://developer.android.com/reference/android/support/v4/content/LocalBroadcastManager.html">LocalBroadcastManager</a>，这个组件可以限制broadcast只在自己的App中进行传递。</p>
+
+<h2>Report Status From an IntentService</h2>
+
+<p>为了在IntentService中向其他组件发送任务状态，首先创建一个Intent并在data字段中包含需要传递的信息。作为一个可选项，还可以给这个Intent添加一个action与data URI。</p>
+
+<p>下一步，通过执行<a href="http://developer.android.com/reference/android/support/v4/content/LocalBroadcastManager.html#sendBroadcast(android.content.Intent">LocalBroadcastManager.sendBroadcast()</a>))来发送Intent。Intent被发送到任何有注册接受它的组件中。为了获取到LocalBroadcastManager的实例，可以执行getInstance().代码示例如下：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">Constants</span> <span class="o">{</span>
+</span><span class='line'>    <span class="o">...</span>
+</span><span class='line'>    <span class="c1">// Defines a custom Intent action</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">BROADCAST_ACTION</span> <span class="o">=</span>
+</span><span class='line'>        <span class="s">&quot;com.example.android.threadsample.BROADCAST&quot;</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">...</span>
+</span><span class='line'>    <span class="c1">// Defines the key for the status &quot;extra&quot; in an Intent</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">EXTENDED_DATA_STATUS</span> <span class="o">=</span>
+</span><span class='line'>        <span class="s">&quot;com.example.android.threadsample.STATUS&quot;</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">...</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">RSSPullService</span> <span class="kd">extends</span> <span class="n">IntentService</span> <span class="o">{</span>
+</span><span class='line'><span class="o">...</span>
+</span><span class='line'>    <span class="cm">/*</span>
+</span><span class='line'><span class="cm">     * Creates a new Intent containing a Uri object</span>
+</span><span class='line'><span class="cm">     * BROADCAST_ACTION is a custom Intent action</span>
+</span><span class='line'><span class="cm">     */</span>
+</span><span class='line'>    <span class="n">Intent</span> <span class="n">localIntent</span> <span class="o">=</span>
+</span><span class='line'>            <span class="k">new</span> <span class="nf">Intent</span><span class="o">(</span><span class="n">Constants</span><span class="o">.</span><span class="na">BROADCAST_ACTION</span><span class="o">)</span>
+</span><span class='line'>            <span class="c1">// Puts the status into the Intent</span>
+</span><span class='line'>            <span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="n">Constants</span><span class="o">.</span><span class="na">EXTENDED_DATA_STATUS</span><span class="o">,</span> <span class="n">status</span><span class="o">);</span>
+</span><span class='line'>    <span class="c1">// Broadcasts the Intent to receivers in this app.</span>
+</span><span class='line'>    <span class="n">LocalBroadcastManager</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="k">this</span><span class="o">).</span><span class="na">sendBroadcast</span><span class="o">(</span><span class="n">localIntent</span><span class="o">);</span>
+</span><span class='line'><span class="o">...</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<!-- More -->
+
+
+<p>下一步是在发送任务的组件中接收发送出来的broadcast数据。</p>
+
+<h2>Receive Status Broadcasts from an IntentService</h2>
+
+<p>为了接受广播的数据对象，需要使用BroadcastReceiver的子类并实现<a href="http://developer.android.com/reference/android/content/BroadcastReceiver.html#onReceive(android.content.Context,%20android.content.Intent">BroadcastReceiver.onReceive()</a>)的方法，这里可以接收LocalBroadcastManager发出的广播数据。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="c1">// Broadcast receiver for receiving status updates from the IntentService</span>
+</span><span class='line'><span class="kd">private</span> <span class="kd">class</span> <span class="nc">ResponseReceiver</span> <span class="kd">extends</span> <span class="n">BroadcastReceiver</span>
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>    <span class="c1">// Prevents instantiation</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="nf">DownloadStateReceiver</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="c1">// Called when the BroadcastReceiver gets an Intent it&#39;s registered to receive</span>
+</span><span class='line'>    <span class="err">@</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onReceive</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="n">Intent</span> <span class="n">intent</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'><span class="o">...</span>
+</span><span class='line'>        <span class="cm">/*</span>
+</span><span class='line'><span class="cm">         * Handle Intents here.</span>
+</span><span class='line'><span class="cm">         */</span>
+</span><span class='line'><span class="o">...</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>一旦定义了BroadcastReceiver，也应该定义actions，categories与data用来做广播过滤。为了实现这些，需要使用<a href="http://developer.android.com/reference/android/content/IntentFilter.html">IntentFilter</a>.如下所示：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="c1">// Class that displays photos</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">DisplayActivity</span> <span class="kd">extends</span> <span class="n">FragmentActivity</span> <span class="o">{</span>
+</span><span class='line'>    <span class="o">...</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">stateBundle</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="o">...</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">onCreate</span><span class="o">(</span><span class="n">stateBundle</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">...</span>
+</span><span class='line'>        <span class="c1">// The filter&#39;s action is BROADCAST_ACTION</span>
+</span><span class='line'>        <span class="n">IntentFilter</span> <span class="n">mStatusIntentFilter</span> <span class="o">=</span> <span class="k">new</span> <span class="n">IntentFilter</span><span class="o">(</span>
+</span><span class='line'>                <span class="n">Constants</span><span class="o">.</span><span class="na">BROADCAST_ACTION</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c1">// Adds a data filter for the HTTP scheme</span>
+</span><span class='line'>        <span class="n">mStatusIntentFilter</span><span class="o">.</span><span class="na">addDataScheme</span><span class="o">(</span><span class="s">&quot;http&quot;</span><span class="o">);</span>
+</span><span class='line'>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>为了给系统注册这个BroadcastReceiver，需要通过LocalBroadcastManager执行registerReceiver()的方法。如下所示：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="c1">// Instantiates a new DownloadStateReceiver</span>
+</span><span class='line'>        <span class="n">DownloadStateReceiver</span> <span class="n">mDownloadStateReceiver</span> <span class="o">=</span>
+</span><span class='line'>                <span class="k">new</span> <span class="nf">DownloadStateReceiver</span><span class="o">();</span>
+</span><span class='line'>        <span class="c1">// Registers the DownloadStateReceiver and its intent filters</span>
+</span><span class='line'>        <span class="n">LocalBroadcastManager</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="k">this</span><span class="o">).</span><span class="na">registerReceiver</span><span class="o">(</span>
+</span><span class='line'>                <span class="n">mDownloadStateReceiver</span><span class="o">,</span>
+</span><span class='line'>                <span class="n">mStatusIntentFilter</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">...</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>一个BroadcastReceiver可以处理多种类型的广播数据。每个广播数据都有自己的ACTION。这个功能使得不用定义多个不同的BroadcastReceiver来分别处理不同的ACTION数据。为BroadcastReceiver定义另外一个IntentFilter，只需要创建一个新的IntentFilter并重复执行registerReceiver()即可。例如:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="cm">/*</span>
+</span><span class='line'><span class="cm">         * Instantiates a new action filter.</span>
+</span><span class='line'><span class="cm">         * No data filter is needed.</span>
+</span><span class='line'><span class="cm">         */</span>
+</span><span class='line'>        <span class="n">statusIntentFilter</span> <span class="o">=</span> <span class="k">new</span> <span class="n">IntentFilter</span><span class="o">(</span><span class="n">Constants</span><span class="o">.</span><span class="na">ACTION_ZOOM_IMAGE</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">...</span>
+</span><span class='line'>        <span class="c1">// Registers the receiver with the new filter</span>
+</span><span class='line'>        <span class="n">LocalBroadcastManager</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="n">getActivity</span><span class="o">()).</span><span class="na">registerReceiver</span><span class="o">(</span>
+</span><span class='line'>                <span class="n">mDownloadStateReceiver</span><span class="o">,</span>
+</span><span class='line'>                <span class="n">mIntentFilter</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>发送一个广播并不会start或者resume一个Activity。BroadcastReceiver可以接收广播数据，即使是你的app是在后台运行中。但是这不会强迫使得你的app变成foreground的。如果想在app不可见的时候通知用户一个后台的事件，建议使用<a href="http://developer.android.com/reference/android/app/Notification.html">Notification</a>。永远不要为了响应一个广播而去启动Activity。</p>
+
+<hr />
+
+<p><strong>后记：</strong>使用LocalBroadcastManager结合IntentService其实是一种很典型高效的做法，同时也更符合OO的思想，通过广播注册与反注册的方式，对两个组件进行解耦。如果使用Handler传递到后台线程作为回调，容易带来的内存泄漏。原因是：匿名内部类对外面的Actvitiy持有引用，如果在Acitivity被销毁的时候，没有对Handler进行显式的解绑，会导致Activity无法正常销毁，这样自然就有了内存泄漏。当然，如果用文章中的方案，通常也要记得在Activity的onPause的时候进行unRegisterReceiver，除非你有充足的理由为解释这里为何要继续保留。</p>
+
+<hr />
+
+<p><strong>学习自<a href="http://developer.android.com/training/run-background-service/report-status.html">http://developer.android.com/training/run-background-service/report-status.html</a>,欢迎交流讨论</strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training(18) - 使用IntentService执行任务(Lesson 2 - 发送任务给IntentService)]]></title>
+    <link href="http://hukai.me/blog/2014/04/20/android-training-18-running-background-service-lesson-2/"/>
+    <updated>2014-04-20T20:46:00+08:00</updated>
+    <id>http://hukai.me/blog/2014/04/20/android-training-18-running-background-service-lesson-2</id>
+    <content type="html"><![CDATA[<p>前一篇文章演示了如何创建一个IntentService类。这次会演示如何通过发送一个Intent来触发IntentService执行任务。这个Intent可以传递一些数据给IntentService。可以在Activity或者Fragment的任何时间点发送这个Intent。</p>
+
+<p>为了创建一个工作请求并发送到IntentService。需要先创建一个explicit Intent，添加数据到intent，然后通过执行<a href="http://developer.android.com/reference/android/content/Context.html#startService(android.content.Intent">startService()</a>) 把它发送到IntentService。</p>
+
+<p>下面的是代码示例：</p>
+
+<ul>
+<li>创建一个新的显式的Intent用来启动IntentService。</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="cm">/*</span>
+</span><span class='line'><span class="cm"> * Creates a new Intent to start the RSSPullService</span>
+</span><span class='line'><span class="cm"> * IntentService. Passes a URI in the</span>
+</span><span class='line'><span class="cm"> * Intent&#39;s &quot;data&quot; field.</span>
+</span><span class='line'><span class="cm"> */</span>
+</span><span class='line'><span class="n">mServiceIntent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">getActivity</span><span class="o">(),</span> <span class="n">RSSPullService</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span><span class='line'><span class="n">mServiceIntent</span><span class="o">.</span><span class="na">setData</span><span class="o">(</span><span class="n">Uri</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="n">dataUrl</span><span class="o">));</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<!-- More -->
+
+
+<ul>
+<li>执行startService()</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="c1">// Starts the IntentService</span>
+</span><span class='line'><span class="n">getActivity</span><span class="o">().</span><span class="na">startService</span><span class="o">(</span><span class="n">mServiceIntent</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>注意：</strong>可以在Activity或者Fragment的任何位置发送任务请求。</p>
+
+<p>一旦执行了startService()，IntentService在自己本身的<a href="http://developer.android.com/reference/android/app/IntentService.html#onHandleIntent(android.content.Intent">onHandleIntent()</a>)方法里面开始执行这个任务。</p>
+
+<p>下一步是如何把工作任务的执行结果返回给发送任务的Activity或者Fragment。下节课会演示如何使用<a href="http://developer.android.com/reference/android/content/BroadcastReceiver.html">BroadcastReceiver</a>来完成这个任务。</p>
+
+<hr />
+
+<p><strong>学习自<a href="http://developer.android.com/training/run-background-service/send-request.html">http://developer.android.com/training/run-background-service/send-request.html</a>,欢迎交流讨论</strong></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Android Training(18) - 使用IntentService执行任务(Lesson 1 - 创建IntentService)]]></title>
@@ -4995,415 +5260,6 @@ Android提供了下面三个方法来解决这个问题：</p>
     <content type="html"><![CDATA[<p><img src="http://hukai.me/images/articles/hello_world.jpg"></p>
 
 <p>Hi.This is my first post. <strong>By markdown.</strong></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Training(14) - 捕获照片(Lesson 3 - 直接操控相机)]]></title>
-    <link href="http://hukai.me/blog/2012/12/18/android-training-14-capturing-photos-lesson-3/"/>
-    <updated>2012-12-18T23:59:00+08:00</updated>
-    <id>http://hukai.me/blog/2012/12/18/android-training-14-capturing-photos-lesson-3</id>
-    <content type="html"><![CDATA[<p>在这一节课，我们会讨论如何通过使用framework的APIs来直接控制相机的硬件。直接控制设备的相机，相比起拍照与录像来说，要复杂一些。然而，如果你想要创建一个专业的特殊的相机程序，这节课会演示这部分内容。</p>
-
-<h2>Open the Camera Object(打开相机对象)</h2>
-
-<p>获取到 Camera 对象是直接控制Camera的第一步。正如Android自带的相机程序一样，推荐访问Camera的方式是在onCreate方法里面另起一个Thread来打开Camera。这个方法可以避免因为打开工作比较费时而引起ANR。在一个更加基础的实现方法里面，打开Camera的动作被延迟到onResume()方法里面去执行，这样使得代码能够更好的重用，并且保持控制流程不会复杂化。(原文是：In a more basic implementation, opening the camera can be deferred to the onResume() method to facilitate code reuse and keep the flow of control simple.)</p>
-
-<!-- more -->
-
-
-<p>在camera正在被另外一个程序使用的时候去执行 Camera.open() 会抛出一个exception，所以需要捕获起来。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="kt">boolean</span> <span class="nf">safeCameraOpen</span><span class="o">(</span><span class="kt">int</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>    <span class="kt">boolean</span> <span class="n">qOpened</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">try</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">releaseCameraAndPreview</span><span class="o">();</span>
-</span><span class='line'>        <span class="n">mCamera</span> <span class="o">=</span> <span class="n">Camera</span><span class="o">.</span><span class="na">open</span><span class="o">(</span><span class="n">id</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">qOpened</span> <span class="o">=</span> <span class="o">(</span><span class="n">mCamera</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">);</span>
-</span><span class='line'>    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">Log</span><span class="o">.</span><span class="na">e</span><span class="o">(</span><span class="n">getString</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">string</span><span class="o">.</span><span class="na">app_name</span><span class="o">),</span> <span class="s">&quot;failed to open Camera&quot;</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">return</span> <span class="n">qOpened</span><span class="o">;</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">private</span> <span class="kt">void</span> <span class="nf">releaseCameraAndPreview</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>    <span class="n">mPreview</span><span class="o">.</span><span class="na">setCamera</span><span class="o">(</span><span class="kc">null</span><span class="o">);</span>
-</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">mCamera</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">mCamera</span><span class="o">.</span><span class="na">release</span><span class="o">();</span>
-</span><span class='line'>        <span class="n">mCamera</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>自从API level 9开始，camera的framework可以支持多个cameras。如果你使用 open() ，你会获取到最后的一个camera。</p>
-
-<h2>Create the Camera Preview(创建相机预览界面)</h2>
-
-<p>拍照通常需要提供一个预览界面来显示待拍的事物。和拍照类似，你需要使用一个 SurfaceView 来展现录制的画面。</p>
-
-<h3>Preview Class</h3>
-
-<p>为了显示一个预览界面，你需要一个Preview类。这个类需要实现android.view.SurfaceHolder.Callback 接口，这个接口用来传递从camera硬件获取的数据到程序。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">class</span> <span class="nc">Preview</span> <span class="kd">extends</span> <span class="n">ViewGroup</span> <span class="kd">implements</span> <span class="n">SurfaceHolder</span><span class="o">.</span><span class="na">Callback</span> <span class="o">{</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">SurfaceView</span> <span class="n">mSurfaceView</span><span class="o">;</span>
-</span><span class='line'>    <span class="n">SurfaceHolder</span> <span class="n">mHolder</span><span class="o">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">Preview</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>        <span class="kd">super</span><span class="o">(</span><span class="n">context</span><span class="o">);</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="n">mSurfaceView</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SurfaceView</span><span class="o">(</span><span class="n">context</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">addView</span><span class="o">(</span><span class="n">mSurfaceView</span><span class="o">);</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c1">// Install a SurfaceHolder.Callback so we get notified when the</span>
-</span><span class='line'>        <span class="c1">// underlying surface is created and destroyed.</span>
-</span><span class='line'>        <span class="n">mHolder</span> <span class="o">=</span> <span class="n">mSurfaceView</span><span class="o">.</span><span class="na">getHolder</span><span class="o">();</span>
-</span><span class='line'>        <span class="n">mHolder</span><span class="o">.</span><span class="na">addCallback</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">mHolder</span><span class="o">.</span><span class="na">setType</span><span class="o">(</span><span class="n">SurfaceHolder</span><span class="o">.</span><span class="na">SURFACE_TYPE_PUSH_BUFFERS</span><span class="o">);</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">...</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这个Preview类必须在查看图片之前传递给 Camera 对象。正如下面描述的：</p>
-
-<h3>Set and Start the Preview</h3>
-
-<p>一个Camera实例与它相关的preview必须以一种指定的顺序来创建，首先是创建Camera对象。在下面的示例中，初始化camera的动作被封装起来，这样，无论用户想对Camera做任何的改变，都通过执行setCamera() 来呼叫<a href="http://developer.android.com/reference/android/hardware/Camera.html#startPreview(">Camera.startPreview()</a>)。Preview对象必须在 surfaceChanged() 的回调方法里面去做重新创建的动作。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">setCamera</span><span class="o">(</span><span class="n">Camera</span> <span class="n">camera</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">mCamera</span> <span class="o">==</span> <span class="n">camera</span><span class="o">)</span> <span class="o">{</span> <span class="k">return</span><span class="o">;</span> <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">stopPreviewAndFreeCamera</span><span class="o">();</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">mCamera</span> <span class="o">=</span> <span class="n">camera</span><span class="o">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">mCamera</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">List</span><span class="o">&lt;</span><span class="n">Size</span><span class="o">&gt;</span> <span class="n">localSizes</span> <span class="o">=</span> <span class="n">mCamera</span><span class="o">.</span><span class="na">getParameters</span><span class="o">().</span><span class="na">getSupportedPreviewSizes</span><span class="o">();</span>
-</span><span class='line'>        <span class="n">mSupportedPreviewSizes</span> <span class="o">=</span> <span class="n">localSizes</span><span class="o">;</span>
-</span><span class='line'>        <span class="n">requestLayout</span><span class="o">();</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="k">try</span> <span class="o">{</span>
-</span><span class='line'>            <span class="n">mCamera</span><span class="o">.</span><span class="na">setPreviewDisplay</span><span class="o">(</span><span class="n">mHolder</span><span class="o">);</span>
-</span><span class='line'>        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="cm">/*</span>
-</span><span class='line'><span class="cm">          Important: Call startPreview() to start updating the preview surface. Preview must </span>
-</span><span class='line'><span class="cm">          be started before you can take a picture.</span>
-</span><span class='line'><span class="cm">          */</span>
-</span><span class='line'>        <span class="n">mCamera</span><span class="o">.</span><span class="na">startPreview</span><span class="o">();</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Modify Camera Settings(修改相机设置)</h2>
-
-<p>相机设置可以改变拍照的方式，从缩放级别到曝光补偿(exposure compensation)。下面的例子仅仅演示了改变预览大小的设置，更多设置请参考Camera的源代码。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">surfaceChanged</span><span class="o">(</span><span class="n">SurfaceHolder</span> <span class="n">holder</span><span class="o">,</span> <span class="kt">int</span> <span class="n">format</span><span class="o">,</span> <span class="kt">int</span> <span class="n">w</span><span class="o">,</span> <span class="kt">int</span> <span class="n">h</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>    <span class="c1">// Now that the size is known, set up the camera parameters and begin</span>
-</span><span class='line'>    <span class="c1">// the preview.</span>
-</span><span class='line'>    <span class="n">Camera</span><span class="o">.</span><span class="na">Parameters</span> <span class="n">parameters</span> <span class="o">=</span> <span class="n">mCamera</span><span class="o">.</span><span class="na">getParameters</span><span class="o">();</span>
-</span><span class='line'>    <span class="n">parameters</span><span class="o">.</span><span class="na">setPreviewSize</span><span class="o">(</span><span class="n">mPreviewSize</span><span class="o">.</span><span class="na">width</span><span class="o">,</span> <span class="n">mPreviewSize</span><span class="o">.</span><span class="na">height</span><span class="o">);</span>
-</span><span class='line'>    <span class="n">requestLayout</span><span class="o">();</span>
-</span><span class='line'>    <span class="n">mCamera</span><span class="o">.</span><span class="na">setParameters</span><span class="o">(</span><span class="n">parameters</span><span class="o">);</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="cm">/*</span>
-</span><span class='line'><span class="cm">      Important: Call startPreview() to start updating the preview surface. Preview must be</span>
-</span><span class='line'><span class="cm">      started before you can take a picture.</span>
-</span><span class='line'><span class="cm">    */</span>
-</span><span class='line'>    <span class="n">mCamera</span><span class="o">.</span><span class="na">startPreview</span><span class="o">();</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Set the Preview Orientation(设置预览方向)</h2>
-
-<p>大多数相机程序会锁定预览为横屏的，因为那是人拍照的自然方式。设置里面并没有阻止你去拍竖屏的照片，这些信息会被记录在EXIF里面。 <a href="http://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation(int">setCameraDisplayOrientation()</a>) 方法可以使得你改变预览的方向，并且不会影响到图片被记录的效果。然而，在Android API level 14之前，你必须在改变方向之前，先停止你的预览，然后才能去重启它。</p>
-
-<h2>Take a Picture(拍一张图片)</h2>
-
-<p>只要预览开始之后，可以使用<a href="http://developer.android.com/reference/android/hardware/Camera.html#takePicture(android.hardware.Camera.ShutterCallback,%20android.hardware.Camera.PictureCallback,%20android.hardware.Camera.PictureCallback">Camera.takePicture()</a>) 方法来拍下一张图片。你可以创建Camera.PictureCallback 与 Camera.ShutterCallback 对象并传递他们到Camera.takePicture()中。</p>
-
-<p>如果你想要做连拍的动作，你可以创建一个Camera.PreviewCallback 并实现onPreviewFrame().你还可以选择几个预览帧来进行拍照，或是建立一个延迟拍照的动作。</p>
-
-<h2>Restart the Preview(重启预览)</h2>
-
-<p>在图片被获取后，你必须在用户拍下一张图片之前重启预览。在下面的示例中，通过重载shutter button来实现重启。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
-</span><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">onClick</span><span class="o">(</span><span class="n">View</span> <span class="n">v</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>    <span class="k">switch</span><span class="o">(</span><span class="n">mPreviewState</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>    <span class="k">case</span> <span class="nl">K_STATE_FROZEN:</span>
-</span><span class='line'>        <span class="n">mCamera</span><span class="o">.</span><span class="na">startPreview</span><span class="o">();</span>
-</span><span class='line'>        <span class="n">mPreviewState</span> <span class="o">=</span> <span class="n">K_STATE_PREVIEW</span><span class="o">;</span>
-</span><span class='line'>        <span class="k">break</span><span class="o">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">default</span><span class="o">:</span>
-</span><span class='line'>        <span class="n">mCamera</span><span class="o">.</span><span class="na">takePicture</span><span class="o">(</span> <span class="kc">null</span><span class="o">,</span> <span class="n">rawCallback</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">mPreviewState</span> <span class="o">=</span> <span class="n">K_STATE_BUSY</span><span class="o">;</span>
-</span><span class='line'>    <span class="o">}</span> <span class="c1">// switch</span>
-</span><span class='line'>    <span class="n">shutterBtnConfig</span><span class="o">();</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Stop the Preview and Release the Camera(停止预览并释放相机)</h2>
-
-<p>当你的程序在使用Camera之后，有必要做清理的动作。特别是，你必须释放 Camera 对象，不然会引起其他app crash。</p>
-
-<p>那么何时应该停止预览并释放相机呢? 在预览的surface被摧毁之后，可以做停止预览与释放相机的动作。如下所示：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">surfaceDestroyed</span><span class="o">(</span><span class="n">SurfaceHolder</span> <span class="n">holder</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>    <span class="c1">// Surface will be destroyed when we return, so stop the preview.</span>
-</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">mCamera</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>        <span class="cm">/*</span>
-</span><span class='line'><span class="cm">          Call stopPreview() to stop updating the preview surface.</span>
-</span><span class='line'><span class="cm">        */</span>
-</span><span class='line'>        <span class="n">mCamera</span><span class="o">.</span><span class="na">stopPreview</span><span class="o">();</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="cm">/**</span>
-</span><span class='line'><span class="cm">  * When this function returns, mCamera will be null.</span>
-</span><span class='line'><span class="cm">  */</span>
-</span><span class='line'><span class="kd">private</span> <span class="kt">void</span> <span class="nf">stopPreviewAndFreeCamera</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">mCamera</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>        <span class="cm">/*</span>
-</span><span class='line'><span class="cm">          Call stopPreview() to stop updating the preview surface.</span>
-</span><span class='line'><span class="cm">        */</span>
-</span><span class='line'>        <span class="n">mCamera</span><span class="o">.</span><span class="na">stopPreview</span><span class="o">();</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="cm">/*</span>
-</span><span class='line'><span class="cm">          Important: Call release() to release the camera for use by other applications. </span>
-</span><span class='line'><span class="cm">          Applications should release the camera immediately in onPause() (and re-open() it in</span>
-</span><span class='line'><span class="cm">          onResume()).</span>
-</span><span class='line'><span class="cm">        */</span>
-</span><span class='line'>        <span class="n">mCamera</span><span class="o">.</span><span class="na">release</span><span class="o">();</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="n">mCamera</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>在这节课的前面，这一些系列的动作也是setCamera() 方法的一部分，因此初始化一个camera的动作，总是从停止预览开始的。</p>
-
-<hr />
-
-<p><strong>学习自：<a href="http://developer.android.com/training/camera/cameradirect.html">http://developer.android.com/training/camera/cameradirect.html</a>，请多指教，谢谢！</strong><br/>
-<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Training(14) - 捕获照片(Lesson 2 - 简单的录像动作)]]></title>
-    <link href="http://hukai.me/blog/2012/12/18/android-training-14-capturing-photos-lesson-2/"/>
-    <updated>2012-12-18T23:21:00+08:00</updated>
-    <id>http://hukai.me/blog/2012/12/18/android-training-14-capturing-photos-lesson-2</id>
-    <content type="html"><![CDATA[<p>这节课会介绍如何使用现有的Camera程序来录制一个视频。和拍照一样，我们没有必要去重新发明录像程序。大多数的Android程序都有自带Camera来进行录像。(<em>这一课的内容大多数与前面一课类似，简要带过，一些细节不赘述了</em>)</p>
-
-<h2>Request Camera Permission [请求权限]</h2>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;manifest</span> <span class="err">...</span> <span class="nt">&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;uses-feature</span> <span class="na">android:name=</span><span class="s">&quot;android.hardware.camera&quot;</span> <span class="nt">/&gt;</span>
-</span><span class='line'>    ...
-</span><span class='line'><span class="err">&lt;</span>/manifest ... &gt;
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>与上一课的拍照一样，你可以在启动Camera之前，使用hasSystemFeature(PackageManager.FEATURE_CAMERA).来检查是否存在Camera。</p>
-
-<!-- more -->
-
-
-<h2>Record a Video with a Camera App(使用相机程序来录制视频)</h2>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="kt">void</span> <span class="nf">dispatchTakeVideoIntent</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>    <span class="n">Intent</span> <span class="n">takeVideoIntent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">MediaStore</span><span class="o">.</span><span class="na">ACTION_VIDEO_CAPTURE</span><span class="o">);</span>
-</span><span class='line'>    <span class="n">startActivityForResult</span><span class="o">(</span><span class="n">takeVideoIntent</span><span class="o">,</span> <span class="n">ACTION_TAKE_VIDEO</span><span class="o">);</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'><span class="kd">public</span> <span class="kd">static</span> <span class="kt">boolean</span> <span class="nf">isIntentAvailable</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="n">String</span> <span class="n">action</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>    <span class="kd">final</span> <span class="n">PackageManager</span> <span class="n">packageManager</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="na">getPackageManager</span><span class="o">();</span>
-</span><span class='line'>    <span class="kd">final</span> <span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">action</span><span class="o">);</span>
-</span><span class='line'>    <span class="n">List</span><span class="o">&lt;</span><span class="n">ResolveInfo</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span>
-</span><span class='line'>        <span class="n">packageManager</span><span class="o">.</span><span class="na">queryIntentActivities</span><span class="o">(</span><span class="n">intent</span><span class="o">,</span>
-</span><span class='line'>            <span class="n">PackageManager</span><span class="o">.</span><span class="na">MATCH_DEFAULT_ONLY</span><span class="o">);</span>
-</span><span class='line'>    <span class="k">return</span> <span class="n">list</span><span class="o">.</span><span class="na">size</span><span class="o">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">;</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>View the Video(查看视频)</h2>
-
-<p>Android的Camera程序会把拍好的视频地址返回。下面的代码演示了，如何查询到这个视频并显示到VideoView.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="kt">void</span> <span class="nf">handleCameraVideo</span><span class="o">(</span><span class="n">Intent</span> <span class="n">intent</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>    <span class="n">mVideoUri</span> <span class="o">=</span> <span class="n">intent</span><span class="o">.</span><span class="na">getData</span><span class="o">();</span>
-</span><span class='line'>    <span class="n">mVideoView</span><span class="o">.</span><span class="na">setVideoURI</span><span class="o">(</span><span class="n">mVideoUri</span><span class="o">);</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<hr />
-
-<p><strong>学习自：<a href="http://developer.android.com/training/camera/videobasics.html">http://developer.android.com/training/camera/videobasics.html</a>，请多指教，谢谢！</strong><br/>
-<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
 ]]></content>
   </entry>
   
