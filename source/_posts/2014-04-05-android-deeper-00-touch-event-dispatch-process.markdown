@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "Android Notes(06) - Touch事件分发响应机制"
+title: "Android Deeper(00) - Touch事件分发响应机制"
 date: 2014-04-05 13:13
 comments: true
 sidebar: false
-categories: Android Android:Notes
+categories: Android Android:Deeper
 ---
 
 ## 1)概述
