@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android | 胡凯]]></title>
   <link href="http://hukai.me/blog/categories/android/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2014-04-20T22:01:46+08:00</updated>
+  <updated>2014-05-18T17:07:10+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -12,6 +12,1072 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Android Deeper(01) - Graphic Architecture]]></title>
+    <link href="http://hukai.me/blog/2014/05/15/android-deeper-01-graphics-architecture/"/>
+    <updated>2014-05-15T14:25:00+08:00</updated>
+    <id>http://hukai.me/blog/2014/05/15/android-deeper-01-graphics-architecture</id>
+    <content type="html"><![CDATA[<p>Android中有几个很重要的概念Surface, SurfaceHolder, EGLSurface, SurfaceView, GLSurfaceView, SurfaceTexture, TextureView与SurfaceFlinger。</p>
+
+<p>这篇文章会介绍Android图形架构的基本构成以及它们是如何在程序framework与多媒体系统中运作的。核心关注点是，图形数据的buffer是如何在系统中传递的。如果你曾经好奇过SurfaceView与TextureView的工作方式，或者是想知道Surface与EGLSurface是如何交互的，那么这篇文章将给你解答这些疑问。<strong>You've come to the right place.</strong></p>
+
+<p>大多数时候，我们都不需要了解这些类的使用原理，但是学习这些它们的工作原理可以为我们提供一种Sense，用来更加高效的工作。所以这里我们学习它们是如何工作的，而不仅仅是它们是如何使用的。</p>
+
+<h2>BufferQueue and gralloc</h2>
+
+<p>BufferQueue and grallocGraphiccal的核心是BufferQueue,它的角色是连接产生图形数据的生产者与显示数据的消费者。生产者与消费者可以再两个不同的进程，那么数据在系统中进行传递就依赖于BufferQueue。</p>
+
+<p>基础的用法是很直接简单的。生产者获取到一个buffer，制定了宽，高，pixel format与usage flags之后，再放到queue中。消费者获取到buffer，消费数据后，把buffer返回到queue中。</p>
+
+<ul>
+<li>生产者：dequeueBuffer() -> queueBuffer()</li>
+<li>消费者：acquireBuffer() -> releaseBuffer()</li>
+</ul>
+
+
+<!-- More -->
+
+
+<p>目前很多Android设备已经开始支持“Sync framework”。这使得系统可以结合hardware组件对graphic data做异步的操作。例如，生产者再rendering完成之前就开始提交一系列的OpenGL ES的绘制命令并参与到输出排队buffer中。Buffer队列中设置有多道栅栏，用来同步生产者与消费者的工作。这样的一个方法可以减少buffer数据在系统中传递的延迟并提升吞吐量。</p>
+
+<p>队列的一些特性，例如最大支持Hold住的数据量，取决于生产者与消费者的共同作用。</p>
+
+<p>BufferQueue的责任是分配Buffer,而Buffer则用来Hold Data的部分。</p>
+
+<h3>gralloc HAL</h3>
+
+<p>真正实行buffer allocation的操作是通过gralloc来实现的，里面的alloc()方法会根据buffer的参数：宽高，pixel format与usage flags等，进行操作。</p>
+
+<p>gralloc不仅仅是native heap上分配内存的另外一个方式。通常alloc取决于usage flags,例如</p>
+
+<ul>
+<li> how often the memory will be accessed from software (CPU)</li>
+<li> how often the memory will be accessed from hardware (GPU)</li>
+<li> whether the memory will be used as an OpenGL ES ("GLES") texture(质地)</li>
+<li> whether the memory will be used by a video encoder</li>
+</ul>
+
+
+<p>例如，如果你指定format RGBA8888，并且这个buffer可以从software层进行访问，那么alloc会使用R-G-B-A的顺序创建每一个pixel.如果你指定buffer只会被hardware访问并且会作为GLES texture的组成部分，那么alloc可以使用BGRA的顺序，这样效率更高。</p>
+
+<h2>SurfaceFlinger and Hardware Composer</h2>
+
+<p>如何把那些数据绘制到屏幕上，需要使用到SurfaceFlinger与Hardware Composer HAL。</p>
+
+<p>SurfaceFlinger的作用是接收来自各处的数据，进行混合编制之后，然后进行显示。</p>
+
+<p>当app作为foreground时，WindowManager Service会请求SurfaceFlinger绘制一个surface。SurfaceFlinger会创建一个”layer” - 它的主要组成部分是BufferQueue。此时SurfaceFlinger扮演了消费者的角色。生产者的数据是通过WindowManager传递到app，WindowManager可以直接发送frames给SurfaceFlinger。其实可以把SurfaceFlinger理解为LayerFlinger。</p>
+
+<p>对于大多数apps来说，在任何时刻，屏幕上会有三个layer。“Status Bar”是在屏幕的最上层，“navigation bar”在屏幕的底部或者侧边，另外一层是app UI layer。一些app可能拥有更多或者更少的layer。例如默认的home app，对于wallpaper有单独设置一层layer，全屏游戏的应用会隐藏status bar的layer。Each layer都可以单独进行更新。Status与Navigation Bar是由系统process进行绘制的。app layer是由app进行绘制的。它们之间是相互独立的。</p>
+
+<p>设备显示屏以固定的频率刷新屏幕，对于手机与平板来说，通常是60fps。刷新的频率有时是不固定的。</p>
+
+<p>当SurfaceFlinger接收到VSYNC刷新信号时，会遍历所有的layers，寻找可以使用的新的buffers。如果找到新的buffer，那么就获取它，否者继续使用前面获取到得buffer。SurfaceFlinger总是需要有些内容可以显示，所以它会持续hold住buffer。如果没有新的buffer提交到layer上，这个layer就会被SurfaceFlinger所忽略。</p>
+
+<p>一旦SurfaceFlinger收集到了可见layer的所有buffers，它会请求Hardware composer如何进行composition的操作。</p>
+
+<h3>Hardware Composer</h3>
+
+<p>Hardware Composer HAL(HWC)是从3.0开始才被引入的。它首要的目的是结合可用的硬件，判断选择最有效的方式用来composite buffers。这部分的功能通常是硬件OEM厂商实现的。</p>
+
+<p>举例说明2种compossite的方式：</p>
+
+<ul>
+<li>先画好App的UI,然后把StatusBar与BottomBar的部分绘制到UI之上，最后把这些组合好的buffer送给硬件进行显示。</li>
+<li>分别传递三部分的Buffer，告诉硬件从不同的屏幕区域读取不同的buffer。
+显然第2种方式会更有效率。</li>
+</ul>
+
+
+<p>因为不同的设备处理能力不一样，每一个layer是否需要旋转，是否有限制的显示位置等等问题。所以HWC的工作方式是这样的：</p>
+
+<ul>
+<li>SurfaceFlinger提供给HWC一个完整的layer list,并且询问系统:该如何处理这些layers?</li>
+<li>HWC通过把每一个layer标记为”overlay”或者“GLES Composition”来作为应答。</li>
+<li>SurfaceFlinger对那些标记为GLES Composition的layer，传递buffer给HWC，并且让HWC来处理。</li>
+</ul>
+
+
+<p>Overlay的方式比GLES composition的方式效率要低很多，特别是Overlay的内容为transparent时。</p>
+
+<h3>The Need for Triple-Buffering</h3>
+
+<ul>
+<li><strong>Double-buffering</strong></li>
+</ul>
+
+
+<p>为了避免在显示上出现断层，系统需要是double-buffered: front buffer显示的同时，back buffer正在准备。
+假设frame N正在显示，那么为了在下一个VSYNC信号中显示frame N+1，此时frame N+1将被SurfaceFlinger提前获取到。当VSYNC信号到达时，HWC会flip buffer。当app需要绘制frame N+2到buffer时，SurfaceFlinger会遍历每个layer寻找是否有新的buffer，此时没有找到任何新的buffer，因此再下一个VSYNC中再次准备显示frame N+1，过了一点时间之后，app结束了rendering frame N+2并且进入了SurfaceFlinger的队列，可是此时已经太晚了，这种双重buffer的方式效率并不够高。</p>
+
+<ul>
+<li><strong>Triple-buffering</strong></li>
+</ul>
+
+
+<p>在VSYNC之前，frame N正在显示，frame N+1已经composited并且准备被显示，frame N+2已经在队列中并且准备好了被SurfaceFlinger获取。当屏幕flip时，buffers可以进行rotate，并且不产生bubble。</p>
+
+<h2>Surface and SurfaceHolder</h2>
+
+<p>Surface通常作为buffer queue的生产者，同时SurfaceFlinger作为消费者。
+用来显示Surface的BufferQueue通常是triple-buffering的，但是buffers却是按需分配的。</p>
+
+<h3>Canvas Rendering</h3>
+
+<p>曾经一段时间，所有的rendering渲染操作都是在软件层进行的。在今天，你也是可以这样做。在低版本的系统中，在软件层的渲染是通过使用Skia的图像库来实现的。如果你想要绘制一个矩形，调用一个库函数，在buffer中设置恰当的bytes数据。为了确保buffer不会在同一个时刻被两个Clients所更新，或者在显示时被写入，你必须对buffer进行加锁操作。<code>lockCanvas()</code>方法可以锁住buffer并且返回一个Canvas用来进行绘制。<code>unlockCanvasAndPost()</code>方法可以解锁buffer并且发送buffer数据给compositor进行组合。</p>
+
+<p>随着时间的推移，带有3D引擎的设备出现了，Android围绕OpenGL ES做了修改与适应。然而，为了兼容旧的API，增加了硬件加速Canvas API。</p>
+
+<p>当你为了访问Canvas而锁住Surface时，CPU渲染器会于BufferQueue的生产者建立连接，指导Surface被销毁时才回断开。大多数其他的生产者(例如GLES)可以与Surface进行断开连接与重新连接，但是Canvas-based的CPU渲染器不可以。这意味着如果你不针对一个Canvas进行加锁的话，是不可以在Surface上使用GLES进行绘制，也不可以给Surface发送来自视频解码器中的数据帧。</p>
+
+<p>生产者从BufferQueue中第一次请求一个buffer时，这个buffer是初始化分配为0的。初始化是非常有必要的，避免在不同进程中出现共享数据的意外错误。当你重用一个buffer时，之前的内容还是处于显示中。如果你重复的调用<code>lockCanvas()</code>与<code>unlockCanvasAndPost()</code>却没有绘制任何内容，你将会在前一个frame与渲染的frame中进行循环。</p>
+
+<p>Surface的lock/unlock代码保持了前一个渲染buffer的reference。如果你在锁定Surface的时候指定了一块dirty的区域，它会从之前的buffer中copy一份non-dirty的pixel数据过来。此时buffer将会机会对等的被SurfaceFlinger或者HWC进行处理，但是因为我们仅仅是需要进行读取的操作，所以没有必要进行互斥的访问。</p>
+
+<p>不通过Canvas(non-Canvas)的方式对一个Surface直接进行绘制的主要方式是通过OpenGL ES.这部分的内容会在下面被讲解。</p>
+
+<h3>SurfaceHolder</h3>
+
+<p>连接Surface与SurfaceView的是SurfaceHolder。最开始的想法是Surface代表了原始的数据buffer，那么SurfaceHolder是app用来追踪Surface的一些上层的信息，例如dimensions与format。Java语言定义好了潜在可能的native的实现接口。虽然有争议部分API是不会再可能被使用到的，可是却一直遗留在Public API中没有移除。</p>
+
+<p>通常来说，对于一个View的任何操作都回触发SurfaceHolder。一些其他的APIs，例如MediaCodec，可以直接操作Surface本身。你也可以从SurfaceHolder中获取到Surface。</p>
+
+<p>获取与设置Surface参数的APIs，例如size和format，都是通过SurfaceHolder来实现的。</p>
+
+<h2>EGLSurface and OpenGL ES</h2>
+
+<p>OpenGL ES定义了一个API用来渲染图形。为了是得GLES可以在各种平台上工作，它设计成可以和一个库进行结合的方式来工作。这个库知道如何通过操作系统创建与访问窗口。在Android中使用的哭叫做EGL。如果你想要绘制textured polygons(多边形，模块)，你可以使用GLES的方法。如果你想要把渲染绘制到屏幕上，你可以使用EGL的方法。</p>
+
+<p>在开始使用GLES之前，你需要创建一个GL context。在EGL中，这意味着创建一个EGLContext与一个EGLSurface。GLES的操作是作用在当前的context上的，当前的context保存在当前thread中，这个context是不能传递的。这意味着你必需注意渲染的动作执行在哪个线程，并且在那个线程中的context是哪个。</p>
+
+<p>EGLSurface可以通过EGL(执行pbuffer)来分配一个buffer,或者通过操作系统来做一个窗口的分配。EGL window surface是通过<code>eglCreateWindowSurface()</code>方法来创建的。这个方法会使用一个window object作为参数，这个window object在android上可以是一个SurfaceView，一个SurfaceTexture，一个surfaceHolder或者是一个Surface，这些对象的内部都拥有一个BufferQuueue。当你执行了那个方法调用之后，EGL创建一个新的EGLSurface对象，并把这个对象与生产者的BufferQuueue的接口建立连接。</p>
+
+<p>EGL并没有提供lock/unlock的方法。你需要列出绘制的命令然后执行<code>eglSwapBuffer()</code>来提交当前frame。这个方法名本意是描述传统的front-back buffer的swap操作，但是实际上再后续的实现中又可能会有差异。</p>
+
+<p>在同一时刻，只能有一个EGLSurface与Surface进行结合，你只能有一个生产者连接到BufferQueue，但是如果你销毁了EGLSurface，那么就与BufferQueue连接断开，此时可以允许其他组件进行连接。</p>
+
+<p>一个EGLSurface在同一时刻必须只能存在于一个Thread中。但是一个Thread可以切换多个不同的EGLSurface。</p>
+
+<p>讨论到EGLSurface时最通常的误解是认为这只是Surface的某个方面(例如SurfaceHolder).它们实际上是有关联却相互独立的。你可以在ELGSurface上绘制没有被Surface hold住得部分，你也可以使用Surface的时候不要用EGL。EGLSurface只为GLES提供了一个绘制的地方。</p>
+
+<h2>SurfaceView and GLSurfaceView</h2>
+
+<p>从现在起，我们可以探讨下一些更上层的组件，以及它们是如何与底层的组件进行适配的。</p>
+
+<p>Android app Framework UI是基于hierarchy中的View进行搭建的。大多数的文章都没有涉及到细节的讨论，但是了解UI组件是如何经过一系列复杂的measurement与layout然后适配到一个矩形区域是非常有意义的。当app来到forground的时候，所有可见的view对象都将被SurfaceFlinger渲染到由WindowManager创建的Surface中。Layout与rendering是执行在app的UI Thread的。</p>
+
+<p>无论你又多少的layouts与Views，所有的对象都是被绘制到同一个Buffer中。无论Views是否开启了hardware-accelerated都是一样的。</p>
+
+<p>SurfaceView的参数和其他的View一样，你可以设置position与size。但是讨论到render的时候，SurfaceView的contents是透明的。SurfaceView在View中只是一个透明的占位区域。</p>
+
+<p>当SurfaceView可见时，WindowManager会请求SurfaceFlinger创建一个新的Surface。(这个过程不是同步的，所以需要实现Surface被创建的回调用来获取到信息)。默认情况下，新创建的Surface是在app UI Surface的下层(后面)，但是这个默认的Z-ordering可以被override，设置为在app UI的上面(Top表面)。</p>
+
+<p>渲染到Surface上的任何数据都是由SurfaceFlinger进行组合的，而不是由app完成。这就是SurfaceView真正牛B的地方：绘制到SurfaceView上的内容可以由单独的Thread或者Proces进行操作。你可以忽略UI Thread，但是你还是需要保持SurfaceView与Activity的生命周期一致，整个SurfaceView是和app UI还有其他被硬件加速的layer是共同协作的。</p>
+
+<p>请注意，相对于BufferQueue来说，Surface是生产者，而SurfaceFlinger layer是消费者。你可以使用任何合适的方法来更新Surface，只要使得Surface可以作为BufferQueue的生产者。你可以使用Surface提供的Canvas的功能，添加一个EGLSurface并使用GLES进行绘制并且使用MeidaCodec的Video decoder对Surface进行写操作。</p>
+
+<h2>GLSurfaceView</h2>
+
+<p>GLSurfaceView提供了一些帮助类用来协助管理EGL contexts，线程间的交互，与Activity生命周期的互动。</p>
+
+<p>GLSurfaceView创建一个线程用来渲染与配置EGL context。当Activity暂停时，状态会被自动清除。</p>
+
+<p>在大多数情况下，GLSurfaceView是非常有用的并且可以和GLES进行协作。在某些情形下，使用它是个好的选择。</p>
+
+<h2>SurfaceTexture</h2>
+
+<p>SurfaceTexture是在Android 3.0才被引入的。和SurfaceView的概念类似(Surface与View的结合体)，SurfaceTexture是Surface与GLES texture的结合体。</p>
+
+<p>当你创建一个SurfaceTexture时，你会创建一个BufferQueue，app此时扮演了消费者的角色。当新的buffer被生产者加入队列时，你的app会通过<code>onFrameAvailable()</code>的回调得到通知。<code>updateTextureImage()</code>方法会释放前面hold住得buffer，从队列中请求一个新的buffer，并执行一些EGL的方法使得buffer对于GLES来说可以作为一个external texture。</p>
+
+<p>External texture(<code>GL_TEXTURE_EXTERNAL_OES</code>)与GLES(<code>GL_TEXTURE_2D</code>)创建的texture并不相同。你必须对你的渲染器做一些不同的配置，同时有些东西是不能修改的。但是最主要的是：你可以把从BufferQueue中获取到的数据直接渲染为textured模型。</p>
+
+<p>你可能好奇我们如何能够确保在buffer中的数据格式是能够被GLES可以识别的。当SurfaceTexture创建了BufferQueue，它会设置消费者的usge flag为<code>GRALLOC_USAGE_HW_TEXTURE</code>，确保被gralloc创建的任何buffer可以被GLES所使用。</p>
+
+<p>因为SurfaceTexture是需要和EGL context进行交互的，你需要注意从正确的线程中调用SurfaceTexture的方法。</p>
+
+<p>每一个传递的Buffer都不仅仅是buffer本身，还包含了一个timestamp与transformation的信息。</p>
+
+<p>提供transformation的信息是为了提供效率。在某些情况下，对于消费者来说，source data可能是错误的orientation，我们没有在发送数据之前就做方向矫正，而是把数据与它的角度信息一起进行传递。transformation matrix的信息可以在数据被使用的时候与其他transformation信息进行整合，这样能够最大化的减少额外的开销。</p>
+
+<p>timestamp也是很有帮助的。例如，假设你连接到了一个生产者的接口上(通过<code>setPreviewTexture()</code>连接到Camera的输出接口)，如果你想要创建一个Video，你需要为每一帧数据设置当前的timestamp，这个timestamp应该是基于frame被captured来计算的，而不是buffer被接收到得时间。这个timestamp是被camera的代码进行设置的，这样确保了timestamp更加具有连续性。</p>
+
+<h2>SurfaceTexture and Surface</h2>
+
+<p>如果你仔细查看API文档，你将会发现：对于程序来说，创建一个空白Surface的唯一方式是通过它的构造函数来实现，这个构造函数使用SufaceTexture作为唯一的参数。（在API 11之前，还没有public的surface构造器）。如果你把SurfaceTexture作为Surface与Texture的结合体，只有唯一的构造方法就会成为一个缺点。</p>
+
+<p>其实SurfaceTexture可以称为GLConsumer，这能够更加准确的描述它扮演的角色：作为BufferQueue的owner与comsumer。当你从SurfaceTexture中创建一个Surface时，从SurfaceTexture的BufferQueue的角度来看，你是在创建一个对象用来作为生产者。</p>
+
+<h2>TextureView</h2>
+
+<p>TextureView是Android 4.0才开始被引入的。它是很复杂的一个View对象，它会组合View与SurfaceTexture。</p>
+
+<p>SurfaceTexture被称为一个GL comsumer，它会消费图形数据的buffer并使得他们作为texture的形式存在。TextureView对SurfaceTexture做了包装，取代了响应回调的职责并负责请求新的buffer。新的buffer会导致TextureView进行invalidate的操作。当请求绘制时，TextureView使用最近接收到得buffer作为它的source data，渲染时不用考虑View的任何状态值。</p>
+
+<p>你可以使用GLES对TextureView进行渲染，就像SurfaceView一样。仅仅是把SurfaceTexture传递到EGL的window创建的方法里面。然而这样做，暴露了一个隐藏的问题。</p>
+
+<p>在前面我们有提到，BufferQueues可以在不同的进程中传递buffers。当使用GLES渲染TextureView的时候，producer与consumer是在同一个进程，并且他们可能会执行在同一个thread。假设我们从UI Thread快速的提交了一连串的buffers。EGL buffer swap的方法会需要从BufferQueue中执行dequeue的操作，他会一直停留直到有一个buffer可用。可是直到consumer请求一个buffer进行渲染之前，不会有任何的buffer可用，而且这件事情也发生在UI Thread。所以这就出现问题了。</p>
+
+<p>解决方案是使得BufferQueue确保总是有一个可用的buffer用来进行dequeue，这样避免buffer swap会被卡住。其中一个方法是当新的buffer进行queued操作时，BufferQueue能够discard前一个queued的buffer，并且确保queue中存在的最少buffer数同时限制加入队列中得最多的buffer个数。(<strong>如果你的队列中，有三个buffers，消费者一次请求了所有的三个buffer，那么就没有buffer用来出队了，buffer swap的调用会被卡住或者失败，隐藏我们需要阻止消费者一次请求超过2个buffer。</strong>)错失Buffer通常是不希望发生的事情，因此只有在特殊情况下才允许发生，例如生产者与消费者在同一个Process。</p>
+
+<h2>SurfaceView or TextureView</h2>
+
+<p>SurfaceView与TextureView扮演了相似的角色，但在实现原理上却有着非常大的差异。选择哪个才是最好的需要知道如何进行权衡利弊。</p>
+
+<p>TextureView是View hierarchy中一个普通的成员，它的行为和其他View类似，可以叠加到其他View上也可以被其他View进行重叠覆盖。你可以对它执行任意的transformation，也可以通过简单的API调用获取其中的数据内容。</p>
+
+<p>TextureView的主要缺陷是composition步骤的效率。对于SurfaceView来说，数据内容是由SurfaceFlinger绘制到单独的一个layer上的，完美的实现了层叠。对于TextureView，View的composition是由GLES执行的，同时更新TextureView的数据内容可能会导致其他View组件也出现redraw(如果view是放在TextureView的上面的话)。在View渲染成功之后，app UI layer必须通过SurfaceFlinger与其他layer(StatusBar layer,NavigationBar layer)进行composition。对于一个全屏的视频播放应用，还有那些UI元素全部在video layer上面的应用，SurfaceView提供了更好的性能。</p>
+
+<p>前面有提到过，对于RDM保护的Video只能在上层的layer上呈现。能够播放DRM的Video Player必须使用SurfaceView。</p>
+
+<h2>SurfaceView and Activity Lifecycle</h2>
+
+<p>当使用SurfaceView的时候，渲染Surface应该使用单独的Thread而不是Main UI Thread。这会带来一些thread与activity生命周期的交互问题。</p>
+
+<p>首先，对于一个拥有SurfaceView的Activity，他们有两个互相依赖的生命周期：</p>
+
+<ul>
+<li>App onCreate/onResume/onPause</li>
+<li>Surface created/changed/destoryed</li>
+</ul>
+
+
+<p>当Activity启动时，你会按下面的顺序接收到callback:</p>
+
+<ul>
+<li>onCreate</li>
+<li>onResume</li>
+<li>surfaceCreated</li>
+<li>surfaceChanged</li>
+</ul>
+
+
+<p>如果你点击back按钮，你将会收到下面的callback:</p>
+
+<ul>
+<li>onPause</li>
+<li>surfaceDestoryed(在Surface消失之前就会执行)</li>
+</ul>
+
+
+<p>如果你点击电源按钮来关闭屏幕，你只会收到<code>onPause()</code>，没有<code>surfaceDestroyed()</code>。此时Surface仍然是存活的，渲染操作还可以继续进行。如果你有需要，还可以持续请求获取到Choreographyer的信号。如果你在锁屏的情况下旋转屏幕，然后对设备进行解锁，此时Activity会被重新启动。但是如果没有进行旋转，解锁之后还是能够获取到之前的Surface。</p>
+
+<p>当在SurfaceView里面使用一个单独的渲染线程时有一个问题：这个Thread的生命周期是不是应该和Surface或者Activity进行绑定？答案取决于在屏幕关闭时你想要做的操作。有两个方法：(1)在Activity的start/stop时对Thread做start/stop的操作。(2)在Surface的create/destory时对thread做start/stop的操作。</p>
+
+<ul>
+<li>方法(1)是和app的生命周期进行绑定。在onResume()的时候开启渲染线程，在onPause时停止它。这会遇到一点麻烦是：不知道何时创建于配置thread，因为Surface有时存在有时又不在。我们必须等待Surface被创建时候才能做一些线程中的初始化的操作。但是我们还不能简单的把这些操作放到<code>surfaceCreated()</code>的回调里面执行，因为如果surface不被重新创建的话，就没有办法触发那些初始化的操作。因此我们不要查询与保存Surface的状态，并且把这些信息传递给渲染thread。请注意，在多核的系统中，线程间传递数据需要小心谨慎，最好的方式是通过Handler message来传递Surface或者SurfaceHolder，而不仅仅是把他们放到thread里面。</li>
+<li>方法(2)呼声更高，因为Surface与渲染的逻辑是相关联的。在Surface创建之后开启渲染Thread，这样避免了一些线程间通信的问题。Surface created/changed的消息都是先于Thread收到的。我们需要确保屏幕关闭之后，渲染操作会停止，在屏幕点亮之后操作能够恢复。可以通过简单的通知Choreographer来停止触发frame绘制的回调。仅仅只有在渲染thread正在运行，我们的<code>onReusme</code>方法才需要恢复那些callback。如果我们基于frame之间的时间做动画的操作，中间省略掉得一些数据是不要紧的。给出明确的pause/resume的消息是个不错的写法。</li>
+</ul>
+
+
+<p>=====
+学习自：<a href="http://source.android.com/devices/graphics/architecture.html">http://source.android.com/devices/graphics/architecture.html</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Notes(06) - Camera]]></title>
+    <link href="http://hukai.me/blog/2014/04/21/android-notes-06-camera/"/>
+    <updated>2014-04-21T21:24:00+08:00</updated>
+    <id>http://hukai.me/blog/2014/04/21/android-notes-06-camera</id>
+    <content type="html"><![CDATA[<p>Android framework为各种不同的Camera与Camera的特色功能提供了支持，使得可以在应用中进行拍照与录像。这篇文章会讨论一种简便，快速的拍照录像方式，为了给用户创建定制的相机体验，文章也会概述相机的高级功能。</p>
+
+<h2>0)开始之前</h2>
+
+<p>在应用中开启Android设备的相机功能之前，应该考量如下几个问题：</p>
+
+<ul>
+<li><strong>必须的相机硬件</strong> - 当然不能把一个包含相机功能的应用安装到一个连相机硬件都没有的设备上。因此，应该在mainfest文件中声明需要使用到相机。</li>
+<li><strong>快速获取图片还是定制相机</strong> - 应用将如何使用相机？是想做一个快速的抓拍还是录制一小段视频剪辑？还是说想提供一种新的相机使用方式？如果是快速的获取一张抓拍图片或者是一小段视频剪辑，建议查看下面的<strong>3)使用已经安装的相机应用。</strong>如果是为了开发一个定制相机功能的应用，查看下面的<strong>4)创建一个相机应用</strong>。</li>
+<li><strong>存储位置</strong> - 生成的图片与视频是只对自己的应用可见还是其它类似Gallery的应用也可以访问？即使自己的应用被卸载后也不能被其他应用访问吗？建议查看<strong>5)保存媒体文件</strong></li>
+</ul>
+
+
+<h2>1)简要概述</h2>
+
+<p>Android framework通过提供Camera API来支持拍照与录制视频的功能。下面是相关的类：</p>
+
+<ul>
+<li><a href="http://developer.android.com/reference/android/hardware/Camera.html"><strong>Camera</strong></a><br/>
+该类是控制相机硬件的基础的API。它可以用来拍照或者录制视频。</li>
+<li><a href="http://developer.android.com/reference/android/view/SurfaceView.html"><strong>SurfaceView</strong></a><br/>
+该类是用来呈现一个动态的相机预览界面。</li>
+<li><a href="http://developer.android.com/reference/android/media/MediaRecorder.html"><strong>MediaRecorder</strong></a><br/>
+该类用来使用相机录制视频。</li>
+<li><a href="http://developer.android.com/reference/android/content/Intent.html"><strong>Intent</strong></a><br/>
+使用<a href="http://developer.android.com/reference/android/provider/MediaStore.html#ACTION_IMAGE_CAPTURE">MediaStore.ACTION_IMAGE_CAPTURE</a> 或者 <a href="http://developer.android.com/reference/android/provider/MediaStore.html#ACTION_VIDEO_CAPTURE">MediaStore.ACTION_VIDEO_CAPTURE</a>作为Intent的action可以用来拍照与录制视频。</li>
+</ul>
+
+
+<!-- More -->
+
+
+<h2>2)Manifest声明</h2>
+
+<p>在使用Camera API开发应用之前，应该确保应用的mainfest中有做恰当的声明，表明需要使用相机或者是相机的相关功能。</p>
+
+<ul>
+<li><p><strong>Camera Permission</strong> - 为了使用相机硬件，你的应用必须请求使用Camera的权限。<br/>
+<code>xml
+&lt;uses-permission android:name="android.permission.CAMERA" /&gt;
+</code><br/>
+<strong>Note:</strong>如果你是通过Intent来使用Camera，你的应用程序则不需要请求这个权限。</p></li>
+<li><p><strong>Camera Features</strong> - 你的应用还必须声明使用相机功能，例如：<br/>
+<code>xml
+&lt;uses-feature android:name="android.hardware.camera" /&gt;
+</code><br/>
+关于相机功能列表，请参考<a href="http://developer.android.com/guide/topics/manifest/uses-feature-element.html#hw-features">功能引用</a>。增加相机功能到你的mainfest文件，这样Google Play可以阻止那些没有相机硬件或者没有相机特定功能的设备安装你的应用。关于Google Play如何做过滤的信息，请参考<a href="http://developer.android.com/guide/topics/manifest/uses-feature-element.html#market-feature-filtering">Google Play and Feature-Based Filtering</a>。<br/>
+你还可以为每个相机特性设置<code>android:required</code>的属性，表示这个功能是否为必须的。</p></li>
+<li><p><strong>Storage Permission</strong> - 如果你的应用需要保存图片或者视频到设备的外置存储空间(SD card)上，你也需要在manifest中指定存取权限。<br/>
+<code>xml
+&lt;uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /&gt;
+</code></p></li>
+<li><p><strong>Audio Recording Permission</strong> - 为了录制音频或者视频，你的程序必须请求audio capture permission。<br/>
+<code>xml
+&lt;uses-permission android:name="android.permission.RECORD_AUDIO" /&gt;
+</code></p></li>
+<li><strong>Location Permission</strong> - 如果你的应用需要为图片添加位置信息，你还需要请求location permission:<br/>
+<code>xml
+&lt;uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /&gt;
+</code><br/>
+关于获取用户位置信息的更多细节，请参考<a href="http://developer.android.com/guide/topics/location/strategies.html">Location Strategies</a>.</li>
+</ul>
+
+
+<h2>3)Using Existing Camera Apps</h2>
+
+<p>在你的应用中快速的实现拍照与录制视频的方法是使用一个Intent来调用已经存在系统中的相机程序。通过已经存在的相机程序拍照或者录制视频，然后返回数据给请求方。这一部分会演示如何使用这种技术。</p>
+
+<p>触发Camera Intent需要遵守如下几个步骤：</p>
+
+<ul>
+<li><p><strong>Compose a Camera Intent</strong> - 创建一个请求拍照或者录像的Intent，使用下面的intent类型：</p>
+
+<ul>
+<li><a href="http://developer.android.com/reference/android/provider/MediaStore.html#ACTION_IMAGE_CAPTURE">MediaStore.ACTION_IMAGE_CAPTURE</a> - 请求拍照的Intent。</li>
+<li><a href="http://developer.android.com/reference/android/provider/MediaStore.html#ACTION_VIDEO_CAPTURE">MediaStore.ACTION_VIDEO_CAPTURE</a> - 请求录像的Intent。</li>
+</ul>
+</li>
+<li><p><strong>Start the Camera Intent</strong> - 使用<a href="http://developer.android.com/reference/android/app/Activity.html#startActivityForResult(android.content.Intent,%20int">startActivityForResult()</a>)方法来执行这个Intent。在启动这个Intent之后，相机程序会被唤起并提供拍照或者录像的功能。</p></li>
+<li><p><strong>Receive the Intent Result</strong> - 在你的程序里面实现<a href="http://developer.android.com/reference/android/app/Activity.html#onActivityResult(int,%20int,%20android.content.Intent">onActivityResult()</a>)的方法用来接收相机程序返回的数据。当用户结束拍照或者录像之后，系统会调用到这个方法。</p></li>
+</ul>
+
+
+<h3>3.1)Image capture intent</h3>
+
+<p>使用Camera Intent是一种使用最少的代码为你的程序开启拍照功能的一种简便的方法。一个拍照程序可以包含下面的附加信息：</p>
+
+<p><strong><a href="http://developer.android.com/reference/android/provider/MediaStore.html#EXTRA_OUTPUT">MediaStore.EXTRA_OUTPUT</a></strong> - 这定义了一个Uri对象来指定存放图片的路径与文件名。这个设置信息是可选的，但是强烈建议添加。如果你不指定这个值，相机程序会使用默认的文件名保存图片到默认的位置，这个值可以从Intent.getData()的字段中获取到。</p>
+
+<p>下面的示例代码演示了如何构建一个拍照Intent并执行它。<code>getOutputMediaFileUri()</code>方法可以从<strong>Saving Media Files</strong>的段落中涉及到。</p>
+
+<p>```java
+private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
+private Uri fileUri;</p>
+
+<p>@Override
+public void onCreate(Bundle savedInstanceState) {</p>
+
+<pre><code>super.onCreate(savedInstanceState);
+setContentView(R.layout.main);
+
+// create Intent to take a picture and return control to the calling application
+Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+fileUri = getOutputMediaFileUri(MEDIA_TYPE_IMAGE); // create a file to save the image
+intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri); // set the image file name
+
+// start the image capture Intent
+startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+</code></pre>
+
+<p>}
+```</p>
+
+<p>当startActivityForResult()方法被执行，用户会看到一个相机拍照的界面。用户执行了拍照(或者取消操作)，用户界面会回退到你的程序，你必须在onActivityResult()方法里面接收返回的数据。关于如何接受完整的intent，可以参考下面的<strong>Receiving camera intent result</strong>段落。</p>
+
+<h3>3.2)Video capture intent</h3>
+
+<p>视频录制的原理和拍照一致。一个视频录制的Intent可以包含如下的参数信息：</p>
+
+<ul>
+<li><a href="http://developer.android.com/reference/android/provider/MediaStore.html#EXTRA_OUTPUT">MediaStore.EXTRA_OUTPUT</a> - 和拍照类似，这里指定保存视频的位置。同样这个字段是可选的，但是也被强烈建议进行填写。如果没有传递这个参数，相机程序会使用默认的文件名保存文件到默认的存储位置。你可以通过在返回的Intent.getData()字段中获取到这个值。</li>
+<li><a href="http://developer.android.com/reference/android/provider/MediaStore.html#EXTRA_VIDEO_QUALITY">MediaStore.EXTRA_VIDEO_QUALITY</a> - 这里的值可以为0或者1，分别表示低质量与高质量。</li>
+<li><a href="http://developer.android.com/reference/android/provider/MediaStore.html#EXTRA_DURATION_LIMIT">MediaStore.EXTRA_DURATION_LIMIT</a> - 设置这个值用来限制视频的长度，用毫秒计算。</li>
+<li><a href="http://developer.android.com/reference/android/provider/MediaStore.html#EXTRA_SIZE_LIMIT">MediaStore.EXTRA_SIZE_LIMIT</a> - 设置这个值用来限制文件的大小，用btye做单位。</li>
+</ul>
+
+
+<p>下面演示了如何构建一个Video Intent并执行：
+```java
+private static final int CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE = 200;
+private Uri fileUri;</p>
+
+<p>@Override
+public void onCreate(Bundle savedInstanceState) {</p>
+
+<pre><code>super.onCreate(savedInstanceState);
+setContentView(R.layout.main);
+
+//create new Intent
+Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+
+fileUri = getOutputMediaFileUri(MEDIA_TYPE_VIDEO);  // create a file to save the video
+intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);  // set the image file name
+
+intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1); // set the video image quality to high
+
+// start the Video Capture Intent
+startActivityForResult(intent, CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE);
+</code></pre>
+
+<p>}
+```
+和拍照类似，也需要在activity的onActivityResult里面去接收数据并做处理。</p>
+
+<h3>3.3)Receiving camera intent result</h3>
+
+<p>一旦你构建并执行了一个拍照或者录像的Intent，你的程序必须确保能够正确接收返回的数据。为了正确的接收到Intent，你必须重写onActivityResult()的方法，下面会演示如何获取到上面示例代码返回的数据。</p>
+
+<p>```java
+private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
+private static final int CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE = 200;</p>
+
+<p>@Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {</p>
+
+<pre><code>if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
+    if (resultCode == RESULT_OK) {
+        // Image captured and saved to fileUri specified in the Intent
+        Toast.makeText(this, "Image saved to:\n" +
+                 data.getData(), Toast.LENGTH_LONG).show();
+    } else if (resultCode == RESULT_CANCELED) {
+        // User cancelled the image capture
+    } else {
+        // Image capture failed, advise user
+    }
+}
+
+if (requestCode == CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE) {
+    if (resultCode == RESULT_OK) {
+        // Video captured and saved to fileUri specified in the Intent
+        Toast.makeText(this, "Video saved to:\n" +
+                 data.getData(), Toast.LENGTH_LONG).show();
+    } else if (resultCode == RESULT_CANCELED) {
+        // User cancelled the video capture
+    } else {
+        // Video capture failed, advise user
+    }
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>一旦你的activity成功接收了数据，那么你的程序就可以在指定的位置获取到图片或者视频了。</p>
+
+<h2>4)Building a Camera App</h2>
+
+<p>一些开发者也许需要开发一个定制的相机应用，用来提供特殊的功能与体验。创建一个定制的相机界面比起使用Intent需要更多的代码，但是它能够提供一种更加优秀的用户体验。</p>
+
+<p>通常来说创建一个定制化的相机界面有如下几个步骤：</p>
+
+<ul>
+<li><strong>Detect and Access Camera</strong> - 检查相机是否存在并可访问。</li>
+<li><strong>Create a Preview Class</strong> - 创建一个继承自SurfaceView的preview类，并implement SurfaceHolder的接口的interface。这个类用来预览相机的动态图片。</li>
+<li><strong>Build a Preview Layout</strong> - 一旦你拥有了preview class。创建一个Layout用来承载preview并提供交互控制界面。</li>
+<li><strong>Setup Listeners for Capture</strong> - 为控制界面建立监听器，用来启动拍照或者录像。</li>
+<li><strong>Capture and Save Files</strong> - 建立拍照录像的代码并进行保存。</li>
+<li><strong>Release the Camera</strong> - 使用完相机之后，你的程序必须正确的释放它，以便其他程序使用。</li>
+</ul>
+
+
+<p>相机硬件是一个共享资源，它必须被小心谨慎的管理使用。因此你的程序不应该和其他可能使用相机硬件的程序有冲突。下面的段落会介绍如何检测相机硬件，如何请求获取权限，如何拍照录像以及如何在使用完毕时释放相机。</p>
+
+<p><strong>注意:</strong> 当你的程序执行完任务之后，需要记得通过执行Camera.release()来释放相机对象。如果你的相机没有合理的释放相机，后续包括你自己的应用在内的所有的相机应用，都将无法正常打开相机并且可能导致程序崩溃。</p>
+
+<h3>4.1)Detecting camera hardware</h3>
+
+<p>如果你的程序没有在manifest中声明需要使用相机，你应该在运行时去检查相机是否可用。为了执行这个检查，需要使用到<a href="http://developer.android.com/reference/android/content/pm/PackageManager.html#hasSystemFeature(java.lang.String">PackageManager.hasSystemFeature()</a>) 方法，如下所示：</p>
+
+<p>```java
+/<em>* Check if this device has a camera </em>/
+private boolean checkCameraHardware(Context context) {</p>
+
+<pre><code>if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
+    // this device has a camera
+    return true;
+} else {
+    // no camera on this device
+    return false;
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>Android设备可以拥有多个摄像头，例如前置与后置摄像头。从Android 2.3 (API Level 9)开始，可以通过<a href="http://developer.android.com/reference/android/hardware/Camera.html#getNumberOfCameras(">Camera.getNumberOfCameras()</a>)方法获取到摄像头的个数。</p>
+
+<h3>4.2)Accessing cameras</h3>
+
+<p>如果你已经判断到程序运行的设备上有摄像头，你需要获取到摄像头的话，需要通过一个相机实例来进行访问。</p>
+
+<p>为了访问到主摄像头，如下所示，使用<a href="http://developer.android.com/reference/android/hardware/Camera.html#open(">Camera.open()</a>)方法。
+```java
+/<em>* A safe way to get an instance of the Camera object. </em>/
+public static Camera getCameraInstance(){</p>
+
+<pre><code>Camera c = null;
+try {
+    c = Camera.open(); // attempt to get a Camera instance
+}
+catch (Exception e){
+    // Camera is not available (in use or does not exist)
+}
+return c; // returns null if camera is unavailable
+</code></pre>
+
+<p>}
+```</p>
+
+<p><strong>注意:</strong> 当使用Camera.open方法时总是需要做检查exceptions的动作。如果没有检查exception，有可能会因为相机正在使用或者相机不存在而使得程序崩溃。</p>
+
+<p>在Android 2.3 (API Level 9)开始, 你可以使用通过<a href="http://developer.android.com/reference/android/hardware/Camera.html#open(int">Camera.open(int)</a>)方法来访问特定的摄像头。上面演示的代码会优先获取主摄像头。</p>
+
+<h3>4.3)Checking camera features</h3>
+
+<p>一旦你获取到相机，你可以使用<a href="http://developer.android.com/reference/android/hardware/Camera.html#getParameters(">Camera.getParameters()</a>)方法来获取到更多的相机信息。也可以通过获取到的相机参数对象得到相机能够支持的功能。从android 2.3开始，使用<a href="http://developer.android.com/reference/android/hardware/Camera.html#getCameraInfo(int,%20android.hardware.Camera.CameraInfo">Camera.getCameraInfo()</a>)可以获取到相机是前置还是后置摄像头以及拍摄出来的图片角度。</p>
+
+<h3>4.4)Creating a preview class</h3>
+
+<p>为了给用户提供有效的拍照与录像体验，用户需要能够看到摄像头捕获的数据。相机预览是使用SurfaceView，它能够显示来自摄像头的数据，因此用户可以分割捕获图片或者视频。</p>
+
+<p>下面的示例代码演示了如何创建一个基础的相机预览类，该类可以included到另外一个layout中。为了捕获拍照事件的回调，需要implement<a href="http://developer.android.com/reference/android/view/SurfaceHolder.Callback.html">SurfaceHolder.Callback</a> ，之后可以在这些回调里面进行创建与销毁View的操作。</p>
+
+<p>```java
+/<em>* A basic Camera preview class </em>/
+public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {</p>
+
+<pre><code>private SurfaceHolder mHolder;
+private Camera mCamera;
+
+public CameraPreview(Context context, Camera camera) {
+    super(context);
+    mCamera = camera;
+
+    // Install a SurfaceHolder.Callback so we get notified when the
+    // underlying surface is created and destroyed.
+    mHolder = getHolder();
+    mHolder.addCallback(this);
+    // deprecated setting, but required on Android versions prior to 3.0
+    mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+}
+
+public void surfaceCreated(SurfaceHolder holder) {
+    // The Surface has been created, now tell the camera where to draw the preview.
+    try {
+        mCamera.setPreviewDisplay(holder);
+        mCamera.startPreview();
+    } catch (IOException e) {
+        Log.d(TAG, "Error setting camera preview: " + e.getMessage());
+    }
+}
+
+public void surfaceDestroyed(SurfaceHolder holder) {
+    // empty. Take care of releasing the Camera preview in your activity.
+}
+
+public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
+    // If your preview can change or rotate, take care of those events here.
+    // Make sure to stop the preview before resizing or reformatting it.
+
+    if (mHolder.getSurface() == null){
+      // preview surface does not exist
+      return;
+    }
+
+    // stop preview before making changes
+    try {
+        mCamera.stopPreview();
+    } catch (Exception e){
+      // ignore: tried to stop a non-existent preview
+    }
+
+    // set preview size and make any resize, rotate or
+    // reformatting changes here
+
+    // start preview with new settings
+    try {
+        mCamera.setPreviewDisplay(mHolder);
+        mCamera.startPreview();
+
+    } catch (Exception e){
+        Log.d(TAG, "Error starting camera preview: " + e.getMessage());
+    }
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>如果你想为你的相机预览界面设置特定的预览大小，可以在<code>surfaceChanged()</code>的回调里面进行操作(注意上面演示代码的注释)。设置预览大小时，你<strong>必须</strong>使用从<a href="http://developer.android.com/reference/android/hardware/Camera.Parameters.html#getSupportedPreviewSizes(">getSupportedPreviewSizes()</a>)方法获取到的预览值，不能在<a href="http://developer.android.com/reference/android/hardware/Camera.Parameters.html#setPreviewSize(int,%20int">setPreviewSize()</a>)方法里设置随意的预览值。</p>
+
+<h3>4.5)Placing preview in a layout</h3>
+
+<p>在上一段落演示的Camera Preview Class,必须放置在一个activity的layout中。这一段落会演示为了预览如何创建一个基础的layout与activity。</p>
+
+<p>下面的代码提供了一个能够显示相机预览界面的基础layout。在这段代码中，FrameLayout是相机预览类的container。使用framelayout可以在相机预览界面上叠加额外的图片信息或者是操作控制组件。</p>
+
+<p>```xml
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"</p>
+
+<pre><code>android:orientation="horizontal"
+android:layout_width="fill_parent"
+android:layout_height="fill_parent"
+&gt;
+</code></pre>
+
+<p>  &lt;FrameLayout</p>
+
+<pre><code>android:id="@+id/camera_preview"
+android:layout_width="fill_parent"
+android:layout_height="fill_parent"
+android:layout_weight="1"
+/&gt;
+</code></pre>
+
+<p>  &lt;Button</p>
+
+<pre><code>android:id="@+id/button_capture"
+android:text="Capture"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_gravity="center"
+/&gt;
+</code></pre>
+
+<p></LinearLayout>
+```</p>
+
+<p>在大多数设备上，相机预览的角度默认是横屏的。演示的layout指定了horizontal，并且下面的代码使得activity固定成横屏的模式。</p>
+
+<p>```xml
+&lt;activity android:name=".CameraActivity"</p>
+
+<pre><code>      android:label="@string/app_name"
+
+      android:screenOrientation="landscape"&gt;
+      &lt;!-- configure this activity to use landscape orientation --&gt;
+
+      &lt;intent-filter&gt;
+    &lt;action android:name="android.intent.action.MAIN" /&gt;
+    &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+&lt;/intent-filter&gt;
+</code></pre>
+
+<p></activity>
+```</p>
+
+<p><strong>Note:</strong> 相机预览界面不一定是要横屏的。从android 2.2开始，你可以使用<a href="http://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation(int">setDisplayOrientation()</a>)方法来设置预览图片的角度。为了在用户旋转手机时改变相机预览的角度，在<code>surfaceChanged()</code>方法里面，首先要使用<a href="http://developer.android.com/reference/android/hardware/Camera.html#stopPreview(">Camera.stopPreview()</a>)停止预览，然后再使用<a href="http://developer.android.com/reference/android/hardware/Camera.html#startPreview(">Camera.startPreview()</a>)方法来重新开启相机预览。</p>
+
+<p>为了在activity中添加相机界面，你的Camera Activity必须确保在activity pause或者是destory的时候释放相机资源。下面的代码演示了如何添加camera preview class到camera activity中。</p>
+
+<p>```java
+public class CameraActivity extends Activity {</p>
+
+<pre><code>private Camera mCamera;
+private CameraPreview mPreview;
+
+@Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.main);
+
+    // Create an instance of Camera
+    mCamera = getCameraInstance();
+
+    // Create our Preview view and set it as the content of our activity.
+    mPreview = new CameraPreview(this, mCamera);
+    FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
+    preview.addView(mPreview);
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p><strong>Note:</strong> 上面演示的<code>getCameraInstance()</code>方法出现在4.2)Accessing camera段落中。</p>
+
+<h3>4.6)Capturing pictures</h3>
+
+<p>一旦你建立了preview class并且创建好了显示的layout。那么就可以开始做拍照的动作了。</p>
+
+<p>为了获取到一张图片，需要使用<a href="http://developer.android.com/reference/android/hardware/Camera.html#takePicture(android.hardware.Camera.ShutterCallback,%20android.hardware.Camera.PictureCallback,%20android.hardware.Camera.PictureCallback">Camera.takePicture()</a>)方法。为了获取到JPEG格式的图片数据，你必须implement一个<a href="http://developer.android.com/reference/android/hardware/Camera.PictureCallback.html">Camera.PictureCallback</a>接口来接收图片数据并把它写到文件中。</p>
+
+<p>```java
+private PictureCallback mPicture = new PictureCallback() {</p>
+
+<pre><code>@Override
+public void onPictureTaken(byte[] data, Camera camera) {
+
+    File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
+    if (pictureFile == null){
+        Log.d(TAG, "Error creating media file, check storage permissions: " +
+            e.getMessage());
+        return;
+    }
+
+    try {
+        FileOutputStream fos = new FileOutputStream(pictureFile);
+        fos.write(data);
+        fos.close();
+    } catch (FileNotFoundException e) {
+        Log.d(TAG, "File not found: " + e.getMessage());
+    } catch (IOException e) {
+        Log.d(TAG, "Error accessing file: " + e.getMessage());
+    }
+}
+</code></pre>
+
+<p>};
+```</p>
+
+<p>触发拍照的动作，需要使用下面演示到的方法。</p>
+
+<p>```java
+// Add a listener to the Capture button
+Button captureButton = (Button) findViewById(id.button_capture);
+captureButton.setOnClickListener(</p>
+
+<pre><code>new View.OnClickListener() {
+    @Override
+    public void onClick(View v) {
+        // get an image from the camera
+        mCamera.takePicture(null, null, mPicture);
+    }
+}
+</code></pre>
+
+<p>);
+```</p>
+
+<h3>4.7)Capturing videos</h3>
+
+<p>录制视频的内容，暂时跳过，下次再看。</p>
+
+<h3>4.8)Releasing the camera</h3>
+
+<p>相机是被共享的一种资源。获取到一个相机实例之后，程序才可以使用相机，但是，在使用完相机的时候，程序必须小心谨慎的释放它。在程序进入到pause状态时，立即释放相机资源。如果你的程序没有合理的释放相机资源，包括自己程序本身在内，后续所有的相机请求都将失败，甚至可能会导致程序崩溃。下面的代码演示了如何释放相机资源。</p>
+
+<p>```java
+public class CameraActivity extends Activity {</p>
+
+<pre><code>private Camera mCamera;
+private SurfaceView mPreview;
+private MediaRecorder mMediaRecorder;
+
+...
+
+@Override
+protected void onPause() {
+    super.onPause();
+    releaseMediaRecorder();       // if you are using MediaRecorder, release it first
+    releaseCamera();              // release the camera immediately on pause event
+}
+
+private void releaseMediaRecorder(){
+    if (mMediaRecorder != null) {
+        mMediaRecorder.reset();   // clear recorder configuration
+        mMediaRecorder.release(); // release the recorder object
+        mMediaRecorder = null;
+        mCamera.lock();           // lock camera for later use
+    }
+}
+
+private void releaseCamera(){
+    if (mCamera != null){
+        mCamera.release();        // release the camera for other applications
+        mCamera = null;
+    }
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>5)Saving Media Files</h2>
+
+<p>用户创建的图片或者视频均需要保存到设备的external storage目录下(SD Card)。可以有多种可能的位置用来保存文件，但是作为一个开发人员，只有下面两种标准的路径进行保存。</p>
+
+<ul>
+<li><a href="http://developer.android.com/reference/android/os/Environment.html#getExternalStoragePublicDirectory(java.lang.String">Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)</a>) - 这个方法会返回用来保存图片与视频所推荐使用的标准共享目录。这个目录是共享开放的，所以其他程序可以轻易的发现，读取并删除这个目录下的文件。如果你的程序被用户卸载，在这个目录下的文件不会被移除。为了避免干扰到用户已经存在的图片与视频目录，你应该为你的程序创建一个子目录。如下面的代码所示。这个方法从Android 2.2 (API Level 8)开始就可以使用。</li>
+<li><a href="http://developer.android.com/reference/android/content/Context.html#getExternalFilesDir(java.lang.String">Context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)</a>) - 这个方法会返回一个和你的程序相关联的，用来保存图片与视频的，标准目录。如果你的程序被卸载，在这个目录下的文件也会被一起移除。这个目录并不能阻止其他程序的读写。</li>
+</ul>
+
+
+<p>```java
+public static final int MEDIA_TYPE_IMAGE = 1;
+public static final int MEDIA_TYPE_VIDEO = 2;</p>
+
+<p>/<em>* Create a file Uri for saving an image or video </em>/
+private static Uri getOutputMediaFileUri(int type){</p>
+
+<pre><code>  return Uri.fromFile(getOutputMediaFile(type));
+</code></pre>
+
+<p>}</p>
+
+<p>/<em>* Create a File for saving an image or video </em>/
+private static File getOutputMediaFile(int type){</p>
+
+<pre><code>// To be safe, you should check that the SDCard is mounted
+// using Environment.getExternalStorageState() before doing this.
+
+File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+          Environment.DIRECTORY_PICTURES), "MyCameraApp");
+// This location works best if you want the created images to be shared
+// between applications and persist after your app has been uninstalled.
+
+// Create the storage directory if it does not exist
+if (! mediaStorageDir.exists()){
+    if (! mediaStorageDir.mkdirs()){
+        Log.d("MyCameraApp", "failed to create directory");
+        return null;
+    }
+}
+
+// Create a media file name
+String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+File mediaFile;
+if (type == MEDIA_TYPE_IMAGE){
+    mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+    "IMG_"+ timeStamp + ".jpg");
+} else if(type == MEDIA_TYPE_VIDEO) {
+    mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+    "VID_"+ timeStamp + ".mp4");
+} else {
+    return null;
+}
+return mediaFile;
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>6)Camera Features</h2>
+
+<p>Android提供了控制相机特性的方法，例如图片格式化，闪光灯模式，设置聚焦等等。这一段落列出了通常的相机功能并简短的介绍如何使用这些功能。大多数相机特性可以通过<strong>Camera.Parameters</strong>对象来获取并进行相关的设置。然而，有几个重要的功能不仅仅是通过<strong>Camera.Parameters</strong>能够实现的。请看下面的内容介绍：</p>
+
+<ul>
+<li>Metering and focus areas：测光并进行聚焦</li>
+<li>Face detection：人脸检测</li>
+<li>Time lapse video：延时视频</li>
+</ul>
+
+
+<p>关于上面3个常用的功能会在下面进行更加详细的介绍，除此之外的其他相机功能，请参考下面这张表：</p>
+
+<p><img src="/images/articles/camera_features_table.png" title="Camera Common Features" alt="camera_features_table.png" /></p>
+
+<p><strong>Note:</strong> 因为软硬件的差异性，那些功能并不一定都是支持的。对于检查功能是否可用，请参考下面的Checking feature availability.</p>
+
+<h3>6.1)Checking feature availability</h3>
+
+<p>相机的有些功能在所有手机上并不一定是都支持的。在开发相机应用时就需要提前考虑应该适配到哪个Level。然后开发的时候需要动态的去根据功能是否支持来做不同的处理。</p>
+
+<p>你可以通过获取到相机参数的对象来做检测。下面的例子演示了如何检查autofocus功能是否可用：
+```java
+// get Camera parameters
+Camera.Parameters params = mCamera.getParameters();</p>
+
+<p>List<String> focusModes = params.getSupportedFocusModes();
+if (focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
+  // Autofocus mode is supported
+}
+```</p>
+
+<p>对于大多数的相机特性，都可以使用类型上面的代码来处理。Camera.Parameters对象提供了一系列的类似<code>getSupported...()</code>, <code>is...Supported()</code> 与 <code>getMax...()</code> 方法来判断某个功能是否可用的。</p>
+
+<p>如果你的程序确定需要相机的某个特性，你可以在mainfest文件中就进声明。例如你声明了flash与auto-focus的功能，那么Google Play会阻止那些不支持这些功能的设备安装这个应用。关于相机功能的声明列表，请参考<a href="http://developer.android.com/guide/topics/manifest/uses-feature-element.html#hw-features">Features Reference.</a></p>
+
+<h3>6.2)Using camera features</h3>
+
+<p>前面已经提到过，通过Camera.Parameters对象来操控相机。如下所示：
+<code>java
+// get Camera parameters
+Camera.Parameters params = mCamera.getParameters();
+// set the focus mode
+params.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+// set Camera parameters
+mCamera.setParameters(params);
+</code>
+上面这种方法对大多数相机功能都是可用的，在你获取到相机的实例之后，大多数参数都是在任意时间均可以修改的。参数修改的效果在相机预览的界面是可以立即看到效果的。在软件层面，实际上可能是需要花几帧的时间来产生效果的，因为需要发送指令给相机硬件产生效果。</p>
+
+<p><strong>Important:</strong> 部分功能是不能修改的。特别是，修改相机预览的角度与大小，是需要先停止预览的。从Android Android 4.0 (API Level 14)开始，预览角度可以不用重启预览就可以进行修改。</p>
+
+<p>下面快速的介绍前面提到的3个功能：</p>
+
+<h4>6.2.1）Metering and focus areas</h4>
+
+<p>在某些拍照场景下，自动聚焦与测光并不能拍出我们想要的效果。从Android 4.0 (API Level 14)开始，支持指定特定的区域用来focus与metering。下面的代码演示了如何指定特定的区域用来focus与metering。</p>
+
+<p>```java
+// Create an instance of Camera
+mCamera = getCameraInstance();</p>
+
+<p>// set Camera parameters
+Camera.Parameters params = mCamera.getParameters();</p>
+
+<p>if (params.getMaxNumMeteringAreas() > 0){ // check that metering areas are supported</p>
+
+<pre><code>List&lt;Camera.Area&gt; meteringAreas = new ArrayList&lt;Camera.Area&gt;();
+
+Rect areaRect1 = new Rect(-100, -100, 100, 100);    // specify an area in center of image
+meteringAreas.add(new Camera.Area(areaRect1, 600)); // set weight to 60%
+Rect areaRect2 = new Rect(800, -1000, 1000, -800);  // specify an area in upper right of image
+meteringAreas.add(new Camera.Area(areaRect2, 400)); // set weight to 40%
+params.setMeteringAreas(meteringAreas);
+</code></pre>
+
+<p>}</p>
+
+<p>mCamera.setParameters(params);
+```
+<a href="http://developer.android.com/reference/android/hardware/Camera.Area.html">Camera.Area</a>对象包含了2个参数: 一个Rect对象用来指定区域，另外一个是权重用来告诉相机这部分区域的重要性。</p>
+
+<p>Rect的值是基于2000*2000的坐标体系。(-1000, -1000)表示的左上角，(1000, 1000)表示的是右下角。如下图所示：</p>
+
+<p><img src="/images/articles/camera-area-coordinates.png" title="Figure 1. The red lines illustrate the coordinate system for specifying a Camera.Area within a camera preview. The blue box shows the location and shape of an camera area with the Rect values 333,333,667,667." alt="camera-area-coordinates.png" /></p>
+
+<p>这个坐标系统是于相机的可见预览区域相吻合的，不会因为预览效果的放大缩小二改变。同样的，通过Camera.setDisplayOrientation()旋转预览并不会导致坐标系统的变化。</p>
+
+<h4>6.2.2)Face detection</h4>
+
+<p>对于包含人像的图片，头像是最重要的区域。在拍照的时候，这个区域应该用来作为focus与while balance操作的重要参数。从Android 4.0 (API Level 14)开始，系统能够提供API来动态检测人脸并且可以使用人脸识别技术来计算拍照图片的设置参数。</p>
+
+<p><strong>Note:</strong> 当人脸检测功能开启的时候，<code>setWhiteBalance(String)</code>, <code>setFocusAreas(List)</code> 与<code>setMeteringAreas(List)</code>并没有效果。</p>
+
+<p>使用人脸检测功能需要下面的几个步骤：</p>
+
+<ul>
+<li>检测在设备上是否有人脸检测的功能。</li>
+<li>创建一个人脸检测的监听器。</li>
+<li>把这个人脸检测器添加到Camera对象中。</li>
+<li>在预览开启之后启动人脸检测(每次预览重启也是)。</li>
+</ul>
+
+
+<p>通过<a href="http://developer.android.com/reference/android/hardware/Camera.Parameters.html#getMaxNumDetectedFaces(">getMaxNumDetectedFaces()</a>)方法来获取设备是否支持检测人脸。如下面的<code>startFaceDetection()</code>方法中演示的：</p>
+
+<p>为了把人脸检测到得结果反馈到界面上，还需要实现检测的监听器，如下所示：
+```java
+class MyFaceDetectionListener implements Camera.FaceDetectionListener {</p>
+
+<pre><code>@Override
+public void onFaceDetection(Face[] faces, Camera camera) {
+    if (faces.length &gt; 0){
+        Log.d("FaceDetection", "face detected: "+ faces.length +
+                " Face 1 Location X: " + faces[0].rect.centerX() +
+                "Y: " + faces[0].rect.centerY() );
+    }
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>创建完这个类之后，需要把这个Listener加到Camera的对象中，如下所示：
+<code>java
+mCamera.setFaceDetectionListener(new MyFaceDetectionListener());
+</code></p>
+
+<p>你得程序必须在每次启动或者重启相机预览的时候开始人脸检测。如下所示：
+```java
+public void startFaceDetection(){</p>
+
+<pre><code>// Try starting Face Detection
+Camera.Parameters params = mCamera.getParameters();
+
+// start face detection only *after* preview has started
+if (params.getMaxNumDetectedFaces() &gt; 0){
+    // camera supports face detection, so can start it:
+    mCamera.startFaceDetection();
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>如果使用前面4.4)Creating a preview class段落中提到的预览类，你需要在<code>surfaceCreated()</code> 与 <code>surfaceChanged()</code>方法中执行<code>startFaceDetection()</code>方法。如下所示：
+```java
+public void surfaceCreated(SurfaceHolder holder) {</p>
+
+<pre><code>try {
+    mCamera.setPreviewDisplay(holder);
+    mCamera.startPreview();
+
+    startFaceDetection(); // start face detection feature
+
+} catch (IOException e) {
+    Log.d(TAG, "Error setting camera preview: " + e.getMessage());
+}
+</code></pre>
+
+<p>}</p>
+
+<p>public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {</p>
+
+<pre><code>if (mHolder.getSurface() == null){
+    // preview surface does not exist
+    Log.d(TAG, "mHolder.getSurface() == null");
+    return;
+}
+
+try {
+    mCamera.stopPreview();
+
+} catch (Exception e){
+    // ignore: tried to stop a non-existent preview
+    Log.d(TAG, "Error stopping camera preview: " + e.getMessage());
+}
+
+try {
+    mCamera.setPreviewDisplay(mHolder);
+    mCamera.startPreview();
+
+    startFaceDetection(); // re-start face detection feature
+
+} catch (Exception e){
+    // ignore: tried to stop a non-existent preview
+    Log.d(TAG, "Error starting camera preview: " + e.getMessage());
+}
+</code></pre>
+
+<p>}
+```
+<strong>Note:</strong> 要在startPreview()方法之后才能开启人脸检测。请不要尝试在onCreate()方法里面启动人脸检测。</p>
+
+<h4>6.2.3)Time lapse video</h4>
+
+<p>Time lapse video使得用户可以通过组合一段时间的图片生成视频片段。这个功能利用了<a href="http://developer.android.com/reference/android/media/MediaRecorder.html">MediaRecorder</a>每隔一段时间来记录一张图片。</p>
+
+<p>为了实现这个功能，你需要像配置一个普通的recorder对象一样。如下面的代码所示：
+<code>java
+// Step 3: Set a CamcorderProfile (requires API Level 8 or higher)
+mMediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_TIME_LAPSE_HIGH));
+...
+// Step 5.5: Set the video capture rate to a low number
+mMediaRecorder.setCaptureRate(0.1); // capture a frame every 10 seconds
+</code>
+上面的设置只是对MediaRecorder进行参数设置的一小部分。一旦配置结束，就可以开启视频录制。关于更多的信息，请参考前面的4.7)Capture Video(还没有开始学习)</p>
+
+<p>===</p>
+
+<p>学习自<a href="http://developer.android.com/guide/topics/media/camera.html">http://developer.android.com/guide/topics/media/camera.html</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Android Training(18) - 使用IntentService执行任务(Lesson 3 - 回传任务状态给发送方)]]></title>
@@ -300,475 +1366,6 @@ protected void onHandleIntent(Intent workIntent) {
 <hr />
 
 <p><strong>学习自<a href="http://developer.android.com/training/run-background-service/create-service.html">http://developer.android.com/training/run-background-service/create-service.html</a>,欢迎交流讨论</strong></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Notes(06) - Touch事件分发响应机制]]></title>
-    <link href="http://hukai.me/blog/2014/04/05/android-notes-06-touch-event-dispatch-process/"/>
-    <updated>2014-04-05T13:13:00+08:00</updated>
-    <id>http://hukai.me/blog/2014/04/05/android-notes-06-touch-event-dispatch-process</id>
-    <content type="html"><![CDATA[<h2>1)概述</h2>
-
-<p>Android的TouchEvent通常包含三个动作,ACTION_DOWN,ACTION_MOVE与ACTION_UP。发出的顺序是DOWN->MOVE->MOVE->...->UP(注意MOVE事件是否能够被触发取决于操作手势里面是否包含了移动的动作)。</p>
-
-<p>消息分发流程，从上到下，从父到子：Activity->ViewGroup1->ViewGroup1的子ViewGroup2->...->Target View<br/>
-消息响应流程，从下到上，从子到父：Target View->...->ViewGroup1的子ViewGroup2->ViewGroup1->Activity</p>
-
-<ul>
-<li><p><strong>public boolean dispatchTouchEvent(MotionEvent ev);</strong><br/>
-事件分发处理函数，通常会在Activity层根据UI的显示情况，把事件传递给相应的ViewGroup。下面的演示代码中，为了方便模拟，会直接return true，解说中称之为“丢弃”。(因为事件实际上没有传递给任何组件，没有被消费，而且是主动的行为，故称之为丢弃)</p></li>
-<li><p><strong>public boolean onInterceptTouchEvent(MotionEvent ev);</strong><br/>
-对分发的事件进行拦截，注意拦截ACION_DOWN与其他ACTION的差异。<br/>
-第1种情况：如果ACTION_DOWN的事件没有被拦截，顺利找到了TargetView，那么后续的MOVE与UP都能够下发。如果后续的MOVE与UP下发时还有继续拦截的话，事件只能传递到拦截层，并且发出ACTION_CANCEL。<br/>
-第2种情况：如果ACITON_DOWN的事件下发时被拦截，导致没有找到TargetView，那么后续的MOVE与UP都无法向下派发了，在Activity层就终止了传递。</p></li>
-<li><p><strong>public boolean onTouchEvent(MotionEvent ev);</strong><br/>
-响应处理函数,如果有设置对应listener的话,这里还会与onTouch,onClick,onLongClick有关联。具体执行顺序是onTouch()->onTouchEvent()->onClick()->onLongClick()。是否能够顺序执行，取决于每个方法的返回值是true还是false。具体这里不展开说。</p></li>
-</ul>
-
-
-<p><strong>强关注点：dispatch与intercept的差异，ACTION_DOWN与其他ACITON会对寻找target组件带来差异，而是否寻找到Target组件对整个流程有着重大的的影响。</strong></p>
-
-<!-- More -->
-
-
-<h2>2)dispatchTouchEvent()的源码解读</h2>
-
-<p>```java Android 4.4 ViewGroup.dispatchTouchEvent()源码解读
-@Override
-public boolean dispatchTouchEvent(MotionEvent ev) {</p>
-
-<pre><code>......
-boolean handled = false;
-......
-final int action = ev.getAction();
-final int actionMasked = action &amp; MotionEvent.ACTION_MASK;
-
-// 1)处理初始的ACTION_DOWN
-if (actionMasked == MotionEvent.ACTION_DOWN) {
-    // 把ACTION_DOWN作为一个Touch手势的始点，清除之前的手势状态。
-    cancelAndClearTouchTargets(ev); //清除前一个手势，*关键操作:mFirstTouchTarget重置为null*
-    resetTouchState(); //重置Touch状态标识
-}
-
-// 2)检查是否会被拦截
-final boolean intercepted;
-if (actionMasked == MotionEvent.ACTION_DOWN || mFirstTouchTarget != null) {
-    // 是ACTION_DOWN的事件，或者mFirstTouchTarget不为null(已经找到能够接收touch事件的目标组件)
-    final boolean disallowIntercept = (mGroupFlags &amp; FLAG_DISALLOW_INTERCEPT) != 0; 
-    // 判断禁止拦截的FLAG，因为requestDisallowInterceptTouchEvent(boolean disallowIntercept)方法可以禁止执行是否需要拦截的判断
-    if (!disallowIntercept) {
-        // 禁止拦截的FLAG为false，说明可以执行拦截判断，则执行此ViewGroup的onInterceptTouchEvent方法
-        intercepted = onInterceptTouchEvent(ev); // 此方法默认返回false，如果想修改默认的行为，需要override此方法，修改返回值。
-        ev.setAction(action);
-    } else {
-        // 禁止拦截的FLAG为ture，说明没有必要去执行是否需要拦截了，这个事件是无法拦截的，能够顺利通过，所以设置拦截变量为false
-        intercepted = false; 
-    }
-} else {
-    // 当不是ACTION_DOWN事件并且mFirstTouchTarget为null(意味着没有touch的目标组件)时，这个ViewGroup应该继续执行拦截的操作。
-    intercepted = true;
-}
-// 通过前面的逻辑处理，得到了是否需要进行拦截的变量值
-
-final boolean canceled = resetCancelNextUpFlag(this) || actionMasked == MotionEvent.ACTION_CANCEL;
-final boolean split = (mGroupFlags &amp; FLAG_SPLIT_MOTION_EVENTS) != 0;
-TouchTarget newTouchTarget = null;
-boolean alreadyDispatchedToNewTouchTarget = false;
-if (!canceled &amp;&amp; !intercepted) {
-    // 不是ACTION_CANCEL并且拦截变量为false
-    if (actionMasked == MotionEvent.ACTION_DOWN) {
-        // 在ACTION_DOWN时去寻找这次DOWN事件新出现的TouchTarget
-        final int actionIndex = ev.getActionIndex(); // always 0 for down
-
-        .....
-
-        final int childrenCount = mChildrenCount;
-        if (newTouchTarget == null &amp;&amp; childrenCount != 0) {
-            // 根据触摸的坐标寻找能够接收这个事件的子组件
-            final float x = ev.getX(actionIndex);
-            final float y = ev.getY(actionIndex);
-
-            final View[] children = mChildren;
-            // 逆序遍历所有子组件
-            for (int i = childrenCount - 1; i &gt;= 0; i--) {
-                final int childIndex = i;
-                final View child = children[childIndex];
-                // 寻找可接收这个事件并且组件区域内包含点击坐标的子View
-                if (!canViewReceivePointerEvents(child) || !isTransformedTouchPointInView(x, y, child, null)) {
-                    continue;
-                }
-
-                newTouchTarget = getTouchTarget(child); // 找到了符合条件的子组件，赋值给newTouchTarget
-
-                ......
-
-                // 把ACTION_DOWN事件传递给子组件进行处理
-                if (dispatchTransformedTouchEvent(ev, false, child, idBitsToAssign)) {
-                    // 如果此子ViewGroup消费了这个touch事件
-                    mLastTouchDownTime = ev.getDownTime();
-                    mLastTouchDownIndex = childIndex;
-                    mLastTouchDownX = ev.getX();
-                    mLastTouchDownY = ev.getY();
-                    // 则为mFirstTouchTarget赋值为newTouchTarget，此子组件成为新的touch事件的起点
-                    newTouchTarget = addTouchTarget(child, idBitsToAssign); 
-                    alreadyDispatchedToNewTouchTarget = true;
-                    break;
-                }
-            }
-        }
-        ......
-    }
-}
-
-// 经过前面的ACTION_DOWN的处理，有两种情况。
-if (mFirstTouchTarget == null) {
-    // 情况1：(mFirstTouchTarget为null) 没有找到能够消费touch事件的子组件或者是touch事件被拦截了，
-    // 那么在ViewGroup的dispatchTransformedTouchEvent方法里面，处理Touch事件则和普通View一样，
-    // 自己无法消费，调用super.dispatchOnTouchEvent()把事件回递给父ViewGroup进行处理
-    handled = dispatchTransformedTouchEvent(ev, canceled, null, TouchTarget.ALL_POINTER_IDS);
-} else {
-    // 情况2：(mFirstTouchTarget!=null) 找到了能够消费touch事件的子组件，那么后续的touch事件都可以传递到子View
-    TouchTarget target = mFirstTouchTarget;
-    // (这里为了理解简单，省略了一个Target List的概念，有需要的同学再查看源码)
-    while (target != null) {
-        if (alreadyDispatchedToNewTouchTarget &amp;&amp; target == newTouchTarget) {
-            // 如果前面利用ACTION_DOWN事件寻找符合接收条件的子组件的同时消费掉了ACTION_DOWN事件，这里直接返回true
-            handled = true;
-        } else {
-            final boolean cancelChild = resetCancelNextUpFlag(target.child) || intercepted;
-            // 对于非ACTION_DOWN事件，则继续传递给目标子组件进行处理(注意这里的非ACTION_DOWN事件已经不需要再判断是否拦截)
-            if (dispatchTransformedTouchEvent(ev, cancelChild, target.child, target.pointerIdBits)) {
-                // 如果target子组件进行处理，符合某些条件的话，会传递ACTION_CANCEL给target子组件
-                // 条件是：如果ACTION_DOWN时没有被拦截，而后面的touch事件被拦截，则需要发送ACTION_CANCEL给target子组件
-                handled = true;
-            }
-            ......
-        }
-    }
-}
-
-if (canceled || actionMasked == MotionEvent.ACTION_UP) {
-    // 如果是ACTION_CANCEL或者ACTION_UP，重置Touch状态标识，mFirstTouchTarget赋值为null，后面的Touch事件都无法派发给子View
-    resetTouchState();
-}
-......
-
-return handled;
-</code></pre>
-
-<p>}
-```</p>
-
-<h2>3)dispatchTouchEvent()流程图</h2>
-
-<p><img src="/images/articles/dispatchtouchevent_process.jpg" title="演示ViewGroup中的dispatchTouchEvent的流程" alt="dispatchtouchevent_process.jpg" /></p>
-
-<h2>4)代码举例说明</h2>
-
-<p><img src="/images/articles/dispatchtouchevent_demo.jpg" title="Demo的layout层级" alt="dispatchtouchevent_demo.jpg" /></p>
-
-<p><a href="https://github.com/kesenhoo/TouchEventDemo.git">Demo Source Code</a>下面是截取的片段
-```java
-@Override
-public boolean dispatchTouchEvent(MotionEvent ev) {</p>
-
-<pre><code>switch (ev.getAction()) {
-    case MotionEvent.ACTION_DOWN:
-        Log.d(TAG, "[dispatchTouchEvent] -&gt; ACTION_DOWN");
-        break;
-        //Log.i(TAG, "[dispatchTouchEvent] -&gt; ACTION_DOWN, return true");
-        //return true;
-    case MotionEvent.ACTION_MOVE:
-        Log.d(TAG, "[dispatchTouchEvent] -&gt; ACTION_MOVE");
-        break;
-        //Log.i(TAG, "[dispatchTouchEvent] -&gt; ACTION_MOVE, return true");
-        //return true;
-    case MotionEvent.ACTION_UP:
-        Log.d(TAG, "[dispatchTouchEvent] -&gt; ACTION_UP");
-        break;
-    case MotionEvent.ACTION_CANCEL:
-        Log.d(TAG, "[dispatchTouchEvent] -&gt; ACTION_CANCEL");
-        break;
-    default:
-        break;
-}
-boolean superReturn = super.dispatchTouchEvent(ev);
-Log.i(TAG, "[dispatchTouchEvent] return super. = " + superReturn);
-return superReturn;
-</code></pre>
-
-<p>}
-```
-下面演示的每一种情况，操作均为点击中间的Button，然后松开。请仔细看下面的案例，里面均有对应的解释。</p>
-
-<h3>Case 0:没有任何的分发丢弃，也没有任何的拦截</h3>
-
-<p><img src="/images/articles/Touch_Case_0_All_Normal.png" title="CASE 0" alt="Touch_Case_0_All_Normal.png" /></p>
-
-<h3>Case 1:Activity层的dispatch函数对ACTION_DOWN进行return true.</h3>
-
-<p><img src="/images/articles/Touch_Case_1_Activity_Dispatch_Down_Return_True.png" title="CASE 1" alt="Touch_Case_1_Activity_Dispatch_Down_Return_True.png" /></p>
-
-<h3>Case 2:ParentLayout层的dispatch函数对ACTION_DOWN进行return true.</h3>
-
-<p><img src="/images/articles/Touch_Case_2_Parent_Dispatch_Down_Return_True.png" title="CASE 2" alt="Touch_Case_2_Parent_Dispatch_Down_Return_True.png" /></p>
-
-<p>因为ChildLayout层的dispatch函数对ACITON_DOWN进行return true和在activity层,ParentLayout层是类似的逻辑，因为都没有找到Target组件，又没有拦截的因素影响，所以后续的MOVE与UP都只传递到DOWN被return true的那一层截至，然后都回传，也都没有被消费掉。(注意发生在ChildLayout层的return true与ParentLayout层的差异在于：回传时，只有return层与activity层才可以接收到onTouchEvent()的回调，但是默认都无法消费)。</p>
-
-<h3>Case 3:Activity层的dispatch函数对ACTION_MOVE进行return true.</h3>
-
-<p><img src="/images/articles/Touch_Case_3_Activity_Dispatch_Move_Return_True.png" title="CASE 3" alt="Touch_Case_2_Activity_Dispatch_Move_Return_True.png" /></p>
-
-<p>因为ParentLayout层的dispatch函数对ACITON_MOVE进行return true和在activity层是类似的道理，不做新的分析</p>
-
-<h3>Case 4:ParentLayout层的intercept函数对ACTION_DOWN进行return true.</h3>
-
-<p><img src="/images/articles/Touch_Case_4_Parent_Intercept_Down_Return_True.png" title="CASE 4" alt="Touch_Case_4_Parent_Intercept_Down_Return_True.png" /></p>
-
-<h3>Case 5:ChildLayout层的intercept函数对ACTION_DOWN进行return true.</h3>
-
-<p><img src="/images/articles/Touch_Case_5_Child_Intercept_Down_Return_True.png" title="CASE 5" alt="Touch_Case_5_Child_Intercept_Down_Return_True.png" /></p>
-
-<h3>Case 6:ChildLayout层的intercept函数对ACTION_MOVE进行return true.</h3>
-
-<p><img src="/images/articles/Touch_Case_6_Child_Intercept_Move_Return_True.png" title="CASE 6" alt="Touch_Case_6_Child_Intercept_Move_Return_True.png" /></p>
-
-<h2>5)写在最后</h2>
-
-<ul>
-<li>对于dispatch分发某个事件的情况：
-
-<ul>
-<li>如果是ACTION_DOWN被return true,那么在哪一层return的，后续的MOVE与UP都只传递到该层，然后回传(<strong>Case 1,2</strong>)(注意在回传的过程中只有在return层与activity层才会触发onTouchEvent，中间若是有其他层，均会被跳过。这一规律暂时没有找到比较有力的解释，需要查看更多的源码。)</li>
-<li>如果非ACTION_DOWN被return true,意味着DOWN事件正常被下发并找到Target组件，那么后续只有被return的事件会无法正常下发，并只传递到return层，没有return的事件还能够正常下方到Target组件并被Target消费。(<strong>Case 3</strong>)</li>
-</ul>
-</li>
-<li>对于intercept拦截某个事件的情况：
-
-<ul>
-<li>如果ACTION_DOWN被拦截，无论拦截发生在哪一层，都会导致Target组件都无法找到，那么后续的MOVE与UP事件都只在Activity层处理，不会下发(<strong>Case 4,5</strong>)。</li>
-<li>如果ACTION_DOWN没被拦截，此时可以找到Target组件，DOWN事件是正常被消费。后续的MOVE如果被拦截，会对子组件触发CANCEL的事件，并且UP事件只能传递到拦截MOVE的那一层，无法消费并返回(<strong>Case 6</strong>)。Ps:因为Case 6演示的是在ChildLayout层对MOVE进行拦截，所以看到的效果是Button直接收到了CANCEL,实际上如果是ParentLayout对MOVE进行拦截，那么CANCEL事件需要经过ChildLayout(如果有需要的话，可以在这里继续拦截CANCEL)，最终CANCEL事件都是由Button进行消费。</li>
-</ul>
-</li>
-</ul>
-
-
-<p><strong>经过上面的描述，对Android的Touch事件传递机制应该有更深入的了解，理解错误或者有偏差的地方，欢迎提出一起讨论，谢谢！</strong></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Training(17) - 管理应用的内存]]></title>
-    <link href="http://hukai.me/blog/2013/10/19/android-training-17-managing_your_app_memory/"/>
-    <updated>2013-10-19T15:18:00+08:00</updated>
-    <id>http://hukai.me/blog/2013/10/19/android-training-17-managing_your_app_memory</id>
-    <content type="html"><![CDATA[<p>Random Access Memory(RAM)在任何软件开发环境中都是一个很宝贵的资源。这一点在物理内存通常很有限的移动操作系统上，显得尤为突出。尽管Android的Dalvik虚拟机扮演了常规的垃圾回收的角色，但这并不意味着你可以忽视app的内存分配与释放的时机与地点。</p>
-
-<p>为了GC能够从你的app中及时回收内存，你需要避免Memory Leaks(这通常由引用的不能释放而导致)并且在适当的时机(下面会讲到的lifecycle callbacks)来释放引用。对于大多数apps来说，Dalvik的GC会自动把离开活动线程的对象进行回收。</p>
-
-<p>这篇文章会解释Android如何管理app的进程与内存分配，并且你可以在开发Android应用的时候主动的减少内存的使用。关于Java的资源管理机制，请参加其它书籍或者线上材料。如果你正在寻找如何分析你的内存使用情况的文章，请参考这里<a href="http://developer.android.com/tools/debugging/debugging-memory.html">Investigating Your RAM Usage</a>。</p>
-
-<!-- More -->
-
-
-<h2>第1部分:Android是如何管理内存的</h2>
-
-<p>Android并没有提供内存的交换区(Swap space)，但是它有使用<a href="http://en.wikipedia.org/wiki/Paging">paging</a>与<a href="http://en.wikipedia.org/wiki/Memory-mapped_files">memory-mapping(mmapping)</a>的机制来管理内存。这意味着任何你修改的内存(无论是通过分配新的对象还是访问到mmaped pages的内容)都会贮存在RAM中，而且不能被paged out。因此唯一完整释放内存的方法是释放那些你可能hold住的对象的引用，这样使得它能够被GC回收。只有一种例外是：如果系统想要在其他地方进行reuse。</p>
-
-<h3>1)共享内存</h3>
-
-<p>Android通过下面几个方式在不同的Process中来共享RAM:</p>
-
-<ul>
-<li>每一个app的process都是从同一个被叫做Zygote的进程中fork出来的。Zygote进程在系统启动并且载入通用的framework的代码与资源之后开始启动。为了启动一个新的程序进程，系统会fork Zygote进程生成一个新的process，然后在新的process中加载并运行app的代码。这使得大多数的RAM pages被用来分配给framework的代码与资源，并在应用的所有进程中进行共享。</li>
-<li>大多数static的数据被mmapped到一个进程中。这不仅仅使得同样的数据能够在进程间进行共享，而且使得它能够在需要的时候被paged out。例如下面几种static的数据:
-
-<ul>
-<li>Dalvik code (by placing it in a pre-linked .odex file for direct mmapping</li>
-<li>App resources (by designing the resource table to be a structure that can be mmapped and by aligning the zip entries of the APK)</li>
-<li>Traditional project elements like native code in .so files.</li>
-</ul>
-</li>
-<li>在许多地方，Android通过显式的分配共享内存区域(例如ashmem或者gralloc)来实现一些动态RAM区域的能够在不同进程间的共享。例如，window surfaces在app与screen compositor之间使用共享的内存，cursor buffers在content provider与client之间使用共享的内存。</li>
-</ul>
-
-
-<p>关于如何查看app所使用的共享内存，请查看<a href="http://developer.android.com/tools/debugging/debugging-memory.html">Investigating Your RAM Usage</a></p>
-
-<h3>2)分配与回收内存</h3>
-
-<p>这里有下面几点关于Android如何分配与回收内存的事实：</p>
-
-<ul>
-<li>每一个进程的Dalvik heap都有一个限制的虚拟内存范围。这就是逻辑上讲的heap size，它可以随着需要进行增长，但是会有一个系统为它所定义的上限。</li>
-<li>逻辑上讲的heap size和实际物理上使用的内存数量是不等的，Android会计算一个叫做Proportional Set Size(PSS)的值，它记录了那些和其他进程进行共享的内存大小。（假设共享内存大小是10M，一共有20个Process在共享使用，根据权重，可能认为其中有0.3M才能真正算是你的进程所使用的）</li>
-<li>Dalvik heap与逻辑上的heap size不吻合，这意味着Android并不会去做heap中的碎片整理用来关闭空闲区域。Android仅仅会在heap的尾端出现不使用的空间时才会做收缩逻辑heap size大小的动作。但是这并不是意味着被heap所使用的物理内存大小不能被收缩。在垃圾回收之后，Dalvik会遍历heap并找出不使用的pages，然后使用madvise把那些pages返回给kernal。因此，成对的allocations与deallocations大块的数据可以使得物理内存能够被正常的回收。然而，回收碎片化的内存则会使得效率低下很多，因为那些碎片化的分配页面也许会被其他地方所共享到。</li>
-</ul>
-
-
-<h3>3)限制应用的内存</h3>
-
-<p>为了维持多任务的功能环境，Android为每一个app都设置了一个硬性的heap size限制。准确的heap size限制随着不同设备的不同RAM大小而各有差异。如果你的app已经到了heap的限制大小并且再尝试分配内存的话，会引起OutOfMemoryError的错误。</p>
-
-<p>在一些情况下，你也许想要查询当前设备的heap size限制大小是多少，然后决定cache的大小。可以通过getMemoryClass()来查询。这个方法会返回一个整数，表明你的app heap size限制是多少megabates。</p>
-
-<h3>4)切换应用</h3>
-
-<p>当用户在不同应用之间进行切换的时候，不是使用交换空间的办法。Android会把那些不包含foreground组件的进程放到LRU cache中。例如，当用户刚开始启动了一个应用，这个时候为它创建了一个进程，但是当用户离开这个应用，这个进程并没有离开。系统会把这个进程放到cache中，如果用户后来回到这个应用，这个进程能够被resued，从而实现app的快速切换。</p>
-
-<p>如果你的应用有一个被缓存的进程，它被保留在内存中，并且当前不再需要它了，这会对系统的整个性能有影响。因此当系统开始进入低内存状态时，它会由系统根据LRU的规则与其他因素选择杀掉某些进程，为了保持你的进程能够尽可能长久的被cached，请参考下面的章节学习何时释放你的引用。</p>
-
-<p>更对关于不在foreground的进程是Android是如何决定kill掉哪一类进程的问题，请参考<a href="http://developer.android.com/guide/components/processes-and-threads.html">Processes and Threads</a>.</p>
-
-<h2>第2部分:你的应用该如何管理内存</h2>
-
-<p>你应该在开发过程的每一个阶段都考虑到RAM的有限性，甚至包括在开发开始之前的设计阶段。有许多种设计与实现方式，他们有着不同的效率，尽管是对同样一种技术的不断组合与演变。</p>
-
-<p>为了使得你的应用效率更高，你应该在设计与实现代码时，遵循下面的技术要点。</p>
-
-<h3>1)珍惜Services资源</h3>
-
-<p>如果你的app需要在后台使用service，除非它被触发执行一个任务，否则其他时候都应该是非运行状态。同样需要注意当这个service已经完成任务后停止service失败引起的泄漏。</p>
-
-<p>当你启动一个service，系统会倾向为了这个Service而一直保留它的Process。这使得process的运行代价很高，因为系统没有办法把Service所占用的RAM让给其他组件或者被Paged out。这减少了系统能够存放到LRU缓存当中的process数量，它会影响app之间的切换效率。它甚至会导致系统内存使用不稳定，从而无法继续Hold住
-所有目前正在运行的Service。</p>
-
-<p>限制你的service的最好办法是使用<a href="http://developer.android.com/reference/android/app/IntentService.html">IntentService</a>, 它会在处理完扔给它的intent任务之后尽快结束自己。更多信息，请阅读<a href="http://developer.android.com/training/run-background-service/index.html">Running in a Background Service</a>.</p>
-
-<p>当一个service已经不需要的时候还继续保留它，这对Android应用的内存管理来说是<strong>最糟糕的错误之一</strong>。因此千万不要贪婪的使得一个Service持续保留。不仅仅是因为它会使得你的app因RAM的限制而性能糟糕，而且用户会发现那些行为奇怪的app并且卸载它。</p>
-
-<h3>2)当你的UI隐藏时释放内存</h3>
-
-<p>当用户切换到其它app并且你的app UI不再可见时，你应该释放你的UI上占用的任何资源。在这个时候释放UI资源可以显著的增加系统cached process的能力，它会对用户的质量体验有着直接的影响。</p>
-
-<p>为了能够接收到用户离开你的UI时的通知，你需要实现Activtiy类里面的<a href="http://developer.android.com/reference/android/content/ComponentCallbacks2.html#onTrimMemory(int">onTrimMemory()</a>)回调方法。你应该使用这个方法来监听到<a href="http://developer.android.com/reference/android/content/ComponentCallbacks2.html#TRIM_MEMORY_UI_HIDDEN">TRIM_MEMORY_UI_HIDDEN</a>级别, 它意味着你的UI已经隐藏，你应该释放那些仅仅被你的UI使用的资源。</p>
-
-<p>请注意：你的app仅仅会在所有UI组件的被隐藏的时候接收到onTrimMemory()的回调并带有参数TRIM_MEMORY_UI_HIDDEN。这与onStop()的回调是不同的，onStop会在activity的实例隐藏时会执行，例如当用户从你的app的某个activity跳转到另外一个activity时onStop会被执行。因此你应该实现onStop回调，并且在此回调里面释放activity的资源，例如网络连接，unregister广播接收者。除非接收到<a href="http://developer.android.com/reference/android/content/ComponentCallbacks2.html#onTrimMemory(int">onTrimMemory(TRIM_MEMORY_UI_HIDDEN)</a>)的回调，否者你不应该释放你的UI资源。这确保了用户从其他activity切回来时，你的UI资源仍然可用，并且可以迅速恢复activity。</p>
-
-<h3>3)当内存紧张时释放部分内存</h3>
-
-<p>在你的app生命周期的任何阶段，onTrimMemory回调方法同样可以告诉你整个设备的内存资源已经开始紧张。你应该根据onTrimMemory方法中的内存级别来进一步决定释放哪些资源。</p>
-
-<ul>
-<li><a href="http://developer.android.com/reference/android/content/ComponentCallbacks2.html#TRIM_MEMORY_RUNNING_MODERATE">TRIM_MEMORY_RUNNING_MODERATE</a>:你的app正在运行并且不会被列为可杀死的。但是设备正运行于低内存状态下，系统开始开始激活杀死LRU Cache中的Process的机制。</li>
-<li><a href="http://developer.android.com/reference/android/content/ComponentCallbacks2.html#TRIM_MEMORY_RUNNING_LOW">TRIM_MEMORY_RUNNING_LOW</a>:你的app正在运行且没有被列为可杀死的。但是设备正运行于更低内存的状态下，你应该释放不用的资源用来提升系统性能，这会直接影响了你的app的性能。</li>
-<li><a href="http://developer.android.com/reference/android/content/ComponentCallbacks2.html#TRIM_MEMORY_RUNNING_CRITICAL">TRIM_MEMORY_RUNNING_CRITICAL</a>:你的app仍在运行，但是系统已经把LRU Cache中的大多数进程都已经杀死，因此你应该立即释放所有非必须的资源。如果系统不能回收到足够的RAM数量，系统将会清除所有的LRU缓存中的进程，并且开始杀死那些之前被认为不应该杀死的进程，例如那个进程包含了一个运行中的Service。</li>
-</ul>
-
-
-<p>同样，当你的app进程正在被cached时，你可能会接受到从onTrimMemory()中返回的下面的值之一:</p>
-
-<ul>
-<li><a href="http://developer.android.com/reference/android/content/ComponentCallbacks2.html#TRIM_MEMORY_BACKGROUND">TRIM_MEMORY_BACKGROUND</a>: 系统正运行于低内存状态并且你的进程正处于LRU缓存名单中<strong>最不容易杀掉的位置</strong>。尽管你的app进程并不是处于被杀掉的高危险状态，系统可能已经开始杀掉LRU缓存中的其他进程了。你应该释放那些容易恢复的资源，以便于你的进程可以保留下来，这样当用户回退到你的app的时候才能够迅速恢复。</li>
-<li><a href="http://developer.android.com/reference/android/content/ComponentCallbacks2.html#TRIM_MEMORY_MODERATE">TRIM_MEMORY_MODERATE</a>: 系统正运行于低内存状态并且你的进程已经已经接近LRU名单的<strong>中部位置</strong>。如果系统开始变得更加内存紧张，你的进程是有可能被杀死的。</li>
-<li><a href="http://developer.android.com/reference/android/content/ComponentCallbacks2.html#TRIM_MEMORY_COMPLETE">TRIM_MEMORY_COMPLETE</a>: 系统正运行与低内存的状态并且你的进程正处于LRU名单中<strong>最容易被杀掉的位置</strong>。你应该释放任何不影响你的app恢复状态的资源。</li>
-</ul>
-
-
-<p>因为onTrimMemory()的回调是在<strong>API 14</strong>才被加进来的，对于老的版本，你可以使用<a href="http://developer.android.com/reference/android/content/ComponentCallbacks.html#onLowMemory(">onLowMemory</a>)回调来进行兼容。onLowMemory相当与TRIM_MEMORY_COMPLETE。</p>
-
-<p><strong>Note:</strong> 当系统开始清除LRU缓存中的进程时，尽管它首先按照LRU的顺序来操作，但是它同样会考虑进程的内存使用量。因此消耗越少的进程则越容易被留下来。</p>
-
-<h3>4)检查你应该使用多少的内存</h3>
-
-<p>正如前面提到的，每一个Android设备都会有不同的RAM总大小与可用空间，因此不同设备为app提供了不同大小的heap限制。你可以通过调用<a href="http://developer.android.com/reference/android/app/ActivityManager.html#getMemoryClass(">getMemoryClass()</a>)来获取你的app的可用heap大小。如果你的app尝试申请更多的内存，会出现OutOfMemory的错误。</p>
-
-<p>在一些特殊的情景下，你可以通过在manifest的application标签下添加largeHeap=true的属性来声明一个更大的heap空间。如果你这样做，你可以通过<a href="http://developer.android.com/reference/android/app/ActivityManager.html#getLargeMemoryClass(">getLargeMemoryClass()</a>)来获取到一个更大的heap size。</p>
-
-<p>然而，能够获取更大heap的设计本意是为了一小部分会消耗大量RAM的应用(例如一个大图片的编辑应用)。不要轻易的因为你需要使用大量的内存而去请求一个大的heap size。只有当你清楚的知道哪里会使用大量的内存并且为什么这些内存必须被保留时才去使用large heap. 因此请尽量少使用large heap。使用额外的内存会影响系统整体的用户体验，并且会使得GC的每次运行时间更长。在任务切换时，系统的性能会变得大打折扣。</p>
-
-<p>另外, large heap并不一定能够获取到更大的heap。在某些有严格限制的机器上，large heap的大小和通常的heap size是一样的。因此即使你申请了large heap，你还是应该通过执行getMemoryClass()来检查实际获取到的heap大小。</p>
-
-<h3>5)避免bitmaps的浪费</h3>
-
-<p>当你加载一个bitmap时，仅仅需要保留适配当前屏幕设备分辨率的数据即可，如果原图高于你的设备分辨率，需要做缩小的动作。请记住，增加bitmap的尺寸会对内存呈现出2次方的增加，因为X与Y都在增加。</p>
-
-<p><strong>Note:</strong>在Android 2.3.x (API level 10)及其以下, bitmap对象是的pixel data是存放在native内存中的，它不便于调试。然而，从Android 3.0(API level 11)开始，bitmap pixel data是分配在你的app的Dalvik heap中, 这提升了GC的工作并且更加容易Debug。因此如果你的app使用bitmap并在旧的机器上引发了一些内存问题，切换到3.0以上的机器上进行Debug。</p>
-
-<h3>6)使用优化的数据容器</h3>
-
-<p>利用Android Framework里面优化过的容器类，例如<a href="http://developer.android.com/reference/android/util/SparseArray.html">SparseArray</a>, SparseBooleanArray, 与 LongSparseArray. 通常的HashMap的实现方式更加消耗内存，因为它需要一个额外的实例对象来记录Mapping操作。另外，SparseArray更加高效在于他们避免了对key与value的autobox自动装箱，并且避免了装箱后的解箱。</p>
-
-<h3>7)请注意内存开销</h3>
-
-<p>对你所使用的语言与库的成本与开销有所了解，从开始到结束，在设计你的app时谨记这些信息。通常，表面上看起来无关痛痒(innocuous)的事情也许实际上会导致大量的开销。例如：</p>
-
-<ul>
-<li>Enums的内存消耗通常是static constants的2倍。你应该尽量避免在Android上使用enums。</li>
-<li>在Java中的每一个类(包括匿名内部类)都会使用大概500 bytes。</li>
-<li>每一个类的实例花销是12-16 bytes。</li>
-<li>往HashMap添加一个entry需要额一个额外占用的32 bytes的entry对象。</li>
-</ul>
-
-
-<h3>8)请注意代码“抽象”</h3>
-
-<p>通常, 开发者使用抽象简单的作为"好的编程实践",因为抽象能够提升代码的灵活性与可维护性。然而，抽象会导致一个显著的开销:通常他们需要同等量的代码用于可执行。那些代码会被map到内存中。因此如果你的抽象没有显著的提升效率，应该尽量避免他们。</p>
-
-<h3>9)为序列化的数据使用nano protobufs</h3>
-
-<p><a href="https://developers.google.com/protocol-buffers/docs/overview">Protocol buffers</a>是由Google为序列化结构数据而设计的，一种语言无关，平台无关，具有良好扩展性的协议。类似XML，却比XML更加轻量，快速，简单。如果你需要为你的数据实现协议化，你应该在客户端的代码中总是使用nano protobufs。通常的协议化操作会生成大量繁琐的代码，这容易给你的app带来许多问题:增加RAM的使用量，显著增加APK的大小，更慢的执行速度，更容易达到DEX的字符限制。</p>
-
-<p>关于更多细节，请参考<a href="https://android.googlesource.com/platform/external/protobuf/+/master/java/README.txt">protobuf readme</a>的"Nano version"章节。</p>
-
-<h3>10)Avoid dependency injection frameworks</h3>
-
-<p>使用类似<a href="https://code.google.com/p/google-guice/">Guice</a>或者<a href="https://github.com/roboguice/roboguice">RoboGuice</a>等framework injection包是很有效的，因为他们能够简化你的代码。</p>
-
-<blockquote><p>RoboGuice 2 smoothes out some of the wrinkles in your Android development experience and makes things simple and fun. Do you always forget to check for null when you getIntent().getExtras()? RoboGuice 2 will help you. Think casting findViewById() to a TextView shouldn’t be necessary? RoboGuice 2 is on it. RoboGuice 2 takes the guesswork out of development. Inject your View, Resource, System Service, or any other object, and let RoboGuice 2 take care of the details.</p></blockquote>
-
-<p>然而，那些框架会通过扫描你的代码执行许多初始化的操作，这会导致你的代码需要大量的RAM来map代码。但是mapped pages会长时间的被保留在RAM中。</p>
-
-<h3>11)谨慎使用external libraries</h3>
-
-<p>很多External library的代码都不是为移动网络环境而编写的，在移动客户端则显示的效率不高。至少，当你决定使用一个external library的时候，你应该针对移动网络做繁琐的porting与maintenance的工作。</p>
-
-<p>即使是针对Android而设计的library，也可能是很危险的，因为每一个library所做的事情都是不一样的。例如，其中一个lib使用的是nano protobufs, 而另外一个使用的是micro protobufs。那么这样，在你的app里面就有2种protobuf的实现方式。这样的冲突同样可能发生在输出日志，加载图片，缓存等等模块里面。</p>
-
-<p>同样不要陷入为了1个或者2个功能而导入整个library的陷阱。如果没有一个合适的库与你的需求相吻合，你应该考虑自己去实现，而不是导入一个大而全的解决方案。</p>
-
-<h3>12)优化整体性能</h3>
-
-<p>官方有列出许多优化整个app性能的文章：<a href="http://developer.android.com/training/best-performance.html">Best Practices for Performance</a>. 这篇文章就是其中之一。有些文章是讲解如何优化app的CPU使用效率，有些是如何优化app的内存使用效率。</p>
-
-<p>你还应该阅读<a href="http://developer.android.com/tools/debugging/debugging-ui.html">optimizing your UI</a>来为layout进行优化。同样还应该关注lint工具所提出的建议，进行优化。</p>
-
-<h3>13)使用ProGuard来剔除不需要的代码</h3>
-
-<p><a href="http://developer.android.com/tools/help/proguard.html">ProGuard</a>能够通过移除不需要的代码，重命名类，域与方法等方对代码进行压缩,优化与混淆。使用ProGuard可以是的你的代码更加紧凑，这样能够使用更少mapped代码所需要的RAM。</p>
-
-<h3>14)对最终的APK使用zipalign</h3>
-
-<p>在编写完所有代码，并通过编译系统生成APK之后，你需要使用<a href="http://developer.android.com/tools/help/zipalign.html">zipalign</a>对APK进行重新校准。如果你不做这个步骤，会导致你的APK需要更多的RAM，因为一些类似图片资源的东西不能被mapped。</p>
-
-<p><strong>Notes::</strong>Google Play不接受没有经过zipalign的APK。</p>
-
-<h3>15)分析你的RAM使用情况</h3>
-
-<p>一旦你获取到一个相对稳定的版本后，需要分析你的app整个生命周期内使用的内存情况，并进行优化，更多细节请参考<a href="http://developer.android.com/tools/debugging/debugging-memory.html">Investigating Your RAM Usage</a>.</p>
-
-<h3>16)使用多进程</h3>
-
-<p>如果合适的话，有一个更高级的技术可以帮助你的app管理内存使用：通过把你的app组件切分成多个组件，运行在不同的进程中。这个技术必须谨慎使用，大多数app都不应该运行在多个进程中。因为如果使用不当，它会显著增加内存的使用，而不是减少。当你的app需要在后台运行与前台一样的大量的任务的时候，可以考虑使用这个技术。</p>
-
-<p>一个典型的例子是创建一个可以长时间后台播放的Music Player。如果整个app运行在一个进程中，当后台播放的时候，前台的那些UI资源也没有办法得到释放。类似这样的app可以切分成2个进程：一个用来操作UI，另外一个用来后台的Service.</p>
-
-<p>你可以通过在manifest文件中声明'android:process'属性来实现某个组件运行在另外一个进程的操作。</p>
-
-<p>```xml
-&lt;service android:name=".PlaybackService"</p>
-
-<pre><code>     android:process=":background" /&gt;
-</code></pre>
-
-<p>```
-更多关于使用这个技术的细节，请参考原文，链接如下。</p>
-
-<hr />
-
-<p><strong>文章学习自<a href="http://developer.android.com/training/articles/memory.html">http://developer.android.com/training/articles/memory.html</a></strong>
-<strong>转载请注明出自<a href="http:://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢</strong></p>
 ]]></content>
   </entry>
   

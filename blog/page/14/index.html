@@ -9,9 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="在这一章，我们将学习为了最小化某些操作对电量的影响是如何处理下载，网络连接，尤其是无线电连接的。
-下面几节课会演示了如何使用缓存caching，轮询polling，预取prefetching等技术来计划与执行下载操作。
-我们还会学习无线电波的power-use属性配置是如何影响我们对于在何时， &hellip;">
+  <meta name="description" content="Minimizing the Effect of Regular Updates[最小化定期更新操作的副作用] 最佳的定时更新频率是不确定的，通常由设备状态，网络连接状态，用户行为与用户定义明确的偏好而决定。 Optimizing Battery Life这一章有讨论如何根据设备状态来修改更新频率 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +75,109 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/03/26/android-training-05-transferring-data-without-draining-the-battery-lesson-2/">Android Training(05) - 优化下载效率(Lesson 2 - 调整更新的频率[C2DM与退避算法])</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-26T16:51:00+08:00" pubdate data-updated="true">Mar 26<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/03/26/android-training-05-transferring-data-without-draining-the-battery-lesson-2/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Minimizing the Effect of Regular Updates[最小化定期更新操作的副作用]</h2>
+
+<p>最佳的定时更新频率是不确定的，通常由设备状态，网络连接状态，用户行为与用户定义明确的偏好而决定。</p>
+
+<p><a href="http://developer.android.com/training/monitoring-device-state/index.html">Optimizing Battery Life</a>这一章有讨论如何根据设备状态来修改更新频率。里面介绍了当断开网络连接的时候去关闭后台服务，在电量比较低的时候减少更新的频率。</p>
+
+<p>这一课会介绍更新频率是多少才会使得更新操作对无线电状态机的影响最小。(C2DM与指数退避算法的使用)</p>
+
+<h2>Use Google Cloud Messaging as an Alternative to Polling[使用C2DM作为轮询方式之一]</h2>
+
+<p>关于<code>Android Cloud to Device Messaging</code> (C2DM)详情 ,请参考:<a href="http://code.google.com/intl/zh-CN/android/c2dm/">http://code.google.com/intl/zh-CN/android/c2dm/</a></p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/03/26/android-training-05-transferring-data-without-draining-the-battery-lesson-2/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/03/26/android-training-05-transferring-data-without-draining-the-battery-lesson-4/">Android Training(05) - 优化下载效率(Lesson 4 - 根据网络类型来切换下载模式)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-26T00:00:00+08:00" pubdate data-updated="true">Mar 26<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/03/26/android-training-05-transferring-data-without-draining-the-battery-lesson-4/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Modifying your Download Patterns Based on the Connectivity Type</h2>
+
+<p>并不是所有的网络类型(Wi-Fi,3G,2G,etc)对电量的消耗是同等的。不仅仅Wi-Fi电波比无线电波消耗的电量要少很多，而且不同的无线电波(3G,2G,LTE……)也存在使用不同电量的区别。</p>
+
+<h2>1.Use Wi-Fi[使用Wi-Fi]</h2>
+
+<p>在大多数情况下，Wi-Fi电波会在使用相对较低的电量的情况下提供一个相对较大的带宽。因此，我们需要努力争取尽量使用Wi-Fi来传递数据。
+我们可以使用Broadcast Receiver来监听当网络连接切换为Wi-Fi，这个时候我们可以进行大量的数据传递操作，例如下载，执行定时的更新操作，甚至是在这个时候加大更新的频率。这些内容都可以在前面的课程中找到。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/03/26/android-training-05-transferring-data-without-draining-the-battery-lesson-4/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -187,106 +288,6 @@ This lesson introduces the wireless radio state machine, explains how your app�
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/03/23/android-training-04-optimiizing-battery-life-lesson-3/">Android Training(04) - 优化电池续航能力(Lesson 3 - 判断并监测网络连接状态)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-23T21:09:00+08:00" pubdate data-updated="true">Mar 23<span>rd</span>, 2012</time>
-        
-         | <a href="/blog/2012/03/23/android-training-04-optimiizing-battery-life-lesson-3/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Determining and Monitoring the Connectivity Status[判断并监测网络连接状态]</h2>
-
-<p>通常我们会有一些计划的任务，比如重复闹钟，后台定时启动的任务等。但是如果我们的网络没有连接上，那么就没有必要启动那些需要连接网络的任务。我们可以使用ConnectivityManager来检查是否连接上网络，是何种网络。[通过网络的连接状况改变，相应的改变app的行为，减少无谓的操作，从而延长设备的续航能力]</p>
-
-<h2>1)Determine if You Have an Internet Connection[判断当前是否有网络连接]</h2>
-
-<p>显然如果没有网络连接，那么就没有必要做那些需要联网的事情。下面是一个检查是否有网络连接的例子：</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/03/23/android-training-04-optimiizing-battery-life-lesson-3/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/03/23/android-training-04-optimiizing-battery-life-lesson-2/">Android Training(04) - 优化电池续航能力(Lesson 2 - 判断设备的停驻模式)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-23T19:53:00+08:00" pubdate data-updated="true">Mar 23<span>rd</span>, 2012</time>
-        
-         | <a href="/blog/2012/03/23/android-training-04-optimiizing-battery-life-lesson-2/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Determining and Monitoring the Docking State and Type[判断并监测设备的停驻状态与类型]</h2>
-
-<p>在上一课中有这样一句话：In many cases, the act of charging a device is coincident with putting it into a dock.</p>
-
-<p>在很多情况下，为设备充电也是一种设备停驻方式</p>
-
-<p>Android设备能够有好几种停驻状态。包括车载模式，家庭模式与数字对战模拟模式[这个有点奇怪]。停驻状态通常与充电状态是非常密切关联的。</p>
-
-<p>停驻模式会如何影响更新频率这完全取决于app的设置。我们可以选择在桌面模式下频繁的更新数据也可以选择在车载模式下关闭更新操作。相反的，你也可以选择在车载模式下最大化更新交通数据频率。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/03/23/android-training-04-optimiizing-battery-life-lesson-2/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/15/">&larr; Older</a>
@@ -304,6 +305,14 @@ This lesson introduces the wireless radio state machine, explains how your app�
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/05/15/android-deeper-01-graphics-architecture/">Android Deeper(01) - Graphic Architecture</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/04/21/android-notes-06-camera/">Android Notes(06) - Camera</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/04/20/android-training-18-running-background-service-lesson-3/">Android Training(18) - 使用IntentService执行任务(Lesson 3 - 回传任务状态给发送方)</a>
       </li>
     
@@ -316,7 +325,7 @@ This lesson introduces the wireless radio state machine, explains how your app�
       </li>
     
       <li class="post">
-        <a href="/blog/2014/04/05/android-notes-06-touch-event-dispatch-process/">Android Notes(06) - Touch事件分发响应机制</a>
+        <a href="/blog/2014/04/05/android-deeper-00-touch-event-dispatch-process/">Android Deeper(00) - Touch事件分发响应机制</a>
       </li>
     
       <li class="post">
@@ -327,21 +336,14 @@ This lesson introduces the wireless radio state machine, explains how your app�
         <a href="/blog/2013/10/19/android-training-17-managing_your_app_memory/">Android Training(17) - 管理应用的内存</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2013/08/18/android-training-16-creating-custom-views-lesson-4/">Android Training(16) - 创建自定义的Views(Lesson 4 - 优化Views)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/08/18/android-training-16-creating-custom-views-lesson-3/">Android Training(16) - 创建自定义的Views(Lesson 3 - 处理View的交互性)</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (70)</a></li>
+  <li><a href='/blog/categories/android'>Android (72)</a></li>
+  <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (7)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (63)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>

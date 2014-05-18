@@ -9,9 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="所有的activities都归属于一个task。
-一个task包含了一些activities，这些activities以用户与他们的交互前后为顺序存放在task中。
-Tasks可以把activies放置在background并且保存每一个activites的状态， &hellip;">
+  <meta name="description" content="Android的framework有大量的Views用来与用户进行交互并显示不同种类的数据。但是有时候你的程序有个特殊的需求，而Android内置的views组件并不能实现。这一章节会演示如何创建你自己的views，并使得它们是robust与reusable的。 Dependencies and &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +75,122 @@ Tasks可以把activies放置在background并且保存每一个activites的状态
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/06/30/android-training-16-creating-custom-views-lesson-0/">Android Training(16) - 创建自定义的Views(Lesson 0 - 章节概览)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-06-30T18:23:00+08:00" pubdate data-updated="true">Jun 30<span>th</span>, 2013</time>
+        
+         | <a href="/blog/2013/06/30/android-training-16-creating-custom-views-lesson-0/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Android的framework有大量的Views用来与用户进行交互并显示不同种类的数据。但是有时候你的程序有个特殊的需求，而Android内置的views组件并不能实现。这一章节会演示如何创建你自己的views，并使得它们是robust与reusable的。</p>
+
+<p><strong>Dependencies and Prerequisites</strong></p>
+
+<p>Android 2.1 (API level 7) or higher</p>
+
+<p><strong>YOU should also read</strong></p>
+
+<ul>
+<li><a href="http://developer.android.com/guide/topics/ui/custom-components.html">Custom Components</a></li>
+<li><a href="http://developer.android.com/guide/topics/ui/ui-events.html">Input Events</a></li>
+<li><a href="http://developer.android.com/guide/topics/graphics/prop-animation.html">Property Animation</a></li>
+<li><a href="http://developer.android.com/guide/topics/graphics/hardware-accel.html">Hardware Acceleration</a></li>
+<li><a href="http://developer.android.com/guide/topics/ui/accessibility/index.html">Accessibility</a> developer guide</li>
+</ul>
+
+
+<p><strong>Try it out</strong></p>
+
+<p>Download the sample<br/>
+<a href="http://developer.android.com/shareables/training/CustomView.zip">CustomView.zip</a></p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/06/30/android-training-16-creating-custom-views-lesson-0/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/19/android-training-09-displaying-bitmaps-efficiently-lesson-4/">Android Training(09) - 高效地显示Bitmap(Lesson 4 - 优化Bitmap的内存使用)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-19T14:43:00+08:00" pubdate data-updated="true">May 19<span>th</span>, 2013</time>
+        
+         | <a href="/blog/2013/05/19/android-training-09-displaying-bitmaps-efficiently-lesson-4/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>作为缓存Bitmaps的进一步延伸, 为了促进GC与bitmap的重用，你还有一些特定的事情可以做. 推荐的策略会根据Android的版本不同而有所差异. <a href="http://developer.android.com/shareables/training/BitmapFun.zip">BitmapFun</a>的示例程序会演示如何设计你的程序使得能够在不同的Android平台上高效的运行.</p>
+
+<p>我们首先要知道Android管理bitmap memory的演变进程:</p>
+
+<ul>
+<li>在Android 2.2 (API level 8)以及之前, 当GC发生时, 你的应用的线程是会stopped的. 这导致了一个滞后，它会降低效率. <strong>在Android 2.3上，添加了并发GC的机制, 这意味着在一个bitmap不再被引用到之后，内存会被立即reclaimed.</strong></li>
+<li>在Android 2.3.3 (API level 10)已经之后, 一个bitmap的像素级数据是存放在native内存中的. 这些数据与bitmap本身是隔离的, bitmap本身是被存放在Dalvik heap中. 在native内存中的pixel数据不是以可以预测的方式去释放的, 这意味着有可能导致一个程序容易超过它的内存限制并Crash. <strong>在Android 3.0 (API Level 11), pixel数据则是与bitmap本身一起存放在dalvik heap中.</strong></li>
+</ul>
+
+
+<p>下面会介绍如何在不同的Android版本上优化bitmap内存使用.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2013/05/19/android-training-09-displaying-bitmaps-efficiently-lesson-4/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -183,102 +297,6 @@ Tasks可以把activies放置在background并且保存每一个activites的状态
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/04/06/android-training-15-performance-tips/">Android Training(15) - 代码性能优化小技巧</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-04-06T18:27:00+08:00" pubdate data-updated="true">Apr 6<span>th</span>, 2013</time>
-        
-         | <a href="/blog/2013/04/06/android-training-15-performance-tips/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Performance Tips</h2>
-
-<p><img src="/images/articles/performance_improve.jpg"></p>
-
-<p>这篇文章主要是介绍了一些小细节的优化技巧，当这些小技巧综合使用起来的时候，对于整个App的性能提升还是有作用的，只是不能较大幅度的提升性能而已。选择合适的算法与数据结构才应该是你首要考虑的因素，在这篇文章中不会涉及这方面。你应该使用这篇文章中的小技巧作为平时写代码的习惯，这样能够提升代码的效率。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2013/04/06/android-training-15-performance-tips/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/03/31/android-notes-03-process-and-thread/">Android Notes(03) - Process and Thread</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-03-31T16:27:00+08:00" pubdate data-updated="true">Mar 31<span>st</span>, 2013</time>
-        
-         | <a href="/blog/2013/03/31/android-notes-03-process-and-thread/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><img src="/images/articles/process_and_thread.jpg"></p>
-
-<p>当程序的第一个组件开始启动时，Android系统会为这个程序启动一个新的Linux进程。默认的，程序中的后续其他组件都是运行在这个进程的线程中(这个线程被成为&#8221;主&#8221;线程:main thread)。如果程序的组件在启动时发现已经存在这个程序的进程了(因为其他组件正在运行)， 那么这个组件将启动在该进程中，并使用同一线程。然而，你可以安排程序中的不同组件运行在另外一个进程中，而且你可以为任何进程创建其它的线程。</p>
-
-<h1>Process：进程</h1>
-
-<p>默认的，同一程序的所有组件都是运行在一个Proces里面的，并且大多数程序都不应该去改变这一规则。然而，如果你需要控制某一确定的组件的Proces，你可以在manifest文件中做特殊设置。<em>Music播放器的Playback Service就可以这样做</em></p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2013/03/31/android-notes-03-process-and-thread/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/5/">&larr; Older</a>
@@ -296,6 +314,14 @@ Tasks可以把activies放置在background并且保存每一个activites的状态
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/05/15/android-deeper-01-graphics-architecture/">Android Deeper(01) - Graphic Architecture</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/04/21/android-notes-06-camera/">Android Notes(06) - Camera</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/04/20/android-training-18-running-background-service-lesson-3/">Android Training(18) - 使用IntentService执行任务(Lesson 3 - 回传任务状态给发送方)</a>
       </li>
     
@@ -308,7 +334,7 @@ Tasks可以把activies放置在background并且保存每一个activites的状态
       </li>
     
       <li class="post">
-        <a href="/blog/2014/04/05/android-notes-06-touch-event-dispatch-process/">Android Notes(06) - Touch事件分发响应机制</a>
+        <a href="/blog/2014/04/05/android-deeper-00-touch-event-dispatch-process/">Android Deeper(00) - Touch事件分发响应机制</a>
       </li>
     
       <li class="post">
@@ -319,21 +345,14 @@ Tasks可以把activies放置在background并且保存每一个activites的状态
         <a href="/blog/2013/10/19/android-training-17-managing_your_app_memory/">Android Training(17) - 管理应用的内存</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2013/08/18/android-training-16-creating-custom-views-lesson-4/">Android Training(16) - 创建自定义的Views(Lesson 4 - 优化Views)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/08/18/android-training-16-creating-custom-views-lesson-3/">Android Training(16) - 创建自定义的Views(Lesson 3 - 处理View的交互性)</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (70)</a></li>
+  <li><a href='/blog/categories/android'>Android (72)</a></li>
+  <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (7)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (63)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>

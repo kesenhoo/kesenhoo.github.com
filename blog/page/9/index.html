@@ -9,7 +9,8 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="Using the Support Library Android Support Library 提供了一个包含了API库的JAR 文件，它可以允许你在你的app在更老的Android平台上使用一些比较新的API。例如，它提供了一些fragment的API，这样你可以在1. &hellip;">
+  <meta name="description" content="Building a Flexible UI 当把你的程序设计成可以适配一系列大小各异的屏幕时，你可以基于可使用的屏幕空间来为你的fragments设置不同的参数，从而达到重用的目的。
+例如：在手持设备上，一次显示一个fragment会比较合适。对应的，在平板这样屏幕比较大的设备上， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +76,101 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/11/28/android-training-11-building-a-dynamic-ui-with-fragments-lesson-4/">Android Training(11) - 使用Fragments建立动态的UI(Lesson 3 - 创建灵活可变的UI)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-11-28T18:00:00+08:00" pubdate data-updated="true">Nov 28<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/11/28/android-training-11-building-a-dynamic-ui-with-fragments-lesson-4/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>Building a Flexible UI</h1>
+
+<p>当把你的程序设计成可以适配一系列大小各异的屏幕时，你可以基于可使用的屏幕空间来为你的fragments设置不同的参数，从而达到重用的目的。<br/>
+例如：在手持设备上，一次显示一个fragment会比较合适。对应的，在平板这样屏幕比较大的设备上，你可以用多个fragment的方式来呈现出side-by-side的效果。这样能够一次显示更多的信息给用户。如下图所示：</p>
+
+<p><img src="/images/articles/fragments-screen-mock.png" alt="fragments-screen-mock.png" /></p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/11/28/android-training-11-building-a-dynamic-ui-with-fragments-lesson-4/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/11/27/android-training-11-building-a-dynamic-ui-with-fragments-lesson-2/">Android Training(11) - 使用Fragments建立动态的UI(Lesson 2 - 新建一个Fragment)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-11-27T16:48:00+08:00" pubdate data-updated="true">Nov 27<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/11/27/android-training-11-building-a-dynamic-ui-with-fragments-lesson-2/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><ul>
+<li>你可以把fragment当作activity的一部分，它有自己的lifecycle,它会接受自己的输入事件。你可以在activity运行的时候增加或者拿掉fragment。（类似子activity，你可以在不同的activity中重用fragment）。这节课演示如何使用support library来创建一个继承自 Fragment 的类。</li>
+<li>Note: 如果你的app决定跑在Level 11或者更高的系统上，你不需要添加这个support library,你可以使用那个版本的系统自带的API来实现。请注意这节课是专注于使用support library里面的API，这里面的API名称与那些本身就包含这些功能的平台上的名称有可能不一样。</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/11/27/android-training-11-building-a-dynamic-ui-with-fragments-lesson-2/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -196,116 +292,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/05/07/android-training-10-network-operations-lesson-3/">Android Training(10) - 执行网络操作(Lesson 3 - 解析XML数据)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-05-07T17:05:00+08:00" pubdate data-updated="true">May 7<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/05/07/android-training-10-network-operations-lesson-3/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><strong>第3课:Parsing XML Data</strong>
-Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来记录更新的信息，以便用户进行订阅读取。</p>
-
-<p>那么上传[?]与解析XML数据就成了app的一个常见的功能。 这一课会介绍如何解析XML文档并使用他们的数据。</p>
-
-<p><em>([?]这里很奇怪，为什么是Upload，看文章最后一段代码示例的注释，应该是Download才对)</em></p>
-
-<h2>Choose a Parser(选择一个解析器)</h2>
-
-<p>我们推荐<a href="http://developer.android.com/reference/org/xmlpull/v1/XmlPullParser.html">XmlPullParser</a>, 它是在Android上一个高效且可维护的解析XML方法。 Android 上有这个接口的两种实现方式：</p>
-
-<ul>
-<li><a href="http://kxml.sourceforge.net/">KXmlParser</a> via <a href="http://developer.android.com/reference/org/xmlpull/v1/XmlPullParserFactory.html#newPullParser(">XmlPullParserFactory.newPullParser()</a>).</li>
-<li>ExpatPullParser, via <a href="http://developer.android.com/reference/android/util/Xml.html#newPullParser(">Xml.newPullParser()</a>).</li>
-</ul>
-
-
-<p>两个选择都是比较好的。下面的示例中是使用ExpatPullParser, via Xml.newPullParser().</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/05/07/android-training-10-network-operations-lesson-3/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/05/07/android-training-10-network-operations-lesson-2/">Android Training(10) - 执行网络操作(Lesson 2 - 管理网络使用方法)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-05-07T13:43:00+08:00" pubdate data-updated="true">May 7<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/05/07/android-training-10-network-operations-lesson-2/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><strong>第2课:Managing Network Usage</strong></p>
-
-<p>这一课会介绍如何细化管理使用的网络资源。如果你的程序需要执行很多网络操作，你应该提供用户设置选项来允许用户控制程序的数据偏好。例如，同步数据的频率，是否只在连接到WiFi才进行下载与上传操作，是否在漫游时使用套餐数据流量等等。这样用户才能在快到达流量上限时关闭你的程序获取数据功能。</p>
-
-<p>关于如何编写一个最小化下载与网络操作对电量影响的程序，请参考：</p>
-
-<p><a href="http://developer.android.com/training/monitoring-device-state/index.html">Optimizing Battery Life</a>:
-<a href="http://developer.android.com/training/efficient-downloads/index.html">Transferring Data Without Draining the Battery</a>:</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2012/05/07/android-training-10-network-operations-lesson-2/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/10/">&larr; Older</a>
@@ -323,6 +309,14 @@ Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来�
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/05/15/android-deeper-01-graphics-architecture/">Android Deeper(01) - Graphic Architecture</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/04/21/android-notes-06-camera/">Android Notes(06) - Camera</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/04/20/android-training-18-running-background-service-lesson-3/">Android Training(18) - 使用IntentService执行任务(Lesson 3 - 回传任务状态给发送方)</a>
       </li>
     
@@ -335,7 +329,7 @@ Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来�
       </li>
     
       <li class="post">
-        <a href="/blog/2014/04/05/android-notes-06-touch-event-dispatch-process/">Android Notes(06) - Touch事件分发响应机制</a>
+        <a href="/blog/2014/04/05/android-deeper-00-touch-event-dispatch-process/">Android Deeper(00) - Touch事件分发响应机制</a>
       </li>
     
       <li class="post">
@@ -346,21 +340,14 @@ Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来�
         <a href="/blog/2013/10/19/android-training-17-managing_your_app_memory/">Android Training(17) - 管理应用的内存</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2013/08/18/android-training-16-creating-custom-views-lesson-4/">Android Training(16) - 创建自定义的Views(Lesson 4 - 优化Views)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/08/18/android-training-16-creating-custom-views-lesson-3/">Android Training(16) - 创建自定义的Views(Lesson 3 - 处理View的交互性)</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (70)</a></li>
+  <li><a href='/blog/categories/android'>Android (72)</a></li>
+  <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (7)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (63)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>

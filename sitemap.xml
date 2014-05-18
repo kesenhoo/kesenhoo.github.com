@@ -357,8 +357,8 @@
         <lastmod>2014-04-10T23:54:00+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/2014/04/05/android-notes-06-touch-event-dispatch-process/</loc>
-        <lastmod>2014-04-10T23:54:00+08:00</lastmod>
+        <loc>http://hukai.me/blog/2014/04/05/android-deeper-00-touch-event-dispatch-process/</loc>
+        <lastmod>2014-05-15T16:19:04+08:00</lastmod>
     </url>
     <url>
         <loc>
@@ -379,12 +379,20 @@
         <lastmod>2014-04-20T22:01:37+08:00</lastmod>
     </url>
     <url>
+        <loc>http://hukai.me/blog/2014/04/21/android-notes-06-camera/</loc>
+        <lastmod>2014-05-18T17:06:53+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://hukai.me/blog/2014/05/15/android-deeper-01-graphics-architecture/</loc>
+        <lastmod>2014-05-15T20:36:25+08:00</lastmod>
+    </url>
+    <url>
         <loc>http://hukai.me/404.html</loc>
         <lastmod>2014-04-10T23:47:10+08:00</lastmod>
     </url>
     <url>
         <loc>http://hukai.me/about/</loc>
-        <lastmod>2014-04-20T22:01:37+08:00</lastmod>
+        <lastmod>2014-05-18T17:06:53+08:00</lastmod>
     </url>
     <url>
         <loc>
@@ -394,10 +402,10 @@
     </url>
     <url>
         <loc>http://hukai.me/blog/archives/</loc>
-        <lastmod>2014-04-20T22:01:37+08:00</lastmod>
+        <lastmod>2014-05-18T17:06:53+08:00</lastmod>
     </url>
     <url>
         <loc>http://hukai.me/</loc>
-        <lastmod>2014-04-20T22:01:37+08:00</lastmod>
+        <lastmod>2014-05-18T17:06:53+08:00</lastmod>
     </url>
 </urlset>

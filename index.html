@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="这章节会演示如何回传IntentService中执行的任务状态与结果给发送方。 例如，回传任务的状态给Activity并进行更新UI。推荐的方式是使用LocalBroadcastManager，这个组件可以限制broadcast只在自己的App中进行传递。 Report Status From &hellip;">
+  <meta name="description" content="Android中有几个很重要的概念Surface, SurfaceHolder, EGLSurface, SurfaceView, GLSurfaceView, SurfaceTexture, TextureView与SurfaceFlinger。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,135 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/15/android-deeper-01-graphics-architecture/">Android Deeper(01) - Graphic Architecture</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-15T14:25:00+08:00" pubdate data-updated="true">May 15<span>th</span>, 2014</time>
+        
+         | <a href="/blog/2014/05/15/android-deeper-01-graphics-architecture/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Android中有几个很重要的概念Surface, SurfaceHolder, EGLSurface, SurfaceView, GLSurfaceView, SurfaceTexture, TextureView与SurfaceFlinger。</p>
+
+<p>这篇文章会介绍Android图形架构的基本构成以及它们是如何在程序framework与多媒体系统中运作的。核心关注点是，图形数据的buffer是如何在系统中传递的。如果你曾经好奇过SurfaceView与TextureView的工作方式，或者是想知道Surface与EGLSurface是如何交互的，那么这篇文章将给你解答这些疑问。<strong>You&#8217;ve come to the right place.</strong></p>
+
+<p>大多数时候，我们都不需要了解这些类的使用原理，但是学习这些它们的工作原理可以为我们提供一种Sense，用来更加高效的工作。所以这里我们学习它们是如何工作的，而不仅仅是它们是如何使用的。</p>
+
+<h2>BufferQueue and gralloc</h2>
+
+<p>BufferQueue and grallocGraphiccal的核心是BufferQueue,它的角色是连接产生图形数据的生产者与显示数据的消费者。生产者与消费者可以再两个不同的进程，那么数据在系统中进行传递就依赖于BufferQueue。</p>
+
+<p>基础的用法是很直接简单的。生产者获取到一个buffer，制定了宽，高，pixel format与usage flags之后，再放到queue中。消费者获取到buffer，消费数据后，把buffer返回到queue中。</p>
+
+<ul>
+<li>生产者：dequeueBuffer() -> queueBuffer()</li>
+<li>消费者：acquireBuffer() -> releaseBuffer()</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/05/15/android-deeper-01-graphics-architecture/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/04/21/android-notes-06-camera/">Android Notes(06) - Camera</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-21T21:24:00+08:00" pubdate data-updated="true">Apr 21<span>st</span>, 2014</time>
+        
+         | <a href="/blog/2014/04/21/android-notes-06-camera/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Android framework为各种不同的Camera与Camera的特色功能提供了支持，使得可以在应用中进行拍照与录像。这篇文章会讨论一种简便，快速的拍照录像方式，为了给用户创建定制的相机体验，文章也会概述相机的高级功能。</p>
+
+<h2>0)开始之前</h2>
+
+<p>在应用中开启Android设备的相机功能之前，应该考量如下几个问题：</p>
+
+<ul>
+<li><strong>必须的相机硬件</strong> - 当然不能把一个包含相机功能的应用安装到一个连相机硬件都没有的设备上。因此，应该在mainfest文件中声明需要使用到相机。</li>
+<li><strong>快速获取图片还是定制相机</strong> - 应用将如何使用相机？是想做一个快速的抓拍还是录制一小段视频剪辑？还是说想提供一种新的相机使用方式？如果是快速的获取一张抓拍图片或者是一小段视频剪辑，建议查看下面的<strong>3)使用已经安装的相机应用。</strong>如果是为了开发一个定制相机功能的应用，查看下面的<strong>4)创建一个相机应用</strong>。</li>
+<li><strong>存储位置</strong> - 生成的图片与视频是只对自己的应用可见还是其它类似Gallery的应用也可以访问？即使自己的应用被卸载后也不能被其他应用访问吗？建议查看<strong>5)保存媒体文件</strong></li>
+</ul>
+
+
+<h2>1)简要概述</h2>
+
+<p>Android framework通过提供Camera API来支持拍照与录制视频的功能。下面是相关的类：</p>
+
+<ul>
+<li><a href="http://developer.android.com/reference/android/hardware/Camera.html"><strong>Camera</strong></a><br/>
+该类是控制相机硬件的基础的API。它可以用来拍照或者录制视频。</li>
+<li><a href="http://developer.android.com/reference/android/view/SurfaceView.html"><strong>SurfaceView</strong></a><br/>
+该类是用来呈现一个动态的相机预览界面。</li>
+<li><a href="http://developer.android.com/reference/android/media/MediaRecorder.html"><strong>MediaRecorder</strong></a><br/>
+该类用来使用相机录制视频。</li>
+<li><a href="http://developer.android.com/reference/android/content/Intent.html"><strong>Intent</strong></a><br/>
+使用<a href="http://developer.android.com/reference/android/provider/MediaStore.html#ACTION_IMAGE_CAPTURE">MediaStore.ACTION_IMAGE_CAPTURE</a> 或者 <a href="http://developer.android.com/reference/android/provider/MediaStore.html#ACTION_VIDEO_CAPTURE">MediaStore.ACTION_VIDEO_CAPTURE</a>作为Intent的action可以用来拍照与录制视频。</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/04/21/android-notes-06-camera/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -251,132 +380,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/04/14/android-training-18-running-background-service-lesson-1/">Android Training(18) - 使用IntentService执行任务(Lesson 1 - 创建IntentService)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-04-14T18:30:00+08:00" pubdate data-updated="true">Apr 14<span>th</span>, 2014</time>
-        
-         | <a href="/blog/2014/04/14/android-training-18-running-background-service-lesson-1/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><strong>写在开始：</strong>接下去的一段时间会学习专题《Background Jobs》的几篇文章，演示如何在后台执行任务，以此加速程序的性能并降低能耗的使用。第一章节会学习如何通过发送任务到后台的Service中执行，从而提示UI的表现性能。</p>
-
-<p>除非你特意指定，否则大部分在前台的操作都执行在一个叫做UI Thread的特殊线程中。这可能会导致某些问题，因为耗时操作可能会干扰界面的响应性能。为了避免这样的问题，Android Framework提供了几个类，用来帮助你把那些耗时操作移动到后台线程中执行。那些类中最常用的就是<a href="http://developer.android.com/reference/android/app/IntentService.html">IntentService</a>.</p>
-
-<p>这一章节会讲到如何实现一个IntentService，向它发送任务并反馈它的结果给其他模块。</p>
-
-<h2>0)概述</h2>
-
-<p>IntentService为执行一个操作在单个后台线程，提供了一种直接的实现方式。它可以处理一个长时间操作的任务并确保不影响到UI的响应性。而且IntentService的执行并不受UI的生命周期的影响。</p>
-
-<p>IntentService有下面几个局限性：</p>
-
-<ul>
-<li>不可以直接和UI做交互。为了把他执行的结果体现在UI上，需要发送给Activity。</li>
-<li>工作任务队列是顺序执行的，如果一个任务正在IntentService中执行，此时你再发送一个任务请求，这个任务会一直等待直到前面一个任务执行完毕。</li>
-<li>正在执行的任务无法打断。</li>
-</ul>
-
-
-<p>然而，在大多数情况下，IntentService都是简单后台任务操作的理想选择。</p>
-
-<p>这节课会演示如何创建继承的IntentService。同样也会演示如何创建必须实现的回调<a href="http://developer.android.com/reference/android/app/IntentService.html#onHandleIntent(android.content.Intent">onHandleIntent()</a>)。最后，还会解释如何在manifest文件中定义这个IntentService。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/04/14/android-training-18-running-background-service-lesson-1/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/04/05/android-notes-06-touch-event-dispatch-process/">Android Notes(06) - Touch事件分发响应机制</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-04-05T13:13:00+08:00" pubdate data-updated="true">Apr 5<span>th</span>, 2014</time>
-        
-         | <a href="/blog/2014/04/05/android-notes-06-touch-event-dispatch-process/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>1)概述</h2>
-
-<p>Android的TouchEvent通常包含三个动作,ACTION_DOWN,ACTION_MOVE与ACTION_UP。发出的顺序是DOWN->MOVE->MOVE->&#8230;->UP(注意MOVE事件是否能够被触发取决于操作手势里面是否包含了移动的动作)。</p>
-
-<p>消息分发流程，从上到下，从父到子：Activity->ViewGroup1->ViewGroup1的子ViewGroup2->&#8230;->Target View<br/>
-消息响应流程，从下到上，从子到父：Target View->&#8230;->ViewGroup1的子ViewGroup2->ViewGroup1->Activity</p>
-
-<ul>
-<li><p><strong>public boolean dispatchTouchEvent(MotionEvent ev);</strong><br/>
-事件分发处理函数，通常会在Activity层根据UI的显示情况，把事件传递给相应的ViewGroup。下面的演示代码中，为了方便模拟，会直接return true，解说中称之为“丢弃”。(因为事件实际上没有传递给任何组件，没有被消费，而且是主动的行为，故称之为丢弃)</p></li>
-<li><p><strong>public boolean onInterceptTouchEvent(MotionEvent ev);</strong><br/>
-对分发的事件进行拦截，注意拦截ACION_DOWN与其他ACTION的差异。<br/>
-第1种情况：如果ACTION_DOWN的事件没有被拦截，顺利找到了TargetView，那么后续的MOVE与UP都能够下发。如果后续的MOVE与UP下发时还有继续拦截的话，事件只能传递到拦截层，并且发出ACTION_CANCEL。<br/>
-第2种情况：如果ACITON_DOWN的事件下发时被拦截，导致没有找到TargetView，那么后续的MOVE与UP都无法向下派发了，在Activity层就终止了传递。</p></li>
-<li><p><strong>public boolean onTouchEvent(MotionEvent ev);</strong><br/>
-响应处理函数,如果有设置对应listener的话,这里还会与onTouch,onClick,onLongClick有关联。具体执行顺序是onTouch()->onTouchEvent()->onClick()->onLongClick()。是否能够顺序执行，取决于每个方法的返回值是true还是false。具体这里不展开说。</p></li>
-</ul>
-
-
-<p><strong>强关注点：dispatch与intercept的差异，ACTION_DOWN与其他ACITON会对寻找target组件带来差异，而是否寻找到Target组件对整个流程有着重大的的影响。</strong></p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/04/05/android-notes-06-touch-event-dispatch-process/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -392,6 +395,14 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/05/15/android-deeper-01-graphics-architecture/">Android Deeper(01) - Graphic Architecture</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/04/21/android-notes-06-camera/">Android Notes(06) - Camera</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/04/20/android-training-18-running-background-service-lesson-3/">Android Training(18) - 使用IntentService执行任务(Lesson 3 - 回传任务状态给发送方)</a>
       </li>
     
@@ -404,7 +415,7 @@
       </li>
     
       <li class="post">
-        <a href="/blog/2014/04/05/android-notes-06-touch-event-dispatch-process/">Android Notes(06) - Touch事件分发响应机制</a>
+        <a href="/blog/2014/04/05/android-deeper-00-touch-event-dispatch-process/">Android Deeper(00) - Touch事件分发响应机制</a>
       </li>
     
       <li class="post">
@@ -415,21 +426,14 @@
         <a href="/blog/2013/10/19/android-training-17-managing_your_app_memory/">Android Training(17) - 管理应用的内存</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2013/08/18/android-training-16-creating-custom-views-lesson-4/">Android Training(16) - 创建自定义的Views(Lesson 4 - 优化Views)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/08/18/android-training-16-creating-custom-views-lesson-3/">Android Training(16) - 创建自定义的Views(Lesson 3 - 处理View的交互性)</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (70)</a></li>
+  <li><a href='/blog/categories/android'>Android (72)</a></li>
+  <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (7)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (63)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
