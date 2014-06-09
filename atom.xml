@@ -4,7 +4,7 @@
   <title><![CDATA[胡凯]]></title>
   <link href="http://hukai.me/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2014-05-18T17:07:10+08:00</updated>
+  <updated>2014-06-09T23:52:18+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Deeper(01) - Graphic Architecture]]></title>
-    <link href="http://hukai.me/blog/2014/05/15/android-deeper-01-graphics-architecture/"/>
+    <link href="http://hukai.me/blog/android-deeper-01-graphics-architecture/"/>
     <updated>2014-05-15T14:25:00+08:00</updated>
-    <id>http://hukai.me/blog/2014/05/15/android-deeper-01-graphics-architecture</id>
+    <id>http://hukai.me/blog/android-deeper-01-graphics-architecture</id>
     <content type="html"><![CDATA[<p>Android中有几个很重要的概念Surface, SurfaceHolder, EGLSurface, SurfaceView, GLSurfaceView, SurfaceTexture, TextureView与SurfaceFlinger。</p>
 
 <p>这篇文章会介绍Android图形架构的基本构成以及它们是如何在程序framework与多媒体系统中运作的。核心关注点是，图形数据的buffer是如何在系统中传递的。如果你曾经好奇过SurfaceView与TextureView的工作方式，或者是想知道Surface与EGLSurface是如何交互的，那么这篇文章将给你解答这些疑问。<strong>You&#8217;ve come to the right place.</strong></p>
@@ -73,7 +73,7 @@
 
 <p>设备显示屏以固定的频率刷新屏幕，对于手机与平板来说，通常是60fps。刷新的频率有时是不固定的。</p>
 
-<p>当SurfaceFlinger接收到VSYNC刷新信号时，会遍历所有的layers，寻找可以使用的新的buffers。如果找到新的buffer，那么就获取它，否者继续使用前面获取到得buffer。SurfaceFlinger总是需要有些内容可以显示，所以它会持续hold住buffer。如果没有新的buffer提交到layer上，这个layer就会被SurfaceFlinger所忽略。</p>
+<p>当SurfaceFlinger接收到VSYNC刷新信号时，会遍历所有的layers，寻找可以使用的新的buffers。如果找到新的buffer，那么就获取它，否则继续使用前面获取到得buffer。SurfaceFlinger总是需要有内容可以显示，所以它会持续hold住buffer。如果没有新的buffer提交到layer上，这个layer就会被SurfaceFlinger所忽略。</p>
 
 <p>一旦SurfaceFlinger收集到了可见layer的所有buffers，它会请求Hardware composer如何进行composition的操作。</p>
 
@@ -147,7 +147,7 @@
 
 <h2>EGLSurface and OpenGL ES</h2>
 
-<p>OpenGL ES定义了一个API用来渲染图形。为了是得GLES可以在各种平台上工作，它设计成可以和一个库进行结合的方式来工作。这个库知道如何通过操作系统创建与访问窗口。在Android中使用的哭叫做EGL。如果你想要绘制textured polygons(多边形，模块)，你可以使用GLES的方法。如果你想要把渲染绘制到屏幕上，你可以使用EGL的方法。</p>
+<p>OpenGL ES定义了一个API用来渲染图形。为了是得GLES可以在各种平台上工作，它设计成可以和一个库进行结合的方式来工作。这个库知道如何通过操作系统创建与访问窗口。在Android中使用的库叫做EGL。如果你想要绘制textured polygons(多边形，模块)，你可以使用GLES的方法。如果你想要把渲染绘制到屏幕上，你可以使用EGL的方法。</p>
 
 <p>在开始使用GLES之前，你需要创建一个GL context。在EGL中，这意味着创建一个EGLContext与一个EGLSurface。GLES的操作是作用在当前的context上的，当前的context保存在当前thread中，这个context是不能传递的。这意味着你必需注意渲染的动作执行在哪个线程，并且在那个线程中的context是哪个。</p>
 
@@ -278,9 +278,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Notes(06) - Camera]]></title>
-    <link href="http://hukai.me/blog/2014/04/21/android-notes-06-camera/"/>
+    <link href="http://hukai.me/blog/android-notes-06-camera/"/>
     <updated>2014-04-21T21:24:00+08:00</updated>
-    <id>http://hukai.me/blog/2014/04/21/android-notes-06-camera</id>
+    <id>http://hukai.me/blog/android-notes-06-camera</id>
     <content type="html"><![CDATA[<p>Android framework为各种不同的Camera与Camera的特色功能提供了支持，使得可以在应用中进行拍照与录像。这篇文章会讨论一种简便，快速的拍照录像方式，为了给用户创建定制的相机体验，文章也会概述相机的高级功能。</p>
 
 <h2>0)开始之前</h2>
@@ -1466,9 +1466,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Training(18) - 使用IntentService执行任务(Lesson 3 - 回传任务状态给发送方)]]></title>
-    <link href="http://hukai.me/blog/2014/04/20/android-training-18-running-background-service-lesson-3/"/>
+    <link href="http://hukai.me/blog/android-training-18-running-background-service-lesson-3/"/>
     <updated>2014-04-20T22:01:00+08:00</updated>
-    <id>http://hukai.me/blog/2014/04/20/android-training-18-running-background-service-lesson-3</id>
+    <id>http://hukai.me/blog/android-training-18-running-background-service-lesson-3</id>
     <content type="html"><![CDATA[<p>这章节会演示如何回传IntentService中执行的任务状态与结果给发送方。 例如，回传任务的状态给Activity并进行更新UI。推荐的方式是使用<a href="http://developer.android.com/reference/android/support/v4/content/LocalBroadcastManager.html">LocalBroadcastManager</a>，这个组件可以限制broadcast只在自己的App中进行传递。</p>
 
 <h2>Report Status From an IntentService</h2>
@@ -1669,9 +1669,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Training(18) - 使用IntentService执行任务(Lesson 2 - 发送任务给IntentService)]]></title>
-    <link href="http://hukai.me/blog/2014/04/20/android-training-18-running-background-service-lesson-2/"/>
+    <link href="http://hukai.me/blog/android-training-18-running-background-service-lesson-2/"/>
     <updated>2014-04-20T20:46:00+08:00</updated>
-    <id>http://hukai.me/blog/2014/04/20/android-training-18-running-background-service-lesson-2</id>
+    <id>http://hukai.me/blog/android-training-18-running-background-service-lesson-2</id>
     <content type="html"><![CDATA[<p>前一篇文章演示了如何创建一个IntentService类。这次会演示如何通过发送一个Intent来触发IntentService执行任务。这个Intent可以传递一些数据给IntentService。可以在Activity或者Fragment的任何时间点发送这个Intent。</p>
 
 <p>为了创建一个工作请求并发送到IntentService。需要先创建一个explicit Intent，添加数据到intent，然后通过执行<a href="http://developer.android.com/reference/android/content/Context.html#startService(android.content.Intent">startService()</a>) 把它发送到IntentService。</p>
@@ -1731,9 +1731,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Training(18) - 使用IntentService执行任务(Lesson 1 - 创建IntentService)]]></title>
-    <link href="http://hukai.me/blog/2014/04/14/android-training-18-running-background-service-lesson-1/"/>
+    <link href="http://hukai.me/blog/android-training-18-running-background-service-lesson-1/"/>
     <updated>2014-04-14T18:30:00+08:00</updated>
-    <id>http://hukai.me/blog/2014/04/14/android-training-18-running-background-service-lesson-1</id>
+    <id>http://hukai.me/blog/android-training-18-running-background-service-lesson-1</id>
     <content type="html"><![CDATA[<p><strong>写在开始：</strong>接下去的一段时间会学习专题《Background Jobs》的几篇文章，演示如何在后台执行任务，以此加速程序的性能并降低能耗的使用。第一章节会学习如何通过发送任务到后台的Service中执行，从而提示UI的表现性能。</p>
 
 <p>除非你特意指定，否则大部分在前台的操作都执行在一个叫做UI Thread的特殊线程中。这可能会导致某些问题，因为耗时操作可能会干扰界面的响应性能。为了避免这样的问题，Android Framework提供了几个类，用来帮助你把那些耗时操作移动到后台线程中执行。那些类中最常用的就是<a href="http://developer.android.com/reference/android/app/IntentService.html">IntentService</a>.</p>
@@ -1836,9 +1836,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Deeper(00) - Touch事件分发响应机制]]></title>
-    <link href="http://hukai.me/blog/2014/04/05/android-deeper-00-touch-event-dispatch-process/"/>
+    <link href="http://hukai.me/blog/android-deeper-00-touch-event-dispatch-process/"/>
     <updated>2014-04-05T13:13:00+08:00</updated>
-    <id>http://hukai.me/blog/2014/04/05/android-deeper-00-touch-event-dispatch-process</id>
+    <id>http://hukai.me/blog/android-deeper-00-touch-event-dispatch-process</id>
     <content type="html"><![CDATA[<h2>1)概述</h2>
 
 <p>Android的TouchEvent通常包含三个动作,ACTION_DOWN,ACTION_MOVE与ACTION_UP。发出的顺序是DOWN->MOVE->MOVE->&#8230;->UP(注意MOVE事件是否能够被触发取决于操作手势里面是否包含了移动的动作)。</p>
@@ -2233,9 +2233,9 @@
   
   <entry>
     <title type="html"><![CDATA[Java Notes 00 - Singleton Pattern(单例总结)]]></title>
-    <link href="http://hukai.me/blog/2013/11/17/java-notes-00-singleton-pattern/"/>
+    <link href="http://hukai.me/blog/java-notes-00-singleton-pattern/"/>
     <updated>2013-11-17T14:21:00+08:00</updated>
-    <id>http://hukai.me/blog/2013/11/17/java-notes-00-singleton-pattern</id>
+    <id>http://hukai.me/blog/java-notes-00-singleton-pattern</id>
     <content type="html"><![CDATA[<p>这里不赘述单例模式的概念了，直接演示几种不同的实现方式。</p>
 
 <h2>0)Eager initialization</h2>
@@ -2628,9 +2628,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Training(17) - 管理应用的内存]]></title>
-    <link href="http://hukai.me/blog/2013/10/19/android-training-17-managing_your_app_memory/"/>
+    <link href="http://hukai.me/blog/android-training-17-managing_your_app_memory/"/>
     <updated>2013-10-19T15:18:00+08:00</updated>
-    <id>http://hukai.me/blog/2013/10/19/android-training-17-managing_your_app_memory</id>
+    <id>http://hukai.me/blog/android-training-17-managing_your_app_memory</id>
     <content type="html"><![CDATA[<p>Random Access Memory(RAM)在任何软件开发环境中都是一个很宝贵的资源。这一点在物理内存通常很有限的移动操作系统上，显得尤为突出。尽管Android的Dalvik虚拟机扮演了常规的垃圾回收的角色，但这并不意味着你可以忽视app的内存分配与释放的时机与地点。</p>
 
 <p>为了GC能够从你的app中及时回收内存，你需要避免Memory Leaks(这通常由引用的不能释放而导致)并且在适当的时机(下面会讲到的lifecycle callbacks)来释放引用。对于大多数apps来说，Dalvik的GC会自动把离开活动线程的对象进行回收。</p>
@@ -2842,9 +2842,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Training(16) - 创建自定义的Views(Lesson 4 - 优化Views)]]></title>
-    <link href="http://hukai.me/blog/2013/08/18/android-training-16-creating-custom-views-lesson-4/"/>
+    <link href="http://hukai.me/blog/android-training-16-creating-custom-views-lesson-4/"/>
     <updated>2013-08-18T17:30:00+08:00</updated>
-    <id>http://hukai.me/blog/2013/08/18/android-training-16-creating-custom-views-lesson-4</id>
+    <id>http://hukai.me/blog/android-training-16-creating-custom-views-lesson-4</id>
     <content type="html"><![CDATA[<p>前面的课程学习到了如何创建设计良好的View，并且能够使之在手势与状态切换时得到正确的反馈。下面要介绍的是如何使得view能够执行更快。为了避免UI显得卡顿，你必须确保动画能够保持在60fps以上。</p>
 
 <!-- more -->
@@ -2944,9 +2944,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Training(16) - 创建自定义的Views(Lesson 3 - 处理View的交互性)]]></title>
-    <link href="http://hukai.me/blog/2013/08/18/android-training-16-creating-custom-views-lesson-3/"/>
+    <link href="http://hukai.me/blog/android-training-16-creating-custom-views-lesson-3/"/>
     <updated>2013-08-18T15:01:00+08:00</updated>
-    <id>http://hukai.me/blog/2013/08/18/android-training-16-creating-custom-views-lesson-3</id>
+    <id>http://hukai.me/blog/android-training-16-creating-custom-views-lesson-3</id>
     <content type="html"><![CDATA[<p>绘制UI仅仅是创建自定义View的一部分。你还需要使得你的View能够以模拟现实世界的方式来进行反馈。Objects应该总是与现实情景能够保持一致。例如，图片不应该突然消失又从另外一个地方出现，因为在现实世界里面不会发生那样的事情。正确的应该是，图片从一个地方移动到另外一个地方。</p>
 
 <p>用户应该可以感受到UI上的微小变化，并对这些变化反馈到现实世界中。例如，当用户做fling(迅速滑动)的动作，应该再滑动开始与结束的时候给用户一定的反馈。</p>
@@ -3129,9 +3129,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Training(16) - 创建自定义的Views(Lesson 2 - 自定义Drawing)]]></title>
-    <link href="http://hukai.me/blog/2013/06/30/android-training-16-creating-custom-views-lesson-2/"/>
+    <link href="http://hukai.me/blog/android-training-16-creating-custom-views-lesson-2/"/>
     <updated>2013-06-30T20:15:00+08:00</updated>
-    <id>http://hukai.me/blog/2013/06/30/android-training-16-creating-custom-views-lesson-2</id>
+    <id>http://hukai.me/blog/android-training-16-creating-custom-views-lesson-2</id>
     <content type="html"><![CDATA[<p>自定义view的最重要的一个部分是自定义它的外观。根据你的程序的需求，自定义绘制动作可能简单也可能很复杂。这节课会演示一些最常见的操作。</p>
 
 <h2>Override onDraw()</h2>
@@ -3348,9 +3348,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Training(16) - 创建自定义的Views(Lesson 1 - 创建一个View类)]]></title>
-    <link href="http://hukai.me/blog/2013/06/30/android-training-16-creating-custom-views-lesson-1/"/>
+    <link href="http://hukai.me/blog/android-training-16-creating-custom-views-lesson-1/"/>
     <updated>2013-06-30T18:47:00+08:00</updated>
-    <id>http://hukai.me/blog/2013/06/30/android-training-16-creating-custom-views-lesson-1</id>
+    <id>http://hukai.me/blog/android-training-16-creating-custom-views-lesson-1</id>
     <content type="html"><![CDATA[<p>设计良好的类总是相似的。它使用一个好用的接口来封装一个特定的功能，它有效的使用CPU与内存，等等。为了成为一个设计良好的类，自定义的view应该:</p>
 
 <ul>
@@ -3545,9 +3545,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Training(16) - 创建自定义的Views(Lesson 0 - 章节概览)]]></title>
-    <link href="http://hukai.me/blog/2013/06/30/android-training-16-creating-custom-views-lesson-0/"/>
+    <link href="http://hukai.me/blog/android-training-16-creating-custom-views-lesson-0/"/>
     <updated>2013-06-30T18:23:00+08:00</updated>
-    <id>http://hukai.me/blog/2013/06/30/android-training-16-creating-custom-views-lesson-0</id>
+    <id>http://hukai.me/blog/android-training-16-creating-custom-views-lesson-0</id>
     <content type="html"><![CDATA[<p>Android的framework有大量的Views用来与用户进行交互并显示不同种类的数据。但是有时候你的程序有个特殊的需求，而Android内置的views组件并不能实现。这一章节会演示如何创建你自己的views，并使得它们是robust与reusable的。</p>
 
 <p><strong>Dependencies and Prerequisites</strong></p>
@@ -3598,9 +3598,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Training(09) - 高效地显示Bitmap(Lesson 4 - 优化Bitmap的内存使用)]]></title>
-    <link href="http://hukai.me/blog/2013/05/19/android-training-09-displaying-bitmaps-efficiently-lesson-4/"/>
+    <link href="http://hukai.me/blog/android-training-09-displaying-bitmaps-efficiently-lesson-4/"/>
     <updated>2013-05-19T14:43:00+08:00</updated>
-    <id>http://hukai.me/blog/2013/05/19/android-training-09-displaying-bitmaps-efficiently-lesson-4</id>
+    <id>http://hukai.me/blog/android-training-09-displaying-bitmaps-efficiently-lesson-4</id>
     <content type="html"><![CDATA[<p>作为缓存Bitmaps的进一步延伸, 为了促进GC与bitmap的重用，你还有一些特定的事情可以做. 推荐的策略会根据Android的版本不同而有所差异. <a href="http://developer.android.com/shareables/training/BitmapFun.zip">BitmapFun</a>的示例程序会演示如何设计你的程序使得能够在不同的Android平台上高效的运行.</p>
 
 <p>我们首先要知道Android管理bitmap memory的演变进程:</p>
@@ -3972,9 +3972,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Notes(05) - Tasks and Back Stack]]></title>
-    <link href="http://hukai.me/blog/2013/04/20/android-notes-05-task-and-back-stack/"/>
+    <link href="http://hukai.me/blog/android-notes-05-task-and-back-stack/"/>
     <updated>2013-04-20T20:42:00+08:00</updated>
-    <id>http://hukai.me/blog/2013/04/20/android-notes-05-task-and-back-stack</id>
+    <id>http://hukai.me/blog/android-notes-05-task-and-back-stack</id>
     <content type="html"><![CDATA[<ul>
 <li>所有的activities都归属于一个task。</li>
 <li>一个task包含了一些activities，这些activities以用户与他们的交互前后为顺序存放在task中。</li>
@@ -4211,9 +4211,9 @@ For example, suppose that an activity that reports weather conditions in selecte
   
   <entry>
     <title type="html"><![CDATA[Android Notes(04) - Intents and Intent Filters]]></title>
-    <link href="http://hukai.me/blog/2013/04/12/android-notes-04-intent-and-intentFilter/"/>
+    <link href="http://hukai.me/blog/android-notes-04-intent-and-intentFilter/"/>
     <updated>2013-04-12T18:27:00+08:00</updated>
-    <id>http://hukai.me/blog/2013/04/12/android-notes-04-intent-and-intentFilter</id>
+    <id>http://hukai.me/blog/android-notes-04-intent-and-intentFilter</id>
     <content type="html"><![CDATA[<h2>Intent与Intent Filter</h2>
 
 <p>Android其中的三大组件，Activity,Service与broadcast receivers是通过Intent来触发彼此的。Intent本身会携带一些信息，它是一种组件内部或者组件间进行交互的中介。<br/>
@@ -4497,9 +4497,9 @@ Flags用来表示，如何启动一个activity(例如，指定activity应该属�
   
   <entry>
     <title type="html"><![CDATA[Android Training(15) - 代码性能优化小技巧]]></title>
-    <link href="http://hukai.me/blog/2013/04/06/android-training-15-performance-tips/"/>
+    <link href="http://hukai.me/blog/android-training-15-performance-tips/"/>
     <updated>2013-04-06T18:27:00+08:00</updated>
-    <id>http://hukai.me/blog/2013/04/06/android-training-15-performance-tips</id>
+    <id>http://hukai.me/blog/android-training-15-performance-tips</id>
     <content type="html"><![CDATA[<h2>Performance Tips</h2>
 
 <p><img src="http://hukai.me/images/articles/performance_improve.jpg"></p>
@@ -4734,9 +4734,9 @@ Flags用来表示，如何启动一个activity(例如，指定activity应该属�
   
   <entry>
     <title type="html"><![CDATA[Android Notes(03) - Process and Thread]]></title>
-    <link href="http://hukai.me/blog/2013/03/31/android-notes-03-process-and-thread/"/>
+    <link href="http://hukai.me/blog/android-notes-03-process-and-thread/"/>
     <updated>2013-03-31T16:27:00+08:00</updated>
-    <id>http://hukai.me/blog/2013/03/31/android-notes-03-process-and-thread</id>
+    <id>http://hukai.me/blog/android-notes-03-process-and-thread</id>
     <content type="html"><![CDATA[<p><img src="http://hukai.me/images/articles/process_and_thread.jpg"></p>
 
 <p>当程序的第一个组件开始启动时，Android系统会为这个程序启动一个新的Linux进程。默认的，程序中的后续其他组件都是运行在这个进程的线程中(这个线程被成为&#8221;主&#8221;线程:main thread)。如果程序的组件在启动时发现已经存在这个程序的进程了(因为其他组件正在运行)， 那么这个组件将启动在该进程中，并使用同一线程。然而，你可以安排程序中的不同组件运行在另外一个进程中，而且你可以为任何进程创建其它的线程。</p>
@@ -4948,9 +4948,9 @@ Android提供了下面三个方法来解决这个问题：</p>
   
   <entry>
     <title type="html"><![CDATA[Android Notes(02) - AIDL]]></title>
-    <link href="http://hukai.me/blog/2013/02/19/android-notes-02-aidl/"/>
+    <link href="http://hukai.me/blog/android-notes-02-aidl/"/>
     <updated>2013-02-19T21:18:00+08:00</updated>
-    <id>http://hukai.me/blog/2013/02/19/android-notes-02-aidl</id>
+    <id>http://hukai.me/blog/android-notes-02-aidl</id>
     <content type="html"><![CDATA[<ul>
 <li>在Android process之间不能用通常的方式去访问彼此的内存数据。 他们把需要传递的数据解析成基础对象，使得系统能够识别并处理这些对象。因为这个处理过程很难写，所以Android使用AIDL来解决这个问题。</li>
 <li>在定义AIDL接口之前，请意识到call这些接口是direct function call。 请不要认为这些call 接口的行为是发生在另外一个线程里面的。具体的不同因这个调用是发生在local process还是remote process而异。
@@ -5670,9 +5670,9 @@ Android提供了下面三个方法来解决这个问题：</p>
   
   <entry>
     <title type="html"><![CDATA[Android Notes(01) - Bound Services]]></title>
-    <link href="http://hukai.me/blog/2013/02/18/android-notes-01-bound-services/"/>
+    <link href="http://hukai.me/blog/android-notes-01-bound-services/"/>
     <updated>2013-02-18T22:30:00+08:00</updated>
-    <id>http://hukai.me/blog/2013/02/18/android-notes-01-bound-services</id>
+    <id>http://hukai.me/blog/android-notes-01-bound-services</id>
     <content type="html"><![CDATA[<ul>
 <li>一个bound的service是C/S的接口。它允许其他组件绑定到service,发送请求，接收回应并执行IPC。通常是需要给其他程序组件提供服务。
 

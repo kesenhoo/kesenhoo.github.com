@@ -1,0 +1,629 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Java Notes 00 - Singleton Pattern(单例总结) - 胡凯</title>
+  <meta name="author" content="Kesen Hoo">
+
+  
+  <meta name="description" content="这里不赘述单例模式的概念了，直接演示几种不同的实现方式。 0)Eager initialization 如果程序一开始就需要某个单例，并且创建这个单例并不那么费时，我们可以考虑用这种方式： 1
+2
+3
+4
+5
+6
+7
+8
+9
+public class Singleton { private &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://hukai.me/blog/java-notes-00-singleton-pattern/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="胡凯" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-37679268-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   class="no-sidebar"  >
+  <header role="banner"><hgroup>
+  <h1><a href="/">胡凯</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:hukai.me" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Java Notes 00 - Singleton Pattern(单例总结)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-17T14:21:00+08:00" pubdate data-updated="true">Nov 17<span>th</span>, 2013</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>这里不赘述单例模式的概念了，直接演示几种不同的实现方式。</p>
+
+<h2>0)Eager initialization</h2>
+
+<p>如果程序一开始就需要某个单例，并且创建这个单例并不那么费时，我们可以考虑用这种方式：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Singleton</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">Singleton</span> <span class="n">INSTANCE</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Singleton</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">private</span> <span class="nf">Singleton</span><span class="o">()</span> <span class="o">{}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="n">Singleton</span> <span class="nf">getInstance</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">INSTANCE</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这种实现方式有几个特点：</p>
+
+<!-- More -->
+
+
+<ul>
+<li>实例一开始就被创建(Eager initialization)。</li>
+<li><code>getInstance()</code>方法不需要加<code>synchronize</code>来解决多线程同步的问题。</li>
+<li><code>final</code>关键字确保了实例不可变，并且只会存在一个。</li>
+</ul>
+
+
+<h2>1)Lazy initialization</h2>
+
+<p>懒加载的方式使得单例会在第一次使用到时才会被创建.先看一种有隐患的写法：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">LazySingleton</span> <span class="o">{</span>
+</span><span class='line'>  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">volatile</span> <span class="n">LazySingleton</span> <span class="n">instance</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">// private constructor</span>
+</span><span class='line'>  <span class="kd">private</span> <span class="nf">LazySingleton</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">public</span> <span class="kd">static</span> <span class="n">LazySingleton</span> <span class="nf">getInstance</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">if</span> <span class="o">(</span><span class="n">instance</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>          <span class="kd">synchronized</span> <span class="o">(</span><span class="n">LazySingleton</span><span class="o">.</span><span class="na">class</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>              <span class="n">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LazySingleton</span><span class="o">();</span>
+</span><span class='line'>          <span class="o">}</span>
+</span><span class='line'>      <span class="o">}</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">instance</span><span class="o">;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>请注意</strong>：上面的写法其实非线程安全的，假设两个Thread同时进入了getInstance方法，都判断到instance==null，然后会因为synchronized的原因，逐个执行，这样就得到了2个实例。解决这个问题，需要用到典型的<strong>double-check</strong>方式，如下：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">LazySingleton</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">volatile</span> <span class="n">LazySingleton</span> <span class="n">instance</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">private</span> <span class="nf">LazySingleton</span><span class="o">()</span> <span class="o">{</span>       
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="n">LazySingleton</span> <span class="nf">getInstance</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">instance</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="kd">synchronized</span> <span class="o">(</span><span class="n">LazySingleton</span> <span class="o">.</span><span class="na">class</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="k">if</span> <span class="o">(</span><span class="n">instance</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                        <span class="n">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LazySingleton</span> <span class="o">();</span>
+</span><span class='line'>                <span class="o">}</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">instance</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>另外一个更简略直观的替代写法是：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">LazySingleton</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">volatile</span> <span class="n">LazySingleton</span> <span class="n">instance</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">private</span> <span class="nf">LazySingleton</span><span class="o">()</span> <span class="o">{</span>       
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">synchronized</span> <span class="n">LazySingleton</span> <span class="nf">getInstance</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">instance</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LazySingleton</span> <span class="o">();</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">instance</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>2)Static block initialization</h2>
+
+<p>如果我们对程序的加载顺序有点了解的话，会知道Static block的初始化是执行在加载类之后，Constructor被执行之前。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">StaticBlockSingleton</span> <span class="o">{</span>
+</span><span class='line'>  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">StaticBlockSingleton</span> <span class="n">INSTANCE</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">static</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>          <span class="n">INSTANCE</span> <span class="o">=</span> <span class="k">new</span> <span class="n">StaticBlockSingleton</span><span class="o">();</span>
+</span><span class='line'>      <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>          <span class="k">throw</span> <span class="k">new</span> <span class="nf">RuntimeException</span><span class="o">(</span><span class="s">&quot;Error, You Know This, Haha!&quot;</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+</span><span class='line'>      <span class="o">}</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">public</span> <span class="kd">static</span> <span class="n">StaticBlockSingleton</span> <span class="nf">getInstance</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">INSTANCE</span><span class="o">;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">private</span> <span class="nf">StaticBlockSingleton</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="c1">// ...</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面的写法有一个弊端，如果我们类有若干个static的变量，程序的初始化却只需要其中的1，2个的话，我们会做多余的static initialization。</p>
+
+<h2>3)Bill Pugh solution</h2>
+
+<p>University of Maryland Computer Science researcher Bill Pugh有写过一篇文章<a href="http://en.wikipedia.org/wiki/Initialization_on_demand_holder_idiom">initialization on demand holder idiom</a>。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Singleton</span> <span class="o">{</span>
+</span><span class='line'>    <span class="c1">// Private constructor prevents instantiation from other classes</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="nf">Singleton</span><span class="o">()</span> <span class="o">{</span> <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="cm">/**</span>
+</span><span class='line'><span class="cm">    * SingletonHolder is loaded on the first execution of Singleton.getInstance() </span>
+</span><span class='line'><span class="cm">    * or the first access to SingletonHolder.INSTANCE, not before.</span>
+</span><span class='line'><span class="cm">    */</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">SingletonHolder</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">Singleton</span> <span class="n">INSTANCE</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Singleton</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="n">Singleton</span> <span class="nf">getInstance</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">SingletonHolder</span><span class="o">.</span><span class="na">INSTANCE</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>SingletonHolder类会在你需要的时候才会被初始化，而且它不影响Singleton类的其他static成员变量的使用。这个方法是线程安全的并且避免了使用volatile与synchronized。</p>
+
+<h2>4)Using Enum</h2>
+
+<p>这是最简便安全的方法。没有明显的缺点，并且避免了下面要讲到的序列化的隐患。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">enum</span> <span class="n">Singleton</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">INSTANCE</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">execute</span> <span class="o">(</span><span class="n">String</span> <span class="n">arg</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// perform operation here </span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Serialize and de-serialize</h2>
+
+<p>在某些情况下，需要实现序列化的时候，普通的单例模式需要添加readResolve的方法，不然会出现异常。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">DemoSingleton</span> <span class="kd">implements</span> <span class="n">Serializable</span> <span class="o">{</span>
+</span><span class='line'>  <span class="kd">private</span> <span class="kd">volatile</span> <span class="kd">static</span> <span class="n">DemoSingleton</span> <span class="n">instance</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">public</span> <span class="kd">static</span> <span class="n">DemoSingleton</span> <span class="nf">getInstance</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">if</span> <span class="o">(</span><span class="n">instance</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>          <span class="n">instance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DemoSingleton</span><span class="o">();</span>
+</span><span class='line'>      <span class="o">}</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">instance</span><span class="o">;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">protected</span> <span class="n">Object</span> <span class="nf">readResolve</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">instance</span><span class="o">;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">private</span> <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">10</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getI</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">i</span><span class="o">;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setI</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">this</span><span class="o">.</span><span class="na">i</span> <span class="o">=</span> <span class="n">i</span><span class="o">;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>仅仅有上面的还不够，我们需要添加serialVersionUID，例子详见下面的总结。</p>
+
+<h2>Conclusion</h2>
+
+<p>实现一个功能完善，性能更佳，不存在序列化等问题的单例，建议使用下面两个方式之一:</p>
+
+<h3>Bill Pugh(Inner Holder)</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">DemoSingleton</span> <span class="kd">implements</span> <span class="n">Serializable</span> <span class="o">{</span>
+</span><span class='line'>  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">long</span> <span class="n">serialVersionUID</span> <span class="o">=</span> <span class="mi">1L</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">private</span> <span class="nf">DemoSingleton</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="c1">// private constructor</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">DemoSingletonHolder</span> <span class="o">{</span>
+</span><span class='line'>      <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">DemoSingleton</span> <span class="n">INSTANCE</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DemoSingleton</span><span class="o">();</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">public</span> <span class="kd">static</span> <span class="n">DemoSingleton</span> <span class="nf">getInstance</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">DemoSingletonHolder</span><span class="o">.</span><span class="na">INSTANCE</span><span class="o">;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">protected</span> <span class="n">Object</span> <span class="nf">readResolve</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="nf">getInstance</span><span class="o">();</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Enum</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">enum</span> <span class="n">Singleton</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">INSTANCE</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">execute</span> <span class="o">(</span><span class="n">String</span> <span class="n">arg</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// perform operation here </span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<hr />
+
+<p><strong>参考资料</strong></p>
+
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/Singleton_pattern">Singleton Pattern</a></li>
+<li><a href="http://howtodoinjava.com/2012/10/22/singleton-design-pattern-in-java/">Singleton Pattern In Java</a></li>
+</ul>
+
+
+<p><strong>转载请注明出自<a href="http:://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢</strong></p>
+</div>
+
+
+  <footer>
+    <p>
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Text" property="dct:title" rel="dct:type">本站作品</span> 由 <a xmlns:cc="http://creativecommons.org/ns#" href="hukai.me" property="cc:attributionName" rel="cc:attributionURL">Kesen Hoo</a> 创作，采用 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a>进行许可。
+    </p>
+
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Kesen Hoo</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-17T14:21:00+08:00" pubdate data-updated="true">Nov 17<span>th</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/java/'>Java</a>
+  
+</span>
+
+
+    </p>
+    
+    
+      <div class="sharing">
+  
+  
+  
+  
+	<!-- JiaThis Button BEGIN -->
+<div class="jiathis_style_32x32">
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_renren"></a>
+	<a class="jiathis_button_linkedin"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share?uid=1723296" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript">
+var jiathis_config = {data_track_clickback:'true'};
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1342501457879302" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+  
+  
+</div>
+
+    
+    <br></br>
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/android-training-17-managing_your_app_memory/" title="Previous Post: Android Training(17) - 管理应用的内存">&laquo; Android Training(17) - 管理应用的内存</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/android-deeper-00-touch-event-dispatch-process/" title="Next Post: Android Deeper(00) - Touch事件分发响应机制">Android Deeper(00) - Touch事件分发响应机制 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Kesen Hoo -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'kesenhoo';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://hukai.me/blog/java-notes-00-singleton-pattern/';
+        var disqus_url = 'http://hukai.me/blog/java-notes-00-singleton-pattern/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

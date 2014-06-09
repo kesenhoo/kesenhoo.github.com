@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android:Training | 胡凯]]></title>
   <link href="http://hukai.me/blog/categories/android-training/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2014-05-18T17:07:10+08:00</updated>
+  <updated>2014-06-09T23:52:39+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Training(18) - 使用IntentService执行任务(Lesson 3 - 回传任务状态给发送方)]]></title>
-    <link href="http://hukai.me/blog/2014/04/20/android-training-18-running-background-service-lesson-3/"/>
+    <link href="http://hukai.me/blog/android-training-18-running-background-service-lesson-3/"/>
     <updated>2014-04-20T22:01:00+08:00</updated>
-    <id>http://hukai.me/blog/2014/04/20/android-training-18-running-background-service-lesson-3</id>
+    <id>http://hukai.me/blog/android-training-18-running-background-service-lesson-3</id>
     <content type="html"><![CDATA[<p>这章节会演示如何回传IntentService中执行的任务状态与结果给发送方。 例如，回传任务的状态给Activity并进行更新UI。推荐的方式是使用<a href="http://developer.android.com/reference/android/support/v4/content/LocalBroadcastManager.html">LocalBroadcastManager</a>，这个组件可以限制broadcast只在自己的App中进行传递。</p>
 
 <h2>Report Status From an IntentService</h2>
@@ -166,9 +166,9 @@ public void onCreate(Bundle stateBundle) {
   
   <entry>
     <title type="html"><![CDATA[Android Training(18) - 使用IntentService执行任务(Lesson 2 - 发送任务给IntentService)]]></title>
-    <link href="http://hukai.me/blog/2014/04/20/android-training-18-running-background-service-lesson-2/"/>
+    <link href="http://hukai.me/blog/android-training-18-running-background-service-lesson-2/"/>
     <updated>2014-04-20T20:46:00+08:00</updated>
-    <id>http://hukai.me/blog/2014/04/20/android-training-18-running-background-service-lesson-2</id>
+    <id>http://hukai.me/blog/android-training-18-running-background-service-lesson-2</id>
     <content type="html"><![CDATA[<p>前一篇文章演示了如何创建一个IntentService类。这次会演示如何通过发送一个Intent来触发IntentService执行任务。这个Intent可以传递一些数据给IntentService。可以在Activity或者Fragment的任何时间点发送这个Intent。</p>
 
 <p>为了创建一个工作请求并发送到IntentService。需要先创建一个explicit Intent，添加数据到intent，然后通过执行<a href="http://developer.android.com/reference/android/content/Context.html#startService(android.content.Intent">startService()</a>) 把它发送到IntentService。</p>
@@ -217,9 +217,9 @@ getActivity().startService(mServiceIntent);
   
   <entry>
     <title type="html"><![CDATA[Android Training(18) - 使用IntentService执行任务(Lesson 1 - 创建IntentService)]]></title>
-    <link href="http://hukai.me/blog/2014/04/14/android-training-18-running-background-service-lesson-1/"/>
+    <link href="http://hukai.me/blog/android-training-18-running-background-service-lesson-1/"/>
     <updated>2014-04-14T18:30:00+08:00</updated>
-    <id>http://hukai.me/blog/2014/04/14/android-training-18-running-background-service-lesson-1</id>
+    <id>http://hukai.me/blog/android-training-18-running-background-service-lesson-1</id>
     <content type="html"><![CDATA[<p><strong>写在开始：</strong>接下去的一段时间会学习专题《Background Jobs》的几篇文章，演示如何在后台执行任务，以此加速程序的性能并降低能耗的使用。第一章节会学习如何通过发送任务到后台的Service中执行，从而提示UI的表现性能。</p>
 
 <p>除非你特意指定，否则大部分在前台的操作都执行在一个叫做UI Thread的特殊线程中。这可能会导致某些问题，因为耗时操作可能会干扰界面的响应性能。为了避免这样的问题，Android Framework提供了几个类，用来帮助你把那些耗时操作移动到后台线程中执行。那些类中最常用的就是<a href="http://developer.android.com/reference/android/app/IntentService.html">IntentService</a>.</p>
@@ -305,9 +305,9 @@ protected void onHandleIntent(Intent workIntent) {
   
   <entry>
     <title type="html"><![CDATA[Android Training(17) - 管理应用的内存]]></title>
-    <link href="http://hukai.me/blog/2013/10/19/android-training-17-managing_your_app_memory/"/>
+    <link href="http://hukai.me/blog/android-training-17-managing_your_app_memory/"/>
     <updated>2013-10-19T15:18:00+08:00</updated>
-    <id>http://hukai.me/blog/2013/10/19/android-training-17-managing_your_app_memory</id>
+    <id>http://hukai.me/blog/android-training-17-managing_your_app_memory</id>
     <content type="html"><![CDATA[<p>Random Access Memory(RAM)在任何软件开发环境中都是一个很宝贵的资源。这一点在物理内存通常很有限的移动操作系统上，显得尤为突出。尽管Android的Dalvik虚拟机扮演了常规的垃圾回收的角色，但这并不意味着你可以忽视app的内存分配与释放的时机与地点。</p>
 
 <p>为了GC能够从你的app中及时回收内存，你需要避免Memory Leaks(这通常由引用的不能释放而导致)并且在适当的时机(下面会讲到的lifecycle callbacks)来释放引用。对于大多数apps来说，Dalvik的GC会自动把离开活动线程的对象进行回收。</p>
@@ -519,9 +519,9 @@ protected void onHandleIntent(Intent workIntent) {
   
   <entry>
     <title type="html"><![CDATA[Android Training(16) - 创建自定义的Views(Lesson 4 - 优化Views)]]></title>
-    <link href="http://hukai.me/blog/2013/08/18/android-training-16-creating-custom-views-lesson-4/"/>
+    <link href="http://hukai.me/blog/android-training-16-creating-custom-views-lesson-4/"/>
     <updated>2013-08-18T17:30:00+08:00</updated>
-    <id>http://hukai.me/blog/2013/08/18/android-training-16-creating-custom-views-lesson-4</id>
+    <id>http://hukai.me/blog/android-training-16-creating-custom-views-lesson-4</id>
     <content type="html"><![CDATA[<p>前面的课程学习到了如何创建设计良好的View，并且能够使之在手势与状态切换时得到正确的反馈。下面要介绍的是如何使得view能够执行更快。为了避免UI显得卡顿，你必须确保动画能够保持在60fps以上。</p>
 
 <!-- more -->

@@ -1,0 +1,829 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Android Training(09) - 高效地显示Bitmap(Lesson 5 - 呈现Bitmap到UI上) - 胡凯</title>
+  <meta name="author" content="Kesen Hoo">
+
+  
+  <meta name="description" content="这一课会演示如何运用前面几节课的内容，使用后台线程与Cache机制来加载图片到 ViewPager 与 GridView 组件，并且学习处理并发与配置改变问题。(并发问题的处理确实需要好好考虑，大多数App都没有仔细考虑到这个问题，会导致浪费更多的资源，效率不够) Load Bitmaps &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://hukai.me/blog/android-training-09-displaying-bitmaps-efficiently-lesson-5/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="胡凯" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-37679268-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   class="no-sidebar"  >
+  <header role="banner"><hgroup>
+  <h1><a href="/">胡凯</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:hukai.me" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Android Training(09) - 高效地显示Bitmap(Lesson 5 - 呈现Bitmap到UI上)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-26T22:27:00+08:00" pubdate data-updated="true">Apr 26<span>th</span>, 2012</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>这一课会演示如何运用前面几节课的内容，使用后台线程与Cache机制来加载图片到 ViewPager 与 GridView 组件，并且学习处理并发与配置改变问题。(<em>并发问题的处理确实需要好好考虑，大多数App都没有仔细考虑到这个问题，会导致浪费更多的资源，效率不够</em>)</p>
+
+<!-- more -->
+
+
+<h2>Load Bitmaps into a ViewPager Implementation(实现加载图片到ViewPager)</h2>
+
+<p><a href="http://developer.android.com/design/patterns/swipe-views.html">swipe view pattern</a>是一个用来切换显示不同详情界面的很好的方法。(<em>关于这种效果请先参看<a href="http://developer.android.com/design/patterns/swipe-views.html">Android Design: Swipe Views</a> ，这是一个很好的设计，在很多App里面都可以看到这种设计，例如网易新闻，可以左右滑动来切换分类与文章，在Google Reader里面文章的切换也是这样</em>).</p>
+
+<p>你可以通过 <a href="http://developer.android.com/reference/android/support/v4/view/PagerAdapter.html">PagerAdapter</a> 与 <a href="http://developer.android.com/reference/android/support/v4/view/ViewPager.html">ViewPager</a> 组件来实现这个效果. 然而，一个更加合适的Adapter是PagerAdapter 的子类 <a href="http://developer.android.com/reference/android/support/v4/app/FragmentStatePagerAdapter.html">FragmentStatePagerAdapter</a>:它可以在某个ViewPager中的子视图切换出屏幕时自动销毁与保存 Fragments 的状态。这样能够保持消耗更少的内存。<br/>
+<strong>Note:</strong> 如果你只有为数不多的图片并且确保不会超出程序内存限制，那么使用 PagerAdapter 或 FragmentPagerAdapter 会更加合适。</p>
+
+<p>下面是一个使用ViewPager与ImageView作为子视图的示例。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ImageDetailActivity</span> <span class="kd">extends</span> <span class="n">FragmentActivity</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">EXTRA_IMAGE</span> <span class="o">=</span> <span class="s">&quot;extra_image&quot;</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">ImagePagerAdapter</span> <span class="n">mAdapter</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">ViewPager</span> <span class="n">mPager</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// A static dataset to back the ViewPager adapter  </span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">final</span> <span class="kd">static</span> <span class="n">Integer</span><span class="o">[]</span> <span class="n">imageResIds</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Integer</span><span class="o">[]</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">sample_image_1</span><span class="o">,</span> <span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">sample_image_2</span><span class="o">,</span> <span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">sample_image_3</span><span class="o">,</span>
+</span><span class='line'>            <span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">sample_image_4</span><span class="o">,</span> <span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">sample_image_5</span><span class="o">,</span> <span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">sample_image_6</span><span class="o">,</span>
+</span><span class='line'>            <span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">sample_image_7</span><span class="o">,</span> <span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">sample_image_8</span><span class="o">,</span> <span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">sample_image_9</span><span class="o">};</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">onCreate</span><span class="o">(</span><span class="n">savedInstanceState</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">setContentView</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">layout</span><span class="o">.</span><span class="na">image_detail_pager</span><span class="o">);</span> <span class="c1">// Contains just a ViewPager  </span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">mAdapter</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ImagePagerAdapter</span><span class="o">(</span><span class="n">getSupportFragmentManager</span><span class="o">(),</span> <span class="n">imageResIds</span><span class="o">.</span><span class="na">length</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">mPager</span> <span class="o">=</span> <span class="o">(</span><span class="n">ViewPager</span><span class="o">)</span> <span class="n">findViewById</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">pager</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">mPager</span><span class="o">.</span><span class="na">setAdapter</span><span class="o">(</span><span class="n">mAdapter</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">ImagePagerAdapter</span> <span class="kd">extends</span> <span class="n">FragmentStatePagerAdapter</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">private</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">mSize</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">public</span> <span class="nf">ImagePagerAdapter</span><span class="o">(</span><span class="n">FragmentManager</span> <span class="n">fm</span><span class="o">,</span> <span class="kt">int</span> <span class="n">size</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="kd">super</span><span class="o">(</span><span class="n">fm</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">mSize</span> <span class="o">=</span> <span class="n">size</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nd">@Override</span>
+</span><span class='line'>        <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getCount</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">mSize</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nd">@Override</span>
+</span><span class='line'>        <span class="kd">public</span> <span class="n">Fragment</span> <span class="nf">getItem</span><span class="o">(</span><span class="kt">int</span> <span class="n">position</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">ImageDetailFragment</span><span class="o">.</span><span class="na">newInstance</span><span class="o">(</span><span class="n">position</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Fragment 里面包含了ImageView 的子组件:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ImageDetailFragment</span> <span class="kd">extends</span> <span class="n">Fragment</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">IMAGE_DATA_EXTRA</span> <span class="o">=</span> <span class="s">&quot;resId&quot;</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kt">int</span> <span class="n">mImageNum</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">ImageView</span> <span class="n">mImageView</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">static</span> <span class="n">ImageDetailFragment</span> <span class="nf">newInstance</span><span class="o">(</span><span class="kt">int</span> <span class="n">imageNum</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">final</span> <span class="n">ImageDetailFragment</span> <span class="n">f</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ImageDetailFragment</span><span class="o">();</span>
+</span><span class='line'>        <span class="kd">final</span> <span class="n">Bundle</span> <span class="n">args</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Bundle</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">args</span><span class="o">.</span><span class="na">putInt</span><span class="o">(</span><span class="n">IMAGE_DATA_EXTRA</span><span class="o">,</span> <span class="n">imageNum</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">f</span><span class="o">.</span><span class="na">setArguments</span><span class="o">(</span><span class="n">args</span><span class="o">);</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">f</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Empty constructor, required as per Fragment docs  </span>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">ImageDetailFragment</span><span class="o">()</span> <span class="o">{}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">onCreate</span><span class="o">(</span><span class="n">savedInstanceState</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">mImageNum</span> <span class="o">=</span> <span class="n">getArguments</span><span class="o">()</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">?</span> <span class="n">getArguments</span><span class="o">().</span><span class="na">getInt</span><span class="o">(</span><span class="n">IMAGE_DATA_EXTRA</span><span class="o">)</span> <span class="o">:</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">View</span> <span class="nf">onCreateView</span><span class="o">(</span><span class="n">LayoutInflater</span> <span class="n">inflater</span><span class="o">,</span> <span class="n">ViewGroup</span> <span class="n">container</span><span class="o">,</span>
+</span><span class='line'>            <span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// image_detail_fragment.xml contains just an ImageView  </span>
+</span><span class='line'>        <span class="kd">final</span> <span class="n">View</span> <span class="n">v</span> <span class="o">=</span> <span class="n">inflater</span><span class="o">.</span><span class="na">inflate</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">layout</span><span class="o">.</span><span class="na">image_detail_fragment</span><span class="o">,</span> <span class="n">container</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">mImageView</span> <span class="o">=</span> <span class="o">(</span><span class="n">ImageView</span><span class="o">)</span> <span class="n">v</span><span class="o">.</span><span class="na">findViewById</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">imageView</span><span class="o">);</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">v</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onActivityCreated</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">onActivityCreated</span><span class="o">(</span><span class="n">savedInstanceState</span><span class="o">);</span>
+</span><span class='line'>        <span class="kd">final</span> <span class="kt">int</span> <span class="n">resId</span> <span class="o">=</span> <span class="n">ImageDetailActivity</span><span class="o">.</span><span class="na">imageResIds</span><span class="o">[</span><span class="n">mImageNum</span><span class="o">];</span>
+</span><span class='line'>        <span class="n">mImageView</span><span class="o">.</span><span class="na">setImageResource</span><span class="o">(</span><span class="n">resId</span><span class="o">);</span> <span class="c1">// Load image into ImageView  </span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>希望你有发现上面示例存在的问题：在UI Thread中读取图片可能会导致程序ANR。使用在Lesson 2中学习的 AsyncTask 会比较好。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ImageDetailActivity</span> <span class="kd">extends</span> <span class="n">FragmentActivity</span> <span class="o">{</span>
+</span><span class='line'>    <span class="o">...</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">loadBitmap</span><span class="o">(</span><span class="kt">int</span> <span class="n">resId</span><span class="o">,</span> <span class="n">ImageView</span> <span class="n">imageView</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mImageView</span><span class="o">.</span><span class="na">setImageResource</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">image_placeholder</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">BitmapWorkerTask</span> <span class="n">task</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BitmapWorkerTask</span><span class="o">(</span><span class="n">mImageView</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">task</span><span class="o">.</span><span class="na">execute</span><span class="o">(</span><span class="n">resId</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="o">...</span> <span class="c1">// include BitmapWorkerTask class  </span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ImageDetailFragment</span> <span class="kd">extends</span> <span class="n">Fragment</span> <span class="o">{</span>
+</span><span class='line'>    <span class="o">...</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onActivityCreated</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">onActivityCreated</span><span class="o">(</span><span class="n">savedInstanceState</span><span class="o">);</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">ImageDetailActivity</span><span class="o">.</span><span class="na">class</span><span class="o">.</span><span class="na">isInstance</span><span class="o">(</span><span class="n">getActivity</span><span class="o">()))</span> <span class="o">{</span>
+</span><span class='line'>            <span class="kd">final</span> <span class="kt">int</span> <span class="n">resId</span> <span class="o">=</span> <span class="n">ImageDetailActivity</span><span class="o">.</span><span class="na">imageResIds</span><span class="o">[</span><span class="n">mImageNum</span><span class="o">];</span>
+</span><span class='line'>            <span class="c1">// Call out to ImageDetailActivity to load the bitmap in a background thread  </span>
+</span><span class='line'>            <span class="o">((</span><span class="n">ImageDetailActivity</span><span class="o">)</span> <span class="n">getActivity</span><span class="o">()).</span><span class="na">loadBitmap</span><span class="o">(</span><span class="n">resId</span><span class="o">,</span> <span class="n">mImageView</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在 BitmapWorkerTask 中做一些例如resizing or fetching images from the network，不会卡到UI Thread。如果后台线程不仅仅是做个简单的直接加载动作，增加一个内存Cache或者磁盘Cache会比较好[参考Lesson 3] ,下面是一些为了内存Cache而附加的内容:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ImageDetailActivity</span> <span class="kd">extends</span> <span class="n">FragmentActivity</span> <span class="o">{</span>
+</span><span class='line'>    <span class="o">...</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">LruCache</span> <span class="n">mMemoryCache</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="o">...</span>
+</span><span class='line'>        <span class="c1">// initialize LruCache as per Use a Memory Cache section  </span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">loadBitmap</span><span class="o">(</span><span class="kt">int</span> <span class="n">resId</span><span class="o">,</span> <span class="n">ImageView</span> <span class="n">imageView</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">final</span> <span class="n">String</span> <span class="n">imageKey</span> <span class="o">=</span> <span class="n">String</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="n">resId</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">final</span> <span class="n">Bitmap</span> <span class="n">bitmap</span> <span class="o">=</span> <span class="n">mMemoryCache</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">imageKey</span><span class="o">);</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">bitmap</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">mImageView</span><span class="o">.</span><span class="na">setImageBitmap</span><span class="o">(</span><span class="n">bitmap</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">mImageView</span><span class="o">.</span><span class="na">setImageResource</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">image_placeholder</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">BitmapWorkerTask</span> <span class="n">task</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BitmapWorkerTask</span><span class="o">(</span><span class="n">mImageView</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">task</span><span class="o">.</span><span class="na">execute</span><span class="o">(</span><span class="n">resId</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="o">...</span> <span class="c1">// include updated BitmapWorkerTask from Use a Memory Cache section  </span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Load Bitmaps into a GridView Implementation(实现加载图片到GridView)</h2>
+
+<p><a href="http://developer.android.com/design/building-blocks/grid-lists.html">Grid list building block</a> 是一种有效显示大量图片的方式。这样能够一次显示许多图片，而且那些即将被显示的图片也处于准备显示状态。如果你想要实现这种效果，你必须确保UI是流畅的，能够控制内存使用，并且正确的处理并发问题（因为 GridView 会循环使用子视图)。</p>
+
+<p>下面是一个在Fragment里面内置了ImageView作为GridView子视图的示例：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ImageGridFragment</span> <span class="kd">extends</span> <span class="n">Fragment</span> <span class="kd">implements</span> <span class="n">AdapterView</span><span class="o">.</span><span class="na">OnItemClickListener</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">ImageAdapter</span> <span class="n">mAdapter</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// A static dataset to back the GridView adapter  </span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">final</span> <span class="kd">static</span> <span class="n">Integer</span><span class="o">[]</span> <span class="n">imageResIds</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Integer</span><span class="o">[]</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">sample_image_1</span><span class="o">,</span> <span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">sample_image_2</span><span class="o">,</span> <span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">sample_image_3</span><span class="o">,</span>
+</span><span class='line'>            <span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">sample_image_4</span><span class="o">,</span> <span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">sample_image_5</span><span class="o">,</span> <span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">sample_image_6</span><span class="o">,</span>
+</span><span class='line'>            <span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">sample_image_7</span><span class="o">,</span> <span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">sample_image_8</span><span class="o">,</span> <span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">sample_image_9</span><span class="o">};</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Empty constructor as per Fragment docs  </span>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">ImageGridFragment</span><span class="o">()</span> <span class="o">{}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">onCreate</span><span class="o">(</span><span class="n">savedInstanceState</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">mAdapter</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ImageAdapter</span><span class="o">(</span><span class="n">getActivity</span><span class="o">());</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">View</span> <span class="nf">onCreateView</span><span class="o">(</span>
+</span><span class='line'>            <span class="n">LayoutInflater</span> <span class="n">inflater</span><span class="o">,</span> <span class="n">ViewGroup</span> <span class="n">container</span><span class="o">,</span> <span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">final</span> <span class="n">View</span> <span class="n">v</span> <span class="o">=</span> <span class="n">inflater</span><span class="o">.</span><span class="na">inflate</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">layout</span><span class="o">.</span><span class="na">image_grid_fragment</span><span class="o">,</span> <span class="n">container</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+</span><span class='line'>        <span class="kd">final</span> <span class="n">GridView</span> <span class="n">mGridView</span> <span class="o">=</span> <span class="o">(</span><span class="n">GridView</span><span class="o">)</span> <span class="n">v</span><span class="o">.</span><span class="na">findViewById</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">gridView</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">mGridView</span><span class="o">.</span><span class="na">setAdapter</span><span class="o">(</span><span class="n">mAdapter</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">mGridView</span><span class="o">.</span><span class="na">setOnItemClickListener</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">v</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onItemClick</span><span class="o">(</span><span class="n">AdapterView</span> <span class="n">parent</span><span class="o">,</span> <span class="n">View</span> <span class="n">v</span><span class="o">,</span> <span class="kt">int</span> <span class="n">position</span><span class="o">,</span> <span class="kt">long</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">final</span> <span class="n">Intent</span> <span class="n">i</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">getActivity</span><span class="o">(),</span> <span class="n">ImageDetailActivity</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">i</span><span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="n">ImageDetailActivity</span><span class="o">.</span><span class="na">EXTRA_IMAGE</span><span class="o">,</span> <span class="n">position</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">startActivity</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">class</span> <span class="nc">ImageAdapter</span> <span class="kd">extends</span> <span class="n">BaseAdapter</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">private</span> <span class="kd">final</span> <span class="n">Context</span> <span class="n">mContext</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">public</span> <span class="nf">ImageAdapter</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="kd">super</span><span class="o">();</span>
+</span><span class='line'>            <span class="n">mContext</span> <span class="o">=</span> <span class="n">context</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nd">@Override</span>
+</span><span class='line'>        <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getCount</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">imageResIds</span><span class="o">.</span><span class="na">length</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nd">@Override</span>
+</span><span class='line'>        <span class="kd">public</span> <span class="n">Object</span> <span class="nf">getItem</span><span class="o">(</span><span class="kt">int</span> <span class="n">position</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">imageResIds</span><span class="o">[</span><span class="n">position</span><span class="o">];</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nd">@Override</span>
+</span><span class='line'>        <span class="kd">public</span> <span class="kt">long</span> <span class="nf">getItemId</span><span class="o">(</span><span class="kt">int</span> <span class="n">position</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">position</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nd">@Override</span>
+</span><span class='line'>        <span class="kd">public</span> <span class="n">View</span> <span class="nf">getView</span><span class="o">(</span><span class="kt">int</span> <span class="n">position</span><span class="o">,</span> <span class="n">View</span> <span class="n">convertView</span><span class="o">,</span> <span class="n">ViewGroup</span> <span class="n">container</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">ImageView</span> <span class="n">imageView</span><span class="o">;</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">convertView</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span> <span class="c1">// if it&#39;s not recycled, initialize some attributes  </span>
+</span><span class='line'>                <span class="n">imageView</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ImageView</span><span class="o">(</span><span class="n">mContext</span><span class="o">);</span>
+</span><span class='line'>                <span class="n">imageView</span><span class="o">.</span><span class="na">setScaleType</span><span class="o">(</span><span class="n">ImageView</span><span class="o">.</span><span class="na">ScaleType</span><span class="o">.</span><span class="na">CENTER_CROP</span><span class="o">);</span>
+</span><span class='line'>                <span class="n">imageView</span><span class="o">.</span><span class="na">setLayoutParams</span><span class="o">(</span><span class="k">new</span> <span class="n">GridView</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">(</span>
+</span><span class='line'>                        <span class="n">LayoutParams</span><span class="o">.</span><span class="na">MATCH_PARENT</span><span class="o">,</span> <span class="n">LayoutParams</span><span class="o">.</span><span class="na">MATCH_PARENT</span><span class="o">));</span>
+</span><span class='line'>            <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">imageView</span> <span class="o">=</span> <span class="o">(</span><span class="n">ImageView</span><span class="o">)</span> <span class="n">convertView</span><span class="o">;</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="c1">//请注意下面的代码  </span>
+</span><span class='line'>        <span class="n">imageView</span><span class="o">.</span><span class="na">setImageResource</span><span class="o">(</span><span class="n">imageResIds</span><span class="o">[</span><span class="n">position</span><span class="o">]);</span> <span class="c1">// Load image into ImageView  </span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">imageView</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>与前面加载到图片到ViewPager一样，如果setImageResource的操作会比较耗时，有可能会卡到UI Thread。可以使用类似前面异步处理图片与增加缓存的方法来解决那个问题。然而，我们还需要考虑GridView的循环机制所带来的并发问题。为了处理这个问题，请参考前面的课程 。下面是一个更新的解决方案：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ImageGridFragment</span> <span class="kd">extends</span> <span class="n">Fragment</span> <span class="kd">implements</span> <span class="n">AdapterView</span><span class="o">.</span><span class="na">OnItemClickListener</span> <span class="o">{</span>
+</span><span class='line'>    <span class="o">...</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">class</span> <span class="nc">ImageAdapter</span> <span class="kd">extends</span> <span class="n">BaseAdapter</span> <span class="o">{</span>
+</span><span class='line'>        <span class="o">...</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nd">@Override</span>
+</span><span class='line'>        <span class="kd">public</span> <span class="n">View</span> <span class="nf">getView</span><span class="o">(</span><span class="kt">int</span> <span class="n">position</span><span class="o">,</span> <span class="n">View</span> <span class="n">convertView</span><span class="o">,</span> <span class="n">ViewGroup</span> <span class="n">container</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="o">...</span>
+</span><span class='line'>            <span class="n">loadBitmap</span><span class="o">(</span><span class="n">imageResIds</span><span class="o">[</span><span class="n">position</span><span class="o">],</span> <span class="n">imageView</span><span class="o">)</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">imageView</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">loadBitmap</span><span class="o">(</span><span class="kt">int</span> <span class="n">resId</span><span class="o">,</span> <span class="n">ImageView</span> <span class="n">imageView</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">cancelPotentialWork</span><span class="o">(</span><span class="n">resId</span><span class="o">,</span> <span class="n">imageView</span><span class="o">))</span> <span class="o">{</span>
+</span><span class='line'>            <span class="kd">final</span> <span class="n">BitmapWorkerTask</span> <span class="n">task</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BitmapWorkerTask</span><span class="o">(</span><span class="n">imageView</span><span class="o">);</span>
+</span><span class='line'>            <span class="kd">final</span> <span class="n">AsyncDrawable</span> <span class="n">asyncDrawable</span> <span class="o">=</span>
+</span><span class='line'>                    <span class="k">new</span> <span class="nf">AsyncDrawable</span><span class="o">(</span><span class="n">getResources</span><span class="o">(),</span> <span class="n">mPlaceHolderBitmap</span><span class="o">,</span> <span class="n">task</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">imageView</span><span class="o">.</span><span class="na">setImageDrawable</span><span class="o">(</span><span class="n">asyncDrawable</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">task</span><span class="o">.</span><span class="na">execute</span><span class="o">(</span><span class="n">resId</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">static</span> <span class="kd">class</span> <span class="nc">AsyncDrawable</span> <span class="kd">extends</span> <span class="n">BitmapDrawable</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">private</span> <span class="kd">final</span> <span class="n">WeakReference</span> <span class="n">bitmapWorkerTaskReference</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">public</span> <span class="nf">AsyncDrawable</span><span class="o">(</span><span class="n">Resources</span> <span class="n">res</span><span class="o">,</span> <span class="n">Bitmap</span> <span class="n">bitmap</span><span class="o">,</span>
+</span><span class='line'>                <span class="n">BitmapWorkerTask</span> <span class="n">bitmapWorkerTask</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="kd">super</span><span class="o">(</span><span class="n">res</span><span class="o">,</span> <span class="n">bitmap</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">bitmapWorkerTaskReference</span> <span class="o">=</span>
+</span><span class='line'>                <span class="k">new</span> <span class="nf">WeakReference</span><span class="o">(</span><span class="n">bitmapWorkerTask</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">public</span> <span class="n">BitmapWorkerTask</span> <span class="nf">getBitmapWorkerTask</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">bitmapWorkerTaskReference</span><span class="o">.</span><span class="na">get</span><span class="o">();</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">boolean</span> <span class="nf">cancelPotentialWork</span><span class="o">(</span><span class="kt">int</span> <span class="n">data</span><span class="o">,</span> <span class="n">ImageView</span> <span class="n">imageView</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">final</span> <span class="n">BitmapWorkerTask</span> <span class="n">bitmapWorkerTask</span> <span class="o">=</span> <span class="n">getBitmapWorkerTask</span><span class="o">(</span><span class="n">imageView</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">bitmapWorkerTask</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="kd">final</span> <span class="kt">int</span> <span class="n">bitmapData</span> <span class="o">=</span> <span class="n">bitmapWorkerTask</span><span class="o">.</span><span class="na">data</span><span class="o">;</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">bitmapData</span> <span class="o">!=</span> <span class="n">data</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="c1">// Cancel previous task  </span>
+</span><span class='line'>                <span class="n">bitmapWorkerTask</span><span class="o">.</span><span class="na">cancel</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+</span><span class='line'>            <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>                <span class="c1">// The same work is already in progress  </span>
+</span><span class='line'>                <span class="k">return</span> <span class="kc">false</span><span class="o">;</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="c1">// No task associated with the ImageView, or an existing task was cancelled  </span>
+</span><span class='line'>        <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">static</span> <span class="n">BitmapWorkerTask</span> <span class="nf">getBitmapWorkerTask</span><span class="o">(</span><span class="n">ImageView</span> <span class="n">imageView</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>       <span class="k">if</span> <span class="o">(</span><span class="n">imageView</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>           <span class="kd">final</span> <span class="n">Drawable</span> <span class="n">drawable</span> <span class="o">=</span> <span class="n">imageView</span><span class="o">.</span><span class="na">getDrawable</span><span class="o">();</span>
+</span><span class='line'>           <span class="k">if</span> <span class="o">(</span><span class="n">drawable</span> <span class="k">instanceof</span> <span class="n">AsyncDrawable</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>               <span class="kd">final</span> <span class="n">AsyncDrawable</span> <span class="n">asyncDrawable</span> <span class="o">=</span> <span class="o">(</span><span class="n">AsyncDrawable</span><span class="o">)</span> <span class="n">drawable</span><span class="o">;</span>
+</span><span class='line'>               <span class="k">return</span> <span class="n">asyncDrawable</span><span class="o">.</span><span class="na">getBitmapWorkerTask</span><span class="o">();</span>
+</span><span class='line'>           <span class="o">}</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="o">...</span> <span class="c1">// include updated BitmapWorkerTask class  </span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>Note:</strong>对于 ListView 同样可以套用上面的方法。</p>
+
+<p>上面的方法提供了足够的弹性，使得你可以做从网络加载与Resize大的数码照片等操作而不至于卡到UI Thread。</p>
+
+<hr />
+
+<p><strong>学习自：<a href="http://developer.android.com/training/displaying-bitmaps/display-bitmap.html">http://developer.android.com/training/displaying-bitmaps/display-bitmap.html</a>，请多指教，谢谢！</strong><br/>
+<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
+</div>
+
+
+  <footer>
+    <p>
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Text" property="dct:title" rel="dct:type">本站作品</span> 由 <a xmlns:cc="http://creativecommons.org/ns#" href="hukai.me" property="cc:attributionName" rel="cc:attributionURL">Kesen Hoo</a> 创作，采用 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a>进行许可。
+    </p>
+
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Kesen Hoo</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-26T22:27:00+08:00" pubdate data-updated="true">Apr 26<span>th</span>, 2012</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/android/'>Android</a>, <a class='category' href='/blog/categories/android-training/'>Android:Training</a>
+  
+</span>
+
+
+    </p>
+    
+    
+      <div class="sharing">
+  
+  
+  
+  
+	<!-- JiaThis Button BEGIN -->
+<div class="jiathis_style_32x32">
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_renren"></a>
+	<a class="jiathis_button_linkedin"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share?uid=1723296" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript">
+var jiathis_config = {data_track_clickback:'true'};
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1342501457879302" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+  
+  
+</div>
+
+    
+    <br></br>
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/android-training-09-displaying-bitmaps-efficiently-lesson-3/" title="Previous Post: Android Training(09) - 高效地显示Bitmap(Lesson 3 - 两种缓存Bitmap的方式)">&laquo; Android Training(09) - 高效地显示Bitmap(Lesson 3 - 两种缓存Bitmap的方式)</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/android-training-10-network-operations-lesson-1/" title="Next Post: Android Training(10) - 执行网络操作(Lesson 1 - HTTP连接网络)">Android Training(10) - 执行网络操作(Lesson 1 - HTTP连接网络) &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Kesen Hoo -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'kesenhoo';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://hukai.me/blog/android-training-09-displaying-bitmaps-efficiently-lesson-5/';
+        var disqus_url = 'http://hukai.me/blog/android-training-09-displaying-bitmaps-efficiently-lesson-5/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

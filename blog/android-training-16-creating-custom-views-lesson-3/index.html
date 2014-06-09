@@ -1,0 +1,410 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Android Training(16) - 创建自定义的Views(Lesson 3 - 处理View的交互性) - 胡凯</title>
+  <meta name="author" content="Kesen Hoo">
+
+  
+  <meta name="description" content="绘制UI仅仅是创建自定义View的一部分。你还需要使得你的View能够以模拟现实世界的方式来进行反馈。Objects应该总是与现实情景能够保持一致。例如，图片不应该突然消失又从另外一个地方出现，因为在现实世界里面不会发生那样的事情。正确的应该是，图片从一个地方移动到另外一个地方。 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://hukai.me/blog/android-training-16-creating-custom-views-lesson-3/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="胡凯" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-37679268-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   class="no-sidebar"  >
+  <header role="banner"><hgroup>
+  <h1><a href="/">胡凯</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:hukai.me" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Android Training(16) - 创建自定义的Views(Lesson 3 - 处理View的交互性)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-18T15:01:00+08:00" pubdate data-updated="true">Aug 18<span>th</span>, 2013</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>绘制UI仅仅是创建自定义View的一部分。你还需要使得你的View能够以模拟现实世界的方式来进行反馈。Objects应该总是与现实情景能够保持一致。例如，图片不应该突然消失又从另外一个地方出现，因为在现实世界里面不会发生那样的事情。正确的应该是，图片从一个地方移动到另外一个地方。</p>
+
+<p>用户应该可以感受到UI上的微小变化，并对这些变化反馈到现实世界中。例如，当用户做fling(迅速滑动)的动作，应该再滑动开始与结束的时候给用户一定的反馈。</p>
+
+<p>这节课会演示如何使用Android framework的功能来为自定义的View添加那些现实世界中的行为。</p>
+
+<!-- more -->
+
+
+<h2>Handle Input Gestures</h2>
+
+<p>像许多其他UI框架一样，Android提供一个输入事件模型。用户的动作会转换成触发一些回调函数的事件，你可以重写这些回调方法来定制你的程序应该如何响应用户的输入事件。在Android中最常用的输入事件是touch，它会触发<a href="http://developer.android.com/reference/android/view/View.html#onTouchEvent(android.view.MotionEvent">onTouchEvent(android.view.MotionEvent)</a>)的回调。重写这个方法来处理touch事件：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">onTouchEvent</span><span class="o">(</span><span class="n">MotionEvent</span> <span class="n">event</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="kd">super</span><span class="o">.</span><span class="na">onTouchEvent</span><span class="o">(</span><span class="n">event</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Touch事件本身并不是特别有用。如今的touch UI定义了touch事件之间的相互作用，叫做gentures。例如tapping,pulling,flinging与zooming。为了把那些touch的源事件转换成gestures, Android提供了<a href="http://developer.android.com/reference/android/view/GestureDetector.html">GestureDetector</a>。</p>
+
+<p>下面演示了如何构造一个GestureDetector。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">class</span> <span class="nc">mListener</span> <span class="kd">extends</span> <span class="n">GestureDetector</span><span class="o">.</span><span class="na">SimpleOnGestureListener</span> <span class="o">{</span>
+</span><span class='line'>   <span class="nd">@Override</span>
+</span><span class='line'>   <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">onDown</span><span class="o">(</span><span class="n">MotionEvent</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>       <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>   <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="n">mDetector</span> <span class="o">=</span> <span class="k">new</span> <span class="n">GestureDetector</span><span class="o">(</span><span class="n">PieChart</span><span class="o">.</span><span class="na">this</span><span class="o">.</span><span class="na">getContext</span><span class="o">(),</span> <span class="k">new</span> <span class="n">mListener</span><span class="o">());</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>不管你是否使用GestureDetector.SimpleOnGestureListener, 你必须总是实现onDown()方法，并返回true。这一步是必须的，因为所有的gestures都是从onDown()开始的。如果你再onDown()里面返回false，系统会认为你想要忽略后续的gesture,那么GestureDetector.OnGestureListener的其他回调方法就不会被执行到了。一旦你实现了GestureDetector.OnGestureListener并且创建了GestureDetector的实例, 你可以使用你的GestureDetector来中止你在onTouchEvent里面收到的touch事件。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">onTouchEvent</span><span class="o">(</span><span class="n">MotionEvent</span> <span class="n">event</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>   <span class="kt">boolean</span> <span class="n">result</span> <span class="o">=</span> <span class="n">mDetector</span><span class="o">.</span><span class="na">onTouchEvent</span><span class="o">(</span><span class="n">event</span><span class="o">);</span>
+</span><span class='line'>   <span class="k">if</span> <span class="o">(!</span><span class="n">result</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>       <span class="k">if</span> <span class="o">(</span><span class="n">event</span><span class="o">.</span><span class="na">getAction</span><span class="o">()</span> <span class="o">==</span> <span class="n">MotionEvent</span><span class="o">.</span><span class="na">ACTION_UP</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>           <span class="n">stopScrolling</span><span class="o">();</span>
+</span><span class='line'>           <span class="n">result</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>       <span class="o">}</span>
+</span><span class='line'>   <span class="o">}</span>
+</span><span class='line'>   <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>当你传递一个touch事件到onTouchEvent()时，若这个个事件没有被认为是gesture中的一部分，它会返回false。你可以执行自定义的gesture-decection代码。</p>
+
+<h2>Create Physically Plausible(貌似可信的) Motion</h2>
+
+<p>Gestures是控制触摸设备的一种强有力的方式，但是除非你能够产出一个合理的触摸反馈，否则将是违反用户直觉的。一个很好的例子是fling手势，用户迅速的在屏幕上移动手指然后抬手离开屏幕。这个手势应该使得UI迅速的按照fling的方向进行滑动，然后慢慢停下来，就像是用户旋转一个飞轮一样。</p>
+
+<p>幸运的是，Android有提供帮助类来模拟这些物理行为。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">onFling</span><span class="o">(</span><span class="n">MotionEvent</span> <span class="n">e1</span><span class="o">,</span> <span class="n">MotionEvent</span> <span class="n">e2</span><span class="o">,</span> <span class="kt">float</span> <span class="n">velocityX</span><span class="o">,</span> <span class="kt">float</span> <span class="n">velocityY</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>   <span class="n">mScroller</span><span class="o">.</span><span class="na">fling</span><span class="o">(</span><span class="n">currentX</span><span class="o">,</span> <span class="n">currentY</span><span class="o">,</span> <span class="n">velocityX</span> <span class="o">/</span> <span class="n">SCALE</span><span class="o">,</span> <span class="n">velocityY</span> <span class="o">/</span> <span class="n">SCALE</span><span class="o">,</span> <span class="n">minX</span><span class="o">,</span> <span class="n">minY</span><span class="o">,</span> <span class="n">maxX</span><span class="o">,</span> <span class="n">maxY</span><span class="o">);</span>
+</span><span class='line'>   <span class="n">postInvalidate</span><span class="o">();</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>Note:</strong> 尽管速率是通过GestureDetector来计算的，许多开发者感觉使用这个值使得fling动画太快。通常把x与y设置为4到8倍的关系。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="k">if</span> <span class="o">(!</span><span class="n">mScroller</span><span class="o">.</span><span class="na">isFinished</span><span class="o">())</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">mScroller</span><span class="o">.</span><span class="na">computeScrollOffset</span><span class="o">();</span>
+</span><span class='line'>    <span class="n">setPieRotation</span><span class="o">(</span><span class="n">mScroller</span><span class="o">.</span><span class="na">getCurrY</span><span class="o">());</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="http://developer.android.com/reference/android/widget/Scroller.html">Scroller</a> 类会为你计算滚动位置，但是他不会自动把哪些位置运用到你的view上面。你有责任确保View获取并运用到新的坐标。你有两种方法来实现这件事情：</p>
+
+<ul>
+<li>在调用fling()之后执行postInvalidate(), 这是为了确保能强制进行重画。这个技术需要每次在onDraw里面计算过scroll offsets(滚动偏移量)之后调用postInvalidate()。</li>
+<li>使用<a href="http://developer.android.com/reference/android/animation/ValueAnimator.html">ValueAnimator</a></li>
+</ul>
+
+
+<p>第二个方法使用起来会稍微复杂一点，但是它更有效率并且避免了不必要的重画的view进行重绘。缺点是ValueAnimator是从API Level 11才有的。因此他不能运用到3.0的系统之前的版本上。</p>
+
+<p><strong> Note: </strong> ValueAnimator虽然是API 11才有的，但是你还是可以在最低版本低于3.0的系统上使用它，做法是在运行时判断当前的API Level，如果低于11则跳过。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'> <span class="n">mScroller</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Scroller</span><span class="o">(</span><span class="n">getContext</span><span class="o">(),</span> <span class="kc">null</span><span class="o">,</span> <span class="kc">true</span><span class="o">);</span>
+</span><span class='line'> <span class="n">mScrollAnimator</span> <span class="o">=</span> <span class="n">ValueAnimator</span><span class="o">.</span><span class="na">ofFloat</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span><span class="mi">1</span><span class="o">);</span>
+</span><span class='line'> <span class="n">mScrollAnimator</span><span class="o">.</span><span class="na">addUpdateListener</span><span class="o">(</span><span class="k">new</span> <span class="n">ValueAnimator</span><span class="o">.</span><span class="na">AnimatorUpdateListener</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>     <span class="nd">@Override</span>
+</span><span class='line'>     <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onAnimationUpdate</span><span class="o">(</span><span class="n">ValueAnimator</span> <span class="n">valueAnimator</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>         <span class="k">if</span> <span class="o">(!</span><span class="n">mScroller</span><span class="o">.</span><span class="na">isFinished</span><span class="o">())</span> <span class="o">{</span>
+</span><span class='line'>             <span class="n">mScroller</span><span class="o">.</span><span class="na">computeScrollOffset</span><span class="o">();</span>
+</span><span class='line'>             <span class="n">setPieRotation</span><span class="o">(</span><span class="n">mScroller</span><span class="o">.</span><span class="na">getCurrY</span><span class="o">());</span>
+</span><span class='line'>         <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>             <span class="n">mScrollAnimator</span><span class="o">.</span><span class="na">cancel</span><span class="o">();</span>
+</span><span class='line'>             <span class="n">onScrollFinished</span><span class="o">();</span>
+</span><span class='line'>         <span class="o">}</span>
+</span><span class='line'>     <span class="o">}</span>
+</span><span class='line'> <span class="o">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Make Your Transitions Smooth</h2>
+
+<p>用户期待一个UI之间的切换是能够平滑过渡的。UI元素需要做到渐入淡出来取代突然出现与消失。Android从3.0开始有提供<a href="http://developer.android.com/guide/topics/graphics/prop-animation.html">property animation framework</a>,用来使得平滑过渡变得更加容易。</p>
+
+<p>如果你不想改变View的属性，只是做一些动画的话，你可以使用ObjectAnimator.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">mAutoCenterAnimator</span> <span class="o">=</span> <span class="n">ObjectAnimator</span><span class="o">.</span><span class="na">ofInt</span><span class="o">(</span><span class="n">PieChart</span><span class="o">.</span><span class="na">this</span><span class="o">,</span> <span class="s">&quot;PieRotation&quot;</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
+</span><span class='line'><span class="n">mAutoCenterAnimator</span><span class="o">.</span><span class="na">setIntValues</span><span class="o">(</span><span class="n">targetAngle</span><span class="o">);</span>
+</span><span class='line'><span class="n">mAutoCenterAnimator</span><span class="o">.</span><span class="na">setDuration</span><span class="o">(</span><span class="n">AUTOCENTER_ANIM_DURATION</span><span class="o">);</span>
+</span><span class='line'><span class="n">mAutoCenterAnimator</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果你想改变的是view的某些基础属性，你可以使用<a href="http://developer.android.com/reference/android/view/ViewPropertyAnimator.html">ViewPropertyAnimator</a> ,它能够同时执行多个属性的动画。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">animate</span><span class="o">().</span><span class="na">rotation</span><span class="o">(</span><span class="n">targetAngle</span><span class="o">).</span><span class="na">setDuration</span><span class="o">(</span><span class="n">ANIM_DURATION</span><span class="o">).</span><span class="na">start</span><span class="o">();</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<hr />
+
+<p><strong>学习自：<a href="http://developer.android.com/training/custom-views/making-interactive.html">http://developer.android.com/training/custom-views/making-interactive.html</a>，请多指教，谢谢！</strong><br/>
+<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
+</div>
+
+
+  <footer>
+    <p>
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Text" property="dct:title" rel="dct:type">本站作品</span> 由 <a xmlns:cc="http://creativecommons.org/ns#" href="hukai.me" property="cc:attributionName" rel="cc:attributionURL">Kesen Hoo</a> 创作，采用 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a>进行许可。
+    </p>
+
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Kesen Hoo</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-18T15:01:00+08:00" pubdate data-updated="true">Aug 18<span>th</span>, 2013</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/android/'>Android</a>, <a class='category' href='/blog/categories/android-training/'>Android:Training</a>
+  
+</span>
+
+
+    </p>
+    
+    
+      <div class="sharing">
+  
+  
+  
+  
+	<!-- JiaThis Button BEGIN -->
+<div class="jiathis_style_32x32">
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_renren"></a>
+	<a class="jiathis_button_linkedin"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share?uid=1723296" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript">
+var jiathis_config = {data_track_clickback:'true'};
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1342501457879302" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+  
+  
+</div>
+
+    
+    <br></br>
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/android-training-16-creating-custom-views-lesson-2/" title="Previous Post: Android Training(16) - 创建自定义的Views(Lesson 2 - 自定义Drawing)">&laquo; Android Training(16) - 创建自定义的Views(Lesson 2 - 自定义Drawing)</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/android-training-16-creating-custom-views-lesson-4/" title="Next Post: Android Training(16) - 创建自定义的Views(Lesson 4 - 优化Views)">Android Training(16) - 创建自定义的Views(Lesson 4 - 优化Views) &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Kesen Hoo -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'kesenhoo';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://hukai.me/blog/android-training-16-creating-custom-views-lesson-3/';
+        var disqus_url = 'http://hukai.me/blog/android-training-16-creating-custom-views-lesson-3/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

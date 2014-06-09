@@ -1,0 +1,460 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Android Training(14) - 捕获照片(Lesson 1 - 简单的拍照动作) - 胡凯</title>
+  <meta name="author" content="Kesen Hoo">
+
+  
+  <meta name="description" content="在多媒体流行之前，世界是沉闷(dismal)并且特色稀少(featureless)的。还记得Gopher? (Gopher是计算机上的一个工具软件，是Internet提供的一种由菜单式驱动的信息查询工具，采用客户机/服务器模式)。因为你的app将要成为你的用户的生活的一部分， &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://hukai.me/blog/android-training-14-capturing-photos-lesson-1/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="胡凯" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-37679268-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   class="no-sidebar"  >
+  <header role="banner"><hgroup>
+  <h1><a href="/">胡凯</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:hukai.me" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Android Training(14) - 捕获照片(Lesson 1 - 简单的拍照动作)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-18T22:21:00+08:00" pubdate data-updated="true">Dec 18<span>th</span>, 2012</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>在多媒体流行之前，世界是沉闷(dismal)并且特色稀少(featureless)的。还记得Gopher? (<em>Gopher是计算机上的一个工具软件，是Internet提供的一种由菜单式驱动的信息查询工具，采用客户机/服务器模式</em>)。因为你的app将要成为你的用户的生活的一部分，请赋予你的app能够把用户生活装进去的功能。使用内置的Camera，你的程序可以使得用户扩展（augment）他们所看的事物，生成唯一的头像，查找角落的人偶（zombies）,或者仅仅是分享他们的经验。</p>
+
+<p>这一章节，会教你如何简单的使用已经存在的Camera程序。在后面的课程中，你会更加深入的（ dive deeper ）学习如何直接控制Camera的硬件。</p>
+
+<p><strong>试试下面的例子程序</strong>
+<a href="http://developer.android.com/shareables/training/PhotoIntentActivity.zip">PhotoIntentActivity.zip</a></p>
+
+<hr />
+
+<p>假设你想通过你的客户端程序实现一个聚合全球天气的地图，上面会有各地的当前天气图片。那么集合图片只是你程序的一部分。你想要最简单的动作来获取图片，而不是重新发明（reinvent）一个camera。幸运的是，大多数Android设备都已经至少安装了一款相机程序。在这节课中，你会学习，如何拍照。</p>
+
+<!-- more -->
+
+
+<h2>Request Camera Permission(请求使用相机权限)</h2>
+
+<p>在写程序之前，需要在你的程序的manifest文件中添加下面的权限：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'> <span class="nt">&lt;manifest</span> <span class="err">...</span> <span class="nt">&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;uses-feature</span> <span class="na">android:name=</span><span class="s">&quot;android.hardware.camera&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>    ...
+</span><span class='line'><span class="err">&lt;</span>/manifest ... &gt;
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果你的程序并不需要一定有Camera，可以添加android:required=&#8221;false&#8221; 的tag属性。这样的话，Google Play 也会允许没有camera的设备下载这个程序。当然你有必要在使用Camera之前通过hasSystemFeature(PackageManager.FEATURE_CAMERA)方法来检查设备上是否有Camera。如果没有，你应该关闭你的Camera相关的功能！(<em>这个几乎没有人去做检查，因为目前所有的智能手机都会有相机</em>)</p>
+
+<h2>Take a Photo with the Camera App(使用相机应用程序进行拍照]</h2>
+
+<p>Android中的方法是：启动一个Intent来完成你想要的动作。这个步骤包含三部分： Intent 本身，启动的外部 Activity, 与一些处理返回照片的代码。如：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="kt">void</span> <span class="nf">dispatchTakePictureIntent</span><span class="o">(</span><span class="kt">int</span> <span class="n">actionCode</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">Intent</span> <span class="n">takePictureIntent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">MediaStore</span><span class="o">.</span><span class="na">ACTION_IMAGE_CAPTURE</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">startActivityForResult</span><span class="o">(</span><span class="n">takePictureIntent</span><span class="o">,</span> <span class="n">actionCode</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>当然在发出Intent之前，你需要检查是否有app会来handle这个intent，否则会引起启动失败：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">static</span> <span class="kt">boolean</span> <span class="nf">isIntentAvailable</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="n">String</span> <span class="n">action</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">final</span> <span class="n">PackageManager</span> <span class="n">packageManager</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="na">getPackageManager</span><span class="o">();</span>
+</span><span class='line'>    <span class="kd">final</span> <span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">action</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">List</span><span class="o">&lt;</span><span class="n">ResolveInfo</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span>
+</span><span class='line'>            <span class="n">packageManager</span><span class="o">.</span><span class="na">queryIntentActivities</span><span class="o">(</span><span class="n">intent</span><span class="o">,</span> <span class="n">PackageManager</span><span class="o">.</span><span class="na">MATCH_DEFAULT_ONLY</span><span class="o">);</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">list</span><span class="o">.</span><span class="na">size</span><span class="o">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>View the Photo(查看照片)</h2>
+
+<p>Android的Camera程序会把拍好的照片编码为bitmap，使用extra value的方式添加到返回的 Intent 当中， 对应的key为data。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="kt">void</span> <span class="nf">handleSmallCameraPhoto</span><span class="o">(</span><span class="n">Intent</span> <span class="n">intent</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">Bundle</span> <span class="n">extras</span> <span class="o">=</span> <span class="n">intent</span><span class="o">.</span><span class="na">getExtras</span><span class="o">();</span>
+</span><span class='line'>    <span class="n">mImageBitmap</span> <span class="o">=</span> <span class="o">(</span><span class="n">Bitmap</span><span class="o">)</span> <span class="n">extras</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">&quot;data&quot;</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">mImageView</span><span class="o">.</span><span class="na">setImageBitmap</span><span class="o">(</span><span class="n">mImageBitmap</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>Note:</strong> 这仅仅是处理一张很少的缩略图而已，如果是大的全图，需要做更多的事情来避免ANR。</p>
+
+<h2>Save the Photo(保存照片)</h2>
+
+<p>如果你提供一个file对象给Android的Camera程序，它会保存这张全图到给定的路径下。你必须提供存储的卷名，文件夹名与文件名。对于2.2以上的系统，如下操作即可：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">storageDir</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span>
+</span><span class='line'>    <span class="n">Environment</span><span class="o">.</span><span class="na">getExternalStoragePublicDirectory</span><span class="o">(</span>
+</span><span class='line'>        <span class="n">Environment</span><span class="o">.</span><span class="na">DIRECTORY_PICTURES</span>
+</span><span class='line'>    <span class="o">),</span>
+</span><span class='line'>    <span class="n">getAlbumName</span><span class="o">()</span>
+</span><span class='line'><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<h2>Set the file name(设置文件名)</h2>
+
+<p>正如上面描述的那样，文件的路径会有设备的系统环境决定。你自己需要做的只是定义个不会引起文件名冲突的命名scheme。下面会演示一种解决方案：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="n">File</span> <span class="nf">createImageFile</span><span class="o">()</span> <span class="kd">throws</span> <span class="n">IOException</span> <span class="o">{</span>
+</span><span class='line'>    <span class="c1">// Create an image file name</span>
+</span><span class='line'>    <span class="n">String</span> <span class="n">timeStamp</span> <span class="o">=</span>
+</span><span class='line'>        <span class="k">new</span> <span class="nf">SimpleDateFormat</span><span class="o">(</span><span class="s">&quot;yyyyMMdd_HHmmss&quot;</span><span class="o">).</span><span class="na">format</span><span class="o">(</span><span class="k">new</span> <span class="n">Date</span><span class="o">());</span>
+</span><span class='line'>    <span class="n">String</span> <span class="n">imageFileName</span> <span class="o">=</span> <span class="n">JPEG_FILE_PREFIX</span> <span class="o">+</span> <span class="n">timeStamp</span> <span class="o">+</span> <span class="s">&quot;_&quot;</span><span class="o">;</span>
+</span><span class='line'>    <span class="n">File</span> <span class="n">image</span> <span class="o">=</span> <span class="n">File</span><span class="o">.</span><span class="na">createTempFile</span><span class="o">(</span>
+</span><span class='line'>        <span class="n">imageFileName</span><span class="o">,</span>
+</span><span class='line'>        <span class="n">JPEG_FILE_SUFFIX</span><span class="o">,</span>
+</span><span class='line'>        <span class="n">getAlbumDir</span><span class="o">()</span>
+</span><span class='line'>    <span class="o">);</span>
+</span><span class='line'>    <span class="n">mCurrentPhotoPath</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="na">getAbsolutePath</span><span class="o">();</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">image</span><span class="o">;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Append the file name onto the Intent(把文件名添加到网络上)</h2>
+
+<p>Once you have a place to save your image, pass that location to the camera application via the Intent.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">File</span> <span class="n">f</span> <span class="o">=</span> <span class="n">createImageFile</span><span class="o">();</span>
+</span><span class='line'><span class="n">takePictureIntent</span><span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="n">MediaStore</span><span class="o">.</span><span class="na">EXTRA_OUTPUT</span><span class="o">,</span> <span class="n">Uri</span><span class="o">.</span><span class="na">fromFile</span><span class="o">(</span><span class="n">f</span><span class="o">));</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Add the Photo to a Gallery(添加照片到相册)</h2>
+
+<p>对于大多数人来说，最简单查看你的照片的方式是通过系统的Media Provider。下面会演示如何触发系统的Media Scanner来添加你的照片到Media Provider的DB中，这样使得相册程序与其他程序能够读取到那些图片。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="kt">void</span> <span class="nf">galleryAddPic</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">Intent</span> <span class="n">mediaScanIntent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_MEDIA_SCANNER_SCAN_FILE</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">File</span> <span class="n">f</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">mCurrentPhotoPath</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">Uri</span> <span class="n">contentUri</span> <span class="o">=</span> <span class="n">Uri</span><span class="o">.</span><span class="na">fromFile</span><span class="o">(</span><span class="n">f</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">mediaScanIntent</span><span class="o">.</span><span class="na">setData</span><span class="o">(</span><span class="n">contentUri</span><span class="o">);</span>
+</span><span class='line'>    <span class="k">this</span><span class="o">.</span><span class="na">sendBroadcast</span><span class="o">(</span><span class="n">mediaScanIntent</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Decode a Scaled Image(解码缩放图片)</h2>
+
+<p>在有限的内存下，管理全尺寸的图片会很麻烦。下面会介绍如何缩放图片来适应程序的显示：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="kt">void</span> <span class="nf">setPic</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="c1">// Get the dimensions of the View</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">targetW</span> <span class="o">=</span> <span class="n">mImageView</span><span class="o">.</span><span class="na">getWidth</span><span class="o">();</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">targetH</span> <span class="o">=</span> <span class="n">mImageView</span><span class="o">.</span><span class="na">getHeight</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Get the dimensions of the bitmap</span>
+</span><span class='line'>    <span class="n">BitmapFactory</span><span class="o">.</span><span class="na">Options</span> <span class="n">bmOptions</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BitmapFactory</span><span class="o">.</span><span class="na">Options</span><span class="o">();</span>
+</span><span class='line'>    <span class="n">bmOptions</span><span class="o">.</span><span class="na">inJustDecodeBounds</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>    <span class="n">BitmapFactory</span><span class="o">.</span><span class="na">decodeFile</span><span class="o">(</span><span class="n">mCurrentPhotoPath</span><span class="o">,</span> <span class="n">bmOptions</span><span class="o">);</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">photoW</span> <span class="o">=</span> <span class="n">bmOptions</span><span class="o">.</span><span class="na">outWidth</span><span class="o">;</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">photoH</span> <span class="o">=</span> <span class="n">bmOptions</span><span class="o">.</span><span class="na">outHeight</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Determine how much to scale down the image</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">scaleFactor</span> <span class="o">=</span> <span class="n">Math</span><span class="o">.</span><span class="na">min</span><span class="o">(</span><span class="n">photoW</span><span class="o">/</span><span class="n">targetW</span><span class="o">,</span> <span class="n">photoH</span><span class="o">/</span><span class="n">targetH</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Decode the image file into a Bitmap sized to fill the View</span>
+</span><span class='line'>    <span class="n">bmOptions</span><span class="o">.</span><span class="na">inJustDecodeBounds</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+</span><span class='line'>    <span class="n">bmOptions</span><span class="o">.</span><span class="na">inSampleSize</span> <span class="o">=</span> <span class="n">scaleFactor</span><span class="o">;</span>
+</span><span class='line'>    <span class="n">bmOptions</span><span class="o">.</span><span class="na">inPurgeable</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">Bitmap</span> <span class="n">bitmap</span> <span class="o">=</span> <span class="n">BitmapFactory</span><span class="o">.</span><span class="na">decodeFile</span><span class="o">(</span><span class="n">mCurrentPhotoPath</span><span class="o">,</span> <span class="n">bmOptions</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">mImageView</span><span class="o">.</span><span class="na">setImageBitmap</span><span class="o">(</span><span class="n">bitmap</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<hr />
+
+<p><strong>学习自：<a href="http://developer.android.com/training/camera/photobasics.html">http://developer.android.com/training/camera/photobasics.html</a>，请多指教，谢谢！</strong><br/>
+<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
+</div>
+
+
+  <footer>
+    <p>
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Text" property="dct:title" rel="dct:type">本站作品</span> 由 <a xmlns:cc="http://creativecommons.org/ns#" href="hukai.me" property="cc:attributionName" rel="cc:attributionURL">Kesen Hoo</a> 创作，采用 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a>进行许可。
+    </p>
+
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Kesen Hoo</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-18T22:21:00+08:00" pubdate data-updated="true">Dec 18<span>th</span>, 2012</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/android/'>Android</a>, <a class='category' href='/blog/categories/android-training/'>Android:Training</a>
+  
+</span>
+
+
+    </p>
+    
+    
+      <div class="sharing">
+  
+  
+  
+  
+	<!-- JiaThis Button BEGIN -->
+<div class="jiathis_style_32x32">
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_renren"></a>
+	<a class="jiathis_button_linkedin"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share?uid=1723296" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript">
+var jiathis_config = {data_track_clickback:'true'};
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1342501457879302" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+  
+  
+</div>
+
+    
+    <br></br>
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/android-training-13-interacting-with-other-apps-lesson-3/" title="Previous Post: Android Training(13) - 与其他Apps进行交互(Lesson 3 - 允许其他app启动你的activity)">&laquo; Android Training(13) - 与其他Apps进行交互(Lesson 3 - 允许其他app启动你的activity)</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/android-training-14-capturing-photos-lesson-2/" title="Next Post: Android Training(14) - 捕获照片(Lesson 2 - 简单的录像动作)">Android Training(14) - 捕获照片(Lesson 2 - 简单的录像动作) &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Kesen Hoo -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'kesenhoo';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://hukai.me/blog/android-training-14-capturing-photos-lesson-1/';
+        var disqus_url = 'http://hukai.me/blog/android-training-14-capturing-photos-lesson-1/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

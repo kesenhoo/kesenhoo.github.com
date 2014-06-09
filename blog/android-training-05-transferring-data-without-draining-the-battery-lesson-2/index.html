@@ -1,0 +1,353 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Android Training(05) - 优化下载效率(Lesson 2 - 调整更新的频率[C2DM与退避算法]) - 胡凯</title>
+  <meta name="author" content="Kesen Hoo">
+
+  
+  <meta name="description" content="Minimizing the Effect of Regular Updates[最小化定期更新操作的副作用] 最佳的定时更新频率是不确定的，通常由设备状态，网络连接状态，用户行为与用户定义明确的偏好而决定。 Optimizing Battery Life这一章有讨论如何根据设备状态来修改更新频率 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://hukai.me/blog/android-training-05-transferring-data-without-draining-the-battery-lesson-2/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="胡凯" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-37679268-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   class="no-sidebar"  >
+  <header role="banner"><hgroup>
+  <h1><a href="/">胡凯</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:hukai.me" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Android Training(05) - 优化下载效率(Lesson 2 - 调整更新的频率[C2DM与退避算法])</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-26T16:51:00+08:00" pubdate data-updated="true">Mar 26<span>th</span>, 2012</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h2>Minimizing the Effect of Regular Updates[最小化定期更新操作的副作用]</h2>
+
+<p>最佳的定时更新频率是不确定的，通常由设备状态，网络连接状态，用户行为与用户定义明确的偏好而决定。</p>
+
+<p><a href="http://developer.android.com/training/monitoring-device-state/index.html">Optimizing Battery Life</a>这一章有讨论如何根据设备状态来修改更新频率。里面介绍了当断开网络连接的时候去关闭后台服务，在电量比较低的时候减少更新的频率。</p>
+
+<p>这一课会介绍更新频率是多少才会使得更新操作对无线电状态机的影响最小。(C2DM与指数退避算法的使用)</p>
+
+<h2>Use Google Cloud Messaging as an Alternative to Polling[使用C2DM作为轮询方式之一]</h2>
+
+<p>关于<code>Android Cloud to Device Messaging</code> (C2DM)详情 ,请参考:<a href="http://code.google.com/intl/zh-CN/android/c2dm/">http://code.google.com/intl/zh-CN/android/c2dm/</a></p>
+
+<!-- More -->
+
+
+<p>每次app去向server询问检查是否有更新操作的时候会激活无线电，这样造成了不必要的能量消耗(在3G情况下，会差不多消耗20秒的能量)。</p>
+
+<p>C2DM是一个用来从server到特定app传输数据的轻量级的机制。使用C2DM,server会在某个app有需要获取新数据的时候通知app有这个消息。</p>
+
+<p>比起轮询方式(app为了即时拿到最新的数据需要定时向server请求数据)，C2DM这种有事件驱动的模式会在仅仅有数据更新的时候通知app去创建网络连接来获取数据[很显然这样减少了app的大量操作，当然也减少了很多电量]。</p>
+
+<p>C2DM需要通过使用固定TCP/IP来实现操作。当在你的设备上可以实现固定IP的时候，最好使用C2DM。[这个地方应该不是传统意义上的固定IP，可以理解为某个会话情况下]
+。很明显，使用C2DM既减少了网络连接次数，也优化了带宽，还减少了对电量的消耗。</p>
+
+<p><strong>Ps：大陆的Google框架通常被移除掉，这导致C2DM实际上根本没有办法在大陆的App上使用</strong></p>
+
+<h2>Optimize Polling with Inexact Repeating Alarms and Exponential Backoffs[通过不定时的重复提醒与指数退避来优化轮询操作]</h2>
+
+<p>如果需要使用轮询机制，在不影响用户体验的前提下，当然设置默认更新频率是越低越好[减少电量的浪费]。</p>
+
+<p>一个简单的方法是给用户提供更新频率的选择，允许用户自己来处理如何平衡数据及时性与电量的消耗。</p>
+
+<p>当设置安排好更新操作后，可以使用不确定重复提醒的方式来允许系统把当前这个操作进行定向移动(比如推迟一会)。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kt">int</span> <span class="n">alarmType</span> <span class="o">=</span> <span class="n">AlarmManager</span><span class="o">.</span><span class="na">ELAPSED_REALTIME</span><span class="o">;</span>
+</span><span class='line'><span class="kt">long</span> <span class="n">interval</span> <span class="o">=</span> <span class="n">AlarmManager</span><span class="o">.</span><span class="na">INTERVAL_HOUR</span><span class="o">;</span>
+</span><span class='line'><span class="kt">long</span> <span class="n">start</span> <span class="o">=</span> <span class="n">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">()</span> <span class="o">+</span> <span class="n">interval</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">alarmManager</span><span class="o">.</span><span class="na">setInexactRepeating</span><span class="o">(</span><span class="n">alarmType</span><span class="o">,</span> <span class="n">start</span><span class="o">,</span> <span class="n">interval</span><span class="o">,</span> <span class="n">pi</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>若是多个提醒都安排在某个点同时被触发，那么这样就可以使得多个操作在同一个无线电状态下操作完。</p>
+
+<p>如果可以，请设置提醒的类型为<code>ELAPSED_REALTIME</code> or <code>RTC</code>而不是<code>_WAKEUP</code>。这样能够更进一步的减少电量的消耗。</p>
+
+<p>我们还可以通过根据app被使用的频率来有选择性的减少更新的频率。</p>
+
+<p>另一个方法在app在上一次更新操作之后还未被使用的情况下，使用指数退避算法<code>exponential back-off algorithm</code>来减少更新频率。当然我们也可以使用一些类似指数退避的方法。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">SharedPreferences</span> <span class="n">sp</span> <span class="o">=</span>
+</span><span class='line'>  <span class="n">context</span><span class="o">.</span><span class="na">getSharedPreferences</span><span class="o">(</span><span class="n">PREFS</span><span class="o">,</span> <span class="n">Context</span><span class="o">.</span><span class="na">MODE_WORLD_READABLE</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">boolean</span> <span class="n">appUsed</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="na">getBoolean</span><span class="o">(</span><span class="n">PREFS_APPUSED</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+</span><span class='line'><span class="kt">long</span> <span class="n">updateInterval</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="na">getLong</span><span class="o">(</span><span class="n">PREFS_INTERVAL</span><span class="o">,</span> <span class="n">DEFAULT_REFRESH_INTERVAL</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">if</span> <span class="o">(!</span><span class="n">appUsed</span><span class="o">)</span>
+</span><span class='line'>  <span class="k">if</span> <span class="o">((</span><span class="n">updateInterval</span> <span class="o">*=</span> <span class="mi">2</span><span class="o">)</span> <span class="o">&gt;</span> <span class="n">MAX_REFRESH_INTERVAL</span><span class="o">)</span>
+</span><span class='line'>    <span class="n">updateInterval</span> <span class="o">=</span> <span class="n">MAX_REFRESH_INTERVAL</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">Editor</span> <span class="n">spEdit</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="na">edit</span><span class="o">();</span>
+</span><span class='line'><span class="n">spEdit</span><span class="o">.</span><span class="na">putBoolean</span><span class="o">(</span><span class="n">PREFS_APPUSED</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+</span><span class='line'><span class="n">spEdit</span><span class="o">.</span><span class="na">putLong</span><span class="o">(</span><span class="n">PREFS_INTERVAL</span><span class="o">,</span> <span class="n">updateInterval</span><span class="o">);</span>
+</span><span class='line'><span class="n">spEdit</span><span class="o">.</span><span class="na">apply</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">rescheduleUpdates</span><span class="o">(</span><span class="n">updateInterval</span><span class="o">);</span>
+</span><span class='line'><span class="n">executeUpdateOrPrefetch</span><span class="o">();</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>
+初始化一个网络连接的花费不会因为是否成功下载了数据而改变。我们可以使用指数退避算法来减少重复尝试(retry)的次数，这样能够避免浪费电量。例如：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="kt">void</span> <span class="nf">retryIn</span><span class="o">(</span><span class="kt">long</span> <span class="n">interval</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>  <span class="kt">boolean</span> <span class="n">success</span> <span class="o">=</span> <span class="n">attemptTransfer</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span> <span class="o">(!</span><span class="n">success</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">retryIn</span><span class="o">(</span><span class="n">interval</span><span class="o">*</span><span class="mi">2</span> <span class="o">&lt;</span> <span class="n">MAX_RETRY_INTERVAL</span> <span class="o">?</span>
+</span><span class='line'>            <span class="n">interval</span><span class="o">*</span><span class="mi">2</span> <span class="o">:</span> <span class="n">MAX_RETRY_INTERVAL</span><span class="o">);</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>Ps：这一课讲到C2DM与指数退避算法等，其实这些细节很值得我们注意，如果能在实际项目中加以应用，很明显程序的质量上升了一个档次。谢谢！</strong></p>
+
+<hr />
+
+<p><strong>学习自：<a href="http://developer.android.com/training/efficient-downloads/regular_updates.html">http://developer.android.com/training/efficient-downloads/regular_updates.html</a>，请多指教，谢谢！</strong><br/>
+<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
+</div>
+
+
+  <footer>
+    <p>
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Text" property="dct:title" rel="dct:type">本站作品</span> 由 <a xmlns:cc="http://creativecommons.org/ns#" href="hukai.me" property="cc:attributionName" rel="cc:attributionURL">Kesen Hoo</a> 创作，采用 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a>进行许可。
+    </p>
+
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Kesen Hoo</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-26T16:51:00+08:00" pubdate data-updated="true">Mar 26<span>th</span>, 2012</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/android/'>Android</a>, <a class='category' href='/blog/categories/android-training/'>Android:Training</a>
+  
+</span>
+
+
+    </p>
+    
+    
+      <div class="sharing">
+  
+  
+  
+  
+	<!-- JiaThis Button BEGIN -->
+<div class="jiathis_style_32x32">
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_renren"></a>
+	<a class="jiathis_button_linkedin"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share?uid=1723296" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript">
+var jiathis_config = {data_track_clickback:'true'};
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1342501457879302" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+  
+  
+</div>
+
+    
+    <br></br>
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/android-training-05-transferring-data-without-draining-the-battery-lesson-4/" title="Previous Post: Android Training(05) - 优化下载效率(Lesson 4 - 根据网络类型来切换下载模式)">&laquo; Android Training(05) - 优化下载效率(Lesson 4 - 根据网络类型来切换下载模式)</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/android-training-05-transferring-data-without-draining-the-battery-lesson-3/" title="Next Post: Android Training(05) - 优化下载效率(Lesson 3 - 使用缓存来避免重复下载)">Android Training(05) - 优化下载效率(Lesson 3 - 使用缓存来避免重复下载) &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Kesen Hoo -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'kesenhoo';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://hukai.me/blog/android-training-05-transferring-data-without-draining-the-battery-lesson-2/';
+        var disqus_url = 'http://hukai.me/blog/android-training-05-transferring-data-without-draining-the-battery-lesson-2/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

@@ -2,389 +2,337 @@
 <urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
     <url>
         <loc>
-            http://hukai.me/blog/2012/03/07/android-training-00-managing-the-activity-lifecycle-lesson-0/
+            http://hukai.me/blog/android-training-00-managing-the-activity-lifecycle-lesson-0/
         </loc>
         <lastmod>2014-04-14T23:53:32+08:00</lastmod>
     </url>
     <url>
         <loc>
-            http://hukai.me/blog/2012/03/08/android-training-00-managing-the-activity-lifecycle-lesson-1/
+            http://hukai.me/blog/android-training-00-managing-the-activity-lifecycle-lesson-1/
         </loc>
         <lastmod>2014-04-14T23:57:48+08:00</lastmod>
     </url>
     <url>
         <loc>
-            http://hukai.me/blog/2012/03/09/android-training-00-managing-the-activity-lifecycle-lesson-2/
+            http://hukai.me/blog/android-training-00-managing-the-activity-lifecycle-lesson-2/
         </loc>
         <lastmod>2014-04-14T23:57:25+08:00</lastmod>
     </url>
     <url>
         <loc>
-            http://hukai.me/blog/2012/03/10/android-training-00-managing-the-activity-lifecycle-lesson-3/
+            http://hukai.me/blog/android-training-00-managing-the-activity-lifecycle-lesson-3/
         </loc>
         <lastmod>2014-04-15T00:20:20+08:00</lastmod>
     </url>
     <url>
         <loc>
-            http://hukai.me/blog/2012/03/11/android-training-00-managing-the-activity-lifecycle-lesson-4/
+            http://hukai.me/blog/android-training-00-managing-the-activity-lifecycle-lesson-4/
         </loc>
         <lastmod>2014-04-14T23:58:48+08:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://hukai.me/blog/2012/03/16/android-training-01-supporting-different-device-lesson-1/
-        </loc>
+        <loc>http://hukai.me/blog/android-training-01-supporting-different-device-lesson-1/</loc>
         <lastmod>2014-04-14T19:02:20+08:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://hukai.me/blog/2012/03/20/android-training-01-supporting-different-device-lesson-2/
-        </loc>
+        <loc>http://hukai.me/blog/android-training-01-supporting-different-device-lesson-2/</loc>
         <lastmod>2014-04-14T19:02:34+08:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://hukai.me/blog/2012/03/21/android-training-01-supporting-different-device-lesson-3/
-        </loc>
+        <loc>http://hukai.me/blog/android-training-01-supporting-different-device-lesson-3/</loc>
         <lastmod>2014-04-14T19:02:52+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/2012/03/21/android-training-02-improve-layouts-lesson-1/</loc>
+        <loc>http://hukai.me/blog/android-training-02-improve-layouts-lesson-1/</loc>
         <lastmod>2014-04-14T19:03:39+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/2012/03/21/android-training-02-improve-layouts-lesson-2/</loc>
+        <loc>http://hukai.me/blog/android-training-02-improve-layouts-lesson-2/</loc>
         <lastmod>2014-04-14T19:03:51+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/2012/03/21/android-training-02-improve-layouts-lesson-3/</loc>
+        <loc>http://hukai.me/blog/android-training-02-improve-layouts-lesson-3/</loc>
         <lastmod>2014-04-14T19:04:16+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/2012/03/21/android-training-02-improve-layouts-lesson-4/</loc>
+        <loc>http://hukai.me/blog/android-training-02-improve-layouts-lesson-4/</loc>
         <lastmod>2014-04-14T19:04:04+08:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://hukai.me/blog/2012/03/21/android-training-03-managing-audio-playback-lesson-1/
-        </loc>
+        <loc>http://hukai.me/blog/android-training-03-managing-audio-playback-lesson-1/</loc>
         <lastmod>2014-04-14T19:15:03+08:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://hukai.me/blog/2012/03/22/android-training-03-managing-audio-playback-lesson-2/
-        </loc>
+        <loc>http://hukai.me/blog/android-training-03-managing-audio-playback-lesson-2/</loc>
         <lastmod>2014-04-14T19:15:16+08:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://hukai.me/blog/2012/03/23/android-training-03-managing-audio-playback-lesson-3/
-        </loc>
+        <loc>http://hukai.me/blog/android-training-03-managing-audio-playback-lesson-3/</loc>
         <lastmod>2014-04-14T19:15:38+08:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://hukai.me/blog/2012/03/23/android-training-04-optimiizing-battery-life-lesson-1/
-        </loc>
+        <loc>http://hukai.me/blog/android-training-04-optimiizing-battery-life-lesson-1/</loc>
         <lastmod>2014-04-14T19:17:38+08:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://hukai.me/blog/2012/03/23/android-training-04-optimiizing-battery-life-lesson-2/
-        </loc>
+        <loc>http://hukai.me/blog/android-training-04-optimiizing-battery-life-lesson-2/</loc>
         <lastmod>2014-04-14T19:17:46+08:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://hukai.me/blog/2012/03/23/android-training-04-optimiizing-battery-life-lesson-3/
-        </loc>
+        <loc>http://hukai.me/blog/android-training-04-optimiizing-battery-life-lesson-3/</loc>
         <lastmod>2014-04-14T19:18:02+08:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://hukai.me/blog/2012/03/24/android-training-04-optimiizing-battery-life-lesson-4/
-        </loc>
+        <loc>http://hukai.me/blog/android-training-04-optimiizing-battery-life-lesson-4/</loc>
         <lastmod>2014-04-14T19:18:28+08:00</lastmod>
     </url>
     <url>
         <loc>
-            http://hukai.me/blog/2012/03/25/android-training-05-transferring-data-without-draining-the-battery-lesson-1/
+            http://hukai.me/blog/android-training-05-transferring-data-without-draining-the-battery-lesson-1/
         </loc>
         <lastmod>2014-04-14T19:19:55+08:00</lastmod>
     </url>
     <url>
         <loc>
-            http://hukai.me/blog/2012/03/26/android-training-05-transferring-data-without-draining-the-battery-lesson-4/
+            http://hukai.me/blog/android-training-05-transferring-data-without-draining-the-battery-lesson-4/
         </loc>
         <lastmod>2014-04-14T19:20:34+08:00</lastmod>
     </url>
     <url>
         <loc>
-            http://hukai.me/blog/2012/03/26/android-training-05-transferring-data-without-draining-the-battery-lesson-2/
+            http://hukai.me/blog/android-training-05-transferring-data-without-draining-the-battery-lesson-2/
         </loc>
         <lastmod>2014-04-14T19:20:09+08:00</lastmod>
     </url>
     <url>
         <loc>
-            http://hukai.me/blog/2012/03/26/android-training-05-transferring-data-without-draining-the-battery-lesson-3/
+            http://hukai.me/blog/android-training-05-transferring-data-without-draining-the-battery-lesson-3/
         </loc>
         <lastmod>2014-04-14T19:20:22+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/2012/03/27/android-training-06-remembering-users-lesson-1/</loc>
+        <loc>http://hukai.me/blog/android-training-06-remembering-users-lesson-1/</loc>
         <lastmod>2014-04-14T19:21:46+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/2012/03/28/android-training-06-remembering-users-lesson-2/</loc>
+        <loc>http://hukai.me/blog/android-training-06-remembering-users-lesson-2/</loc>
         <lastmod>2014-04-14T19:22:37+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/2012/03/29/android-training-06-remembering-users-lesson-3/</loc>
+        <loc>http://hukai.me/blog/android-training-06-remembering-users-lesson-3/</loc>
         <lastmod>2014-04-14T19:22:45+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/2012/03/31/android-training-07-share-simple-data-lesson-1/</loc>
+        <loc>http://hukai.me/blog/android-training-07-share-simple-data-lesson-1/</loc>
         <lastmod>2014-04-14T19:23:37+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/2012/03/31/android-training-07-share-simple-data-lesson-2/</loc>
+        <loc>http://hukai.me/blog/android-training-07-share-simple-data-lesson-2/</loc>
         <lastmod>2014-04-14T19:23:49+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/2012/03/31/android-training-07-share-simple-data-lesson-3/</loc>
+        <loc>http://hukai.me/blog/android-training-07-share-simple-data-lesson-3/</loc>
         <lastmod>2014-04-14T19:24:07+08:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://hukai.me/blog/2012/04/22/android-training-08-syncing-to-the-cloud-lesson-1/
-        </loc>
+        <loc>http://hukai.me/blog/android-training-08-syncing-to-the-cloud-lesson-1/</loc>
         <lastmod>2014-04-14T19:24:45+08:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://hukai.me/blog/2012/04/22/android-training-08-syncing-to-the-cloud-lesson-2/
-        </loc>
+        <loc>http://hukai.me/blog/android-training-08-syncing-to-the-cloud-lesson-2/</loc>
         <lastmod>2014-04-14T19:24:56+08:00</lastmod>
     </url>
     <url>
         <loc>
-            http://hukai.me/blog/2012/04/23/android-training-09-displaying-bitmaps-efficiently-lesson-1/
+            http://hukai.me/blog/android-training-09-displaying-bitmaps-efficiently-lesson-1/
         </loc>
         <lastmod>2014-04-14T19:26:52+08:00</lastmod>
     </url>
     <url>
         <loc>
-            http://hukai.me/blog/2012/04/23/android-training-09-displaying-bitmaps-efficiently-lesson-2/
+            http://hukai.me/blog/android-training-09-displaying-bitmaps-efficiently-lesson-2/
         </loc>
         <lastmod>2014-04-14T19:27:03+08:00</lastmod>
     </url>
     <url>
         <loc>
-            http://hukai.me/blog/2012/04/24/android-training-09-displaying-bitmaps-efficiently-lesson-3/
+            http://hukai.me/blog/android-training-09-displaying-bitmaps-efficiently-lesson-3/
         </loc>
         <lastmod>2014-04-14T19:27:12+08:00</lastmod>
     </url>
     <url>
         <loc>
-            http://hukai.me/blog/2012/04/26/android-training-09-displaying-bitmaps-efficiently-lesson-5/
+            http://hukai.me/blog/android-training-09-displaying-bitmaps-efficiently-lesson-5/
         </loc>
         <lastmod>2014-04-14T19:27:20+08:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://hukai.me/blog/2012/05/03/android-training-10-network-operations-lesson-1/
-        </loc>
+        <loc>http://hukai.me/blog/android-training-10-network-operations-lesson-1/</loc>
         <lastmod>2014-04-15T00:03:31+08:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://hukai.me/blog/2012/05/07/android-training-10-network-operations-lesson-2/
-        </loc>
+        <loc>http://hukai.me/blog/android-training-10-network-operations-lesson-2/</loc>
         <lastmod>2014-04-15T00:03:42+08:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://hukai.me/blog/2012/05/07/android-training-10-network-operations-lesson-3/
-        </loc>
+        <loc>http://hukai.me/blog/android-training-10-network-operations-lesson-3/</loc>
         <lastmod>2014-04-15T00:03:51+08:00</lastmod>
     </url>
     <url>
         <loc>
-            http://hukai.me/blog/2012/11/27/android-training-11-building-a-dynamic-ui-with-fragments-lesson-0/
+            http://hukai.me/blog/android-training-11-building-a-dynamic-ui-with-fragments-lesson-0/
         </loc>
         <lastmod>2014-04-15T00:05:52+08:00</lastmod>
     </url>
     <url>
         <loc>
-            http://hukai.me/blog/2012/11/27/android-training-11-building-a-dynamic-ui-with-fragments-lesson-1/
+            http://hukai.me/blog/android-training-11-building-a-dynamic-ui-with-fragments-lesson-1/
         </loc>
         <lastmod>2014-04-15T00:06:05+08:00</lastmod>
     </url>
     <url>
         <loc>
-            http://hukai.me/blog/2012/11/27/android-training-11-building-a-dynamic-ui-with-fragments-lesson-2/
+            http://hukai.me/blog/android-training-11-building-a-dynamic-ui-with-fragments-lesson-2/
         </loc>
         <lastmod>2014-04-15T00:06:19+08:00</lastmod>
     </url>
     <url>
         <loc>
-            http://hukai.me/blog/2012/11/28/android-training-11-building-a-dynamic-ui-with-fragments-lesson-4/
+            http://hukai.me/blog/android-training-11-building-a-dynamic-ui-with-fragments-lesson-4/
         </loc>
         <lastmod>2014-04-15T00:06:41+08:00</lastmod>
     </url>
     <url>
         <loc>
-            http://hukai.me/blog/2012/11/28/android-training-11-building-a-dynamic-ui-with-fragments-lesson-3/
+            http://hukai.me/blog/android-training-11-building-a-dynamic-ui-with-fragments-lesson-3/
         </loc>
         <lastmod>2014-04-15T00:06:31+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/2012/11/29/android-training-12-saving-data-lesson-1/</loc>
+        <loc>http://hukai.me/blog/android-training-12-saving-data-lesson-1/</loc>
         <lastmod>2014-04-15T00:07:29+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/2012/11/29/android-training-12-saving-data-lesson-2/</loc>
+        <loc>http://hukai.me/blog/android-training-12-saving-data-lesson-2/</loc>
         <lastmod>2014-04-15T00:07:42+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/2012/11/30/android-training-12-saving-data-lesson-3/</loc>
+        <loc>http://hukai.me/blog/android-training-12-saving-data-lesson-3/</loc>
         <lastmod>2014-04-15T00:07:53+08:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://hukai.me/blog/2012/12/03/android-training-13-interacting-with-other-apps-lesson-1/
-        </loc>
+        <loc>http://hukai.me/blog/android-training-13-interacting-with-other-apps-lesson-1/</loc>
         <lastmod>2014-04-15T00:08:49+08:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://hukai.me/blog/2012/12/03/android-training-13-interacting-with-other-apps-lesson-2/
-        </loc>
+        <loc>http://hukai.me/blog/android-training-13-interacting-with-other-apps-lesson-2/</loc>
         <lastmod>2014-04-15T00:09:04+08:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://hukai.me/blog/2012/12/04/android-training-13-interacting-with-other-apps-lesson-3/
-        </loc>
+        <loc>http://hukai.me/blog/android-training-13-interacting-with-other-apps-lesson-3/</loc>
         <lastmod>2014-04-15T00:09:14+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/2012/12/18/android-training-14-capturing-photos-lesson-1/</loc>
+        <loc>http://hukai.me/blog/android-training-14-capturing-photos-lesson-1/</loc>
         <lastmod>2014-04-15T00:10:27+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/2012/12/18/android-training-14-capturing-photos-lesson-2/</loc>
+        <loc>http://hukai.me/blog/android-training-14-capturing-photos-lesson-2/</loc>
         <lastmod>2014-04-15T00:10:38+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/2012/12/18/android-training-14-capturing-photos-lesson-3/</loc>
+        <loc>http://hukai.me/blog/android-training-14-capturing-photos-lesson-3/</loc>
         <lastmod>2014-04-15T00:10:47+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/2012/12/20/hi/</loc>
+        <loc>http://hukai.me/blog/hi/</loc>
         <lastmod>2014-04-10T23:54:00+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/2013/02/04/android-notes-00-services/</loc>
+        <loc>http://hukai.me/blog/android-notes-00-services/</loc>
         <lastmod>2014-04-10T23:54:00+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/2013/02/18/android-notes-01-bound-services/</loc>
+        <loc>http://hukai.me/blog/android-notes-01-bound-services/</loc>
         <lastmod>2014-04-10T23:54:00+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/2013/02/19/android-notes-02-aidl/</loc>
+        <loc>http://hukai.me/blog/android-notes-02-aidl/</loc>
         <lastmod>2014-04-10T23:54:00+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/2013/03/31/android-notes-03-process-and-thread/</loc>
+        <loc>http://hukai.me/blog/android-notes-03-process-and-thread/</loc>
         <lastmod>2014-04-10T23:54:00+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/2013/04/06/android-training-15-performance-tips/</loc>
+        <loc>http://hukai.me/blog/android-training-15-performance-tips/</loc>
         <lastmod>2014-04-15T00:11:12+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/2013/04/12/android-notes-04-intent-and-intentFilter/</loc>
+        <loc>http://hukai.me/blog/android-notes-04-intent-and-intentFilter/</loc>
         <lastmod>2014-04-10T23:54:00+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/2013/04/20/android-notes-05-task-and-back-stack/</loc>
+        <loc>http://hukai.me/blog/android-notes-05-task-and-back-stack/</loc>
         <lastmod>2014-04-10T23:54:00+08:00</lastmod>
     </url>
     <url>
         <loc>
-            http://hukai.me/blog/2013/05/19/android-training-09-displaying-bitmaps-efficiently-lesson-4/
+            http://hukai.me/blog/android-training-09-displaying-bitmaps-efficiently-lesson-4/
         </loc>
         <lastmod>2014-04-14T19:26:25+08:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://hukai.me/blog/2013/06/30/android-training-16-creating-custom-views-lesson-0/
-        </loc>
+        <loc>http://hukai.me/blog/android-training-16-creating-custom-views-lesson-0/</loc>
         <lastmod>2014-04-15T00:13:18+08:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://hukai.me/blog/2013/06/30/android-training-16-creating-custom-views-lesson-1/
-        </loc>
+        <loc>http://hukai.me/blog/android-training-16-creating-custom-views-lesson-1/</loc>
         <lastmod>2014-04-15T00:13:28+08:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://hukai.me/blog/2013/06/30/android-training-16-creating-custom-views-lesson-2/
-        </loc>
+        <loc>http://hukai.me/blog/android-training-16-creating-custom-views-lesson-2/</loc>
         <lastmod>2014-04-15T00:13:36+08:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://hukai.me/blog/2013/08/18/android-training-16-creating-custom-views-lesson-3/
-        </loc>
+        <loc>http://hukai.me/blog/android-training-16-creating-custom-views-lesson-3/</loc>
         <lastmod>2014-04-15T00:13:45+08:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://hukai.me/blog/2013/08/18/android-training-16-creating-custom-views-lesson-4/
-        </loc>
+        <loc>http://hukai.me/blog/android-training-16-creating-custom-views-lesson-4/</loc>
         <lastmod>2014-04-15T00:13:54+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/2013/10/19/android-training-17-managing_your_app_memory/</loc>
+        <loc>http://hukai.me/blog/android-training-17-managing_your_app_memory/</loc>
         <lastmod>2014-04-18T20:13:12+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/2013/11/17/java-notes-00-singleton-pattern/</loc>
+        <loc>http://hukai.me/blog/java-notes-00-singleton-pattern/</loc>
         <lastmod>2014-04-10T23:54:00+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/2014/04/05/android-deeper-00-touch-event-dispatch-process/</loc>
+        <loc>http://hukai.me/blog/android-deeper-00-touch-event-dispatch-process/</loc>
         <lastmod>2014-05-15T16:19:04+08:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://hukai.me/blog/2014/04/14/android-training-18-running-background-service-lesson-1/
-        </loc>
+        <loc>http://hukai.me/blog/android-training-18-running-background-service-lesson-1/</loc>
         <lastmod>2014-04-15T00:14:29+08:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://hukai.me/blog/2014/04/20/android-training-18-running-background-service-lesson-2/
-        </loc>
+        <loc>http://hukai.me/blog/android-training-18-running-background-service-lesson-2/</loc>
         <lastmod>2014-04-20T21:10:39+08:00</lastmod>
     </url>
     <url>
-        <loc>
-            http://hukai.me/blog/2014/04/20/android-training-18-running-background-service-lesson-3/
-        </loc>
+        <loc>http://hukai.me/blog/android-training-18-running-background-service-lesson-3/</loc>
         <lastmod>2014-04-20T22:01:37+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/2014/04/21/android-notes-06-camera/</loc>
+        <loc>http://hukai.me/blog/android-notes-06-camera/</loc>
         <lastmod>2014-05-18T17:06:53+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/2014/05/15/android-deeper-01-graphics-architecture/</loc>
-        <lastmod>2014-05-15T20:36:25+08:00</lastmod>
+        <loc>http://hukai.me/blog/android-deeper-01-graphics-architecture/</loc>
+        <lastmod>2014-05-23T09:39:12+08:00</lastmod>
     </url>
     <url>
         <loc>http://hukai.me/404.html</loc>
@@ -392,7 +340,7 @@
     </url>
     <url>
         <loc>http://hukai.me/about/</loc>
-        <lastmod>2014-05-18T17:06:53+08:00</lastmod>
+        <lastmod>2014-05-23T09:39:12+08:00</lastmod>
     </url>
     <url>
         <loc>
@@ -402,10 +350,10 @@
     </url>
     <url>
         <loc>http://hukai.me/blog/archives/</loc>
-        <lastmod>2014-05-18T17:06:53+08:00</lastmod>
+        <lastmod>2014-05-23T09:39:12+08:00</lastmod>
     </url>
     <url>
         <loc>http://hukai.me/</loc>
-        <lastmod>2014-05-18T17:06:53+08:00</lastmod>
+        <lastmod>2014-05-23T09:39:12+08:00</lastmod>
     </url>
 </urlset>

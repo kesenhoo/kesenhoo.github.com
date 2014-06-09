@@ -1,0 +1,407 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Android Training(05) - 优化下载效率(Lesson 1 - 用有效率的网络访问方式来优化下载) - 胡凯</title>
+  <meta name="author" content="Kesen Hoo">
+
+  
+  <meta name="description" content="在这一章，我们将学习为了最小化某些操作对电量的影响是如何处理下载，网络连接，尤其是无线电连接的。
+下面几节课会演示了如何使用缓存caching，轮询polling，预取prefetching等技术来计划与执行下载操作。
+我们还会学习无线电波的power-use属性配置是如何影响我们对于在何时， &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://hukai.me/blog/android-training-05-transferring-data-without-draining-the-battery-lesson-1/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="胡凯" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-37679268-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   class="no-sidebar"  >
+  <header role="banner"><hgroup>
+  <h1><a href="/">胡凯</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:hukai.me" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Android Training(05) - 优化下载效率(Lesson 1 - 用有效率的网络访问方式来优化下载)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-25T16:54:00+08:00" pubdate data-updated="true">Mar 25<span>th</span>, 2012</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>在这一章，我们将学习为了最小化某些操作对电量的影响是如何处理下载，网络连接，尤其是无线电连接的。
+下面几节课会演示了如何使用缓存caching，轮询polling，预取prefetching等技术来计划与执行下载操作。
+我们还会学习无线电波的power-use属性配置是如何影响我们对于在何时，用什么，以何种方式来传输数据的选择。
+当然这些选择是为了最小化对电池寿命的影响。</p>
+
+<p><strong>Dependencies and prerequisites</strong><br/>
+Android 2.0 (API Level 5) or higher</p>
+
+<p><strong>You should also read</strong><br/>
+<a href="http://developer.android.com/training/monitoring-device-state/index.html">Optimizing Battery Life</a></p>
+
+<h2>Lessons</h2>
+
+<ul>
+<li><strong>Optimizing Downloads for Efficient Network Access[使用有效的网络连接方式来最优化下载]</strong><br/>
+This lesson introduces the wireless radio state machine, explains how your app’s connectivity model interacts with it, and how you can minimize your data connection and use prefetching and bundling to minimize the battery drain associated with your data transfers.</li>
+</ul>
+
+
+<!-- more -->
+
+
+<ul>
+<li><p><strong>Minimizing the Effect of Regular Updates[优化常规更新操作的效果]</strong><br/>
+This lesson will examine how your refresh frequency can be varied to best mitigate the effect of background updates on the underlying wireless radio state machine.</p></li>
+<li><p><strong>Redundant Downloads are Redundant[重复的下载是冗余的]</strong><br/>
+The most fundamental way to reduce your downloads is to download only what you need. This lesson introduces some best practices to eliminate redundant downloads.</p></li>
+<li><p><strong>Modifying your Download Patterns Based on the Connectivity Type[根据网络连接类型来更改下载模式]</strong><br/>
+When it comes to impact on battery life, not all connection types are created equal. Not only does the Wi-Fi radio use significantly less battery than its wireless radio counterparts, but the radios used in different wireless radio technologies have different battery implications.</p></li>
+</ul>
+
+
+<h2>第1课：Optimizing Downloads for Efficient Network Access[用有效的网络访问来最优化下载]</h2>
+
+<p>也许使用无线电波(wireless radio)进行传输数据会是我们app最耗电的操作之一。所以为了最小化网络连接的电量消耗，懂得连接模式(connectivity model)会如何影响底层的音频硬件设备是至关重要的。
+这节课介绍了无线电波状态机(wireless radio state machine)，并解释了app的connectivity model是如何与状态机进行交互的。然后会提出建议的方法来最小化我们的数据连接，使用预取(prefetching)与捆绑(bundle)的方式进行数据的传输，这些操作都是为了最小化电量的消耗。</p>
+
+<h2>The Radio State Machine[无线电状态机]</h2>
+
+<p>一个完全活动的无线电会消耗很大部分的电量，因此需要学习如何在不同状态下进行过渡，这样能够避免电量的浪费。
+典型的3G无线电网络有三种能量状态：</p>
+
+<ul>
+<li><strong>Full power</strong>: 当无线连接被激活的时候，允许设备以最大的传输速率进行操作。</li>
+<li><strong>Low power</strong>: 相对Full power来说，算是一种中间状态，差不多50%的传输速率。</li>
+<li><strong>Standby</strong>: 最低的状态，没有数据连接需要传输。</li>
+</ul>
+
+
+<p>在最低并且空闲的状态下，电量消耗相对来说是少的。
+这里需要介绍一延时(latency)的机制，从low status返回到full status大概需要花费1.5秒，从idle status返回到full status需要花费2秒。
+为了最小化延迟，状态机使用了一种后滞过渡到更低能量状态的机制。下图是一个典型的3G无线电波状态机的图示(AT&amp;T电信的一种制式).</p>
+
+<p><img src="/images/articles/mobile_radio_state_machine.png" title="Figure 1. Typical 3G wireless radio state machine." alt="mobile_radio_state_machine.png" /></p>
+
+<ul>
+<li>在每一台设备上的无线状态机都会根据无线电波的制式(2G,3G,LTE等)而改变，并且由设备本身自己所使用的网络进行定义与配置。</li>
+<li>这一课描述了一种典型的3G无线电波状态机，<a href="http://www.research.att.com/articles/featured_stories/2011_03/201102_Energy_efficient?fbid=SYuI20FzBum">data provided by AT&amp;T</a>。这些原理是具有通用性的，在其他的无线电波上同样适用。</li>
+<li>这种方法在浏览通常的网页操作上是特别有效的，因为它可以阻止一些不必要的浪费。而且相对较短的后期处理时间也保证了当一个session结束的时候，无线电波可以转移到相对较低的能量状态。</li>
+<li>不幸的是，这个方法会导致在现代的智能机系统例如Android上的apps效率低下。因为Android上的apps不仅仅可以在前台运行，也可以在后台运行。[无线电波的状态改变会影响到本来的设计，有些想在前台运行的可能会因为切换到低能量状态而影响程序效率。坊间说手机在电量低的状态下无线电波的强度会增大好几倍来保证信号，可能与这个有关]</li>
+</ul>
+
+
+<h2>How Apps Impact the Radio State Machine[看apps如何影响无线状态机（使用bundle与unbundle传输数据的差异）]</h2>
+
+<p>每一次新创建一个网络连接，无线电波就切换到full power状态。在上面典型的3G无线电波状态机情况下，无线电波会在传输数据时保持在full power的状态，结束之后会有一个附加的5秒时间切换到low power,再之后会经过12秒进入到low  energy的状态。因此对于典型的3G设备，每一次数据传输的会话都会引起无线电波都会持续消耗大概20秒的能量。</p>
+
+<p>实际上，这意味着一个app传递1秒钟的unbundled data会使得无线电波持续活动18秒【18=1秒的传输数据+5秒过渡时间回到low power+12秒过渡时间回到standby】。因此每一分钟，它会消耗18秒high power的电量，42秒的low power的电量。</p>
+
+<p>通过比较，如果每分钟app会传输bundle的data持续3秒的话，其中会使得无线电波持续在high power状态仅仅8秒钟，在low power状态仅仅12秒钟。
+上面第二种传输bundle data的例子，可以看到减少了大量的电量消耗。图示如下：</p>
+
+<p><img src="/images/articles/graphs.png" title="Figure 2. Relative wireless radio power use for bundled versus unbundled transfers." alt="graphs.png" /></p>
+
+<h2>Prefetch Data[预取数据]</h2>
+
+<p>预取(Prefetching)数据是一种减少独立数据传输会话数量的有效方法。预取技术允许你在单次操作的时候，通过一次连接，在最大能力下，根据给出的时间下载到所有的数据。</p>
+
+<p>通过前面的传输数据的技术，你减少了大量的无线电波激活时间。这样的话，不仅仅是保存了电量，也提高了潜在风险【看下面讲解】，降低了带宽，减少了下载时间。</p>
+
+<p>预取技术提供了一种提高用户体验的方法，通过减少可能因为下载时间过长而导致预览后者后续操作等待漫长。</p>
+
+<p>然而，使用预取技术过于频繁，不仅仅会导致电量消耗快速增长，还有可能预取到一些并不需要的数据【比如预取了10秒，用户在第3秒就已经切换掉，这个时候预取过多的就是浪费】。同样，确保app不会因为等待预取全部完成而卡到程序的开始播放也是非常重要的。从实践的角度，那意味着需要逐步处理数据，并且按照有优先级的顺序开始进行数据传递，这样能确保不卡到程序的开始播放的同时数据也能够得到持续的下载。</p>
+
+<p>那么应该如何控制预取的操作呢？这需要根据正在下载的数据大小与可能被用到的数据量来决定。一个基于上面状态机情况的比较大概的建议是：对于数据来说，大概有50%的机会可能用在当前用户的会话中，那么我们可以预取大约6秒(大约1-2Mb)，这大概使得潜在可能要用的数据量与可能已经下载好的数据量相一致。</p>
+
+<p>通常来说，预取1-5Mb会比较好，这种情况下，我们仅仅只需要每隔2-5分钟开始另一段下载。【3G网络是这样吗？】根据这个原理，大数据的下载，比如视频文件，应该每隔2-5秒开始另一段下载，这样能有效的预取到下面几分钟内的数据进行预览。</p>
+
+<p>值得注意的是，下载需要是bundled的形式，而且上面那些大概的数据与时间可能会根据网络连接的类型与速度有所变化，这些都将在下面两部分内容讲到。</p>
+
+<p>让我们来看一些例子：</p>
+
+<p><strong>A music player</strong>
+你可以选择预取整个专辑，然而这样用户在第一首歌曲之后停止监听，那么就浪费了大量的带宽于电量。
+一个比较好的方法是维护一首歌曲的缓冲区。对于流媒体音乐，不应该去维护一段连续的数据流，因为这样会使得无线电波一直保持激活状态，应该考虑把HTTP的数据流集中一次传输到音频流，就像上面描述的预取技术一样(下载好2Mb，然后开始一次取出，再去下载下面的2Mb)。</p>
+
+<p><strong>A news reader</strong>
+许多news apps尝试通过只下载新闻标题来减少带宽，完整的文章仅在用户想要读取的时候再去读取，而且文章也会因为太长而刚开始只显示部分信息，等用户下滑时再去读取完整信息。
+使用这个方法，无线电波仅仅会在用户点击更多信息的时候才会被激活。但是，在切换文章分类预阅读文章的时候仍然会造成大量潜在的消耗。【因为无线电波有几十秒的过渡期】</p>
+
+<p>一个比较好的方法是在启动的时候预取一个合理数量的数据，比如在启动的时候预取一些文章的标题【免得切换分类时又去获取这个栏目下的头条】与缩略图信息。之后开始获取剩余的标题预缩略信息。</p>
+
+<p>另一个方法是预取所有的标题，缩略信息，文章文字，甚至是所有文章的图片-根据既设的后台程序进行逐一获取。这样做的风险是花费了大量的带宽与电量去下载一些不会阅读到的内容，因此这需要比较小心思考是否合适。其中的一个解决方案是，当在连接至Wi-Fi时有计划的下载所有的内容，并且如果有可能最好是设备正在充电的时候。关于这个的细节的实现，我们将在后面的课程中涉及到。【这让我想起了网易新闻的离线下载，在连接到Wi-Fi的时候，可以选择下载所有的内容到本地，之后直接打开阅读】</p>
+
+<h2>Batch Transfers and Connections[批量传输与连接]</h2>
+
+<p>使用典型3G无线网络制式的时候，每一次初始化一个连接(与需要传输的数据量无关)，你都有可能导致无线电波持续花费大约20秒的电量。</p>
+
+<p>一个app，若是每20秒进行一次ping server的操作，假设这个app是正在运行且对用户可见，那么这会导致无线电波不确定什么时候被开启，最终可能使得电量花费在没有实际传输数据的情况下。</p>
+
+<p>因此，对数据进行bundle操作并且创建一个序列来存放这些bundle好的数据就显的非常重要。操作正确的话，可以使得大量的数据集中进行发送，这样使得无线电波的激活时间尽可能的少，同时减少大部分电量的花费。这样做的潜在好处是尽可能在每次传输数据的会话中尽可能多的传输数据而且减少了会话的次数。</p>
+
+<p>例如：新闻客户端可以分析用户的使用行为习惯，根据这些习惯来做决定如何获取数据，获取多少，什么时候获取等。在这个例子中，所有收集到的用户习惯应该捆绑一起，之后再一起进行发送，而不是每次点击的行为都去发送这个碎片数据。同时，发送这些数据不应该在下载一个全图或者执行例行更新的时候去操作。</p>
+
+<h2>Reduce Connections[减少连接次数]</h2>
+
+<p>重用已经存在的网络连接比起重新建立一个新的连接通常来说是更有效率的。重用网络连接同样可以使得在拥挤不堪的网络环境中进行更加智能的互动。当可以捆绑所有请求在一个GET里面的时候不要同时创建多个网络连接或者把多个GET请求进行串联。</p>
+
+<p>例如，可以一起请求所有文章的情况下，不要根据多个栏目进行多次请求。无线电波会在等待接受返回信息或者timeout信息之前保持激活状态，所以如果不需要的连接请立即关闭而不是等待他们timeout。</p>
+
+<p>之前说道，如果关闭一个连接过于及时，会导致后面再次请求时重新建立一个在Server与Client之间的连接，而我们说过要尽量避免建立重复的连接，那么有个有效的折中办法是不要立即关闭，而是在timeout之前关闭(即稍微晚点却又不至于到timeout)。</p>
+
+<p><strong>Note</strong>:使用HttpUrlConnection，而不是Apache的HttpClient,前者有做response cache.</p>
+
+<h2>Use the DDMS Network Traffic Tool to Identify Areas of Concern[使用DDMS网络通信工具来检测网络使用情况]</h2>
+
+<p>The Android <a href="http://developer.android.com/guide/developing/debugging/ddms.html">DDMS (Dalvik Debug Monitor Server)</a> 包含了一个查看网络使用详情的栏目来允许跟踪app的网络请求。使用这个工具，可以监测app是在何时，如何传输数据的，从而可以进行代码的优化。</p>
+
+<p>下图显示了传输少量的网络模型，可以看到每次差不多相隔15秒，这意味着可以通过预取技术或者批量上传来大幅提高效率。</p>
+
+<p><img src="/images/articles/DDMS.png" title="Figure 3. Tracking network usage with DDMS." alt="DDMS.png" /></p>
+
+<p>通过监测数据传输的频率与每次传输的数据量，可以查看出哪些位置应该进行优化，通常的，图中显示的短小的类似钉子形状的位置，可以进行与附近位置的请求进行做merge的动作。</p>
+
+<p>为了更好的检测出问题所在，<strong>Traffic Status API</strong>允许你使用<strong>TrafficStats.setThreadStatsTag()</strong>的方法标记数据传输发生在某个Thread里面，然后可以手动的使用tagSocket()进行标记到或者使用untagSocket()来取消标记，例如：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">TrafficStats</span><span class="o">.</span><span class="na">setThreadStatsTag</span><span class="o">(</span><span class="mi">0</span><span class="n">xF00D</span><span class="o">);</span>
+</span><span class='line'><span class="n">TrafficStats</span><span class="o">.</span><span class="na">tagSocket</span><span class="o">(</span><span class="n">outputSocket</span><span class="o">);</span>
+</span><span class='line'><span class="c1">// Transfer data using socket  </span>
+</span><span class='line'><span class="n">TrafficStats</span><span class="o">.</span><span class="na">untagSocket</span><span class="o">(</span><span class="n">outputSocket</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Apache的HttpClient与URLConnection库可以自动tag sockets使用当前getThreadStatusTag()的值。那些库在通过keep-alive pools循环的时候也会tag与untag sockets。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">TrafficStats</span><span class="o">.</span><span class="na">setThreadStatsTag</span><span class="o">(</span><span class="mi">0</span><span class="n">xF00D</span><span class="o">);</span>
+</span><span class='line'><span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>  <span class="c1">// Make network request using HttpClient.execute()  </span>
+</span><span class='line'><span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">TrafficStats</span><span class="o">.</span><span class="na">clearThreadStatsTag</span><span class="o">();</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Socket tagging 是在Android 4.0上才被支持的, 但是实际情况是仅仅会在运行Android 4.0.3 or higher的设备上才会显示.</p>
+
+<hr />
+
+<p>后记：哇，这节课太长了，不过很值得我们学习并注意，Radio state machine，Prefetch，Bundle等，在实际项目中，可能很少有人注意到这些，这也是Google开设这一系列课程的价值所在，提高app的质量，用更少的资源做更多的事情。</p>
+
+<p><strong>学习自：<a href="http://developer.android.com/training/efficient-downloads/efficient-network-access.html">http://developer.android.com/training/efficient-downloads/efficient-network-access.html</a>，请多指教，谢谢！</strong><br/>
+<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
+</div>
+
+
+  <footer>
+    <p>
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Text" property="dct:title" rel="dct:type">本站作品</span> 由 <a xmlns:cc="http://creativecommons.org/ns#" href="hukai.me" property="cc:attributionName" rel="cc:attributionURL">Kesen Hoo</a> 创作，采用 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a>进行许可。
+    </p>
+
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Kesen Hoo</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-25T16:54:00+08:00" pubdate data-updated="true">Mar 25<span>th</span>, 2012</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/android/'>Android</a>, <a class='category' href='/blog/categories/android-training/'>Android:Training</a>
+  
+</span>
+
+
+    </p>
+    
+    
+      <div class="sharing">
+  
+  
+  
+  
+	<!-- JiaThis Button BEGIN -->
+<div class="jiathis_style_32x32">
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_renren"></a>
+	<a class="jiathis_button_linkedin"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share?uid=1723296" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript">
+var jiathis_config = {data_track_clickback:'true'};
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1342501457879302" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+  
+  
+</div>
+
+    
+    <br></br>
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/android-training-04-optimiizing-battery-life-lesson-4/" title="Previous Post: Android Training(04) - 优化电池续航能力(Lesson 4 - 判断并监测网络连接状态)">&laquo; Android Training(04) - 优化电池续航能力(Lesson 4 - 判断并监测网络连接状态)</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/android-training-05-transferring-data-without-draining-the-battery-lesson-4/" title="Next Post: Android Training(05) - 优化下载效率(Lesson 4 - 根据网络类型来切换下载模式)">Android Training(05) - 优化下载效率(Lesson 4 - 根据网络类型来切换下载模式) &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Kesen Hoo -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'kesenhoo';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://hukai.me/blog/android-training-05-transferring-data-without-draining-the-battery-lesson-1/';
+        var disqus_url = 'http://hukai.me/blog/android-training-05-transferring-data-without-draining-the-battery-lesson-1/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

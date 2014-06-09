@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android:Deeper | 胡凯]]></title>
   <link href="http://hukai.me/blog/categories/android-deeper/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2014-05-18T17:07:10+08:00</updated>
+  <updated>2014-06-09T23:52:39+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Deeper(01) - Graphic Architecture]]></title>
-    <link href="http://hukai.me/blog/2014/05/15/android-deeper-01-graphics-architecture/"/>
+    <link href="http://hukai.me/blog/android-deeper-01-graphics-architecture/"/>
     <updated>2014-05-15T14:25:00+08:00</updated>
-    <id>http://hukai.me/blog/2014/05/15/android-deeper-01-graphics-architecture</id>
+    <id>http://hukai.me/blog/android-deeper-01-graphics-architecture</id>
     <content type="html"><![CDATA[<p>Android中有几个很重要的概念Surface, SurfaceHolder, EGLSurface, SurfaceView, GLSurfaceView, SurfaceTexture, TextureView与SurfaceFlinger。</p>
 
 <p>这篇文章会介绍Android图形架构的基本构成以及它们是如何在程序framework与多媒体系统中运作的。核心关注点是，图形数据的buffer是如何在系统中传递的。如果你曾经好奇过SurfaceView与TextureView的工作方式，或者是想知道Surface与EGLSurface是如何交互的，那么这篇文章将给你解答这些疑问。<strong>You've come to the right place.</strong></p>
@@ -73,7 +73,7 @@
 
 <p>设备显示屏以固定的频率刷新屏幕，对于手机与平板来说，通常是60fps。刷新的频率有时是不固定的。</p>
 
-<p>当SurfaceFlinger接收到VSYNC刷新信号时，会遍历所有的layers，寻找可以使用的新的buffers。如果找到新的buffer，那么就获取它，否者继续使用前面获取到得buffer。SurfaceFlinger总是需要有些内容可以显示，所以它会持续hold住buffer。如果没有新的buffer提交到layer上，这个layer就会被SurfaceFlinger所忽略。</p>
+<p>当SurfaceFlinger接收到VSYNC刷新信号时，会遍历所有的layers，寻找可以使用的新的buffers。如果找到新的buffer，那么就获取它，否则继续使用前面获取到得buffer。SurfaceFlinger总是需要有内容可以显示，所以它会持续hold住buffer。如果没有新的buffer提交到layer上，这个layer就会被SurfaceFlinger所忽略。</p>
 
 <p>一旦SurfaceFlinger收集到了可见layer的所有buffers，它会请求Hardware composer如何进行composition的操作。</p>
 
@@ -147,7 +147,7 @@
 
 <h2>EGLSurface and OpenGL ES</h2>
 
-<p>OpenGL ES定义了一个API用来渲染图形。为了是得GLES可以在各种平台上工作，它设计成可以和一个库进行结合的方式来工作。这个库知道如何通过操作系统创建与访问窗口。在Android中使用的哭叫做EGL。如果你想要绘制textured polygons(多边形，模块)，你可以使用GLES的方法。如果你想要把渲染绘制到屏幕上，你可以使用EGL的方法。</p>
+<p>OpenGL ES定义了一个API用来渲染图形。为了是得GLES可以在各种平台上工作，它设计成可以和一个库进行结合的方式来工作。这个库知道如何通过操作系统创建与访问窗口。在Android中使用的库叫做EGL。如果你想要绘制textured polygons(多边形，模块)，你可以使用GLES的方法。如果你想要把渲染绘制到屏幕上，你可以使用EGL的方法。</p>
 
 <p>在开始使用GLES之前，你需要创建一个GL context。在EGL中，这意味着创建一个EGLContext与一个EGLSurface。GLES的操作是作用在当前的context上的，当前的context保存在当前thread中，这个context是不能传递的。这意味着你必需注意渲染的动作执行在哪个线程，并且在那个线程中的context是哪个。</p>
 
@@ -278,9 +278,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Deeper(00) - Touch事件分发响应机制]]></title>
-    <link href="http://hukai.me/blog/2014/04/05/android-deeper-00-touch-event-dispatch-process/"/>
+    <link href="http://hukai.me/blog/android-deeper-00-touch-event-dispatch-process/"/>
     <updated>2014-04-05T13:13:00+08:00</updated>
-    <id>http://hukai.me/blog/2014/04/05/android-deeper-00-touch-event-dispatch-process</id>
+    <id>http://hukai.me/blog/android-deeper-00-touch-event-dispatch-process</id>
     <content type="html"><![CDATA[<h2>1)概述</h2>
 
 <p>Android的TouchEvent通常包含三个动作,ACTION_DOWN,ACTION_MOVE与ACTION_UP。发出的顺序是DOWN->MOVE->MOVE->...->UP(注意MOVE事件是否能够被触发取决于操作手势里面是否包含了移动的动作)。</p>
