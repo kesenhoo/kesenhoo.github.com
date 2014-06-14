@@ -67,6 +67,7 @@ Android framework通过提供Camera API来支持拍照与录制视频的功能�
 触发Camera Intent需要遵守如下几个步骤：
 
 * **Compose a Camera Intent** - 创建一个请求拍照或者录像的Intent，使用下面的intent类型：
+
 	* [MediaStore.ACTION_IMAGE_CAPTURE](http://developer.android.com/reference/android/provider/MediaStore.html#ACTION_IMAGE_CAPTURE) - 请求拍照的Intent。
 	* [MediaStore.ACTION_VIDEO_CAPTURE](http://developer.android.com/reference/android/provider/MediaStore.html#ACTION_VIDEO_CAPTURE) - 请求录像的Intent。
 	
@@ -693,7 +694,7 @@ mMediaRecorder.setCaptureRate(0.1); // capture a frame every 10 seconds
 ```
 上面的设置只是对MediaRecorder进行参数设置的一小部分。一旦配置结束，就可以开启视频录制。关于更多的信息，请参考前面的4.7)Capture Video(还没有开始学习)
 
-====
+===
 
 学习自<http://developer.android.com/guide/topics/media/camera.html>
 

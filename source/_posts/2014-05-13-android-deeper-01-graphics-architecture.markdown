@@ -53,7 +53,7 @@ SurfaceFlinger的作用是接收来自各处的数据，进行混合编制之后
 
 设备显示屏以固定的频率刷新屏幕，对于手机与平板来说，通常是60fps。刷新的频率有时是不固定的。
 
-当SurfaceFlinger接收到VSYNC刷新信号时，会遍历所有的layers，寻找可以使用的新的buffers。如果找到新的buffer，那么就获取它，否者继续使用前面获取到得buffer。SurfaceFlinger总是需要有些内容可以显示，所以它会持续hold住buffer。如果没有新的buffer提交到layer上，这个layer就会被SurfaceFlinger所忽略。
+当SurfaceFlinger接收到VSYNC刷新信号时，会遍历所有的layers，寻找可以使用的新的buffers。如果找到新的buffer，那么就获取它，否则继续使用前面获取到得buffer。SurfaceFlinger总是需要有内容可以显示，所以它会持续hold住buffer。如果没有新的buffer提交到layer上，这个layer就会被SurfaceFlinger所忽略。
 
 一旦SurfaceFlinger收集到了可见layer的所有buffers，它会请求Hardware composer如何进行composition的操作。
 
@@ -110,7 +110,7 @@ Surface的lock/unlock代码保持了前一个渲染buffer的reference。如果�
 获取与设置Surface参数的APIs，例如size和format，都是通过SurfaceHolder来实现的。
 
 ## EGLSurface and OpenGL ES
-OpenGL ES定义了一个API用来渲染图形。为了是得GLES可以在各种平台上工作，它设计成可以和一个库进行结合的方式来工作。这个库知道如何通过操作系统创建与访问窗口。在Android中使用的哭叫做EGL。如果你想要绘制textured polygons(多边形，模块)，你可以使用GLES的方法。如果你想要把渲染绘制到屏幕上，你可以使用EGL的方法。
+OpenGL ES定义了一个API用来渲染图形。为了是得GLES可以在各种平台上工作，它设计成可以和一个库进行结合的方式来工作。这个库知道如何通过操作系统创建与访问窗口。在Android中使用的库叫做EGL。如果你想要绘制textured polygons(多边形，模块)，你可以使用GLES的方法。如果你想要把渲染绘制到屏幕上，你可以使用EGL的方法。
 
 在开始使用GLES之前，你需要创建一个GL context。在EGL中，这意味着创建一个EGLContext与一个EGLSurface。GLES的操作是作用在当前的context上的，当前的context保存在当前thread中，这个context是不能传递的。这意味着你必需注意渲染的动作执行在哪个线程，并且在那个线程中的context是哪个。
 
