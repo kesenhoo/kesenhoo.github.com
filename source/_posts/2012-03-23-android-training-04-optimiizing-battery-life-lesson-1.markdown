@@ -21,8 +21,8 @@ categories: Android Android:Training
 <!-- More -->
 
 ## 1)Determine the Current Charging State[判断当前充电状态]
-[BatteryManager](http://developer.android.com/reference/android/os/BatteryManager.html)会广播一个带有电池与充电详情的Sticky Intent。【关于Sticky intent有不清楚的，请参考http://developer.android.com/guide/topics/fundamentals/services.html中对带有sticky的service是如何解释的】
 
+[BatteryManager](http://developer.android.com/reference/android/os/BatteryManager.html)会广播一个带有电池与充电详情的[Sticky Intent](http://developer.android.com/guide/topics/fundamentals/services.html)
 因为广播的是一个sticky intent，那么不需要注册BroadcastReceiver。仅仅只需要简单的call一个参null参数的regiserReceiver()方法。
 ```java
 IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);  
