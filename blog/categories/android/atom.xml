@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android | 胡凯]]></title>
   <link href="http://hukai.me/blog/categories/android/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2014-06-09T23:52:39+08:00</updated>
+  <updated>2014-06-24T10:09:25+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -12,6 +12,221 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training - Volley(Lesson 1 - 发送简单的请求)]]></title>
+    <link href="http://hukai.me/blog/android-training-volley-simple-request/"/>
+    <updated>2014-06-24T09:00:00+08:00</updated>
+    <id>http://hukai.me/blog/android-training-volley-simple-request</id>
+    <content type="html"><![CDATA[<p>使用Volley的方式是，你通过创建一个<code>RequestQueue</code>并传递<code>Request</code>对象给它。RequestQueue管理工作线程用来执行网络操作，从Cache中读取与写入数据，以及解析Http的响应内容。<code>Requests</code>执行raw responses的解析，Volley会把响应的数据分发给主线程。</p>
+
+<p>这节课会介绍如何使用<code>Volley.newRequestQueue</code>这个建立请求队列的方法来发送一个请求，在下一节课<a href="request-queue.html">建立一个请求队列Setting Up a RequestQueue</a>中会介绍你自己如何建立一个请求队列。</p>
+
+<p>这节课也会介绍如何添加一个请求到RequesutQueue以及如何取消一个请求。</p>
+
+<h2>Add the INTERNET Permission</h2>
+
+<p>为了使用Volley，你必须添加<code>android.permission.INTERNET</code>权限到你的manifest文件中。没有这个权限，你的app将无法访问网络。</p>
+
+<h2>Use newRequestQueue</h2>
+
+<p>Volley提供了一个简便的方法：<code>Volley.newRequestQueue</code>用来为你建立一个<code>RequestQueue</code>，使用默认值，并启动这个队列。例如：</p>
+
+<!-- More -->
+
+
+<p>```java
+final TextView mTextView = (TextView) findViewById(R.id.text);
+...</p>
+
+<p>// Instantiate the RequestQueue.
+RequestQueue queue = Volley.newRequestQueue(this);
+String url ="http://www.google.com";</p>
+
+<p>// Request a string response from the provided URL.
+StringRequest stringRequest = new StringRequest(Request.Method.GET, url,</p>
+
+<pre><code>        new Response.Listener() {
+@Override
+public void onResponse(String response) {
+    // Display the first 500 characters of the response string.
+    mTextView.setText("Response is: "+ response.substring(0,500));
+}
+</code></pre>
+
+<p>}, new Response.ErrorListener() {</p>
+
+<pre><code>@Override
+public void onErrorResponse(VolleyError error) {
+    mTextView.setText("That didn't work!");
+}
+</code></pre>
+
+<p>});
+// Add the request to the RequestQueue.
+queue.add(stringRequest);
+```</p>
+
+<p>Volley总是把解析过后的数据返回到主线程中。在主线程中更加合适使用接收到到的数据用来操作UI控件，这样你可以在响应的handler中轻松的修改UI，但是对于库提供的一些其他方法是有些特殊的，例如与取消有关的。</p>
+
+<p>关于如何创建你自己的请求队列，不要使用Volley.newRequestQueue方法，请查看<a href="request-queue.html">建立一个请求队列Setting Up a RequestQueue</a>。</p>
+
+<h2>Send a Request</h2>
+
+<p>为了发送一个请求，你只需要构造一个请求并通过<code>add()</code>方法添加到<code>RequestQueue</code>中。一旦你添加了这个请求，它会通过队列，得到处理，然后得到原始的响应数据并返回。</p>
+
+<p>当你执行<code>add()</code>方法时，Volley触发执行一个缓存处理线程以及网络一系列的网络处理线程。当你添加一个请求到队列中，它将被缓存线程所捕获并触发：如果这个请求可以被缓存处理，那么会在缓存线程中执行响应数据的解析并返回到主线程。如果请求不能被缓存所处理，它会被放到网络队列中。网络线程池中的第一个可用的网络线程会从队列中获取到这个请求并执行HTTP操作，解析响应数据，把数据写到缓存中之后再把解析之后的数据返回到主线程。</p>
+
+<p>请注意那些比较耗时的操作，例如I/O与解析parsing/decoding都是执行在工作线程。<strong>你可以在任何线程中添加一个请求，但是响应结果都是返回到主线程的。</strong></p>
+
+<p>下图1，演示了一个请求的生命周期：</p>
+
+<p><img src="/images/articles/volley-request.png" alt="volley-request" /></p>
+
+<h2>Cancel a Request</h2>
+
+<p>为了取消一个请求，对你的请求对象执行<code>cancel()</code>方法。一旦取消，Volley会确保你的响应Handler不会被执行。这意味着在实际操作中你可以在activity的<code>onStop()</code>方法中取消所有pending在队列中的请求。你不需要通过检测<code>getActivity() == null</code>来丢弃你的响应handler，其他类似<code>onSaveInstanceState()</code>等保护性的方法里面也都不需要检测。</p>
+
+<p>为了利用这种优势，你应该跟踪所有已经发送的请求，以便在需要的时候，可以取消他们。<strong>有一个简便的方法</strong>：你可以为每一个请求对象都绑定一个tag对象。你可以使用这个tag来提供取消的范围。例如，你可以为你的所有请求都绑定到执行的Activity上，然后你可以在<code>onStop()</code>方法执行<code>requestQueue.cancelAll(this)</code> 。同样的，你可以为ViewPager中的所有请求缩略图Request对象分别打上对应Tab的tag。并在滑动时取消这些请求，用来确保新生成的tab不会被前面tab的请求任务所卡到。</p>
+
+<p>下面一个使用String来打Tag的例子：</p>
+
+<ul>
+<li>定义你的tag并添加到你的请求任务中。</li>
+</ul>
+
+
+<p>```java
+public static final String TAG = "MyTag";
+StringRequest stringRequest; // Assume this exists.
+RequestQueue mRequestQueue;  // Assume this exists.</p>
+
+<p>// Set the tag on the request.
+stringRequest.setTag(TAG);</p>
+
+<p>// Add the request to the RequestQueue.
+mRequestQueue.add(stringRequest);
+```</p>
+
+<ul>
+<li>在activity的onStop()方法里面，取消所有的包含这个tag的请求任务。</li>
+</ul>
+
+
+<p>```java
+@Override
+protected void onStop () {</p>
+
+<pre><code>super.onStop();
+if (mRequestQueue != null) {
+    mRequestQueue.cancelAll(TAG);
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>当取消请求时请注意：如果你依赖你的响应handler来标记状态或者触发另外一个进程，你需要为此给出有力的解释。再说一次，response handler是不会被执行的。</p>
+
+<hr />
+
+<p><strong>学习自<a href="http://developer.android.com/training/volley/simple.html">http://developer.android.com/training/volley/simple.html</a>,欢迎交流讨论</strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training - Volley(Lesson 0 - 序言)]]></title>
+    <link href="http://hukai.me/blog/android-training-volley-index/"/>
+    <updated>2014-06-24T08:30:00+08:00</updated>
+    <id>http://hukai.me/blog/android-training-volley-index</id>
+    <content type="html"><![CDATA[<p><code>Volley</code> 是一个HTTP库，它能够帮助Android apps更方便的执行网络操作，最重要的是，它更快速高效。可以通过开源的 <a href="https://android.googlesource.com/platform/frameworks/volley">AOSP</a> 仓库获取到Volley 。</p>
+
+<hr />
+
+<p><strong>DEPENDENCIES AND PREREQUISITES</strong></p>
+
+<p>Android 1.6 (API Level 4) or higher</p>
+
+<p><strong>YOU SHOULD ALSO SEE</strong></p>
+
+<p>使用Volley来编写一个app，请参考<a href="https://github.com/google/iosched">2013 Google I/O schedule app</a>. 另外需要特别关注下面2个部分：
+* <a href="https://github.com/google/iosched/blob/master/android/src/main/java/com/google/android/apps/iosched/util/ImageLoader.java">ImageLoader</a>
+* <a href="https://github.com/google/iosched/blob/master/android/src/main/java/com/google/android/apps/iosched/util/BitmapCache.java">BitmapCache</a></p>
+
+<p><strong> <a href="https://developers.google.com/events/io/sessions/325304728">VIDEO - Volley:Easy,Fast Networking for Android</a> </strong></p>
+
+<hr />
+
+<p>Volley 有如下的优点：</p>
+
+<!-- More -->
+
+
+<ul>
+<li>自动执行网络请求。</li>
+<li>高并发网络连接。</li>
+<li>通过标准的HTTP的<a href="http://en.wikipedia.org/wiki/Cache_coherence%22">cache coherence</a>(高速缓存一致性)使得磁盘与内存缓存不可见(Transparent)。</li>
+<li>支持指定请求的优先级。</li>
+<li>支持取消已经发出的请求。你可以取消单个请求，或者指定取消请求队列中的一个区域。</li>
+<li>框架容易被定制，例如，定制重试或者回退功能。</li>
+<li>强大的指令(Strong ordering)可以使得异步加载网络数据并显示到UI的操作更加简单。</li>
+<li>包含了Debugging与tracing工具。</li>
+</ul>
+
+
+<p>Volley擅长执行用来显示UI的RPC操作， 例如获取搜索结果的数据。它轻松的整合了任何协议，并输出操作结果的数据，可以是raw strings，也可以是images，或者是JSON。通过提供内置你可能使用到得功能，Volley可以使得你免去重复编写样板代码，使你可以把关注点放在你的app的功能逻辑上。</p>
+
+<p>Volley不适合用来下载大的数据文件。因为Volley会在解析的过程中保留持有所有的响应数据在内存中。对于下载大量的数据操作，请考虑使用<a href="http://developer.android.com/reference/android/app/DownloadManager.html">DownloadManager</a>。</p>
+
+<p>Volley框架的核心代码是托管在AOSP仓库的<code>frameworks/volley</code>中，相关的工具放在<code>toolbox</code>下。把Volley添加到你的项目中的最简便的方法是Clone仓库然后把它设置为一个library project：</p>
+
+<ul>
+<li>通过下面的命令来Clone仓库：</li>
+</ul>
+
+
+<p><code>git clone https://android.googlesource.com/platform/frameworks/volley</code></p>
+
+<ul>
+<li>以一个Android library project的方式导入下载的源代码到你的项目中。(如果你是使用Eclipse，请参考<a href="http://developer.android.com/tools/projects/projects-eclipse.html">Managing Projects from Eclipse with ADT</a>)，或者编译成一个<code>.jar</code>文件。</li>
+</ul>
+
+
+<h2>Lessons</h2>
+
+<ul>
+<li><a href="simple.html">发送一个简单的网络请求(Sending a Simple Request)</a></li>
+</ul>
+
+
+<p>学习如何通过Volley默认的行为发送一个简单的请求，以及如何取消一个请求。</p>
+
+<ul>
+<li><a href="request-queue.html">建立一个请求队列(Setting Up a RequestQueue)</a></li>
+</ul>
+
+
+<p>学习如何建立一个请求队列，以及如何实现一个单例模式来创建一个请求队列。</p>
+
+<ul>
+<li><a href="request.html">生成一个标准的请求(Making a Standard Request)</a></li>
+</ul>
+
+
+<p>学习如何使用Volley的out-of-the-box的请求类型(raw strings, images, and JSON)来发送一个请求。</p>
+
+<ul>
+<li><a href="request-custom.html">实现自定义的请求(Implementing a Custom Request)</a></li>
+</ul>
+
+
+<p>学习如何实现一个自定义的请求</p>
+
+<hr />
+
+<p><strong>学习自<a href="http://developer.android.com/training/volley/index.html">http://developer.android.com/training/volley/index.html</a>,欢迎交流讨论</strong></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Android Deeper(01) - Graphic Architecture]]></title>
@@ -1227,145 +1442,6 @@ public void onCreate(Bundle stateBundle) {
 <hr />
 
 <p><strong>学习自<a href="http://developer.android.com/training/run-background-service/report-status.html">http://developer.android.com/training/run-background-service/report-status.html</a>,欢迎交流讨论</strong></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Training(18) - 使用IntentService执行任务(Lesson 2 - 发送任务给IntentService)]]></title>
-    <link href="http://hukai.me/blog/android-training-18-running-background-service-lesson-2/"/>
-    <updated>2014-04-20T20:46:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-18-running-background-service-lesson-2</id>
-    <content type="html"><![CDATA[<p>前一篇文章演示了如何创建一个IntentService类。这次会演示如何通过发送一个Intent来触发IntentService执行任务。这个Intent可以传递一些数据给IntentService。可以在Activity或者Fragment的任何时间点发送这个Intent。</p>
-
-<p>为了创建一个工作请求并发送到IntentService。需要先创建一个explicit Intent，添加数据到intent，然后通过执行<a href="http://developer.android.com/reference/android/content/Context.html#startService(android.content.Intent">startService()</a>) 把它发送到IntentService。</p>
-
-<p>下面的是代码示例：</p>
-
-<ul>
-<li>创建一个新的显式的Intent用来启动IntentService。</li>
-</ul>
-
-
-<p><code>java
-/*
- * Creates a new Intent to start the RSSPullService
- * IntentService. Passes a URI in the
- * Intent's "data" field.
- */
-mServiceIntent = new Intent(getActivity(), RSSPullService.class);
-mServiceIntent.setData(Uri.parse(dataUrl));
-</code></p>
-
-<!-- More -->
-
-
-<ul>
-<li>执行startService()</li>
-</ul>
-
-
-<p><code>java
-// Starts the IntentService
-getActivity().startService(mServiceIntent);
-</code></p>
-
-<p><strong>注意：</strong>可以在Activity或者Fragment的任何位置发送任务请求。</p>
-
-<p>一旦执行了startService()，IntentService在自己本身的<a href="http://developer.android.com/reference/android/app/IntentService.html#onHandleIntent(android.content.Intent">onHandleIntent()</a>)方法里面开始执行这个任务。</p>
-
-<p>下一步是如何把工作任务的执行结果返回给发送任务的Activity或者Fragment。下节课会演示如何使用<a href="http://developer.android.com/reference/android/content/BroadcastReceiver.html">BroadcastReceiver</a>来完成这个任务。</p>
-
-<hr />
-
-<p><strong>学习自<a href="http://developer.android.com/training/run-background-service/send-request.html">http://developer.android.com/training/run-background-service/send-request.html</a>,欢迎交流讨论</strong></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Training(18) - 使用IntentService执行任务(Lesson 1 - 创建IntentService)]]></title>
-    <link href="http://hukai.me/blog/android-training-18-running-background-service-lesson-1/"/>
-    <updated>2014-04-14T18:30:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-18-running-background-service-lesson-1</id>
-    <content type="html"><![CDATA[<p><strong>写在开始：</strong>接下去的一段时间会学习专题《Background Jobs》的几篇文章，演示如何在后台执行任务，以此加速程序的性能并降低能耗的使用。第一章节会学习如何通过发送任务到后台的Service中执行，从而提示UI的表现性能。</p>
-
-<p>除非你特意指定，否则大部分在前台的操作都执行在一个叫做UI Thread的特殊线程中。这可能会导致某些问题，因为耗时操作可能会干扰界面的响应性能。为了避免这样的问题，Android Framework提供了几个类，用来帮助你把那些耗时操作移动到后台线程中执行。那些类中最常用的就是<a href="http://developer.android.com/reference/android/app/IntentService.html">IntentService</a>.</p>
-
-<p>这一章节会讲到如何实现一个IntentService，向它发送任务并反馈它的结果给其他模块。</p>
-
-<h2>0)概述</h2>
-
-<p>IntentService为执行一个操作在单个后台线程，提供了一种直接的实现方式。它可以处理一个长时间操作的任务并确保不影响到UI的响应性。而且IntentService的执行并不受UI的生命周期的影响。</p>
-
-<p>IntentService有下面几个局限性：</p>
-
-<ul>
-<li>不可以直接和UI做交互。为了把他执行的结果体现在UI上，需要发送给Activity。</li>
-<li>工作任务队列是顺序执行的，如果一个任务正在IntentService中执行，此时你再发送一个任务请求，这个任务会一直等待直到前面一个任务执行完毕。</li>
-<li>正在执行的任务无法打断。</li>
-</ul>
-
-
-<p>然而，在大多数情况下，IntentService都是简单后台任务操作的理想选择。</p>
-
-<p>这节课会演示如何创建继承的IntentService。同样也会演示如何创建必须实现的回调<a href="http://developer.android.com/reference/android/app/IntentService.html#onHandleIntent(android.content.Intent">onHandleIntent()</a>)。最后，还会解释如何在manifest文件中定义这个IntentService。</p>
-
-<!-- More -->
-
-
-<h2>1)创建IntentService</h2>
-
-<p>为了给你的app创建一个IntentService，定义一个类，extends IntentService，在里面override onHandleIntent()方法，如下所示：</p>
-
-<p>```java
-public class RSSPullService extends IntentService {</p>
-
-<pre><code>@Override
-protected void onHandleIntent(Intent workIntent) {
-    // Gets data from the incoming Intent
-    String dataString = workIntent.getDataString();
-    ...
-    // Do work here, based on the contents of dataString
-    ...
-}
-</code></pre>
-
-<p>}
-```</p>
-
-<p>注意一个普通Service组件的其他回调，例如<code>onStartCommand()</code>会被IntentService自动触发。在IntentService中，要避免override那些回调。</p>
-
-<h2>2)在Manifest文件中定义IntentService</h2>
-
-<p>IntentService需要在manifest文件的<application>标签下进行定义，如下所示：</p>
-
-<p>```xml
-&lt;application</p>
-
-<pre><code>    android:icon="@drawable/icon"
-    android:label="@string/app_name"&gt;
-    ...
-    &lt;!--
-        Because android:exported is set to "false",
-        the service is only available to this app.
-    --&gt;
-    &lt;service
-        android:name=".RSSPullService"
-        android:exported="false"/&gt;
-    ...
-</code></pre>
-
-<p><application/>
-```</p>
-
-<p><code>android:name</code>属性指明了IntentService的名字。</p>
-
-<p>注意<service>标签并没有包含任何intent filter。因为发送任务给IntentService的Activity需要使用显式Intent，所以不需要filter。这也意味着只有在同一个app或者其他使用同一个UserID的组件才能够访问到这个Service。</p>
-
-<p>至此，已经学习了IntentService的基础知识，下节会学习如何发送任务到IntentService。</p>
-
-<hr />
-
-<p><strong>学习自<a href="http://developer.android.com/training/run-background-service/create-service.html">http://developer.android.com/training/run-background-service/create-service.html</a>,欢迎交流讨论</strong></p>
 ]]></content>
   </entry>
   

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android:Notes | 胡凯]]></title>
   <link href="http://hukai.me/blog/categories/android-notes/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2014-06-09T23:52:39+08:00</updated>
+  <updated>2014-06-24T10:09:25+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -1295,7 +1295,7 @@ scheme://host:port/path
     <link href="http://hukai.me/blog/android-notes-03-process-and-thread/"/>
     <updated>2013-03-31T16:27:00+08:00</updated>
     <id>http://hukai.me/blog/android-notes-03-process-and-thread</id>
-    <content type="html"><![CDATA[<p>{% img /images/articles/process_and_thread.jpg %}</p>
+    <content type="html"><![CDATA[<p><img src="/images/articles/process_and_thread.jpg"></p>
 
 <p>当程序的第一个组件开始启动时，Android系统会为这个程序启动一个新的Linux进程。默认的，程序中的后续其他组件都是运行在这个进程的线程中(这个线程被成为"主"线程:main thread)。如果程序的组件在启动时发现已经存在这个程序的进程了(因为其他组件正在运行)， 那么这个组件将启动在该进程中，并使用同一线程。然而，你可以安排程序中的不同组件运行在另外一个进程中，而且你可以为任何进程创建其它的线程。</p>
 

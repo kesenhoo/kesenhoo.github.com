@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android:Training | 胡凯]]></title>
   <link href="http://hukai.me/blog/categories/android-training/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2014-06-09T23:52:39+08:00</updated>
+  <updated>2014-06-24T10:09:25+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -12,6 +12,221 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training - Volley(Lesson 1 - 发送简单的请求)]]></title>
+    <link href="http://hukai.me/blog/android-training-volley-simple-request/"/>
+    <updated>2014-06-24T09:00:00+08:00</updated>
+    <id>http://hukai.me/blog/android-training-volley-simple-request</id>
+    <content type="html"><![CDATA[<p>使用Volley的方式是，你通过创建一个<code>RequestQueue</code>并传递<code>Request</code>对象给它。RequestQueue管理工作线程用来执行网络操作，从Cache中读取与写入数据，以及解析Http的响应内容。<code>Requests</code>执行raw responses的解析，Volley会把响应的数据分发给主线程。</p>
+
+<p>这节课会介绍如何使用<code>Volley.newRequestQueue</code>这个建立请求队列的方法来发送一个请求，在下一节课<a href="request-queue.html">建立一个请求队列Setting Up a RequestQueue</a>中会介绍你自己如何建立一个请求队列。</p>
+
+<p>这节课也会介绍如何添加一个请求到RequesutQueue以及如何取消一个请求。</p>
+
+<h2>Add the INTERNET Permission</h2>
+
+<p>为了使用Volley，你必须添加<code>android.permission.INTERNET</code>权限到你的manifest文件中。没有这个权限，你的app将无法访问网络。</p>
+
+<h2>Use newRequestQueue</h2>
+
+<p>Volley提供了一个简便的方法：<code>Volley.newRequestQueue</code>用来为你建立一个<code>RequestQueue</code>，使用默认值，并启动这个队列。例如：</p>
+
+<!-- More -->
+
+
+<p>```java
+final TextView mTextView = (TextView) findViewById(R.id.text);
+...</p>
+
+<p>// Instantiate the RequestQueue.
+RequestQueue queue = Volley.newRequestQueue(this);
+String url ="http://www.google.com";</p>
+
+<p>// Request a string response from the provided URL.
+StringRequest stringRequest = new StringRequest(Request.Method.GET, url,</p>
+
+<pre><code>        new Response.Listener() {
+@Override
+public void onResponse(String response) {
+    // Display the first 500 characters of the response string.
+    mTextView.setText("Response is: "+ response.substring(0,500));
+}
+</code></pre>
+
+<p>}, new Response.ErrorListener() {</p>
+
+<pre><code>@Override
+public void onErrorResponse(VolleyError error) {
+    mTextView.setText("That didn't work!");
+}
+</code></pre>
+
+<p>});
+// Add the request to the RequestQueue.
+queue.add(stringRequest);
+```</p>
+
+<p>Volley总是把解析过后的数据返回到主线程中。在主线程中更加合适使用接收到到的数据用来操作UI控件，这样你可以在响应的handler中轻松的修改UI，但是对于库提供的一些其他方法是有些特殊的，例如与取消有关的。</p>
+
+<p>关于如何创建你自己的请求队列，不要使用Volley.newRequestQueue方法，请查看<a href="request-queue.html">建立一个请求队列Setting Up a RequestQueue</a>。</p>
+
+<h2>Send a Request</h2>
+
+<p>为了发送一个请求，你只需要构造一个请求并通过<code>add()</code>方法添加到<code>RequestQueue</code>中。一旦你添加了这个请求，它会通过队列，得到处理，然后得到原始的响应数据并返回。</p>
+
+<p>当你执行<code>add()</code>方法时，Volley触发执行一个缓存处理线程以及网络一系列的网络处理线程。当你添加一个请求到队列中，它将被缓存线程所捕获并触发：如果这个请求可以被缓存处理，那么会在缓存线程中执行响应数据的解析并返回到主线程。如果请求不能被缓存所处理，它会被放到网络队列中。网络线程池中的第一个可用的网络线程会从队列中获取到这个请求并执行HTTP操作，解析响应数据，把数据写到缓存中之后再把解析之后的数据返回到主线程。</p>
+
+<p>请注意那些比较耗时的操作，例如I/O与解析parsing/decoding都是执行在工作线程。<strong>你可以在任何线程中添加一个请求，但是响应结果都是返回到主线程的。</strong></p>
+
+<p>下图1，演示了一个请求的生命周期：</p>
+
+<p><img src="/images/articles/volley-request.png" alt="volley-request" /></p>
+
+<h2>Cancel a Request</h2>
+
+<p>为了取消一个请求，对你的请求对象执行<code>cancel()</code>方法。一旦取消，Volley会确保你的响应Handler不会被执行。这意味着在实际操作中你可以在activity的<code>onStop()</code>方法中取消所有pending在队列中的请求。你不需要通过检测<code>getActivity() == null</code>来丢弃你的响应handler，其他类似<code>onSaveInstanceState()</code>等保护性的方法里面也都不需要检测。</p>
+
+<p>为了利用这种优势，你应该跟踪所有已经发送的请求，以便在需要的时候，可以取消他们。<strong>有一个简便的方法</strong>：你可以为每一个请求对象都绑定一个tag对象。你可以使用这个tag来提供取消的范围。例如，你可以为你的所有请求都绑定到执行的Activity上，然后你可以在<code>onStop()</code>方法执行<code>requestQueue.cancelAll(this)</code> 。同样的，你可以为ViewPager中的所有请求缩略图Request对象分别打上对应Tab的tag。并在滑动时取消这些请求，用来确保新生成的tab不会被前面tab的请求任务所卡到。</p>
+
+<p>下面一个使用String来打Tag的例子：</p>
+
+<ul>
+<li>定义你的tag并添加到你的请求任务中。</li>
+</ul>
+
+
+<p>```java
+public static final String TAG = "MyTag";
+StringRequest stringRequest; // Assume this exists.
+RequestQueue mRequestQueue;  // Assume this exists.</p>
+
+<p>// Set the tag on the request.
+stringRequest.setTag(TAG);</p>
+
+<p>// Add the request to the RequestQueue.
+mRequestQueue.add(stringRequest);
+```</p>
+
+<ul>
+<li>在activity的onStop()方法里面，取消所有的包含这个tag的请求任务。</li>
+</ul>
+
+
+<p>```java
+@Override
+protected void onStop () {</p>
+
+<pre><code>super.onStop();
+if (mRequestQueue != null) {
+    mRequestQueue.cancelAll(TAG);
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>当取消请求时请注意：如果你依赖你的响应handler来标记状态或者触发另外一个进程，你需要为此给出有力的解释。再说一次，response handler是不会被执行的。</p>
+
+<hr />
+
+<p><strong>学习自<a href="http://developer.android.com/training/volley/simple.html">http://developer.android.com/training/volley/simple.html</a>,欢迎交流讨论</strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training - Volley(Lesson 0 - 序言)]]></title>
+    <link href="http://hukai.me/blog/android-training-volley-index/"/>
+    <updated>2014-06-24T08:30:00+08:00</updated>
+    <id>http://hukai.me/blog/android-training-volley-index</id>
+    <content type="html"><![CDATA[<p><code>Volley</code> 是一个HTTP库，它能够帮助Android apps更方便的执行网络操作，最重要的是，它更快速高效。可以通过开源的 <a href="https://android.googlesource.com/platform/frameworks/volley">AOSP</a> 仓库获取到Volley 。</p>
+
+<hr />
+
+<p><strong>DEPENDENCIES AND PREREQUISITES</strong></p>
+
+<p>Android 1.6 (API Level 4) or higher</p>
+
+<p><strong>YOU SHOULD ALSO SEE</strong></p>
+
+<p>使用Volley来编写一个app，请参考<a href="https://github.com/google/iosched">2013 Google I/O schedule app</a>. 另外需要特别关注下面2个部分：
+* <a href="https://github.com/google/iosched/blob/master/android/src/main/java/com/google/android/apps/iosched/util/ImageLoader.java">ImageLoader</a>
+* <a href="https://github.com/google/iosched/blob/master/android/src/main/java/com/google/android/apps/iosched/util/BitmapCache.java">BitmapCache</a></p>
+
+<p><strong> <a href="https://developers.google.com/events/io/sessions/325304728">VIDEO - Volley:Easy,Fast Networking for Android</a> </strong></p>
+
+<hr />
+
+<p>Volley 有如下的优点：</p>
+
+<!-- More -->
+
+
+<ul>
+<li>自动执行网络请求。</li>
+<li>高并发网络连接。</li>
+<li>通过标准的HTTP的<a href="http://en.wikipedia.org/wiki/Cache_coherence%22">cache coherence</a>(高速缓存一致性)使得磁盘与内存缓存不可见(Transparent)。</li>
+<li>支持指定请求的优先级。</li>
+<li>支持取消已经发出的请求。你可以取消单个请求，或者指定取消请求队列中的一个区域。</li>
+<li>框架容易被定制，例如，定制重试或者回退功能。</li>
+<li>强大的指令(Strong ordering)可以使得异步加载网络数据并显示到UI的操作更加简单。</li>
+<li>包含了Debugging与tracing工具。</li>
+</ul>
+
+
+<p>Volley擅长执行用来显示UI的RPC操作， 例如获取搜索结果的数据。它轻松的整合了任何协议，并输出操作结果的数据，可以是raw strings，也可以是images，或者是JSON。通过提供内置你可能使用到得功能，Volley可以使得你免去重复编写样板代码，使你可以把关注点放在你的app的功能逻辑上。</p>
+
+<p>Volley不适合用来下载大的数据文件。因为Volley会在解析的过程中保留持有所有的响应数据在内存中。对于下载大量的数据操作，请考虑使用<a href="http://developer.android.com/reference/android/app/DownloadManager.html">DownloadManager</a>。</p>
+
+<p>Volley框架的核心代码是托管在AOSP仓库的<code>frameworks/volley</code>中，相关的工具放在<code>toolbox</code>下。把Volley添加到你的项目中的最简便的方法是Clone仓库然后把它设置为一个library project：</p>
+
+<ul>
+<li>通过下面的命令来Clone仓库：</li>
+</ul>
+
+
+<p><code>git clone https://android.googlesource.com/platform/frameworks/volley</code></p>
+
+<ul>
+<li>以一个Android library project的方式导入下载的源代码到你的项目中。(如果你是使用Eclipse，请参考<a href="http://developer.android.com/tools/projects/projects-eclipse.html">Managing Projects from Eclipse with ADT</a>)，或者编译成一个<code>.jar</code>文件。</li>
+</ul>
+
+
+<h2>Lessons</h2>
+
+<ul>
+<li><a href="simple.html">发送一个简单的网络请求(Sending a Simple Request)</a></li>
+</ul>
+
+
+<p>学习如何通过Volley默认的行为发送一个简单的请求，以及如何取消一个请求。</p>
+
+<ul>
+<li><a href="request-queue.html">建立一个请求队列(Setting Up a RequestQueue)</a></li>
+</ul>
+
+
+<p>学习如何建立一个请求队列，以及如何实现一个单例模式来创建一个请求队列。</p>
+
+<ul>
+<li><a href="request.html">生成一个标准的请求(Making a Standard Request)</a></li>
+</ul>
+
+
+<p>学习如何使用Volley的out-of-the-box的请求类型(raw strings, images, and JSON)来发送一个请求。</p>
+
+<ul>
+<li><a href="request-custom.html">实现自定义的请求(Implementing a Custom Request)</a></li>
+</ul>
+
+
+<p>学习如何实现一个自定义的请求</p>
+
+<hr />
+
+<p><strong>学习自<a href="http://developer.android.com/training/volley/index.html">http://developer.android.com/training/volley/index.html</a>,欢迎交流讨论</strong></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Android Training(18) - 使用IntentService执行任务(Lesson 3 - 回传任务状态给发送方)]]></title>
@@ -300,293 +515,6 @@ protected void onHandleIntent(Intent workIntent) {
 <hr />
 
 <p><strong>学习自<a href="http://developer.android.com/training/run-background-service/create-service.html">http://developer.android.com/training/run-background-service/create-service.html</a>,欢迎交流讨论</strong></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Training(17) - 管理应用的内存]]></title>
-    <link href="http://hukai.me/blog/android-training-17-managing_your_app_memory/"/>
-    <updated>2013-10-19T15:18:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-17-managing_your_app_memory</id>
-    <content type="html"><![CDATA[<p>Random Access Memory(RAM)在任何软件开发环境中都是一个很宝贵的资源。这一点在物理内存通常很有限的移动操作系统上，显得尤为突出。尽管Android的Dalvik虚拟机扮演了常规的垃圾回收的角色，但这并不意味着你可以忽视app的内存分配与释放的时机与地点。</p>
-
-<p>为了GC能够从你的app中及时回收内存，你需要避免Memory Leaks(这通常由引用的不能释放而导致)并且在适当的时机(下面会讲到的lifecycle callbacks)来释放引用。对于大多数apps来说，Dalvik的GC会自动把离开活动线程的对象进行回收。</p>
-
-<p>这篇文章会解释Android如何管理app的进程与内存分配，并且你可以在开发Android应用的时候主动的减少内存的使用。关于Java的资源管理机制，请参加其它书籍或者线上材料。如果你正在寻找如何分析你的内存使用情况的文章，请参考这里<a href="http://developer.android.com/tools/debugging/debugging-memory.html">Investigating Your RAM Usage</a>。</p>
-
-<!-- More -->
-
-
-<h2>第1部分:Android是如何管理内存的</h2>
-
-<p>Android并没有提供内存的交换区(Swap space)，但是它有使用<a href="http://en.wikipedia.org/wiki/Paging">paging</a>与<a href="http://en.wikipedia.org/wiki/Memory-mapped_files">memory-mapping(mmapping)</a>的机制来管理内存。这意味着任何你修改的内存(无论是通过分配新的对象还是访问到mmaped pages的内容)都会贮存在RAM中，而且不能被paged out。因此唯一完整释放内存的方法是释放那些你可能hold住的对象的引用，这样使得它能够被GC回收。只有一种例外是：如果系统想要在其他地方进行reuse。</p>
-
-<h3>1)共享内存</h3>
-
-<p>Android通过下面几个方式在不同的Process中来共享RAM:</p>
-
-<ul>
-<li>每一个app的process都是从同一个被叫做Zygote的进程中fork出来的。Zygote进程在系统启动并且载入通用的framework的代码与资源之后开始启动。为了启动一个新的程序进程，系统会fork Zygote进程生成一个新的process，然后在新的process中加载并运行app的代码。这使得大多数的RAM pages被用来分配给framework的代码与资源，并在应用的所有进程中进行共享。</li>
-<li>大多数static的数据被mmapped到一个进程中。这不仅仅使得同样的数据能够在进程间进行共享，而且使得它能够在需要的时候被paged out。例如下面几种static的数据:
-
-<ul>
-<li>Dalvik code (by placing it in a pre-linked .odex file for direct mmapping</li>
-<li>App resources (by designing the resource table to be a structure that can be mmapped and by aligning the zip entries of the APK)</li>
-<li>Traditional project elements like native code in .so files.</li>
-</ul>
-</li>
-<li>在许多地方，Android通过显式的分配共享内存区域(例如ashmem或者gralloc)来实现一些动态RAM区域的能够在不同进程间的共享。例如，window surfaces在app与screen compositor之间使用共享的内存，cursor buffers在content provider与client之间使用共享的内存。</li>
-</ul>
-
-
-<p>关于如何查看app所使用的共享内存，请查看<a href="http://developer.android.com/tools/debugging/debugging-memory.html">Investigating Your RAM Usage</a></p>
-
-<h3>2)分配与回收内存</h3>
-
-<p>这里有下面几点关于Android如何分配与回收内存的事实：</p>
-
-<ul>
-<li>每一个进程的Dalvik heap都有一个限制的虚拟内存范围。这就是逻辑上讲的heap size，它可以随着需要进行增长，但是会有一个系统为它所定义的上限。</li>
-<li>逻辑上讲的heap size和实际物理上使用的内存数量是不等的，Android会计算一个叫做Proportional Set Size(PSS)的值，它记录了那些和其他进程进行共享的内存大小。（假设共享内存大小是10M，一共有20个Process在共享使用，根据权重，可能认为其中有0.3M才能真正算是你的进程所使用的）</li>
-<li>Dalvik heap与逻辑上的heap size不吻合，这意味着Android并不会去做heap中的碎片整理用来关闭空闲区域。Android仅仅会在heap的尾端出现不使用的空间时才会做收缩逻辑heap size大小的动作。但是这并不是意味着被heap所使用的物理内存大小不能被收缩。在垃圾回收之后，Dalvik会遍历heap并找出不使用的pages，然后使用madvise把那些pages返回给kernal。因此，成对的allocations与deallocations大块的数据可以使得物理内存能够被正常的回收。然而，回收碎片化的内存则会使得效率低下很多，因为那些碎片化的分配页面也许会被其他地方所共享到。</li>
-</ul>
-
-
-<h3>3)限制应用的内存</h3>
-
-<p>为了维持多任务的功能环境，Android为每一个app都设置了一个硬性的heap size限制。准确的heap size限制随着不同设备的不同RAM大小而各有差异。如果你的app已经到了heap的限制大小并且再尝试分配内存的话，会引起OutOfMemoryError的错误。</p>
-
-<p>在一些情况下，你也许想要查询当前设备的heap size限制大小是多少，然后决定cache的大小。可以通过getMemoryClass()来查询。这个方法会返回一个整数，表明你的app heap size限制是多少megabates。</p>
-
-<h3>4)切换应用</h3>
-
-<p>当用户在不同应用之间进行切换的时候，不是使用交换空间的办法。Android会把那些不包含foreground组件的进程放到LRU cache中。例如，当用户刚开始启动了一个应用，这个时候为它创建了一个进程，但是当用户离开这个应用，这个进程并没有离开。系统会把这个进程放到cache中，如果用户后来回到这个应用，这个进程能够被resued，从而实现app的快速切换。</p>
-
-<p>如果你的应用有一个被缓存的进程，它被保留在内存中，并且当前不再需要它了，这会对系统的整个性能有影响。因此当系统开始进入低内存状态时，它会由系统根据LRU的规则与其他因素选择杀掉某些进程，为了保持你的进程能够尽可能长久的被cached，请参考下面的章节学习何时释放你的引用。</p>
-
-<p>更对关于不在foreground的进程是Android是如何决定kill掉哪一类进程的问题，请参考<a href="http://developer.android.com/guide/components/processes-and-threads.html">Processes and Threads</a>.</p>
-
-<h2>第2部分:你的应用该如何管理内存</h2>
-
-<p>你应该在开发过程的每一个阶段都考虑到RAM的有限性，甚至包括在开发开始之前的设计阶段。有许多种设计与实现方式，他们有着不同的效率，尽管是对同样一种技术的不断组合与演变。</p>
-
-<p>为了使得你的应用效率更高，你应该在设计与实现代码时，遵循下面的技术要点。</p>
-
-<h3>1)珍惜Services资源</h3>
-
-<p>如果你的app需要在后台使用service，除非它被触发执行一个任务，否则其他时候都应该是非运行状态。同样需要注意当这个service已经完成任务后停止service失败引起的泄漏。</p>
-
-<p>当你启动一个service，系统会倾向为了这个Service而一直保留它的Process。这使得process的运行代价很高，因为系统没有办法把Service所占用的RAM让给其他组件或者被Paged out。这减少了系统能够存放到LRU缓存当中的process数量，它会影响app之间的切换效率。它甚至会导致系统内存使用不稳定，从而无法继续Hold住
-所有目前正在运行的Service。</p>
-
-<p>限制你的service的最好办法是使用<a href="http://developer.android.com/reference/android/app/IntentService.html">IntentService</a>, 它会在处理完扔给它的intent任务之后尽快结束自己。更多信息，请阅读<a href="http://developer.android.com/training/run-background-service/index.html">Running in a Background Service</a>.</p>
-
-<p>当一个service已经不需要的时候还继续保留它，这对Android应用的内存管理来说是<strong>最糟糕的错误之一</strong>。因此千万不要贪婪的使得一个Service持续保留。不仅仅是因为它会使得你的app因RAM的限制而性能糟糕，而且用户会发现那些行为奇怪的app并且卸载它。</p>
-
-<h3>2)当你的UI隐藏时释放内存</h3>
-
-<p>当用户切换到其它app并且你的app UI不再可见时，你应该释放你的UI上占用的任何资源。在这个时候释放UI资源可以显著的增加系统cached process的能力，它会对用户的质量体验有着直接的影响。</p>
-
-<p>为了能够接收到用户离开你的UI时的通知，你需要实现Activtiy类里面的<a href="http://developer.android.com/reference/android/content/ComponentCallbacks2.html#onTrimMemory(int">onTrimMemory()</a>)回调方法。你应该使用这个方法来监听到<a href="http://developer.android.com/reference/android/content/ComponentCallbacks2.html#TRIM_MEMORY_UI_HIDDEN">TRIM_MEMORY_UI_HIDDEN</a>级别, 它意味着你的UI已经隐藏，你应该释放那些仅仅被你的UI使用的资源。</p>
-
-<p>请注意：你的app仅仅会在所有UI组件的被隐藏的时候接收到onTrimMemory()的回调并带有参数TRIM_MEMORY_UI_HIDDEN。这与onStop()的回调是不同的，onStop会在activity的实例隐藏时会执行，例如当用户从你的app的某个activity跳转到另外一个activity时onStop会被执行。因此你应该实现onStop回调，并且在此回调里面释放activity的资源，例如网络连接，unregister广播接收者。除非接收到<a href="http://developer.android.com/reference/android/content/ComponentCallbacks2.html#onTrimMemory(int">onTrimMemory(TRIM_MEMORY_UI_HIDDEN)</a>)的回调，否者你不应该释放你的UI资源。这确保了用户从其他activity切回来时，你的UI资源仍然可用，并且可以迅速恢复activity。</p>
-
-<h3>3)当内存紧张时释放部分内存</h3>
-
-<p>在你的app生命周期的任何阶段，onTrimMemory回调方法同样可以告诉你整个设备的内存资源已经开始紧张。你应该根据onTrimMemory方法中的内存级别来进一步决定释放哪些资源。</p>
-
-<ul>
-<li><a href="http://developer.android.com/reference/android/content/ComponentCallbacks2.html#TRIM_MEMORY_RUNNING_MODERATE">TRIM_MEMORY_RUNNING_MODERATE</a>:你的app正在运行并且不会被列为可杀死的。但是设备正运行于低内存状态下，系统开始开始激活杀死LRU Cache中的Process的机制。</li>
-<li><a href="http://developer.android.com/reference/android/content/ComponentCallbacks2.html#TRIM_MEMORY_RUNNING_LOW">TRIM_MEMORY_RUNNING_LOW</a>:你的app正在运行且没有被列为可杀死的。但是设备正运行于更低内存的状态下，你应该释放不用的资源用来提升系统性能，这会直接影响了你的app的性能。</li>
-<li><a href="http://developer.android.com/reference/android/content/ComponentCallbacks2.html#TRIM_MEMORY_RUNNING_CRITICAL">TRIM_MEMORY_RUNNING_CRITICAL</a>:你的app仍在运行，但是系统已经把LRU Cache中的大多数进程都已经杀死，因此你应该立即释放所有非必须的资源。如果系统不能回收到足够的RAM数量，系统将会清除所有的LRU缓存中的进程，并且开始杀死那些之前被认为不应该杀死的进程，例如那个进程包含了一个运行中的Service。</li>
-</ul>
-
-
-<p>同样，当你的app进程正在被cached时，你可能会接受到从onTrimMemory()中返回的下面的值之一:</p>
-
-<ul>
-<li><a href="http://developer.android.com/reference/android/content/ComponentCallbacks2.html#TRIM_MEMORY_BACKGROUND">TRIM_MEMORY_BACKGROUND</a>: 系统正运行于低内存状态并且你的进程正处于LRU缓存名单中<strong>最不容易杀掉的位置</strong>。尽管你的app进程并不是处于被杀掉的高危险状态，系统可能已经开始杀掉LRU缓存中的其他进程了。你应该释放那些容易恢复的资源，以便于你的进程可以保留下来，这样当用户回退到你的app的时候才能够迅速恢复。</li>
-<li><a href="http://developer.android.com/reference/android/content/ComponentCallbacks2.html#TRIM_MEMORY_MODERATE">TRIM_MEMORY_MODERATE</a>: 系统正运行于低内存状态并且你的进程已经已经接近LRU名单的<strong>中部位置</strong>。如果系统开始变得更加内存紧张，你的进程是有可能被杀死的。</li>
-<li><a href="http://developer.android.com/reference/android/content/ComponentCallbacks2.html#TRIM_MEMORY_COMPLETE">TRIM_MEMORY_COMPLETE</a>: 系统正运行与低内存的状态并且你的进程正处于LRU名单中<strong>最容易被杀掉的位置</strong>。你应该释放任何不影响你的app恢复状态的资源。</li>
-</ul>
-
-
-<p>因为onTrimMemory()的回调是在<strong>API 14</strong>才被加进来的，对于老的版本，你可以使用<a href="http://developer.android.com/reference/android/content/ComponentCallbacks.html#onLowMemory(">onLowMemory</a>)回调来进行兼容。onLowMemory相当与TRIM_MEMORY_COMPLETE。</p>
-
-<p><strong>Note:</strong> 当系统开始清除LRU缓存中的进程时，尽管它首先按照LRU的顺序来操作，但是它同样会考虑进程的内存使用量。因此消耗越少的进程则越容易被留下来。</p>
-
-<h3>4)检查你应该使用多少的内存</h3>
-
-<p>正如前面提到的，每一个Android设备都会有不同的RAM总大小与可用空间，因此不同设备为app提供了不同大小的heap限制。你可以通过调用<a href="http://developer.android.com/reference/android/app/ActivityManager.html#getMemoryClass(">getMemoryClass()</a>)来获取你的app的可用heap大小。如果你的app尝试申请更多的内存，会出现OutOfMemory的错误。</p>
-
-<p>在一些特殊的情景下，你可以通过在manifest的application标签下添加largeHeap=true的属性来声明一个更大的heap空间。如果你这样做，你可以通过<a href="http://developer.android.com/reference/android/app/ActivityManager.html#getLargeMemoryClass(">getLargeMemoryClass()</a>)来获取到一个更大的heap size。</p>
-
-<p>然而，能够获取更大heap的设计本意是为了一小部分会消耗大量RAM的应用(例如一个大图片的编辑应用)。不要轻易的因为你需要使用大量的内存而去请求一个大的heap size。只有当你清楚的知道哪里会使用大量的内存并且为什么这些内存必须被保留时才去使用large heap. 因此请尽量少使用large heap。使用额外的内存会影响系统整体的用户体验，并且会使得GC的每次运行时间更长。在任务切换时，系统的性能会变得大打折扣。</p>
-
-<p>另外, large heap并不一定能够获取到更大的heap。在某些有严格限制的机器上，large heap的大小和通常的heap size是一样的。因此即使你申请了large heap，你还是应该通过执行getMemoryClass()来检查实际获取到的heap大小。</p>
-
-<h3>5)避免bitmaps的浪费</h3>
-
-<p>当你加载一个bitmap时，仅仅需要保留适配当前屏幕设备分辨率的数据即可，如果原图高于你的设备分辨率，需要做缩小的动作。请记住，增加bitmap的尺寸会对内存呈现出2次方的增加，因为X与Y都在增加。</p>
-
-<p><strong>Note:</strong>在Android 2.3.x (API level 10)及其以下, bitmap对象是的pixel data是存放在native内存中的，它不便于调试。然而，从Android 3.0(API level 11)开始，bitmap pixel data是分配在你的app的Dalvik heap中, 这提升了GC的工作并且更加容易Debug。因此如果你的app使用bitmap并在旧的机器上引发了一些内存问题，切换到3.0以上的机器上进行Debug。</p>
-
-<h3>6)使用优化的数据容器</h3>
-
-<p>利用Android Framework里面优化过的容器类，例如<a href="http://developer.android.com/reference/android/util/SparseArray.html">SparseArray</a>, SparseBooleanArray, 与 LongSparseArray. 通常的HashMap的实现方式更加消耗内存，因为它需要一个额外的实例对象来记录Mapping操作。另外，SparseArray更加高效在于他们避免了对key与value的autobox自动装箱，并且避免了装箱后的解箱。</p>
-
-<h3>7)请注意内存开销</h3>
-
-<p>对你所使用的语言与库的成本与开销有所了解，从开始到结束，在设计你的app时谨记这些信息。通常，表面上看起来无关痛痒(innocuous)的事情也许实际上会导致大量的开销。例如：</p>
-
-<ul>
-<li>Enums的内存消耗通常是static constants的2倍。你应该尽量避免在Android上使用enums。</li>
-<li>在Java中的每一个类(包括匿名内部类)都会使用大概500 bytes。</li>
-<li>每一个类的实例花销是12-16 bytes。</li>
-<li>往HashMap添加一个entry需要额一个额外占用的32 bytes的entry对象。</li>
-</ul>
-
-
-<h3>8)请注意代码“抽象”</h3>
-
-<p>通常, 开发者使用抽象简单的作为"好的编程实践",因为抽象能够提升代码的灵活性与可维护性。然而，抽象会导致一个显著的开销:通常他们需要同等量的代码用于可执行。那些代码会被map到内存中。因此如果你的抽象没有显著的提升效率，应该尽量避免他们。</p>
-
-<h3>9)为序列化的数据使用nano protobufs</h3>
-
-<p><a href="https://developers.google.com/protocol-buffers/docs/overview">Protocol buffers</a>是由Google为序列化结构数据而设计的，一种语言无关，平台无关，具有良好扩展性的协议。类似XML，却比XML更加轻量，快速，简单。如果你需要为你的数据实现协议化，你应该在客户端的代码中总是使用nano protobufs。通常的协议化操作会生成大量繁琐的代码，这容易给你的app带来许多问题:增加RAM的使用量，显著增加APK的大小，更慢的执行速度，更容易达到DEX的字符限制。</p>
-
-<p>关于更多细节，请参考<a href="https://android.googlesource.com/platform/external/protobuf/+/master/java/README.txt">protobuf readme</a>的"Nano version"章节。</p>
-
-<h3>10)Avoid dependency injection frameworks</h3>
-
-<p>使用类似<a href="https://code.google.com/p/google-guice/">Guice</a>或者<a href="https://github.com/roboguice/roboguice">RoboGuice</a>等framework injection包是很有效的，因为他们能够简化你的代码。</p>
-
-<blockquote><p>RoboGuice 2 smoothes out some of the wrinkles in your Android development experience and makes things simple and fun. Do you always forget to check for null when you getIntent().getExtras()? RoboGuice 2 will help you. Think casting findViewById() to a TextView shouldn’t be necessary? RoboGuice 2 is on it. RoboGuice 2 takes the guesswork out of development. Inject your View, Resource, System Service, or any other object, and let RoboGuice 2 take care of the details.</p></blockquote>
-
-<p>然而，那些框架会通过扫描你的代码执行许多初始化的操作，这会导致你的代码需要大量的RAM来map代码。但是mapped pages会长时间的被保留在RAM中。</p>
-
-<h3>11)谨慎使用external libraries</h3>
-
-<p>很多External library的代码都不是为移动网络环境而编写的，在移动客户端则显示的效率不高。至少，当你决定使用一个external library的时候，你应该针对移动网络做繁琐的porting与maintenance的工作。</p>
-
-<p>即使是针对Android而设计的library，也可能是很危险的，因为每一个library所做的事情都是不一样的。例如，其中一个lib使用的是nano protobufs, 而另外一个使用的是micro protobufs。那么这样，在你的app里面就有2种protobuf的实现方式。这样的冲突同样可能发生在输出日志，加载图片，缓存等等模块里面。</p>
-
-<p>同样不要陷入为了1个或者2个功能而导入整个library的陷阱。如果没有一个合适的库与你的需求相吻合，你应该考虑自己去实现，而不是导入一个大而全的解决方案。</p>
-
-<h3>12)优化整体性能</h3>
-
-<p>官方有列出许多优化整个app性能的文章：<a href="http://developer.android.com/training/best-performance.html">Best Practices for Performance</a>. 这篇文章就是其中之一。有些文章是讲解如何优化app的CPU使用效率，有些是如何优化app的内存使用效率。</p>
-
-<p>你还应该阅读<a href="http://developer.android.com/tools/debugging/debugging-ui.html">optimizing your UI</a>来为layout进行优化。同样还应该关注lint工具所提出的建议，进行优化。</p>
-
-<h3>13)使用ProGuard来剔除不需要的代码</h3>
-
-<p><a href="http://developer.android.com/tools/help/proguard.html">ProGuard</a>能够通过移除不需要的代码，重命名类，域与方法等方对代码进行压缩,优化与混淆。使用ProGuard可以是的你的代码更加紧凑，这样能够使用更少mapped代码所需要的RAM。</p>
-
-<h3>14)对最终的APK使用zipalign</h3>
-
-<p>在编写完所有代码，并通过编译系统生成APK之后，你需要使用<a href="http://developer.android.com/tools/help/zipalign.html">zipalign</a>对APK进行重新校准。如果你不做这个步骤，会导致你的APK需要更多的RAM，因为一些类似图片资源的东西不能被mapped。</p>
-
-<p><strong>Notes::</strong>Google Play不接受没有经过zipalign的APK。</p>
-
-<h3>15)分析你的RAM使用情况</h3>
-
-<p>一旦你获取到一个相对稳定的版本后，需要分析你的app整个生命周期内使用的内存情况，并进行优化，更多细节请参考<a href="http://developer.android.com/tools/debugging/debugging-memory.html">Investigating Your RAM Usage</a>.</p>
-
-<h3>16)使用多进程</h3>
-
-<p>如果合适的话，有一个更高级的技术可以帮助你的app管理内存使用：通过把你的app组件切分成多个组件，运行在不同的进程中。这个技术必须谨慎使用，大多数app都不应该运行在多个进程中。因为如果使用不当，它会显著增加内存的使用，而不是减少。当你的app需要在后台运行与前台一样的大量的任务的时候，可以考虑使用这个技术。</p>
-
-<p>一个典型的例子是创建一个可以长时间后台播放的Music Player。如果整个app运行在一个进程中，当后台播放的时候，前台的那些UI资源也没有办法得到释放。类似这样的app可以切分成2个进程：一个用来操作UI，另外一个用来后台的Service.</p>
-
-<p>你可以通过在manifest文件中声明'android:process'属性来实现某个组件运行在另外一个进程的操作。</p>
-
-<p>```xml
-&lt;service android:name=".PlaybackService"</p>
-
-<pre><code>     android:process=":background" /&gt;
-</code></pre>
-
-<p>```
-更多关于使用这个技术的细节，请参考原文，链接如下。</p>
-
-<hr />
-
-<p><strong>文章学习自<a href="http://developer.android.com/training/articles/memory.html">http://developer.android.com/training/articles/memory.html</a></strong>
-<strong>转载请注明出自<a href="http:://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢</strong></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Training(16) - 创建自定义的Views(Lesson 4 - 优化Views)]]></title>
-    <link href="http://hukai.me/blog/android-training-16-creating-custom-views-lesson-4/"/>
-    <updated>2013-08-18T17:30:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-16-creating-custom-views-lesson-4</id>
-    <content type="html"><![CDATA[<p>前面的课程学习到了如何创建设计良好的View，并且能够使之在手势与状态切换时得到正确的反馈。下面要介绍的是如何使得view能够执行更快。为了避免UI显得卡顿，你必须确保动画能够保持在60fps以上。</p>
-
-<!-- more -->
-
-
-<h2>Do Less, Less Frequently</h2>
-
-<p>为了加速你的view，对于频繁调用的方法，需要尽量减少不必要的代码。先从onDraw开始，需要特别注意不应该在这里做内存分配的事情，因为它会导致GC，从而导致卡顿。在初始化或者动画间隙期间做分配内存的动作。不要在动画正在执行的时候做内存分配的事情。</p>
-
-<p>你还需要尽可能的减少onDraw被调用的次数，大多数时候导致onDraw都是因为调用了invalidate().因此请尽量减少调用invaildate()的次数。如果可能的话，尽量调用含有4个参数的invalidate()方法而不是没有参数的invalidate()。没有参数的invalidate会强制重绘整个view。</p>
-
-<p>另外一个非常耗时的操作是请求layout。任何时候执行requestLayout()，会使得Android UI系统去遍历整个View的层级来计算出每一个view的大小。如果找到有冲突的值，它会需要重新计算好几次。另外需要尽量保持View的层级是扁平化的，这样对提高效率很有帮助。</p>
-
-<p>如果你有一个复杂的UI，你应该考虑写一个自定义的ViewGroup来执行他的layout操作。与内置的view不同，自定义的view可以使得程序仅仅测量这一部分，这避免了遍历整个view的层级结构来计算大小。</p>
-
-<h2>Use Hardware Acceleration</h2>
-
-<p>从Android 3.0开始，Android的2D图像系统可以通过GPU来加速。GPU硬件加速可以提高许多程序的性能。但是这并不是说它适合所有的程序。</p>
-
-<p>参考<a href="http://developer.android.com/guide/topics/graphics/hardware-accel.html">Hardware Acceleration</a> 来学习如何在程序中启用加速。</p>
-
-<p>一旦你开启了硬件加速，性能的提示并不一定可以明显察觉到。移动GPU在某些例如scaling,rotating与translating的操作中表现良好。但是对其他一些任务则表现不佳。</p>
-
-<p>在下面的例子中，绘制pie是相对来说比较费时的。解决方案是把pie放到一个子view中，并设置View使用LAYER_TYPE_HARDWARE来进行加速,。
-```java
-   private class PieView extends View {</p>
-
-<pre><code>   public PieView(Context context) {
-       super(context);
-       if (!isInEditMode()) {
-           setLayerType(View.LAYER_TYPE_HARDWARE, null);
-       }
-   }
-
-   @Override
-   protected void onDraw(Canvas canvas) {
-       super.onDraw(canvas);
-
-       for (Item it : mData) {
-           mPiePaint.setShader(it.mShader);
-           canvas.drawArc(mBounds,
-                   360 - it.mEndAngle,
-                   it.mEndAngle - it.mStartAngle,
-                   true, mPiePaint);
-       }
-   }
-
-   @Override
-   protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-       mBounds = new RectF(0, 0, w, h);
-   }
-
-   RectF mBounds;
-</code></pre>
-
-<p>   }
-```
-通过这样的修改以后，PieChart.PieView.onDraw()只会在第一次现实的时候被调用。之后，pie chart会被缓存为一张图片，并通过GPU来进行重画不同的角度。</p>
-
-<p>缓存图片到hardware layer会消耗video memory，而video memory又是有限的。基于这样的考虑，仅仅在用户触发scrolling的时候使用LAYER_TYPE_HARDWARE，在其他时候，使用LAYER_TYPE_NONE。</p>
-
-<hr />
-
-<p><strong>学习自：<a href="http://developer.android.com/training/custom-views/optimizing-view.html">http://developer.android.com/training/custom-views/optimizing-view.html</a>，请多指教，谢谢！</strong><br/>
-<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
 ]]></content>
   </entry>
   

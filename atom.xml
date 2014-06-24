@@ -4,7 +4,7 @@
   <title><![CDATA[胡凯]]></title>
   <link href="http://hukai.me/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2014-06-09T23:52:18+08:00</updated>
+  <updated>2014-06-24T10:09:25+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -12,6 +12,253 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training - Volley(Lesson 1 - 发送简单的请求)]]></title>
+    <link href="http://hukai.me/blog/android-training-volley-simple-request/"/>
+    <updated>2014-06-24T09:00:00+08:00</updated>
+    <id>http://hukai.me/blog/android-training-volley-simple-request</id>
+    <content type="html"><![CDATA[<p>使用Volley的方式是，你通过创建一个<code>RequestQueue</code>并传递<code>Request</code>对象给它。RequestQueue管理工作线程用来执行网络操作，从Cache中读取与写入数据，以及解析Http的响应内容。<code>Requests</code>执行raw responses的解析，Volley会把响应的数据分发给主线程。</p>
+
+<p>这节课会介绍如何使用<code>Volley.newRequestQueue</code>这个建立请求队列的方法来发送一个请求，在下一节课<a href="request-queue.html">建立一个请求队列Setting Up a RequestQueue</a>中会介绍你自己如何建立一个请求队列。</p>
+
+<p>这节课也会介绍如何添加一个请求到RequesutQueue以及如何取消一个请求。</p>
+
+<h2>Add the INTERNET Permission</h2>
+
+<p>为了使用Volley，你必须添加<code>android.permission.INTERNET</code>权限到你的manifest文件中。没有这个权限，你的app将无法访问网络。</p>
+
+<h2>Use newRequestQueue</h2>
+
+<p>Volley提供了一个简便的方法：<code>Volley.newRequestQueue</code>用来为你建立一个<code>RequestQueue</code>，使用默认值，并启动这个队列。例如：</p>
+
+<!-- More -->
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">final</span> <span class="n">TextView</span> <span class="n">mTextView</span> <span class="o">=</span> <span class="o">(</span><span class="n">TextView</span><span class="o">)</span> <span class="n">findViewById</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">text</span><span class="o">);</span>
+</span><span class='line'><span class="o">...</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Instantiate the RequestQueue.</span>
+</span><span class='line'><span class="n">RequestQueue</span> <span class="n">queue</span> <span class="o">=</span> <span class="n">Volley</span><span class="o">.</span><span class="na">newRequestQueue</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+</span><span class='line'><span class="n">String</span> <span class="n">url</span> <span class="o">=</span><span class="s">&quot;http://www.google.com&quot;</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Request a string response from the provided URL.</span>
+</span><span class='line'><span class="n">StringRequest</span> <span class="n">stringRequest</span> <span class="o">=</span> <span class="k">new</span> <span class="n">StringRequest</span><span class="o">(</span><span class="n">Request</span><span class="o">.</span><span class="na">Method</span><span class="o">.</span><span class="na">GET</span><span class="o">,</span> <span class="n">url</span><span class="o">,</span>
+</span><span class='line'>            <span class="k">new</span> <span class="n">Response</span><span class="o">.</span><span class="na">Listener</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onResponse</span><span class="o">(</span><span class="n">String</span> <span class="n">response</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// Display the first 500 characters of the response string.</span>
+</span><span class='line'>        <span class="n">mTextView</span><span class="o">.</span><span class="na">setText</span><span class="o">(</span><span class="s">&quot;Response is: &quot;</span><span class="o">+</span> <span class="n">response</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span><span class="mi">500</span><span class="o">));</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">},</span> <span class="k">new</span> <span class="n">Response</span><span class="o">.</span><span class="na">ErrorListener</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onErrorResponse</span><span class="o">(</span><span class="n">VolleyError</span> <span class="n">error</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mTextView</span><span class="o">.</span><span class="na">setText</span><span class="o">(</span><span class="s">&quot;That didn&#39;t work!&quot;</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">});</span>
+</span><span class='line'><span class="c1">// Add the request to the RequestQueue.</span>
+</span><span class='line'><span class="n">queue</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">stringRequest</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Volley总是把解析过后的数据返回到主线程中。在主线程中更加合适使用接收到到的数据用来操作UI控件，这样你可以在响应的handler中轻松的修改UI，但是对于库提供的一些其他方法是有些特殊的，例如与取消有关的。</p>
+
+<p>关于如何创建你自己的请求队列，不要使用Volley.newRequestQueue方法，请查看<a href="request-queue.html">建立一个请求队列Setting Up a RequestQueue</a>。</p>
+
+<h2>Send a Request</h2>
+
+<p>为了发送一个请求，你只需要构造一个请求并通过<code>add()</code>方法添加到<code>RequestQueue</code>中。一旦你添加了这个请求，它会通过队列，得到处理，然后得到原始的响应数据并返回。</p>
+
+<p>当你执行<code>add()</code>方法时，Volley触发执行一个缓存处理线程以及网络一系列的网络处理线程。当你添加一个请求到队列中，它将被缓存线程所捕获并触发：如果这个请求可以被缓存处理，那么会在缓存线程中执行响应数据的解析并返回到主线程。如果请求不能被缓存所处理，它会被放到网络队列中。网络线程池中的第一个可用的网络线程会从队列中获取到这个请求并执行HTTP操作，解析响应数据，把数据写到缓存中之后再把解析之后的数据返回到主线程。</p>
+
+<p>请注意那些比较耗时的操作，例如I/O与解析parsing/decoding都是执行在工作线程。<strong>你可以在任何线程中添加一个请求，但是响应结果都是返回到主线程的。</strong></p>
+
+<p>下图1，演示了一个请求的生命周期：</p>
+
+<p><img src="http://hukai.me/images/articles/volley-request.png" alt="volley-request" /></p>
+
+<h2>Cancel a Request</h2>
+
+<p>为了取消一个请求，对你的请求对象执行<code>cancel()</code>方法。一旦取消，Volley会确保你的响应Handler不会被执行。这意味着在实际操作中你可以在activity的<code>onStop()</code>方法中取消所有pending在队列中的请求。你不需要通过检测<code>getActivity() == null</code>来丢弃你的响应handler，其他类似<code>onSaveInstanceState()</code>等保护性的方法里面也都不需要检测。</p>
+
+<p>为了利用这种优势，你应该跟踪所有已经发送的请求，以便在需要的时候，可以取消他们。<strong>有一个简便的方法</strong>：你可以为每一个请求对象都绑定一个tag对象。你可以使用这个tag来提供取消的范围。例如，你可以为你的所有请求都绑定到执行的Activity上，然后你可以在<code>onStop()</code>方法执行<code>requestQueue.cancelAll(this)</code> 。同样的，你可以为ViewPager中的所有请求缩略图Request对象分别打上对应Tab的tag。并在滑动时取消这些请求，用来确保新生成的tab不会被前面tab的请求任务所卡到。</p>
+
+<p>下面一个使用String来打Tag的例子：</p>
+
+<ul>
+<li>定义你的tag并添加到你的请求任务中。</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">TAG</span> <span class="o">=</span> <span class="s">&quot;MyTag&quot;</span><span class="o">;</span>
+</span><span class='line'><span class="n">StringRequest</span> <span class="n">stringRequest</span><span class="o">;</span> <span class="c1">// Assume this exists.</span>
+</span><span class='line'><span class="n">RequestQueue</span> <span class="n">mRequestQueue</span><span class="o">;</span>  <span class="c1">// Assume this exists.</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Set the tag on the request.</span>
+</span><span class='line'><span class="n">stringRequest</span><span class="o">.</span><span class="na">setTag</span><span class="o">(</span><span class="n">TAG</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Add the request to the RequestQueue.</span>
+</span><span class='line'><span class="n">mRequestQueue</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">stringRequest</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>在activity的onStop()方法里面，取消所有的包含这个tag的请求任务。</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onStop</span> <span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">super</span><span class="o">.</span><span class="na">onStop</span><span class="o">();</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">mRequestQueue</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mRequestQueue</span><span class="o">.</span><span class="na">cancelAll</span><span class="o">(</span><span class="n">TAG</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>当取消请求时请注意：如果你依赖你的响应handler来标记状态或者触发另外一个进程，你需要为此给出有力的解释。再说一次，response handler是不会被执行的。</p>
+
+<hr />
+
+<p><strong>学习自<a href="http://developer.android.com/training/volley/simple.html">http://developer.android.com/training/volley/simple.html</a>,欢迎交流讨论</strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training - Volley(Lesson 0 - 序言)]]></title>
+    <link href="http://hukai.me/blog/android-training-volley-index/"/>
+    <updated>2014-06-24T08:30:00+08:00</updated>
+    <id>http://hukai.me/blog/android-training-volley-index</id>
+    <content type="html"><![CDATA[<p><code>Volley</code> 是一个HTTP库，它能够帮助Android apps更方便的执行网络操作，最重要的是，它更快速高效。可以通过开源的 <a href="https://android.googlesource.com/platform/frameworks/volley">AOSP</a> 仓库获取到Volley 。</p>
+
+<hr />
+
+<p><strong>DEPENDENCIES AND PREREQUISITES</strong></p>
+
+<p>Android 1.6 (API Level 4) or higher</p>
+
+<p><strong>YOU SHOULD ALSO SEE</strong></p>
+
+<p>使用Volley来编写一个app，请参考<a href="https://github.com/google/iosched">2013 Google I/O schedule app</a>. 另外需要特别关注下面2个部分：
+* <a href="https://github.com/google/iosched/blob/master/android/src/main/java/com/google/android/apps/iosched/util/ImageLoader.java">ImageLoader</a>
+* <a href="https://github.com/google/iosched/blob/master/android/src/main/java/com/google/android/apps/iosched/util/BitmapCache.java">BitmapCache</a></p>
+
+<p><strong> <a href="https://developers.google.com/events/io/sessions/325304728">VIDEO - Volley:Easy,Fast Networking for Android</a> </strong></p>
+
+<hr />
+
+<p>Volley 有如下的优点：</p>
+
+<!-- More -->
+
+
+<ul>
+<li>自动执行网络请求。</li>
+<li>高并发网络连接。</li>
+<li>通过标准的HTTP的<a href="http://en.wikipedia.org/wiki/Cache_coherence%22">cache coherence</a>(高速缓存一致性)使得磁盘与内存缓存不可见(Transparent)。</li>
+<li>支持指定请求的优先级。</li>
+<li>支持取消已经发出的请求。你可以取消单个请求，或者指定取消请求队列中的一个区域。</li>
+<li>框架容易被定制，例如，定制重试或者回退功能。</li>
+<li>强大的指令(Strong ordering)可以使得异步加载网络数据并显示到UI的操作更加简单。</li>
+<li>包含了Debugging与tracing工具。</li>
+</ul>
+
+
+<p>Volley擅长执行用来显示UI的RPC操作， 例如获取搜索结果的数据。它轻松的整合了任何协议，并输出操作结果的数据，可以是raw strings，也可以是images，或者是JSON。通过提供内置你可能使用到得功能，Volley可以使得你免去重复编写样板代码，使你可以把关注点放在你的app的功能逻辑上。</p>
+
+<p>Volley不适合用来下载大的数据文件。因为Volley会在解析的过程中保留持有所有的响应数据在内存中。对于下载大量的数据操作，请考虑使用<a href="http://developer.android.com/reference/android/app/DownloadManager.html">DownloadManager</a>。</p>
+
+<p>Volley框架的核心代码是托管在AOSP仓库的<code>frameworks/volley</code>中，相关的工具放在<code>toolbox</code>下。把Volley添加到你的项目中的最简便的方法是Clone仓库然后把它设置为一个library project：</p>
+
+<ul>
+<li>通过下面的命令来Clone仓库：</li>
+</ul>
+
+
+<p><code>git clone https://android.googlesource.com/platform/frameworks/volley</code></p>
+
+<ul>
+<li>以一个Android library project的方式导入下载的源代码到你的项目中。(如果你是使用Eclipse，请参考<a href="http://developer.android.com/tools/projects/projects-eclipse.html">Managing Projects from Eclipse with ADT</a>)，或者编译成一个<code>.jar</code>文件。</li>
+</ul>
+
+
+<h2>Lessons</h2>
+
+<ul>
+<li><a href="simple.html">发送一个简单的网络请求(Sending a Simple Request)</a></li>
+</ul>
+
+
+<p>学习如何通过Volley默认的行为发送一个简单的请求，以及如何取消一个请求。</p>
+
+<ul>
+<li><a href="request-queue.html">建立一个请求队列(Setting Up a RequestQueue)</a></li>
+</ul>
+
+
+<p>学习如何建立一个请求队列，以及如何实现一个单例模式来创建一个请求队列。</p>
+
+<ul>
+<li><a href="request.html">生成一个标准的请求(Making a Standard Request)</a></li>
+</ul>
+
+
+<p>学习如何使用Volley的out-of-the-box的请求类型(raw strings, images, and JSON)来发送一个请求。</p>
+
+<ul>
+<li><a href="request-custom.html">实现自定义的请求(Implementing a Custom Request)</a></li>
+</ul>
+
+
+<p>学习如何实现一个自定义的请求</p>
+
+<hr />
+
+<p><strong>学习自<a href="http://developer.android.com/training/volley/index.html">http://developer.android.com/training/volley/index.html</a>,欢迎交流讨论</strong></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Android Deeper(01) - Graphic Architecture]]></title>
@@ -4942,1271 +5189,6 @@ Android提供了下面三个方法来解决这个问题：</p>
 <hr />
 
 <p><strong>文章学习自http://developer.android.com/guide/components/processes-and-threads.html</strong><br/>
-<strong>转载请注明出自<a href="http:://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢</strong></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Notes(02) - AIDL]]></title>
-    <link href="http://hukai.me/blog/android-notes-02-aidl/"/>
-    <updated>2013-02-19T21:18:00+08:00</updated>
-    <id>http://hukai.me/blog/android-notes-02-aidl</id>
-    <content type="html"><![CDATA[<ul>
-<li>在Android process之间不能用通常的方式去访问彼此的内存数据。 他们把需要传递的数据解析成基础对象，使得系统能够识别并处理这些对象。因为这个处理过程很难写，所以Android使用AIDL来解决这个问题。</li>
-<li>在定义AIDL接口之前，请意识到call这些接口是direct function call。 请不要认为这些call 接口的行为是发生在另外一个线程里面的。具体的不同因这个调用是发生在local process还是remote process而异。
-
-<ul>
-<li>发生在local process里面的调用会跑在这个local process的thread里面。如果这是你的主UI线程，那么AIDL接口的调用也会发生在这个UI thread里面。如果这是发生在另外一个thread，那么调用会发生在service里面。因此，如果仅仅是发生在local process的调用，则你可以完全控制这些调用，当然这样的话，也就不需要用AIDL了。因为你完全可以使用Bound Service的第一种方式去实现。</li>
-<li>发生在remote process里面的调用是会跑在你自己的process所维护的一个thread pool里面。那么你需要注意可能会在同一时刻接受到多个请求。所以AIDL的操作需要做到thread-safe。(<em>每次请求，都会交给Service，在线程池里面启动一个thread去执行那些请求，所以那些方法需要是线程安全的</em>)</li>
-<li>oneway关键字改变了remote call的行为。当使用这个关键字时，remote call不会被阻塞住，它仅仅是发送交互数据后再立即返回。IBinder thread pool 之后会把它当作一个通常的remote call呼叫。</li>
-</ul>
-</li>
-</ul>
-
-
-<!-- more -->
-
-
-<h2>定义一个AIDL接口</h2>
-
-<ul>
-<li>需要在src的目录下使用Java的语法去定义一个.aidl的文件，Android SDK tools会基于这个文件在gen目录下生成一个IBinder的接口（与.aidl同名，后缀名为java的文件）。Service需要实现这个接口，然后Client程序才可以bind到service并执行接口的方法，从而实现IPC。</li>
-<li>具体实现一个AIDL接口，需要下面几个步骤：(请注意，aidl的文件需要向后兼容[能增加，不能减少与修改之前的接口]，因为这个文件需要提供给客户端程序)
-
-<ul>
-<li>创建一个.aidl文件</li>
-<li>实现接口</li>
-<li>暴露接口给Client</li>
-</ul>
-</li>
-</ul>
-
-
-<h3>1)Create the .aidl file</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="c1">// IRemoteService.aidl</span>
-</span><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">example</span><span class="o">.</span><span class="na">android</span><span class="o">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Declare any non-default types here with import statements</span>
-</span><span class='line'>
-</span><span class='line'><span class="cm">/** Example service interface */</span>
-</span><span class='line'><span class="kd">interface</span> <span class="nc">IRemoteService</span><span class="o">{</span>
-</span><span class='line'>    <span class="cm">/** Request the process ID of this service, to do evil things with it. */</span>
-</span><span class='line'>    <span class="kt">int</span> <span class="nf">getPid</span><span class="o">();</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="cm">/** Demonstrates some basic types that you can use as parameters</span>
-</span><span class='line'><span class="cm">     * and return values in AIDL.</span>
-</span><span class='line'><span class="cm">     */</span>
-</span><span class='line'>    <span class="kt">void</span> <span class="nf">basicTypes</span><span class="o">(</span><span class="kt">int</span> <span class="n">anInt</span><span class="o">,</span><span class="kt">long</span> <span class="n">aLong</span><span class="o">,</span><span class="kt">boolean</span> <span class="n">aBoolean</span><span class="o">,</span><span class="kt">float</span> <span class="n">aFloat</span><span class="o">,</span>
-</span><span class='line'>            <span class="kt">double</span> <span class="n">aDouble</span><span class="o">,</span><span class="n">String</span> <span class="n">aString</span><span class="o">);</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>2)Implement the interface</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="kd">final</span> <span class="n">IRemoteService</span><span class="o">.</span><span class="na">Stub</span> <span class="n">mBinder</span> <span class="o">=</span> <span class="k">new</span> <span class="n">IRemoteService</span><span class="o">.</span><span class="na">Stub</span><span class="o">(){</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getPid</span><span class="o">(){</span>
-</span><span class='line'>        <span class="n">returnProcess</span><span class="o">.</span><span class="na">myPid</span><span class="o">();</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">basicTypes</span><span class="o">(</span><span class="kt">int</span> <span class="n">anInt</span><span class="o">,</span><span class="kt">long</span> <span class="n">aLong</span><span class="o">,</span><span class="kt">boolean</span> <span class="n">aBoolean</span><span class="o">,</span>
-</span><span class='line'>        <span class="kt">float</span> <span class="n">aFloat</span><span class="o">,</span><span class="kt">double</span> <span class="n">aDouble</span><span class="o">,</span><span class="n">String</span> <span class="n">aString</span><span class="o">){</span>
-</span><span class='line'>        <span class="c1">// Does nothing</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">};</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>3)Expose the interface to clients</h3>
-
-<ul>
-<li>Service端：</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">RemoteService</span> <span class="kd">extends</span> <span class="n">Service</span><span class="o">{</span>    <span class="nd">@Override</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">(){</span>
-</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">onCreate</span><span class="o">();</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nd">@Override</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="n">IBinder</span> <span class="nf">onBind</span><span class="o">(</span><span class="n">Intent</span> <span class="n">intent</span><span class="o">){</span>
-</span><span class='line'>        <span class="c1">// Return the interface</span>
-</span><span class='line'>        <span class="k">return</span> <span class="n">mBinder</span><span class="o">;</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kd">private</span> <span class="n">finalI</span> <span class="n">RemoteService</span><span class="o">.</span><span class="na">Stub</span> <span class="n">mBinder</span> <span class="o">=</span> <span class="n">newIRemoteService</span><span class="o">.</span><span class="na">Stub</span><span class="o">(){</span>
-</span><span class='line'>        <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getPid</span><span class="o">(){</span>
-</span><span class='line'>            <span class="n">returnProcess</span><span class="o">.</span><span class="na">myPid</span><span class="o">();</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">basicTypes</span><span class="o">(</span><span class="kt">int</span> <span class="n">anInt</span><span class="o">,</span><span class="kt">long</span> <span class="n">aLong</span><span class="o">,</span><span class="kt">boolean</span> <span class="n">aBoolean</span><span class="o">,</span>
-</span><span class='line'>            <span class="kt">float</span> <span class="n">aFloat</span><span class="o">,</span><span class="kt">double</span> <span class="n">aDouble</span><span class="o">,</span><span class="n">String</span> <span class="n">aString</span><span class="o">){</span>
-</span><span class='line'>            <span class="c1">// Does nothing</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>    <span class="o">};</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>Client端</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">IRemoteService</span> <span class="n">mIRemoteService</span><span class="o">;</span>
-</span><span class='line'><span class="kd">private</span> <span class="n">ServiceConnection</span> <span class="n">mConnection</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ServiceConnection</span><span class="o">(){</span>
-</span><span class='line'>    <span class="c1">// Called when the connection with the service is established</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onServiceConnected</span><span class="o">(</span><span class="n">ComponentName</span> <span class="n">className</span><span class="o">,</span><span class="n">IBinder</span> <span class="n">service</span><span class="o">){</span>
-</span><span class='line'>        <span class="c1">// Following the example above for an AIDL interface,</span>
-</span><span class='line'>        <span class="c1">// this gets an instance of the IRemoteInterface, which we can use to call on the service</span>
-</span><span class='line'>        <span class="n">mIRemoteService</span> <span class="o">=</span> <span class="n">IRemoteService</span><span class="o">.</span><span class="na">Stub</span><span class="o">.</span><span class="na">asInterface</span><span class="o">(</span><span class="n">service</span><span class="o">);</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// Called when the connection with the service disconnects unexpectedly</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onServiceDisconnected</span><span class="o">(</span><span class="n">ComponentName</span> <span class="n">className</span><span class="o">){</span>
-</span><span class='line'>        <span class="n">Log</span><span class="o">.</span><span class="na">e</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span><span class="s">&quot;Service has unexpectedly disconnected&quot;</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">mIRemoteService</span> <span class="o">=</span><span class="kc">null</span><span class="o">;</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">};</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>通过IPC传递对象</h2>
-
-<ul>
-<li><p>某些时候传递的对象不是Android默认支持的那些，我们需要自己使得这个对象Parcelable化，实现步骤如下：</p>
-
-<ul>
-<li>Make your class implement the Parcelable interface.</li>
-<li>Implement writeToParcel, which takes the current state of the object and writes it to a Parcel.</li>
-<li>Add a static field called CREATOR to your class which is an object implementing the Parcelable.Creator interface.</li>
-<li>Finally, create an .aidl file that declares your parcelable class (as shown for the Rect.aidl file, below).If you are using a custom build process, do not add the .aidl file to your build. Similar to a header file in the C language, this .aidl file isn&#8217;t compiled.</li>
-</ul>
-</li>
-<li><p>首先需要在aidl文件中声明这个对象类型</p></li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">android</span><span class="o">.</span><span class="na">graphics</span><span class="o">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Declare Rect so AIDL can find it and knows that it implements</span>
-</span><span class='line'><span class="c1">// the parcelable protocol.</span>
-</span><span class='line'><span class="n">parcelable</span> <span class="n">Rect</span><span class="o">;</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">android.os.Parcel</span><span class="o">;</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">android.os.Parcelable</span><span class="o">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">Rect</span> <span class="kd">implements</span> <span class="n">Parcelable</span><span class="o">{</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">int</span> <span class="n">left</span><span class="o">;</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">int</span> <span class="n">top</span><span class="o">;</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">int</span> <span class="n">right</span><span class="o">;</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">int</span> <span class="n">bottom</span><span class="o">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">Parcelable</span><span class="o">.</span><span class="na">Creator</span><span class="o">&lt;</span><span class="n">Rect</span><span class="o">&gt;</span> <span class="n">CREATOR</span> <span class="o">=</span> <span class="k">new</span>
-</span><span class='line'><span class="n">Parcelable</span><span class="o">.</span><span class="na">Creator</span><span class="o">&lt;</span><span class="n">Rect</span><span class="o">&gt;(){</span>
-</span><span class='line'>        <span class="kd">public</span> <span class="n">Rect</span> <span class="nf">createFromParcel</span><span class="o">(</span><span class="n">Parcelin</span><span class="o">){</span>
-</span><span class='line'>            <span class="k">return</span> <span class="k">new</span> <span class="nf">Rect</span><span class="o">(</span><span class="n">in</span><span class="o">);</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="kd">public</span> <span class="n">Rect</span><span class="o">[]</span> <span class="nf">newArray</span><span class="o">(</span><span class="kt">int</span> <span class="n">size</span><span class="o">){</span>
-</span><span class='line'>            <span class="k">return</span> <span class="k">new</span> <span class="n">Rect</span><span class="o">[</span><span class="n">size</span><span class="o">];</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>    <span class="o">};</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kd">public</span> <span class="nf">Rect</span><span class="o">(){</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kd">private</span> <span class="nf">Rect</span><span class="o">(</span><span class="n">Parcelin</span><span class="o">){</span>
-</span><span class='line'>        <span class="n">readFromParcel</span><span class="o">(</span><span class="n">in</span><span class="o">);</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">writeToParcel</span><span class="o">(</span><span class="n">Parcelout</span><span class="o">){</span>
-</span><span class='line'>        <span class="n">out</span><span class="o">.</span><span class="na">writeInt</span><span class="o">(</span><span class="n">left</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">out</span><span class="o">.</span><span class="na">writeInt</span><span class="o">(</span><span class="n">top</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">out</span><span class="o">.</span><span class="na">writeInt</span><span class="o">(</span><span class="n">right</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">out</span><span class="o">.</span><span class="na">writeInt</span><span class="o">(</span><span class="n">bottom</span><span class="o">);</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">readFromParcel</span><span class="o">(</span><span class="n">Parcelin</span><span class="o">){</span>
-</span><span class='line'>        <span class="n">left</span> <span class="o">=</span> <span class="n">in</span><span class="o">.</span><span class="na">readInt</span><span class="o">();</span>
-</span><span class='line'>        <span class="n">top</span> <span class="o">=</span> <span class="n">in</span><span class="o">.</span><span class="na">readInt</span><span class="o">();</span>
-</span><span class='line'>        <span class="n">right</span> <span class="o">=</span> <span class="n">in</span><span class="o">.</span><span class="na">readInt</span><span class="o">();</span>
-</span><span class='line'>        <span class="n">bottom</span> <span class="o">=</span> <span class="n">in</span><span class="o">.</span><span class="na">readInt</span><span class="o">();</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>调用IPC的方法</h2>
-
-<ul>
-<li>Include the .aidl file in the project src/ directory.</li>
-<li>Declare an instance of the IBinder interface (generated based on the AIDL).</li>
-<li>Implement ServiceConnection.</li>
-<li>Call Context.bindService(), passing in your ServiceConnection implementation.</li>
-<li>In your implementation of onServiceConnected(), you will receive an IBinder instance (called service). Call YourInterfaceName.Stub.asInterface((IBinder)service) to cast the returned parameter toYourInterface type.</li>
-<li>Call the methods that you defined on your interface. You should always trap DeadObjectException exceptions, which are thrown when the connection has broken; this will be the only exception thrown by remote methods.</li>
-<li>To disconnect, call Context.unbindService() with the instance of your interface.</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-<span class='line-number'>75</span>
-<span class='line-number'>76</span>
-<span class='line-number'>77</span>
-<span class='line-number'>78</span>
-<span class='line-number'>79</span>
-<span class='line-number'>80</span>
-<span class='line-number'>81</span>
-<span class='line-number'>82</span>
-<span class='line-number'>83</span>
-<span class='line-number'>84</span>
-<span class='line-number'>85</span>
-<span class='line-number'>86</span>
-<span class='line-number'>87</span>
-<span class='line-number'>88</span>
-<span class='line-number'>89</span>
-<span class='line-number'>90</span>
-<span class='line-number'>91</span>
-<span class='line-number'>92</span>
-<span class='line-number'>93</span>
-<span class='line-number'>94</span>
-<span class='line-number'>95</span>
-<span class='line-number'>96</span>
-<span class='line-number'>97</span>
-<span class='line-number'>98</span>
-<span class='line-number'>99</span>
-<span class='line-number'>100</span>
-<span class='line-number'>101</span>
-<span class='line-number'>102</span>
-<span class='line-number'>103</span>
-<span class='line-number'>104</span>
-<span class='line-number'>105</span>
-<span class='line-number'>106</span>
-<span class='line-number'>107</span>
-<span class='line-number'>108</span>
-<span class='line-number'>109</span>
-<span class='line-number'>110</span>
-<span class='line-number'>111</span>
-<span class='line-number'>112</span>
-<span class='line-number'>113</span>
-<span class='line-number'>114</span>
-<span class='line-number'>115</span>
-<span class='line-number'>116</span>
-<span class='line-number'>117</span>
-<span class='line-number'>118</span>
-<span class='line-number'>119</span>
-<span class='line-number'>120</span>
-<span class='line-number'>121</span>
-<span class='line-number'>122</span>
-<span class='line-number'>123</span>
-<span class='line-number'>124</span>
-<span class='line-number'>125</span>
-<span class='line-number'>126</span>
-<span class='line-number'>127</span>
-<span class='line-number'>128</span>
-<span class='line-number'>129</span>
-<span class='line-number'>130</span>
-<span class='line-number'>131</span>
-<span class='line-number'>132</span>
-<span class='line-number'>133</span>
-<span class='line-number'>134</span>
-<span class='line-number'>135</span>
-<span class='line-number'>136</span>
-<span class='line-number'>137</span>
-<span class='line-number'>138</span>
-<span class='line-number'>139</span>
-<span class='line-number'>140</span>
-<span class='line-number'>141</span>
-<span class='line-number'>142</span>
-<span class='line-number'>143</span>
-<span class='line-number'>144</span>
-<span class='line-number'>145</span>
-<span class='line-number'>146</span>
-<span class='line-number'>147</span>
-<span class='line-number'>148</span>
-<span class='line-number'>149</span>
-<span class='line-number'>150</span>
-<span class='line-number'>151</span>
-<span class='line-number'>152</span>
-<span class='line-number'>153</span>
-<span class='line-number'>154</span>
-<span class='line-number'>155</span>
-<span class='line-number'>156</span>
-<span class='line-number'>157</span>
-<span class='line-number'>158</span>
-<span class='line-number'>159</span>
-<span class='line-number'>160</span>
-<span class='line-number'>161</span>
-<span class='line-number'>162</span>
-<span class='line-number'>163</span>
-<span class='line-number'>164</span>
-<span class='line-number'>165</span>
-<span class='line-number'>166</span>
-<span class='line-number'>167</span>
-<span class='line-number'>168</span>
-<span class='line-number'>169</span>
-<span class='line-number'>170</span>
-<span class='line-number'>171</span>
-<span class='line-number'>172</span>
-<span class='line-number'>173</span>
-<span class='line-number'>174</span>
-<span class='line-number'>175</span>
-<span class='line-number'>176</span>
-<span class='line-number'>177</span>
-<span class='line-number'>178</span>
-<span class='line-number'>179</span>
-<span class='line-number'>180</span>
-<span class='line-number'>181</span>
-<span class='line-number'>182</span>
-<span class='line-number'>183</span>
-<span class='line-number'>184</span>
-<span class='line-number'>185</span>
-<span class='line-number'>186</span>
-<span class='line-number'>187</span>
-<span class='line-number'>188</span>
-<span class='line-number'>189</span>
-<span class='line-number'>190</span>
-<span class='line-number'>191</span>
-<span class='line-number'>192</span>
-<span class='line-number'>193</span>
-<span class='line-number'>194</span>
-<span class='line-number'>195</span>
-<span class='line-number'>196</span>
-<span class='line-number'>197</span>
-<span class='line-number'>198</span>
-<span class='line-number'>199</span>
-<span class='line-number'>200</span>
-<span class='line-number'>201</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">Binding</span> <span class="kd">extends</span> <span class="n">Activity</span> <span class="o">{</span>
-</span><span class='line'>    <span class="cm">/** The primary interface we will be calling on the service. */</span>
-</span><span class='line'>    <span class="n">IRemoteService</span> <span class="n">mService</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
-</span><span class='line'>    <span class="cm">/** Another interface we use on the service. */</span>
-</span><span class='line'>    <span class="n">ISecondary</span> <span class="n">mSecondaryService</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">Button</span> <span class="n">mKillButton</span><span class="o">;</span>
-</span><span class='line'>    <span class="n">TextView</span> <span class="n">mCallbackText</span><span class="o">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kd">private</span> <span class="kt">boolean</span> <span class="n">mIsBound</span><span class="o">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="cm">/**</span>
-</span><span class='line'><span class="cm">     * Standard initialization of this activity.  Set up the UI, then wait</span>
-</span><span class='line'><span class="cm">     * for the user to poke it before doing anything.</span>
-</span><span class='line'><span class="cm">     */</span>
-</span><span class='line'>    <span class="nd">@Override</span>
-</span><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">onCreate</span><span class="o">(</span><span class="n">savedInstanceState</span><span class="o">);</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="n">setContentView</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">layout</span><span class="o">.</span><span class="na">remote_service_binding</span><span class="o">);</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c1">// Watch for button clicks.</span>
-</span><span class='line'>        <span class="n">Button</span> <span class="n">button</span> <span class="o">=</span> <span class="o">(</span><span class="n">Button</span><span class="o">)</span><span class="n">findViewById</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">bind</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">button</span><span class="o">.</span><span class="na">setOnClickListener</span><span class="o">(</span><span class="n">mBindListener</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">button</span> <span class="o">=</span> <span class="o">(</span><span class="n">Button</span><span class="o">)</span><span class="n">findViewById</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">unbind</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">button</span><span class="o">.</span><span class="na">setOnClickListener</span><span class="o">(</span><span class="n">mUnbindListener</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">mKillButton</span> <span class="o">=</span> <span class="o">(</span><span class="n">Button</span><span class="o">)</span><span class="n">findViewById</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">kill</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">mKillButton</span><span class="o">.</span><span class="na">setOnClickListener</span><span class="o">(</span><span class="n">mKillListener</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">mKillButton</span><span class="o">.</span><span class="na">setEnabled</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="n">mCallbackText</span> <span class="o">=</span> <span class="o">(</span><span class="n">TextView</span><span class="o">)</span><span class="n">findViewById</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">callback</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">mCallbackText</span><span class="o">.</span><span class="na">setText</span><span class="o">(</span><span class="s">&quot;Not attached.&quot;</span><span class="o">);</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="cm">/**</span>
-</span><span class='line'><span class="cm">     * Class for interacting with the main interface of the service.</span>
-</span><span class='line'><span class="cm">     */</span>
-</span><span class='line'>    <span class="kd">private</span> <span class="n">ServiceConnection</span> <span class="n">mConnection</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ServiceConnection</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onServiceConnected</span><span class="o">(</span><span class="n">ComponentName</span> <span class="n">className</span><span class="o">,</span>
-</span><span class='line'>                <span class="n">IBinder</span> <span class="n">service</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>            <span class="c1">// This is called when the connection with the service has been</span>
-</span><span class='line'>            <span class="c1">// established, giving us the service object we can use to</span>
-</span><span class='line'>            <span class="c1">// interact with the service.  We are communicating with our</span>
-</span><span class='line'>            <span class="c1">// service through an IDL interface, so get a client-side</span>
-</span><span class='line'>            <span class="c1">// representation of that from the raw service object.</span>
-</span><span class='line'>            <span class="n">mService</span> <span class="o">=</span> <span class="n">IRemoteService</span><span class="o">.</span><span class="na">Stub</span><span class="o">.</span><span class="na">asInterface</span><span class="o">(</span><span class="n">service</span><span class="o">);</span>
-</span><span class='line'>            <span class="n">mKillButton</span><span class="o">.</span><span class="na">setEnabled</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
-</span><span class='line'>            <span class="n">mCallbackText</span><span class="o">.</span><span class="na">setText</span><span class="o">(</span><span class="s">&quot;Attached.&quot;</span><span class="o">);</span>
-</span><span class='line'>
-</span><span class='line'>            <span class="c1">// We want to monitor the service for as long as we are</span>
-</span><span class='line'>            <span class="c1">// connected to it.</span>
-</span><span class='line'>            <span class="k">try</span> <span class="o">{</span>
-</span><span class='line'>                <span class="n">mService</span><span class="o">.</span><span class="na">registerCallback</span><span class="o">(</span><span class="n">mCallback</span><span class="o">);</span>
-</span><span class='line'>            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">RemoteException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>                <span class="c1">// In this case the service has crashed before we could even</span>
-</span><span class='line'>                <span class="c1">// do anything with it; we can count on soon being</span>
-</span><span class='line'>                <span class="c1">// disconnected (and then reconnected if it can be restarted)</span>
-</span><span class='line'>                <span class="c1">// so there is no need to do anything here.</span>
-</span><span class='line'>            <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>            <span class="c1">// As part of the sample, tell the user what happened.</span>
-</span><span class='line'>            <span class="n">Toast</span><span class="o">.</span><span class="na">makeText</span><span class="o">(</span><span class="n">Binding</span><span class="o">.</span><span class="na">this</span><span class="o">,</span> <span class="n">R</span><span class="o">.</span><span class="na">string</span><span class="o">.</span><span class="na">remote_service_connected</span><span class="o">,</span>
-</span><span class='line'>                    <span class="n">Toast</span><span class="o">.</span><span class="na">LENGTH_SHORT</span><span class="o">).</span><span class="na">show</span><span class="o">();</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onServiceDisconnected</span><span class="o">(</span><span class="n">ComponentName</span> <span class="n">className</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>            <span class="c1">// This is called when the connection with the service has been</span>
-</span><span class='line'>            <span class="c1">// unexpectedly disconnected -- that is, its process crashed.</span>
-</span><span class='line'>            <span class="n">mService</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
-</span><span class='line'>            <span class="n">mKillButton</span><span class="o">.</span><span class="na">setEnabled</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
-</span><span class='line'>            <span class="n">mCallbackText</span><span class="o">.</span><span class="na">setText</span><span class="o">(</span><span class="s">&quot;Disconnected.&quot;</span><span class="o">);</span>
-</span><span class='line'>
-</span><span class='line'>            <span class="c1">// As part of the sample, tell the user what happened.</span>
-</span><span class='line'>            <span class="n">Toast</span><span class="o">.</span><span class="na">makeText</span><span class="o">(</span><span class="n">Binding</span><span class="o">.</span><span class="na">this</span><span class="o">,</span> <span class="n">R</span><span class="o">.</span><span class="na">string</span><span class="o">.</span><span class="na">remote_service_disconnected</span><span class="o">,</span>
-</span><span class='line'>                    <span class="n">Toast</span><span class="o">.</span><span class="na">LENGTH_SHORT</span><span class="o">).</span><span class="na">show</span><span class="o">();</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>    <span class="o">};</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="cm">/**</span>
-</span><span class='line'><span class="cm">     * Class for interacting with the secondary interface of the service.</span>
-</span><span class='line'><span class="cm">     */</span>
-</span><span class='line'>    <span class="kd">private</span> <span class="n">ServiceConnection</span> <span class="n">mSecondaryConnection</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ServiceConnection</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onServiceConnected</span><span class="o">(</span><span class="n">ComponentName</span> <span class="n">className</span><span class="o">,</span>
-</span><span class='line'>                <span class="n">IBinder</span> <span class="n">service</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>            <span class="c1">// Connecting to a secondary interface is the same as any</span>
-</span><span class='line'>            <span class="c1">// other interface.</span>
-</span><span class='line'>            <span class="n">mSecondaryService</span> <span class="o">=</span> <span class="n">ISecondary</span><span class="o">.</span><span class="na">Stub</span><span class="o">.</span><span class="na">asInterface</span><span class="o">(</span><span class="n">service</span><span class="o">);</span>
-</span><span class='line'>            <span class="n">mKillButton</span><span class="o">.</span><span class="na">setEnabled</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onServiceDisconnected</span><span class="o">(</span><span class="n">ComponentName</span> <span class="n">className</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>            <span class="n">mSecondaryService</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
-</span><span class='line'>            <span class="n">mKillButton</span><span class="o">.</span><span class="na">setEnabled</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>    <span class="o">};</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kd">private</span> <span class="n">OnClickListener</span> <span class="n">mBindListener</span> <span class="o">=</span> <span class="k">new</span> <span class="n">OnClickListener</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onClick</span><span class="o">(</span><span class="n">View</span> <span class="n">v</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>            <span class="c1">// Establish a couple connections with the service, binding</span>
-</span><span class='line'>            <span class="c1">// by interface names.  This allows other applications to be</span>
-</span><span class='line'>            <span class="c1">// installed that replace the remote service by implementing</span>
-</span><span class='line'>            <span class="c1">// the same interface.</span>
-</span><span class='line'>            <span class="n">bindService</span><span class="o">(</span><span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">IRemoteService</span><span class="o">.</span><span class="na">class</span><span class="o">.</span><span class="na">getName</span><span class="o">()),</span>
-</span><span class='line'>                    <span class="n">mConnection</span><span class="o">,</span> <span class="n">Context</span><span class="o">.</span><span class="na">BIND_AUTO_CREATE</span><span class="o">);</span>
-</span><span class='line'>            <span class="n">bindService</span><span class="o">(</span><span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">ISecondary</span><span class="o">.</span><span class="na">class</span><span class="o">.</span><span class="na">getName</span><span class="o">()),</span>
-</span><span class='line'>                    <span class="n">mSecondaryConnection</span><span class="o">,</span> <span class="n">Context</span><span class="o">.</span><span class="na">BIND_AUTO_CREATE</span><span class="o">);</span>
-</span><span class='line'>            <span class="n">mIsBound</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
-</span><span class='line'>            <span class="n">mCallbackText</span><span class="o">.</span><span class="na">setText</span><span class="o">(</span><span class="s">&quot;Binding.&quot;</span><span class="o">);</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>    <span class="o">};</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kd">private</span> <span class="n">OnClickListener</span> <span class="n">mUnbindListener</span> <span class="o">=</span> <span class="k">new</span> <span class="n">OnClickListener</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onClick</span><span class="o">(</span><span class="n">View</span> <span class="n">v</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">mIsBound</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>                <span class="c1">// If we have received the service, and hence registered with</span>
-</span><span class='line'>                <span class="c1">// it, then now is the time to unregister.</span>
-</span><span class='line'>                <span class="k">if</span> <span class="o">(</span><span class="n">mService</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>                    <span class="k">try</span> <span class="o">{</span>
-</span><span class='line'>                        <span class="n">mService</span><span class="o">.</span><span class="na">unregisterCallback</span><span class="o">(</span><span class="n">mCallback</span><span class="o">);</span>
-</span><span class='line'>                    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">RemoteException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>                        <span class="c1">// There is nothing special we need to do if the service</span>
-</span><span class='line'>                        <span class="c1">// has crashed.</span>
-</span><span class='line'>                    <span class="o">}</span>
-</span><span class='line'>                <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>                <span class="c1">// Detach our existing connection.</span>
-</span><span class='line'>                <span class="n">unbindService</span><span class="o">(</span><span class="n">mConnection</span><span class="o">);</span>
-</span><span class='line'>                <span class="n">unbindService</span><span class="o">(</span><span class="n">mSecondaryConnection</span><span class="o">);</span>
-</span><span class='line'>                <span class="n">mKillButton</span><span class="o">.</span><span class="na">setEnabled</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
-</span><span class='line'>                <span class="n">mIsBound</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
-</span><span class='line'>                <span class="n">mCallbackText</span><span class="o">.</span><span class="na">setText</span><span class="o">(</span><span class="s">&quot;Unbinding.&quot;</span><span class="o">);</span>
-</span><span class='line'>            <span class="o">}</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>    <span class="o">};</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kd">private</span> <span class="n">OnClickListener</span> <span class="n">mKillListener</span> <span class="o">=</span> <span class="k">new</span> <span class="n">OnClickListener</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onClick</span><span class="o">(</span><span class="n">View</span> <span class="n">v</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>            <span class="c1">// To kill the process hosting our service, we need to know its</span>
-</span><span class='line'>            <span class="c1">// PID.  Conveniently our service has a call that will return</span>
-</span><span class='line'>            <span class="c1">// to us that information.</span>
-</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">mSecondaryService</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>                <span class="k">try</span> <span class="o">{</span>
-</span><span class='line'>                    <span class="kt">int</span> <span class="n">pid</span> <span class="o">=</span> <span class="n">mSecondaryService</span><span class="o">.</span><span class="na">getPid</span><span class="o">();</span>
-</span><span class='line'>                    <span class="c1">// Note that, though this API allows us to request to</span>
-</span><span class='line'>                    <span class="c1">// kill any process based on its PID, the kernel will</span>
-</span><span class='line'>                    <span class="c1">// still impose standard restrictions on which PIDs you</span>
-</span><span class='line'>                    <span class="c1">// are actually able to kill.  Typically this means only</span>
-</span><span class='line'>                    <span class="c1">// the process running your application and any additional</span>
-</span><span class='line'>                    <span class="c1">// processes created by that app as shown here; packages</span>
-</span><span class='line'>                    <span class="c1">// sharing a common UID will also be able to kill each</span>
-</span><span class='line'>                    <span class="c1">// other&#39;s processes.</span>
-</span><span class='line'>                    <span class="n">Process</span><span class="o">.</span><span class="na">killProcess</span><span class="o">(</span><span class="n">pid</span><span class="o">);</span>
-</span><span class='line'>                    <span class="n">mCallbackText</span><span class="o">.</span><span class="na">setText</span><span class="o">(</span><span class="s">&quot;Killed service process.&quot;</span><span class="o">);</span>
-</span><span class='line'>                <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">RemoteException</span> <span class="n">ex</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>                    <span class="c1">// Recover gracefully from the process hosting the</span>
-</span><span class='line'>                    <span class="c1">// server dying.</span>
-</span><span class='line'>                    <span class="c1">// Just for purposes of the sample, put up a notification.</span>
-</span><span class='line'>                    <span class="n">Toast</span><span class="o">.</span><span class="na">makeText</span><span class="o">(</span><span class="n">Binding</span><span class="o">.</span><span class="na">this</span><span class="o">,</span>
-</span><span class='line'>                            <span class="n">R</span><span class="o">.</span><span class="na">string</span><span class="o">.</span><span class="na">remote_call_failed</span><span class="o">,</span>
-</span><span class='line'>                            <span class="n">Toast</span><span class="o">.</span><span class="na">LENGTH_SHORT</span><span class="o">).</span><span class="na">show</span><span class="o">();</span>
-</span><span class='line'>                <span class="o">}</span>
-</span><span class='line'>            <span class="o">}</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>    <span class="o">};</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="c1">// ----------------------------------------------------------------------</span>
-</span><span class='line'>    <span class="c1">// Code showing how to deal with callbacks.</span>
-</span><span class='line'>    <span class="c1">// ----------------------------------------------------------------------</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="cm">/**</span>
-</span><span class='line'><span class="cm">     * This implementation is used to receive callbacks from the remote</span>
-</span><span class='line'><span class="cm">     * service.</span>
-</span><span class='line'><span class="cm">     */</span>
-</span><span class='line'>    <span class="kd">private</span> <span class="n">IRemoteServiceCallback</span> <span class="n">mCallback</span> <span class="o">=</span> <span class="k">new</span> <span class="n">IRemoteServiceCallback</span><span class="o">.</span><span class="na">Stub</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>        <span class="cm">/**</span>
-</span><span class='line'><span class="cm">         * This is called by the remote service regularly to tell us about</span>
-</span><span class='line'><span class="cm">         * new values.  Note that IPC calls are dispatched through a thread</span>
-</span><span class='line'><span class="cm">         * pool running in each process, so the code executing here will</span>
-</span><span class='line'><span class="cm">         * NOT be running in our main thread like most other things -- so,</span>
-</span><span class='line'><span class="cm">         * to update the UI, we need to use a Handler to hop over there.</span>
-</span><span class='line'><span class="cm">         */</span>
-</span><span class='line'>        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">valueChanged</span><span class="o">(</span><span class="kt">int</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>            <span class="n">mHandler</span><span class="o">.</span><span class="na">sendMessage</span><span class="o">(</span><span class="n">mHandler</span><span class="o">.</span><span class="na">obtainMessage</span><span class="o">(</span><span class="n">BUMP_MSG</span><span class="o">,</span> <span class="n">value</span><span class="o">,</span> <span class="mi">0</span><span class="o">));</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>    <span class="o">};</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">BUMP_MSG</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kd">private</span> <span class="n">Handler</span> <span class="n">mHandler</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Handler</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>        <span class="nd">@Override</span> <span class="kd">public</span> <span class="kt">void</span> <span class="n">handleMessage</span><span class="o">(</span><span class="n">Message</span> <span class="n">msg</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>            <span class="k">switch</span> <span class="o">(</span><span class="n">msg</span><span class="o">.</span><span class="na">what</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>                <span class="k">case</span> <span class="nl">BUMP_MSG:</span>
-</span><span class='line'>                    <span class="n">mCallbackText</span><span class="o">.</span><span class="na">setText</span><span class="o">(</span><span class="s">&quot;Received from service: &quot;</span> <span class="o">+</span> <span class="n">msg</span><span class="o">.</span><span class="na">arg1</span><span class="o">);</span>
-</span><span class='line'>                    <span class="k">break</span><span class="o">;</span>
-</span><span class='line'>                <span class="k">default</span><span class="o">:</span>
-</span><span class='line'>                    <span class="kd">super</span><span class="o">.</span><span class="na">handleMessage</span><span class="o">(</span><span class="n">msg</span><span class="o">);</span>
-</span><span class='line'>            <span class="o">}</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="o">};</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<hr />
-
-<p><strong>文章学习自<a href="http://developer.android.com/guide/components/aidl.html">http://developer.android.com/guide/components/aidl.html</a></strong><br/>
-<strong>转载请注明出自<a href="http:://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢</strong></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Notes(01) - Bound Services]]></title>
-    <link href="http://hukai.me/blog/android-notes-01-bound-services/"/>
-    <updated>2013-02-18T22:30:00+08:00</updated>
-    <id>http://hukai.me/blog/android-notes-01-bound-services</id>
-    <content type="html"><![CDATA[<ul>
-<li>一个bound的service是C/S的接口。它允许其他组件绑定到service,发送请求，接收回应并执行IPC。通常是需要给其他程序组件提供服务。
-
-<ul>
-<li>A bound service allows other components to bind to it, in order to interact with it and perform interprocess communication。</li>
-<li>A bound service is destroyed once all clients unbind, unless the service was also started。</li>
-</ul>
-</li>
-<li>客户端通过执行 bindService()绑定到service。这样的话，客户端需要实现一个ServiceConnection, 它可以监视与service的连接状态。bindService() 并不会有返回值，但是Android系统会在client与service连接上时，执行onServiceConnected() 的callback。在这个回调方法里面传递IBinder给client用来与service进行交互。</li>
-<li>前面提到可以有多个Client同时bind到service。然而，系统只会在第一个client做绑定时才会执行service的onBind() 方法。对于随后需要绑定的客户端，系统会直接传递同一个 IBinder 对象给Client，而不是去再次执行onBind方法。(<em>那么也就是onBind方法只会被执行一次</em>)</li>
-<li>通常来说，Music程序需要实现service的两种方式，这样既可以在activity被销毁之后(<em>假设只实现bound的方式的话，这个时候，unbind了，Music会停止</em>)音乐可以继续播放，当重新进入activity时又会重新bind上。这刚好验证了下面的说法：</li>
-<li>如果一个service既可以started与bound。当一个service是started的，系统并不会在所有的Client都unbind之后去杀死这个service，我们需要显示的去停止这个service，通过stopSelf或者stopService的方式。</li>
-</ul>
-
-
-<!-- more -->
-
-
-<h2>创建一个bound的Service</h2>
-
-<ul>
-<li>当创建了一个可以绑定的service之后，你必须提供一个<a href="http://developer.android.com/reference/android/os/IBinder.html">IBinder</a>对象，它用来提供client与service进行交互的接口。我们有下面三种方式来实现这个接口：
-
-<ul>
-<li><strong>Extending the Binder class</strong>： 如果你的sevice是私有的（不需要与其他程序进行IPC交互），Client可以与Service在同一个Process里面直接进行交互。若不需要IPC，建议使用这个方法。</li>
-<li><strong>Using a Messenger</strong>： 可以使用handler与message进行IPC操作，这是一种直观简便的方式。一个发送消息，一个接受处理后并返回。Handler使得有一个Queue来装这些发送的请求，然后Service再逐个接受并进行处理。(<em>这样的话，只能顺序执行那些发出的请求</em>)</li>
-<li><strong>Using AIDL</strong>(Android Interface Definition Language)： 一种系统可以理解并做出合适处理的IPC机制。使用AIDL可以处理同时发出的请求（并发）。在这种情况下，Service必须小心仔细的去处理多线程操作。 我们需要生成一个.aidl的文件来定义接口，Android SDK tool会使用这个文件生成一个抽象类，在这个类里面去实现接口并处理IPC。</li>
-<li><strong>请注意</strong>：AIDL的方式并不常见，因为他实现起来更加复杂，若需要了解AIDL的详情，请参考后续文章。</li>
-</ul>
-</li>
-</ul>
-
-
-<h3>(1)Extending the Binder class</h3>
-
-<p>Note: 这种方法仅仅适合client与service在同一个程序与process中的情况。这种情况是最常见的。例如，如果你的音乐程序需要bind到一个activity，并且想使得播放音乐在后台。(<em>实际上，大多数情况下，播放音乐程序的service都需要与其他process的组件进行bind，所以这种方式extend Binder类的方式只适合简单的播放需求</em>)</p>
-
-<ul>
-<li><p>实现步骤</p>
-
-<ul>
-<li>In your service, create an instance of Binder that either:Return this instance of Binder from the onBind() callback method.
-
-<ul>
-<li>contains public methods that the client can call</li>
-<li>returns the current Service instance, which has public methods the client can call</li>
-<li>or, returns an instance of another class hosted by the service with public methods the client can call</li>
-</ul>
-</li>
-<li>Return this instance of Binder from the onBind() callback method.</li>
-<li>In the client, receive the Binder from the onServiceConnected() callback method and make calls to the bound service using the methods provided.</li>
-</ul>
-</li>
-<li><p>Service端代码示例：</p></li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">LocalService</span> <span class="kd">extends</span> <span class="n">Service</span><span class="o">{</span>
-</span><span class='line'>    <span class="c1">// Binder given to clients</span>
-</span><span class='line'>    <span class="kd">private</span> <span class="kd">final</span> <span class="n">IBinder</span> <span class="n">mBinder</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LocalBinder</span><span class="o">();</span>
-</span><span class='line'>    <span class="c1">// Random number generator</span>
-</span><span class='line'>    <span class="kd">private</span> <span class="kd">final</span> <span class="n">Random</span> <span class="n">mGenerator</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Random</span><span class="o">();</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="cm">/**</span>
-</span><span class='line'><span class="cm">     * Class used for the client Binder.  Because we know this service always</span>
-</span><span class='line'><span class="cm">     * runs in the same process as its clients, we don&#39;t need to deal with IPC.</span>
-</span><span class='line'><span class="cm">     */</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kd">class</span> <span class="nc">LocalBinder</span> <span class="kd">extends</span> <span class="n">Binder</span><span class="o">{</span>
-</span><span class='line'>        <span class="n">LocalService</span> <span class="nf">getService</span><span class="o">(){</span>
-</span><span class='line'>            <span class="c1">// Return this instance of LocalService so clients can call public methods</span>
-</span><span class='line'>            <span class="k">return</span> <span class="n">LocalService</span><span class="o">.</span><span class="na">this</span><span class="o">;</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nd">@Override</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="n">IBinder</span> <span class="nf">onBind</span><span class="o">(</span><span class="n">Intent</span> <span class="n">intent</span><span class="o">){</span>
-</span><span class='line'>        <span class="k">return</span> <span class="n">mBinder</span><span class="o">;</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="cm">/** method for clients */</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getRandomNumber</span><span class="o">(){</span>
-</span><span class='line'>      <span class="k">return</span> <span class="n">mGenerator</span><span class="o">.</span><span class="na">nextInt</span><span class="o">(</span><span class="mi">100</span><span class="o">);</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>Client端代码示例：</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">BindingActivity</span> <span class="kd">extends</span> <span class="n">Activity</span><span class="o">{</span>
-</span><span class='line'>    <span class="n">LocalService</span> <span class="n">mService</span><span class="o">;</span>
-</span><span class='line'>    <span class="kt">boolean</span> <span class="n">mBound</span> <span class="o">=</span><span class="kc">false</span><span class="o">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nd">@Override</span>
-</span><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">){</span>
-</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">onCreate</span><span class="o">(</span><span class="n">savedInstanceState</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">setContentView</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">layout</span><span class="o">.</span><span class="na">main</span><span class="o">);</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nd">@Override</span>
-</span><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onStart</span><span class="o">(){</span>
-</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">onStart</span><span class="o">();</span>
-</span><span class='line'>        <span class="c1">// Bind to LocalService</span>
-</span><span class='line'>        <span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="k">this</span><span class="o">,</span><span class="n">LocalService</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">bindService</span><span class="o">(</span><span class="n">intent</span><span class="o">,</span> <span class="n">mConnection</span><span class="o">,</span><span class="n">Context</span><span class="o">.</span><span class="na">BIND_AUTO_CREATE</span><span class="o">);</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nd">@Override</span>
-</span><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onStop</span><span class="o">(){</span>
-</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">onStop</span><span class="o">();</span>
-</span><span class='line'>        <span class="c1">// Unbind from the service</span>
-</span><span class='line'>        <span class="k">if</span><span class="o">(</span><span class="n">mBound</span><span class="o">){</span>
-</span><span class='line'>            <span class="n">unbindService</span><span class="o">(</span><span class="n">mConnection</span><span class="o">);</span>
-</span><span class='line'>            <span class="n">mBound</span> <span class="o">=</span><span class="kc">false</span><span class="o">;</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="cm">/** Called when a button is clicked (the button in the layout file attaches to</span>
-</span><span class='line'><span class="cm">      * this method with the android:onClick attribute) */</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onButtonClick</span><span class="o">(</span><span class="n">View</span> <span class="n">v</span><span class="o">){</span>
-</span><span class='line'>        <span class="k">if</span><span class="o">(</span><span class="n">mBound</span><span class="o">){</span>
-</span><span class='line'>            <span class="c1">// Call a method from the LocalService.</span>
-</span><span class='line'>            <span class="c1">// However, if this call were something that might hang, then this request should</span>
-</span><span class='line'>            <span class="c1">// occur in a separate thread to avoid slowing down the activity performance.</span>
-</span><span class='line'>            <span class="kt">int</span> <span class="n">num</span> <span class="o">=</span> <span class="n">mService</span><span class="o">.</span><span class="na">getRandomNumber</span><span class="o">();</span>
-</span><span class='line'>            <span class="n">Toast</span><span class="o">.</span><span class="na">makeText</span><span class="o">(</span><span class="k">this</span><span class="o">,</span><span class="s">&quot;number: &quot;</span><span class="o">+</span> <span class="n">num</span><span class="o">,</span><span class="n">Toast</span><span class="o">.</span><span class="na">LENGTH_SHORT</span><span class="o">).</span><span class="na">show</span><span class="o">();</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="cm">/** Defines callbacks for service binding, passed to bindService() */</span>
-</span><span class='line'>    <span class="kd">private</span> <span class="n">ServiceConnection</span> <span class="n">mConnection</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ServiceConnection</span><span class="o">(){</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="nd">@Override</span>
-</span><span class='line'>        <span class="n">publicvoid</span> <span class="nf">onServiceConnected</span><span class="o">(</span><span class="n">ComponentName</span> <span class="n">className</span><span class="o">,</span>
-</span><span class='line'>                <span class="n">IBinder</span> <span class="n">service</span><span class="o">){</span>
-</span><span class='line'>            <span class="c1">// We&#39;ve bound to LocalService, cast the IBinder and get LocalService instance</span>
-</span><span class='line'>            <span class="n">LocalBinder</span> <span class="n">binder</span> <span class="o">=(</span><span class="n">LocalBinder</span><span class="o">)</span> <span class="n">service</span><span class="o">;</span>
-</span><span class='line'>            <span class="n">mService</span> <span class="o">=</span> <span class="n">binder</span><span class="o">.</span><span class="na">getService</span><span class="o">();</span>
-</span><span class='line'>            <span class="n">mBound</span> <span class="o">=</span><span class="kc">true</span><span class="o">;</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="nd">@Override</span>
-</span><span class='line'>        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onServiceDisconnected</span><span class="o">(</span><span class="n">ComponentName</span> <span class="n">arg0</span><span class="o">){</span>
-</span><span class='line'>            <span class="n">mBound</span> <span class="o">=</span><span class="kc">false</span><span class="o">;</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>    <span class="o">};</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>(2)Using a Messenger</h3>
-
-<ul>
-<li>这是避免使用AIDL仍然可以实现IPC的一个简便方法。
-
-<ul>
-<li>Service实现一个Handler来接受Client的每一个callback。</li>
-<li>这个Handler用来创建Messenger 对象。</li>
-<li>Messenger 创建一个IBinder对象，Service在onBind方法里面把这个对象返回给客户端。</li>
-<li>客户端使用这个IBinder对象来实例化 Messenger (that references the service&#8217;s Handler), 然后客户端使用这个messager再发送message对象给service。</li>
-<li>Service在它的handler里面接收到每一个Message。</li>
-</ul>
-</li>
-<li>Service代码示例：</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MessengerService</span> <span class="kd">extends</span> <span class="n">Service</span><span class="o">{</span>
-</span><span class='line'>    <span class="cm">/** Command to the service to display a message */</span>
-</span><span class='line'>    <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">MSG_SAY_HELLO</span> <span class="o">=</span><span class="mi">1</span><span class="o">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="cm">/**</span>
-</span><span class='line'><span class="cm">     * Handler of incoming messages from clients.</span>
-</span><span class='line'><span class="cm">     */</span>
-</span><span class='line'>    <span class="kd">class</span> <span class="nc">IncomingHandler</span> <span class="kd">extends</span> <span class="n">Handler</span><span class="o">{</span>
-</span><span class='line'>        <span class="nd">@Override</span>
-</span><span class='line'>        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">handleMessage</span><span class="o">(</span><span class="n">Message</span> <span class="n">msg</span><span class="o">){</span>
-</span><span class='line'>            <span class="k">switch</span><span class="o">(</span><span class="n">msg</span><span class="o">.</span><span class="na">what</span><span class="o">){</span>
-</span><span class='line'>                <span class="k">case</span> <span class="nl">MSG_SAY_HELLO:</span>
-</span><span class='line'>                    <span class="n">Toast</span><span class="o">.</span><span class="na">makeText</span><span class="o">(</span><span class="n">getApplicationContext</span><span class="o">(),</span><span class="s">&quot;hello!&quot;</span><span class="o">,</span><span class="n">Toast</span><span class="o">.</span><span class="na">LENGTH_SHORT</span><span class="o">).</span><span class="na">show</span><span class="o">();</span>
-</span><span class='line'>                    <span class="k">break</span><span class="o">;</span>
-</span><span class='line'>                <span class="k">default</span><span class="o">:</span>
-</span><span class='line'>                    <span class="kd">super</span><span class="o">.</span><span class="na">handleMessage</span><span class="o">(</span><span class="n">msg</span><span class="o">);</span>
-</span><span class='line'>            <span class="o">}</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="cm">/**</span>
-</span><span class='line'><span class="cm">     * Target we publish for clients to send messages to IncomingHandler.</span>
-</span><span class='line'><span class="cm">     */</span>
-</span><span class='line'>    <span class="kd">final</span> <span class="n">Messenger</span> <span class="n">mMessenger</span> <span class="o">=</span><span class="k">new</span> <span class="n">Messenger</span><span class="o">(</span><span class="n">newIncomingHandler</span><span class="o">());</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="cm">/**</span>
-</span><span class='line'><span class="cm">     * When binding to the service, we return an interface to our messenger</span>
-</span><span class='line'><span class="cm">     * for sending messages to the service.</span>
-</span><span class='line'><span class="cm">     */</span>
-</span><span class='line'>    <span class="nd">@Override</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="n">IBinder</span> <span class="nf">onBind</span><span class="o">(</span><span class="n">Intent</span> <span class="n">intent</span><span class="o">){</span>
-</span><span class='line'>        <span class="n">Toast</span><span class="o">.</span><span class="na">makeText</span><span class="o">(</span><span class="n">getApplicationContext</span><span class="o">(),</span><span class="s">&quot;binding&quot;</span><span class="o">,</span><span class="n">Toast</span><span class="o">.</span><span class="na">LENGTH_SHORT</span><span class="o">).</span><span class="na">show</span><span class="o">();</span>
-</span><span class='line'>        <span class="k">return</span> <span class="n">mMessenger</span><span class="o">.</span><span class="na">getBinder</span><span class="o">();</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>Client端代码</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ActivityMessenger</span> <span class="kd">extends</span> <span class="n">Activity</span><span class="o">{</span>
-</span><span class='line'>    <span class="cm">/** Messenger for communicating with the service. */</span>
-</span><span class='line'>    <span class="n">Messenger</span> <span class="n">mService</span> <span class="o">=</span><span class="kc">null</span><span class="o">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="cm">/** Flag indicating whether we have called bind on the service. */</span>
-</span><span class='line'>    <span class="kt">boolean</span> <span class="n">mBound</span><span class="o">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="cm">/**</span>
-</span><span class='line'><span class="cm">     * Class for interacting with the main interface of the service.</span>
-</span><span class='line'><span class="cm">     */</span>
-</span><span class='line'>    <span class="kd">private</span> <span class="n">ServiceConnection</span> <span class="n">mConnection</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ServiceConnection</span><span class="o">(){</span>
-</span><span class='line'>        <span class="n">publicvoid</span> <span class="nf">onServiceConnected</span><span class="o">(</span><span class="n">ComponentName</span> <span class="n">className</span><span class="o">,</span><span class="n">IBinder</span> <span class="n">service</span><span class="o">){</span>
-</span><span class='line'>            <span class="c1">// This is called when the connection with the service has been</span>
-</span><span class='line'>            <span class="c1">// established, giving us the object we can use to</span>
-</span><span class='line'>            <span class="c1">// interact with the service.  We are communicating with the</span>
-</span><span class='line'>            <span class="c1">// service using a Messenger, so here we get a client-side</span>
-</span><span class='line'>            <span class="c1">// representation of that from the raw IBinder object.</span>
-</span><span class='line'>            <span class="n">mService</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Messenger</span><span class="o">(</span><span class="n">service</span><span class="o">);</span>
-</span><span class='line'>            <span class="n">mBound</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onServiceDisconnected</span><span class="o">(</span><span class="n">ComponentName</span> <span class="n">className</span><span class="o">){</span>
-</span><span class='line'>            <span class="c1">// This is called when the connection with the service has been</span>
-</span><span class='line'>            <span class="c1">// unexpectedly disconnected -- that is, its process crashed.</span>
-</span><span class='line'>            <span class="n">mService</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
-</span><span class='line'>            <span class="n">mBound</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>    <span class="o">};</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">sayHello</span><span class="o">(</span><span class="n">View</span> <span class="n">v</span><span class="o">){</span>
-</span><span class='line'>        <span class="k">if</span><span class="o">(!</span><span class="n">mBound</span><span class="o">)</span> <span class="k">return</span><span class="o">;</span>
-</span><span class='line'>        <span class="c1">// Create and send a message to the service, using a supported &#39;what&#39; value</span>
-</span><span class='line'>        <span class="n">Message</span> <span class="n">msg</span> <span class="o">=</span> <span class="n">Message</span><span class="o">.</span><span class="na">obtain</span><span class="o">(</span><span class="kc">null</span><span class="o">,</span><span class="n">MessengerService</span><span class="o">.</span><span class="na">MSG_SAY_HELLO</span><span class="o">,</span><span class="mi">0</span><span class="o">,</span><span class="mi">0</span><span class="o">);</span>
-</span><span class='line'>        <span class="k">try</span><span class="o">{</span>
-</span><span class='line'>            <span class="n">mService</span><span class="o">.</span><span class="na">send</span><span class="o">(</span><span class="n">msg</span><span class="o">);</span>
-</span><span class='line'>        <span class="o">}</span><span class="k">catch</span><span class="o">(</span><span class="n">RemoteException</span> <span class="n">e</span><span class="o">){</span>
-</span><span class='line'>            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nd">@Override</span>
-</span><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">){</span>
-</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">onCreate</span><span class="o">(</span><span class="n">savedInstanceState</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">setContentView</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">layout</span><span class="o">.</span><span class="na">main</span><span class="o">);</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nd">@Override</span>
-</span><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onStart</span><span class="o">(){</span>
-</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">onStart</span><span class="o">();</span>
-</span><span class='line'>        <span class="c1">// Bind to the service</span>
-</span><span class='line'>        <span class="n">bindService</span><span class="o">(</span><span class="n">newIntent</span><span class="o">(</span><span class="k">this</span><span class="o">,</span><span class="n">MessengerService</span><span class="o">.</span><span class="na">class</span><span class="o">),</span> <span class="n">mConnection</span><span class="o">,</span>
-</span><span class='line'>            <span class="n">Context</span><span class="o">.</span><span class="na">BIND_AUTO_CREATE</span><span class="o">);</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nd">@Override</span>
-</span><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onStop</span><span class="o">(){</span>
-</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">onStop</span><span class="o">();</span>
-</span><span class='line'>        <span class="c1">// Unbind from the service</span>
-</span><span class='line'>        <span class="k">if</span><span class="o">(</span><span class="n">mBound</span><span class="o">){</span>
-</span><span class='line'>            <span class="n">unbindService</span><span class="o">(</span><span class="n">mConnection</span><span class="o">);</span>
-</span><span class='line'>            <span class="n">mBound</span> <span class="o">=</span><span class="kc">false</span><span class="o">;</span>
-</span><span class='line'>        <span class="o">}</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>请注意：上面并没有演示Service接收到Client的Msg之后，如何再与Client进行交互的。如果想了解更多请看Demo Source Code:<a href="http://developer.android.com/resources/samples/ApiDemos/src/com/example/android/apis/app/MessengerService.html">MessengerService.java</a> (service) and <a href="http://developer.android.com/resources/samples/ApiDemos/src/com/example/android/apis/app/MessengerServiceActivities.html">MessengerServiceActivities.java</a> (client) samples.</li>
-</ul>
-
-
-<h3>(3)AIDL:关于这部分内容，请看下一篇文章</h3>
-
-<ul>
-<li><strong>使用Messager与AIDL的对比：</strong>
-
-<ul>
-<li>如果想要IPC,使用Messager要比AIDL更简单，只是AIDL可以处理并发的情况，更加复杂一点。</li>
-<li>对于大多数App来说，都不需要处理多线程并发的问题，所以使用Messager会更简单一点。每次处理一个message。</li>
-<li>如果你的Service需要是多线程的，那么需要使用AIDL。(<em>有多个bind对象，他们可能会同时发出request</em>)</li>
-</ul>
-</li>
-</ul>
-
-
-<h2>绑定到Service</h2>
-
-<ul>
-<li>因为Binding的操作是异步（asynchronous）的， bindService() 会立即返回，并不携带IBinder对象返回给Client。为了接收到IBinder对象，客户端需要创建一个 ServiceConnection 来接收它。</li>
-<li>Note: 只有activities, services, and content providers 可以bind到service，你不可以从broadcast receiver里面去做bind service的操作。</li>
-<li>为了实现Bind到Service，你需要做以下的事情：
-
-<ul>
-<li>Implement ServiceConnection.需要重写下面两个方法
-
-<ul>
-<li>onServiceConnected()： 系统会在connected上的时候call到这个方法。</li>
-<li>onServiceDisconnected()： 只有在serivce被异常终结时才会call到这个方法，正常的unbind不会call这里。</li>
-</ul>
-</li>
-<li>当系统call了onServiceConnected（）之后，你可以开始使用定义好的接口去呼叫service。</li>
-<li>想要与service解绑，可以执行 unbindService()。</li>
-</ul>
-</li>
-<li>Additional notes:
-
-<ul>
-<li>你应该总是去捕获 DeadObjectException ，当connection被破坏时会抛出这个异常。</li>
-<li>对象都是跨process引用的。</li>
-<li>你应该成对的使用bind与unbind。例如
-
-<ul>
-<li>如果你不想在activity不可见的时候再与service进行交互，需要在activity的onStart里面进行bind，在onStop里面去unbind。</li>
-<li>如果想在activity不可见时，仍然进行交互，那么在onDestory里面再去做unbind。</li>
-</ul>
-</li>
-<li>请不要在activity的onResume与onPause里面去做bind与unbind，这两个activity的状态切换太频繁，不适合用来做与service的交互。</li>
-</ul>
-</li>
-</ul>
-
-
-<h4>管理Bound Service的Lifecycle</h4>
-
-<ul>
-<li>如果这个service是一个单纯的bound service(不是started与bound的混合体)，那么Android系统会自动去管理它的lifecycle。(当所有的client都unbind时，系统kill这个service)。</li>
-<li>如果你实现了onStartCommand()方法，那么这个service就被认为是started类型的，那么即使所有的client都unbind了，那么还是需要通过stopSelf或者stopService的方式来停止这个service。</li>
-<li>另外，如果你的service是started类型的，并且还可以接受bind操作。那么当系统执行你的 onUnbind() 方法时，如果你想在Client下次bind上service的时候系统去call onRebind（而不是重新call onBind），你可以选择在onUnbind里面去return true。 在 onRebind() 会返回void，但是client仍然会在onServiceConnected里面接受到IBinder。</li>
-</ul>
-
-
-<p><img src="http://hukai.me/images/articles/service_binding_tree_lifecycle.png" alt="service_binding_tree_lifecycle.png" /></p>
-
-<hr />
-
-<p><strong>文章学习自<a href="http://developer.android.com/guide/components/bound-services.html">http://developer.android.com/guide/components/bound-services.html</a></strong><br/>
 <strong>转载请注明出自<a href="http:://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢</strong></p>
 ]]></content>
   </entry>

@@ -9,8 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="不像其他编程范式一样：程序从main()方法开始启动。Android系统根据生命周期的不同阶段唤起对应的回调函数来执行代码。系统存在启动与销毁一个activity的一套有序的回调函数。
-这一个课会介绍那些生命周期中最重要的回调函数，并演示如何处理启动一个activity所涉及到的回调函数。 &hellip;">
+  <meta name="description" content="恰当的停止与重启你的activity是很重要的，在activity生命周期中，他们能确保用户感知到程序的存在并不会丢失他们的进度。在下面一些关键的场景中会涉及到停止与重启： 用户打开最近使用app的菜单并切换你的app到另外一个app，这个时候你的app是被停止的。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -76,6 +75,110 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/android-training-00-managing-the-activity-lifecycle-lesson-3/">Android Training(00) - 详解Activity生命周期(Lesson 3 - 停止与重启activity)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-10T21:27:00+08:00" pubdate data-updated="true">Mar 10<span>th</span>, 2012</time>
+        
+         | <a href="/blog/android-training-00-managing-the-activity-lifecycle-lesson-3/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><ul>
+<li>恰当的停止与重启你的activity是很重要的，在activity生命周期中，他们能确保用户感知到程序的存在并不会丢失他们的进度。在下面一些关键的场景中会涉及到停止与重启：
+
+<ul>
+<li>用户打开最近使用app的菜单并切换你的app到另外一个app，这个时候你的app是被停止的。如果用户通过统一的办法回到你的app，那么你的activity会重启.</li>
+<li>用户在你的app里面执行启动一个新的activity的操作，当前activity会在第二个activity被创建后停止。如果用户点击back按钮，第一个activtiy会被重启.</li>
+<li>用户在使用你的app时接受到一个来电通话.</li>
+</ul>
+</li>
+<li><a href="http://developer.android.com/reference/android/app/Activity.html">Activity</a>类提供了onStop()与onRestart(), 方法来允许你在activity停止与重启时进行调用。不像暂停状态是部分阻塞UI，停止状态是UI不在可见并且用户的焦点转移到另一个activity中.</li>
+<li><strong>Note:</strong>因为系统在activity停止时会在内存中保存了Activity实例。有些时候你不需要实现onStop(),onRestart()甚至是onStart()方法. 因为大多数的activity相对比较简单，activity会自己停止与重启，你只需要使用onPause()来停止正在运行的动作并断开系统资源链接。</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/android-training-00-managing-the-activity-lifecycle-lesson-3/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/android-training-00-managing-the-activity-lifecycle-lesson-2/">Android Training(00) - 详解Activity生命周期(Lesson 2 - 暂停与恢复activity)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-09T22:58:00+08:00" pubdate data-updated="true">Mar 9<span>th</span>, 2012</time>
+        
+         | <a href="/blog/android-training-00-managing-the-activity-lifecycle-lesson-2/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><ul>
+<li>在使用通常的app时，前端的activity有时候会被其他可见的组件而阻塞(obstructed)，这样会导致当前的activity进入Pause状态。例如，当打开一个半透明的activity时(such as one in the style of a dialog) ，之前的activity会被暂停. 只要这个activity仍然被部分可见，之前的activity则一直处于Paused状态。</li>
+<li>然而，一旦之前的activity被完全阻塞并不可见，它则会进入Stop状态(which is discussed in the next lesson)。</li>
+<li>当你的activity进入paused状态，系统会调用你的activity中的onPause()方法, 这个方法会停止目前正在运行的操作，比如暂停视频播放。它会保存那些有可能需要长期保存的信息。(请注意是在onPause里面去保存那些信息)。如果用户从暂停状态回到你的activity，系统会恢复那些数据并执行onResume()方法。</li>
+<li><strong>Note:</strong>当你的activity接受到调用onPause()信息 ，那可能意味者activity将被暂停一段时间，并且用户很可能回到你的activity。然而，那也是用户要离开你的activtiy的第一个信号。</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/android-training-00-managing-the-activity-lifecycle-lesson-2/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -199,6 +302,14 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/android-training-volley-simple-request/">Android Training - Volley(Lesson 1 - 发送简单的请求)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-volley-index/">Android Training - Volley(Lesson 0 - 序言)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/android-deeper-01-graphics-architecture/">Android Deeper(01) - Graphic Architecture</a>
       </li>
     
@@ -222,24 +333,16 @@
         <a href="/blog/android-deeper-00-touch-event-dispatch-process/">Android Deeper(00) - Touch事件分发响应机制</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/java-notes-00-singleton-pattern/">Java Notes 00 - Singleton Pattern(单例总结)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-17-managing_your_app_memory/">Android Training(17) - 管理应用的内存</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (72)</a></li>
+  <li><a href='/blog/categories/android'>Android (74)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (7)</a></li>
-  <li><a href='/blog/categories/android-training'>Android:training (63)</a></li>
+  <li><a href='/blog/categories/android-training'>Android:training (65)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
 </ul>

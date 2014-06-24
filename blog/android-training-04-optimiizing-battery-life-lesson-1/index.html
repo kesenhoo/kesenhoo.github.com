@@ -120,9 +120,8 @@
 
 <h2>1)Determine the Current Charging State[判断当前充电状态]</h2>
 
-<p><a href="http://developer.android.com/reference/android/os/BatteryManager.html">BatteryManager</a>会广播一个带有电池与充电详情的Sticky Intent。【关于Sticky intent有不清楚的，请参考http://developer.android.com/guide/topics/fundamentals/services.html中对带有sticky的service是如何解释的】</p>
-
-<p>因为广播的是一个sticky intent，那么不需要注册BroadcastReceiver。仅仅只需要简单的call一个参null参数的regiserReceiver()方法。</p>
+<p><a href="http://developer.android.com/reference/android/os/BatteryManager.html">BatteryManager</a>会广播一个带有电池与充电详情的<a href="http://developer.android.com/guide/topics/fundamentals/services.html">Sticky Intent</a>
+因为广播的是一个sticky intent，那么不需要注册BroadcastReceiver。仅仅只需要简单的call一个参null参数的regiserReceiver()方法。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
