@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android:Training | 胡凯]]></title>
   <link href="http://hukai.me/blog/categories/android-training/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2014-06-24T10:09:25+08:00</updated>
+  <updated>2014-06-26T22:39:28+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -12,6 +12,550 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training - Volley(Lesson 4 - 实现自定义的请求)]]></title>
+    <link href="http://hukai.me/blog/android-training-volley-custom-request/"/>
+    <updated>2014-06-25T23:20:00+08:00</updated>
+    <id>http://hukai.me/blog/android-training-volley-custom-request</id>
+    <content type="html"><![CDATA[<p>这节课会介绍如何实现你自定义的请求类型，这些自定义的类型不属于Volley内置支持包里面。</p>
+
+<h2>编写一个自定义的请求Write a Custom Request</h2>
+
+<p>大多数的请求类型都已经包含在Volley的工具箱里面。如果你的请求返回数值是一个string，image或者JSON，那么你是不需要自己去实现请求类的。</p>
+
+<p>对于那些你需要自定义的请求类型，下面是你需要做得步骤：</p>
+
+<ul>
+<li>继承<code>Request&lt;T&gt;</code>类，<code>&lt;T&gt;</code>表示了请求返回的数据类型。因此如果你需要解析的响应类型是一个String，可以通过继承<code>Request&lt;String&gt;</code>来创建你自定义的请求。请参考Volley工具类中的StringRequest与 ImageRequest来学习如何继承Request<T>。</li>
+<li>实现抽象方法<code>parseNetworkResponse()</code>与<code>deliverResponse()</code>，下面会详细介绍。</li>
+</ul>
+
+
+<h3>parseNetworkResponse</h3>
+
+<p>为了能够提交一种指定类型的数据(例如，string，image，JSON等)，需要对解析后的结果进行封装。下面会演示如何实现<code>parseNetworkResponse()</code>。</p>
+
+<p>```java
+@Override
+protected Response<T> parseNetworkResponse(</p>
+
+<pre><code>    NetworkResponse response) {
+try {
+    String json = new String(response.data,
+    HttpHeaderParser.parseCharset(response.headers));
+return Response.success(gson.fromJson(json, clazz),
+HttpHeaderParser.parseCacheHeaders(response));
+}
+// handle errors
+</code></pre>
+
+<p>...
+}
+```</p>
+
+<p>请注意：</p>
+
+<ul>
+<li><code>parseNetworkResponse()</code>的参数是类型是<code>NetworkResponse</code>，这种参数包含了的响应数据内容有一个byte[]，HTTP status code以及response headers.</li>
+<li>你实现的方法必须返回一个Response<T>，它包含了你响应对象与缓存metadata或者是一个错误。</li>
+</ul>
+
+
+<p>如果你的协议没有标准的cache机制，你可以自己建立一个<code>Cache.Entry</code>, 但是大多数请求都可以用下面的方式来处理:</p>
+
+<p>```java
+return Response.success(myDecodedObject,</p>
+
+<pre><code>    HttpHeaderParser.parseCacheHeaders(response));
+</code></pre>
+
+<p>```</p>
+
+<p>Volley在工作线程中执行parseNetworkResponse()方法。这确保了耗时的解析操作，例如decode一张JPEG图片成bitmap，不会阻塞UI线程。</p>
+
+<h3>deliverResponse</h3>
+
+<p>Volley会把parseNetworkResponse()方法返回的数据带到主线程的回调中。如下所示：</p>
+
+<p>```java
+protected void deliverResponse(T response) {</p>
+
+<pre><code>    listener.onResponse(response);
+</code></pre>
+
+<p>```</p>
+
+<h3>Example: GsonRequest</h3>
+
+<p><a href="http://code.google.com/p/google-gson/">Gson</a>是一个使用映射支持JSON与Java对象之间相互转换的库文件。你可以定义和JSON keys想对应名称的Java对象。把对象传递给传递Gson，然后Gson会帮你为对象填充字段值。 下面是一个完整的示例：演示了使用Gson解析Volley数据：</p>
+
+<p>```java
+public class GsonRequest<T> extends Request<T> {</p>
+
+<pre><code>private final Gson gson = new Gson();
+private final Class&lt;T&gt; clazz;
+private final Map&lt;String, String&gt; headers;
+private final Listener&lt;T&gt; listener;
+
+/**
+ * Make a GET request and return a parsed object from JSON.
+ *
+ * @param url URL of the request to make
+ * @param clazz Relevant class object, for Gson's reflection
+ * @param headers Map of request headers
+ */
+public GsonRequest(String url, Class&lt;T&gt; clazz, Map&lt;String, String&gt; headers,
+        Listener&lt;T&gt; listener, ErrorListener errorListener) {
+    super(Method.GET, url, errorListener);
+    this.clazz = clazz;
+    this.headers = headers;
+    this.listener = listener;
+}
+
+@Override
+public Map&lt;String, String&gt; getHeaders() throws AuthFailureError {
+    return headers != null ? headers : super.getHeaders();
+}
+
+@Override
+protected void deliverResponse(T response) {
+    listener.onResponse(response);
+}
+
+@Override
+protected Response&lt;T&gt; parseNetworkResponse(NetworkResponse response) {
+    try {
+        String json = new String(
+                response.data,
+                HttpHeaderParser.parseCharset(response.headers));
+        return Response.success(
+                gson.fromJson(json, clazz),
+                HttpHeaderParser.parseCacheHeaders(response));
+    } catch (UnsupportedEncodingException e) {
+        return Response.error(new ParseError(e));
+    } catch (JsonSyntaxException e) {
+        return Response.error(new ParseError(e));
+    }
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>如果你愿意使用的话，Volley提供了现成的<code>JsonArrayRequest</code>与<code>JsonArrayObject</code>类。参考上一课:创建标准的请求</p>
+
+<hr />
+
+<p><strong>学习自<a href="http://developer.android.com/training/volley/request-custom.html">http://developer.android.com/training/volley/request-custom.html</a>,欢迎交流讨论</strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training - Volley(Lesson 3 - 创建标准的请求)]]></title>
+    <link href="http://hukai.me/blog/android-training-volley-standard-request/"/>
+    <updated>2014-06-24T22:10:00+08:00</updated>
+    <id>http://hukai.me/blog/android-training-volley-standard-request</id>
+    <content type="html"><![CDATA[<p>这一课会介绍如何使用Volley支持的常用请求类型：</p>
+
+<ul>
+<li><code>StringRequest</code>。指定一个URL并在相应回调中接受一个原始的raw string数据。请参考前一课的示例。</li>
+<li><code>ImageRequest</code>。指定一个URL并在相应回调中接受一个image。</li>
+<li><code>JsonObjectRequest</code>与<code>JsonArrayRequest</code> (均为<code>JsonRequest</code>的子类)。指定一个URL并在相应回调中获取到一个JSON对象或者JSON数组。</li>
+</ul>
+
+
+<p>如果你需要的是上面演示的请求类型，那么你应该不需要自己实现一个自定义的请求。这节课会演示如何使用那些标准的请求类型。关于如何实现自定义的请求，请看下一课：<a href="request-costom.html">实现自定义的请求</a>。</p>
+
+<h2>1)Request an Image</h2>
+
+<p>Volley为请求图片提供了如下的类。这些类依次有着依赖关系，用来支持在不同的层级进行图片处理：</p>
+
+<ul>
+<li><p><code>ImageRequest</code> - 一个封装好的，用来处理URL请求图片并且返回一张decode好的bitmap的类。它同样提供了一些简便的接口方法，例如指定一个大小进行重新裁剪。它的主要好处是Volley回确保类似decode，resize等耗时的操作执行在工作线程中。</p></li>
+<li><p><code>ImageLoader</code> - 一个用来处理加载与缓存从网络上获取到的图片的帮助类。ImageLoader是管理协调大量的ImageRequest的类。例如，在ListView中需要显示大量缩略图的时候。ImageLoader为通常的Volley cache提供了更加前瞻的内存缓存，这个缓存对于防止图片抖动非常有用。。这还使得能够在避免阻挡或者延迟主线程的前提下在缓存中能够被Hit到。ImageLoader还能够实现响应联合Coalescing，每一个响应回调里面都可以设置bitmap到view上面。联合Coalescing使得能够同时提交多个响应，这提升了性能。</p></li>
+<li><p><code>NetworkImageView</code> - 在ImageLoader的基础上建立，替换ImageView进行使用。对于需要对ImageView设置网络图片的情况下使用很有效。NetworkImageView同样可以在view被detached的时候取消pending的请求。</p></li>
+</ul>
+
+
+<h3>1.1)Use ImageRequest</h3>
+
+<p>下面是一个使用ImageRequest的示例。它会获取指定URL的image病显示到app上。里面演示的RequestQueue是通过上一课提到的单例类实现的。</p>
+
+<p>```java
+ImageView mImageView;
+String url = "http://i.imgur.com/7spzG.png";
+mImageView = (ImageView) findViewById(R.id.myImage);
+...</p>
+
+<p>// Retrieves an image specified by the URL, displays it in the UI.
+ImageRequest request = new ImageRequest(url,</p>
+
+<pre><code>new Response.Listener() {
+    @Override
+    public void onResponse(Bitmap bitmap) {
+        mImageView.setImageBitmap(bitmap);
+    }
+}, 0, 0, null,
+new Response.ErrorListener() {
+    public void onErrorResponse(VolleyError error) {
+        mImageView.setImageResource(R.drawable.image_load_error);
+    }
+});
+</code></pre>
+
+<p>// Access the RequestQueue through your singleton class.
+MySingleton.getInstance(this).addToRequestQueue(request);
+```</p>
+
+<h3>1.2)Use ImageLoader and NetworkImageView</h3>
+
+<p>你可以使用ImageLoader与NetworkImageView用来处理类似ListView等大量显示图片的情况。在你的layout XML文件中，你可以使用NetworkImageView来替代通常的ImageView， 例如:</p>
+
+<p>```xml
+&lt;com.android.volley.toolbox.NetworkImageView</p>
+
+<pre><code>    android:id="@+id/networkImageView"
+    android:layout_width="150dp"
+    android:layout_height="170dp"
+    android:layout_centerHorizontal="true" /&gt;
+</code></pre>
+
+<p>```</p>
+
+<p>你可以使用ImageLoader来显示一张图片，例如：</p>
+
+<p>```java
+ImageLoader mImageLoader;
+ImageView mImageView;
+// The URL for the image that is being loaded.
+private static final String IMAGE_URL =</p>
+
+<pre><code>"http://developer.android.com/images/training/system-ui.png";
+</code></pre>
+
+<p>...
+mImageView = (ImageView) findViewById(R.id.regularImageView);</p>
+
+<p>// Get the ImageLoader through your singleton class.
+mImageLoader = MySingleton.getInstance(this).getImageLoader();
+mImageLoader.get(IMAGE_URL, ImageLoader.getImageListener(mImageView,</p>
+
+<pre><code>     R.drawable.def_image, R.drawable.err_image));
+</code></pre>
+
+<p>```</p>
+
+<p>然而，如果你要做得是为ImageView进行图片设置，你可以使用NetworkImageView来实现，例如：</p>
+
+<p>```java
+ImageLoader mImageLoader;
+NetworkImageView mNetworkImageView;
+private static final String IMAGE_URL =</p>
+
+<pre><code>"http://developer.android.com/images/training/system-ui.png";
+</code></pre>
+
+<p>...</p>
+
+<p>// Get the NetworkImageView that will display the image.
+mNetworkImageView = (NetworkImageView) findViewById(R.id.networkImageView);</p>
+
+<p>// Get the ImageLoader through your singleton class.
+mImageLoader = MySingleton.getInstance(this).getImageLoader();</p>
+
+<p>// Set the URL of the image that should be loaded into this view, and
+// specify the ImageLoader that will be used to make the request.
+mNetworkImageView.setImageUrl(IMAGE_URL, mImageLoader);
+```</p>
+
+<p>上面的代码是通过前一节课的单例模式来实现访问到RequestQueue与ImageLoader的。之所以这样做得原因是：对于ImageLoader(一个用来处理加载与缓存图片的帮助类)来说，单例模式可以避免旋转所带来的抖动。使用单例模式可以使得bitmap的缓存与activity的生命周期无关。如果你在activity中创建ImageLoader，这个ImageLoader有可能会在手机进行旋转的时候被重新创建。这可能会导致抖动。</p>
+
+<h3>1.3)Example LRU cache</h3>
+
+<p>Volley工具箱中提供了通过DiskBasedCache实现的一种标准缓存。这个类能够缓存文件到磁盘的制定目录。但是为了使用ImageLoader，你应该提供一个自定义的内存LRC缓存，这个缓存需要实现<code>ImageLoader.ImageCache</code>的接口。你可能想把你的缓存设置成一个单例。关于更多的有关内容，请参考<a href="request.html">建立请求队列Setting Up a RequestQueue</a>.</p>
+
+<p>下面是一个内存LRU Cache的实例。它继承自LruCache并实现了ImageLoader.ImageCache的接口：</p>
+
+<p>```java
+import android.graphics.Bitmap;
+import android.support.v4.util.LruCache;
+import android.util.DisplayMetrics;
+import com.android.volley.toolbox.ImageLoader.ImageCache;</p>
+
+<p>public class LruBitmapCache extends LruCache&lt;String, Bitmap></p>
+
+<pre><code>    implements ImageCache {
+
+public LruBitmapCache(int maxSize) {
+    super(maxSize);
+}
+
+public LruBitmapCache(Context ctx) {
+    this(getCacheSize(ctx));
+}
+
+@Override
+protected int sizeOf(String key, Bitmap value) {
+    return value.getRowBytes() * value.getHeight();
+}
+
+@Override
+public Bitmap getBitmap(String url) {
+    return get(url);
+}
+
+@Override
+public void putBitmap(String url, Bitmap bitmap) {
+    put(url, bitmap);
+}
+
+// Returns a cache size equal to approximately three screens worth of images.
+public static int getCacheSize(Context ctx) {
+    final DisplayMetrics displayMetrics = ctx.getResources().
+            getDisplayMetrics();
+    final int screenWidth = displayMetrics.widthPixels;
+    final int screenHeight = displayMetrics.heightPixels;
+    // 4 bytes per pixel
+    final int screenBytes = screenWidth * screenHeight * 4;
+
+    return screenBytes * 3;
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>下面是如何初始化ImageLoader并使用cache的实例:</p>
+
+<p><code>java
+RequestQueue mRequestQueue; // assume this exists.
+ImageLoader mImageLoader = new ImageLoader(mRequestQueue, new LruBitmapCache(LruBitmapCache.getCacheSize()));
+</code></p>
+
+<h2>2)Request JSON</h2>
+
+<p>Volley提供了以下的类用来执行JSON请求：</p>
+
+<ul>
+<li><code>JsonArrayRequest</code> - 一个为了获取JSONArray返回数据的请求。</li>
+<li><code>JsonObjectRequest</code> - 一个为了获取JSONObject返回数据的请求。允许把一个JSONObject作为请求参数。</li>
+</ul>
+
+
+<p>这两个类都是继承自JsonRequest的。你可以使用类似的方法来处理这两种类型的请求。如下演示了如果获取一个JSON feed并显示到UI上：</p>
+
+<p>```java
+TextView mTxtDisplay;
+ImageView mImageView;
+mTxtDisplay = (TextView) findViewById(R.id.txtDisplay);
+String url = "http://my-json-feed";</p>
+
+<p>JsonObjectRequest jsObjRequest = new JsonObjectRequest</p>
+
+<pre><code>    (Request.Method.GET, url, null, new Response.Listener() {
+
+@Override
+public void onResponse(JSONObject response) {
+    mTxtDisplay.setText("Response: " + response.toString());
+}
+</code></pre>
+
+<p>}, new Response.ErrorListener() {</p>
+
+<pre><code>@Override
+public void onErrorResponse(VolleyError error) {
+    // TODO Auto-generated method stub
+
+}
+</code></pre>
+
+<p>});</p>
+
+<p>// Access the RequestQueue through your singleton class.
+MySingleton.getInstance(this).addToRequestQueue(jsObjRequest);
+```</p>
+
+<p>关于基于<a href="http://code.google.com/p/google-gson/">Gson</a>实现一个自定义的JSON请求对象，请参考下一节课：<a href="request-custom.html">实现一个自定义的请求Implementing a Custom Request</a>.</p>
+
+<hr />
+
+<p><strong>学习自<a href="http://developer.android.com/training/volley/request.html">http://developer.android.com/training/volley/request.html</a>,欢迎交流讨论</strong></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training - Volley(Lesson 2 - 建立请求队列)]]></title>
+    <link href="http://hukai.me/blog/android-training-volley-request-queue/"/>
+    <updated>2014-06-24T21:03:00+08:00</updated>
+    <id>http://hukai.me/blog/android-training-volley-request-queue</id>
+    <content type="html"><![CDATA[<p>前一节课演示了如何使用<code>Volley.newRequestQueue</code>这一简便的方法来建立一个<code>RequestQueue</code>，这是利用了Volley默认的优势。这节课会介绍如何显式的建立一个RequestQueue，以便满足你自定义的需求。</p>
+
+<p>这节课同样会介绍一种推荐的实现方式：创建一个单例的RequestQueue，这使得RequestQueue能够持续保持在你的app的生命周期中。</p>
+
+<h2>Set Up a Network and Cache</h2>
+
+<p>一个RequestQueue需要两部分来支持它的工作：一部分是网络操作用来执行请求的数据传输，另外一个是用来处理缓存操作的Cache。在Volley的工具箱中包含了标准的实现方式：<code>DiskBasedCache</code>提供了每个文件与对应响应数据一一映射的缓存实现。 <code>BasicNetwork</code>提供了一个网络传输的实现，连接方式可以是<a href="http://developer.android.com/reference/android/net/http/AndroidHttpClient.html">AndroidHttpClient</a> 或者是 <a href="http://developer.android.com/reference/java/net/HttpURLConnection.html">HttpURLConnection</a>.</p>
+
+<p><code>BasicNetwork</code>是Volley默认的网络操作实现方式。一个BasicNetwork必须使用HTTP Client进行初始化。这个Client通常是AndroidHttpClient 或者 HttpURLConnection:</p>
+
+<ul>
+<li>对于app target API level低于API 9(Gingerbread)的使用AndroidHttpClient。在Gingerbread之前，HttpURLConnection是不可靠的。对于这个的细节，请参考<a href="http://android-developers.blogspot.com/2011/09/androids-http-clients.html">Android's HTTP Clients</a>。</li>
+<li>对于API Level 9以及以上的，会使用HttpURLConnection。</li>
+</ul>
+
+
+<p>为了创建一个能够执行在所有Android版本上的应用，你可以通过检查系统版本选择合适的HTTP Client。例如：</p>
+
+<p>```java
+HttpStack stack;
+...
+// If the device is running a version >= Gingerbread...
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {</p>
+
+<pre><code>// ...use HttpURLConnection for stack.
+</code></pre>
+
+<p>} else {</p>
+
+<pre><code>// ...use AndroidHttpClient for stack.
+</code></pre>
+
+<p>}
+Network network = new BasicNetwork(stack);
+```</p>
+
+<p>下面的代码片段会掩饰如何一步步建立一个RequestQueue:</p>
+
+<p>```java
+RequestQueue mRequestQueue;</p>
+
+<p>// Instantiate the cache
+Cache cache = new DiskBasedCache(getCacheDir(), 1024 * 1024); // 1MB cap</p>
+
+<p>// Set up the network to use HttpURLConnection as the HTTP client.
+Network network = new BasicNetwork(new HurlStack());</p>
+
+<p>// Instantiate the RequestQueue with the cache and network.
+mRequestQueue = new RequestQueue(cache, network);</p>
+
+<p>// Start the queue
+mRequestQueue.start();</p>
+
+<p>String url ="http://www.myurl.com";</p>
+
+<p>// Formulate the request and handle the response.
+StringRequest stringRequest = new StringRequest(Request.Method.GET, url,</p>
+
+<pre><code>    new Response.Listener&lt;String&gt;() {
+@Override
+public void onResponse(String response) {
+    // Do something with the response
+}
+</code></pre>
+
+<p>},</p>
+
+<pre><code>new Response.ErrorListener() {
+    @Override
+    public void onErrorResponse(VolleyError error) {
+        // Handle error
+}
+</code></pre>
+
+<p>});</p>
+
+<p>// Add the request to the RequestQueue.
+mRequestQueue.add(stringRequest);
+...
+```</p>
+
+<p>如果你仅仅是想做一个单次的请求并且不想要线程池一直保留，你可以通过使用在前面一课：<a href="simple.html">发送一个简单的请求(Sending a Simple Request)</a>文章中提到<code>Volley.newRequestQueue()</code>方法在任何需要的时刻创建RequestQueue，然后在你的响应回调里面执行<code>stop()</code>方法来停止操作。但是更通常的做法是创建一个RequestQueue并设置为一个单例。下面将演示这种做法。</p>
+
+<h2>Use a Singleton Pattern</h2>
+
+<p>如果你的程序需要持续的使用网络，更加高效的方式应该是建立一个RequestQueue的单例，这样它能够持续保持在整个app的生命周期中。你可以通过多种方式来实现这个单例。推荐的方式是实现一个单例类，里面封装了RequestQueue对象与其他Volley的方法。另外一个方法是继承Application类，并在<code>Application.OnCreate()</code>方法里面建立RequestQueue。但是这个方法是不推荐的。因为一个static的单例能够以一种更加模块化的方式提供同样的功能。</p>
+
+<p>一个关键的概念是RequestQueue必须和Application context所关联的。而不是Activity的context。这可以确保RequestQueue可以在你的app生命周期中一直存活，而不会因为activity的重新创建而重新创建RequestQueue。(例如，当用户旋转设备时)。</p>
+
+<p>下面是一个单例类，提供了RequestQueue与ImageLoader的功能：</p>
+
+<p>```java
+private static MySingleton mInstance;</p>
+
+<pre><code>private RequestQueue mRequestQueue;
+private ImageLoader mImageLoader;
+private static Context mCtx;
+
+private MySingleton(Context context) {
+    mCtx = context;
+    mRequestQueue = getRequestQueue();
+
+    mImageLoader = new ImageLoader(mRequestQueue,
+            new ImageLoader.ImageCache() {
+        private final LruCache&lt;String, Bitmap&gt;
+                cache = new LruCache&lt;String, Bitmap&gt;(20);
+
+        @Override
+        public Bitmap getBitmap(String url) {
+            return cache.get(url);
+        }
+
+        @Override
+        public void putBitmap(String url, Bitmap bitmap) {
+            cache.put(url, bitmap);
+        }
+    });
+}
+
+public static synchronized MySingleton getInstance(Context context) {
+    if (mInstance == null) {
+        mInstance = new MySingleton(context);
+    }
+    return mInstance;
+}
+
+public RequestQueue getRequestQueue() {
+    if (mRequestQueue == null) {
+        // getApplicationContext() is key, it keeps you from leaking the
+        // Activity or BroadcastReceiver if someone passes one in.
+        mRequestQueue = Volley.newRequestQueue(mCtx.getApplicationContext());
+    }
+    return mRequestQueue;
+}
+
+public &lt;T&gt; void addToRequestQueue(Request&lt;T&gt; req) {
+    getRequestQueue().add(req);
+}
+
+public ImageLoader getImageLoader() {
+    return mImageLoader;
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>下面演示了利用单例类来执行RequestQueue的操作：</p>
+
+<p>```java
+// Get a RequestQueue
+RequestQueue queue = MySingleton.getInstance(this.getApplicationContext()).</p>
+
+<pre><code>getRequestQueue();
+</code></pre>
+
+<p>...</p>
+
+<p>// Add a request (in this example, called stringRequest) to your RequestQueue.
+MySingleton.getInstance(this).addToRequestQueue(stringRequest);
+```</p>
+
+<hr />
+
+<p><strong>学习自<a href="http://developer.android.com/training/volley/request-queue.html">http://developer.android.com/training/volley/request-queue.html</a>,欢迎交流讨论</strong></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Android Training - Volley(Lesson 1 - 发送简单的请求)]]></title>
@@ -225,296 +769,6 @@ if (mRequestQueue != null) {
 <hr />
 
 <p><strong>学习自<a href="http://developer.android.com/training/volley/index.html">http://developer.android.com/training/volley/index.html</a>,欢迎交流讨论</strong></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Training(18) - 使用IntentService执行任务(Lesson 3 - 回传任务状态给发送方)]]></title>
-    <link href="http://hukai.me/blog/android-training-18-running-background-service-lesson-3/"/>
-    <updated>2014-04-20T22:01:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-18-running-background-service-lesson-3</id>
-    <content type="html"><![CDATA[<p>这章节会演示如何回传IntentService中执行的任务状态与结果给发送方。 例如，回传任务的状态给Activity并进行更新UI。推荐的方式是使用<a href="http://developer.android.com/reference/android/support/v4/content/LocalBroadcastManager.html">LocalBroadcastManager</a>，这个组件可以限制broadcast只在自己的App中进行传递。</p>
-
-<h2>Report Status From an IntentService</h2>
-
-<p>为了在IntentService中向其他组件发送任务状态，首先创建一个Intent并在data字段中包含需要传递的信息。作为一个可选项，还可以给这个Intent添加一个action与data URI。</p>
-
-<p>下一步，通过执行<a href="http://developer.android.com/reference/android/support/v4/content/LocalBroadcastManager.html#sendBroadcast(android.content.Intent">LocalBroadcastManager.sendBroadcast()</a>))来发送Intent。Intent被发送到任何有注册接受它的组件中。为了获取到LocalBroadcastManager的实例，可以执行getInstance().代码示例如下：</p>
-
-<p>```java
-public final class Constants {</p>
-
-<pre><code>...
-// Defines a custom Intent action
-public static final String BROADCAST_ACTION =
-    "com.example.android.threadsample.BROADCAST";
-...
-// Defines the key for the status "extra" in an Intent
-public static final String EXTENDED_DATA_STATUS =
-    "com.example.android.threadsample.STATUS";
-...
-</code></pre>
-
-<p>}
-public class RSSPullService extends IntentService {
-...</p>
-
-<pre><code>/*
- * Creates a new Intent containing a Uri object
- * BROADCAST_ACTION is a custom Intent action
- */
-Intent localIntent =
-        new Intent(Constants.BROADCAST_ACTION)
-        // Puts the status into the Intent
-        .putExtra(Constants.EXTENDED_DATA_STATUS, status);
-// Broadcasts the Intent to receivers in this app.
-LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
-</code></pre>
-
-<p>...
-}
-```</p>
-
-<!-- More -->
-
-
-<p>下一步是在发送任务的组件中接收发送出来的broadcast数据。</p>
-
-<h2>Receive Status Broadcasts from an IntentService</h2>
-
-<p>为了接受广播的数据对象，需要使用BroadcastReceiver的子类并实现<a href="http://developer.android.com/reference/android/content/BroadcastReceiver.html#onReceive(android.content.Context,%20android.content.Intent">BroadcastReceiver.onReceive()</a>)的方法，这里可以接收LocalBroadcastManager发出的广播数据。</p>
-
-<p>```java
-// Broadcast receiver for receiving status updates from the IntentService
-private class ResponseReceiver extends BroadcastReceiver
-{</p>
-
-<pre><code>// Prevents instantiation
-private DownloadStateReceiver() {
-}
-// Called when the BroadcastReceiver gets an Intent it's registered to receive
-@
-public void onReceive(Context context, Intent intent) {
-</code></pre>
-
-<p>...</p>
-
-<pre><code>    /*
-     * Handle Intents here.
-     */
-</code></pre>
-
-<p>...</p>
-
-<pre><code>}
-</code></pre>
-
-<p>}
-```</p>
-
-<p>一旦定义了BroadcastReceiver，也应该定义actions，categories与data用来做广播过滤。为了实现这些，需要使用<a href="http://developer.android.com/reference/android/content/IntentFilter.html">IntentFilter</a>.如下所示：</p>
-
-<p>```java
-// Class that displays photos
-public class DisplayActivity extends FragmentActivity {</p>
-
-<pre><code>...
-public void onCreate(Bundle stateBundle) {
-    ...
-    super.onCreate(stateBundle);
-    ...
-    // The filter's action is BROADCAST_ACTION
-    IntentFilter mStatusIntentFilter = new IntentFilter(
-            Constants.BROADCAST_ACTION);
-
-    // Adds a data filter for the HTTP scheme
-    mStatusIntentFilter.addDataScheme("http");
-</code></pre>
-
-<p>```</p>
-
-<p>为了给系统注册这个BroadcastReceiver，需要通过LocalBroadcastManager执行registerReceiver()的方法。如下所示：</p>
-
-<p>```java
-// Instantiates a new DownloadStateReceiver</p>
-
-<pre><code>    DownloadStateReceiver mDownloadStateReceiver =
-            new DownloadStateReceiver();
-    // Registers the DownloadStateReceiver and its intent filters
-    LocalBroadcastManager.getInstance(this).registerReceiver(
-            mDownloadStateReceiver,
-            mStatusIntentFilter);
-    ...
-</code></pre>
-
-<p>```</p>
-
-<p>一个BroadcastReceiver可以处理多种类型的广播数据。每个广播数据都有自己的ACTION。这个功能使得不用定义多个不同的BroadcastReceiver来分别处理不同的ACTION数据。为BroadcastReceiver定义另外一个IntentFilter，只需要创建一个新的IntentFilter并重复执行registerReceiver()即可。例如:</p>
-
-<p>```java
-/*</p>
-
-<pre><code>     * Instantiates a new action filter.
-     * No data filter is needed.
-     */
-    statusIntentFilter = new IntentFilter(Constants.ACTION_ZOOM_IMAGE);
-    ...
-    // Registers the receiver with the new filter
-    LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
-            mDownloadStateReceiver,
-            mIntentFilter);
-</code></pre>
-
-<p>```</p>
-
-<p>发送一个广播并不会start或者resume一个Activity。BroadcastReceiver可以接收广播数据，即使是你的app是在后台运行中。但是这不会强迫使得你的app变成foreground的。如果想在app不可见的时候通知用户一个后台的事件，建议使用<a href="http://developer.android.com/reference/android/app/Notification.html">Notification</a>。永远不要为了响应一个广播而去启动Activity。</p>
-
-<hr />
-
-<p><strong>后记：</strong>使用LocalBroadcastManager结合IntentService其实是一种很典型高效的做法，同时也更符合OO的思想，通过广播注册与反注册的方式，对两个组件进行解耦。如果使用Handler传递到后台线程作为回调，容易带来的内存泄漏。原因是：匿名内部类对外面的Actvitiy持有引用，如果在Acitivity被销毁的时候，没有对Handler进行显式的解绑，会导致Activity无法正常销毁，这样自然就有了内存泄漏。当然，如果用文章中的方案，通常也要记得在Activity的onPause的时候进行unRegisterReceiver，除非你有充足的理由为解释这里为何要继续保留。</p>
-
-<hr />
-
-<p><strong>学习自<a href="http://developer.android.com/training/run-background-service/report-status.html">http://developer.android.com/training/run-background-service/report-status.html</a>,欢迎交流讨论</strong></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Training(18) - 使用IntentService执行任务(Lesson 2 - 发送任务给IntentService)]]></title>
-    <link href="http://hukai.me/blog/android-training-18-running-background-service-lesson-2/"/>
-    <updated>2014-04-20T20:46:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-18-running-background-service-lesson-2</id>
-    <content type="html"><![CDATA[<p>前一篇文章演示了如何创建一个IntentService类。这次会演示如何通过发送一个Intent来触发IntentService执行任务。这个Intent可以传递一些数据给IntentService。可以在Activity或者Fragment的任何时间点发送这个Intent。</p>
-
-<p>为了创建一个工作请求并发送到IntentService。需要先创建一个explicit Intent，添加数据到intent，然后通过执行<a href="http://developer.android.com/reference/android/content/Context.html#startService(android.content.Intent">startService()</a>) 把它发送到IntentService。</p>
-
-<p>下面的是代码示例：</p>
-
-<ul>
-<li>创建一个新的显式的Intent用来启动IntentService。</li>
-</ul>
-
-
-<p><code>java
-/*
- * Creates a new Intent to start the RSSPullService
- * IntentService. Passes a URI in the
- * Intent's "data" field.
- */
-mServiceIntent = new Intent(getActivity(), RSSPullService.class);
-mServiceIntent.setData(Uri.parse(dataUrl));
-</code></p>
-
-<!-- More -->
-
-
-<ul>
-<li>执行startService()</li>
-</ul>
-
-
-<p><code>java
-// Starts the IntentService
-getActivity().startService(mServiceIntent);
-</code></p>
-
-<p><strong>注意：</strong>可以在Activity或者Fragment的任何位置发送任务请求。</p>
-
-<p>一旦执行了startService()，IntentService在自己本身的<a href="http://developer.android.com/reference/android/app/IntentService.html#onHandleIntent(android.content.Intent">onHandleIntent()</a>)方法里面开始执行这个任务。</p>
-
-<p>下一步是如何把工作任务的执行结果返回给发送任务的Activity或者Fragment。下节课会演示如何使用<a href="http://developer.android.com/reference/android/content/BroadcastReceiver.html">BroadcastReceiver</a>来完成这个任务。</p>
-
-<hr />
-
-<p><strong>学习自<a href="http://developer.android.com/training/run-background-service/send-request.html">http://developer.android.com/training/run-background-service/send-request.html</a>,欢迎交流讨论</strong></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Training(18) - 使用IntentService执行任务(Lesson 1 - 创建IntentService)]]></title>
-    <link href="http://hukai.me/blog/android-training-18-running-background-service-lesson-1/"/>
-    <updated>2014-04-14T18:30:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-18-running-background-service-lesson-1</id>
-    <content type="html"><![CDATA[<p><strong>写在开始：</strong>接下去的一段时间会学习专题《Background Jobs》的几篇文章，演示如何在后台执行任务，以此加速程序的性能并降低能耗的使用。第一章节会学习如何通过发送任务到后台的Service中执行，从而提示UI的表现性能。</p>
-
-<p>除非你特意指定，否则大部分在前台的操作都执行在一个叫做UI Thread的特殊线程中。这可能会导致某些问题，因为耗时操作可能会干扰界面的响应性能。为了避免这样的问题，Android Framework提供了几个类，用来帮助你把那些耗时操作移动到后台线程中执行。那些类中最常用的就是<a href="http://developer.android.com/reference/android/app/IntentService.html">IntentService</a>.</p>
-
-<p>这一章节会讲到如何实现一个IntentService，向它发送任务并反馈它的结果给其他模块。</p>
-
-<h2>0)概述</h2>
-
-<p>IntentService为执行一个操作在单个后台线程，提供了一种直接的实现方式。它可以处理一个长时间操作的任务并确保不影响到UI的响应性。而且IntentService的执行并不受UI的生命周期的影响。</p>
-
-<p>IntentService有下面几个局限性：</p>
-
-<ul>
-<li>不可以直接和UI做交互。为了把他执行的结果体现在UI上，需要发送给Activity。</li>
-<li>工作任务队列是顺序执行的，如果一个任务正在IntentService中执行，此时你再发送一个任务请求，这个任务会一直等待直到前面一个任务执行完毕。</li>
-<li>正在执行的任务无法打断。</li>
-</ul>
-
-
-<p>然而，在大多数情况下，IntentService都是简单后台任务操作的理想选择。</p>
-
-<p>这节课会演示如何创建继承的IntentService。同样也会演示如何创建必须实现的回调<a href="http://developer.android.com/reference/android/app/IntentService.html#onHandleIntent(android.content.Intent">onHandleIntent()</a>)。最后，还会解释如何在manifest文件中定义这个IntentService。</p>
-
-<!-- More -->
-
-
-<h2>1)创建IntentService</h2>
-
-<p>为了给你的app创建一个IntentService，定义一个类，extends IntentService，在里面override onHandleIntent()方法，如下所示：</p>
-
-<p>```java
-public class RSSPullService extends IntentService {</p>
-
-<pre><code>@Override
-protected void onHandleIntent(Intent workIntent) {
-    // Gets data from the incoming Intent
-    String dataString = workIntent.getDataString();
-    ...
-    // Do work here, based on the contents of dataString
-    ...
-}
-</code></pre>
-
-<p>}
-```</p>
-
-<p>注意一个普通Service组件的其他回调，例如<code>onStartCommand()</code>会被IntentService自动触发。在IntentService中，要避免override那些回调。</p>
-
-<h2>2)在Manifest文件中定义IntentService</h2>
-
-<p>IntentService需要在manifest文件的<application>标签下进行定义，如下所示：</p>
-
-<p>```xml
-&lt;application</p>
-
-<pre><code>    android:icon="@drawable/icon"
-    android:label="@string/app_name"&gt;
-    ...
-    &lt;!--
-        Because android:exported is set to "false",
-        the service is only available to this app.
-    --&gt;
-    &lt;service
-        android:name=".RSSPullService"
-        android:exported="false"/&gt;
-    ...
-</code></pre>
-
-<p><application/>
-```</p>
-
-<p><code>android:name</code>属性指明了IntentService的名字。</p>
-
-<p>注意<service>标签并没有包含任何intent filter。因为发送任务给IntentService的Activity需要使用显式Intent，所以不需要filter。这也意味着只有在同一个app或者其他使用同一个UserID的组件才能够访问到这个Service。</p>
-
-<p>至此，已经学习了IntentService的基础知识，下节会学习如何发送任务到IntentService。</p>
-
-<hr />
-
-<p><strong>学习自<a href="http://developer.android.com/training/run-background-service/create-service.html">http://developer.android.com/training/run-background-service/create-service.html</a>,欢迎交流讨论</strong></p>
 ]]></content>
   </entry>
   

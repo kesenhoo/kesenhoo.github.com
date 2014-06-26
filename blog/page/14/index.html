@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="章节概览:Remembering Users Android用户希望把自己的信息绑定到喜欢的app与设备上，那么使得你的程序更加令人喜爱的一个方法是使得它更加的人性化。Android设备知道你的使用者是谁，他们都使用过哪些服务，在哪里存储了你的数据。在得到你的用户授权的前提下， &hellip;">
+  <meta name="description" content="章节序言 Android程序中很炫的一个功能是程序之间可以互相通信。为什么要重新发明一个已经存在于另外一个程序中的功能呢，而且这个功能并非自己程序的核心部分。 这一章节会讲述一些通常使用的方法来在不同程序之间通过使用Intent APIs与ActionProvider对象来发送与接受content &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +81,158 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/android-training-07-share-simple-data-lesson-1/">Android Training(07) - 分享简单数据(Lesson 1 - 发送简单数据到其他Apps)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-31T14:00:00+08:00" pubdate data-updated="true">Mar 31<span>st</span>, 2012</time>
+        
+         | <a href="/blog/android-training-07-share-simple-data-lesson-1/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><strong>章节序言</strong></p>
+
+<p>Android程序中很炫的一个功能是程序之间可以互相通信。为什么要重新发明一个已经存在于另外一个程序中的功能呢，而且这个功能并非自己程序的核心部分。</p>
+
+<p>这一章节会讲述一些通常使用的方法来在不同程序之间通过使用<a href="https://developer.android.com/reference/android/content/Intent.html">Intent</a> APIs与<a href="https://developer.android.com/reference/android/view/ActionProvider.html">ActionProvider</a>对象来发送与接受content。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/android-training-07-share-simple-data-lesson-1/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/android-training-06-remembering-users-lesson-3/">Android Training(06) - 记住用户的信息(Lesson 3 - 创建自定义的账户类型)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-29T12:37:00+08:00" pubdate data-updated="true">Mar 29<span>th</span>, 2012</time>
+        
+         | <a href="/blog/android-training-06-remembering-users-lesson-3/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Creating a Custom Account Type</h2>
+
+<p>到目前为止，我们讨论了如何使用Google APIs。但是我们应该不仅仅是只需要Google的服务而已，比如增加QQ账户，Sina账户等。那么这一课会讲述如何创建一个自定义的账户，并且像内置的账户那样进行工作。</p>
+
+<h2>(1)Implement Your Custom Account Code</h2>
+
+<p>首先需要做的是从用户那获取证书[输入账户与密码后进行验证],这个过程也许只是简单的显示一个对话框来输入用户名与密码，或者是比较复杂的操作来获取证书，比如一次性的密码口令或者精密的扫描。不管怎么样，你需要实现下面的操作:</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/android-training-06-remembering-users-lesson-3/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/android-training-06-remembering-users-lesson-2/">Android Training(06) - 记住用户的信息(Lesson 2 - 使用OAuth2来进行身份鉴定)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-28T18:53:00+08:00" pubdate data-updated="true">Mar 28<span>th</span>, 2012</time>
+        
+         | <a href="/blog/android-training-06-remembering-users-lesson-2/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Authenticating to OAuth2 Services[使用OAuth2来进行鉴权]</h2>
+
+<p>为了安全的访问线上服务，用户需要在service上进行鉴定，他们需要提供身份的证明。对于一个程序来说，如果是访问第三方的服务，那么这个安全问题就更加复杂。
+【比如，你有个资料在A服务器上，但是你需要在B上面对A里面的数据进行操作，这个时候如果把登入A的帐号与密码给B去直接操作就不够安全，简单的方法是先把A上的资料拿下来，再弄到B上面去，然后B再做操作，这又显得很不方便，就是为了解决这样类似的问题，才诞生了OAuth。关于OAuth2的详情，请参考：<a href="http://oauth.net/2/">http://oauth.net/2/</a>，谢谢！】
+目前行业内解决这种第三方服务身份鉴定的方法是使用OAuth2协议。OAuth2提供了auth token，它代表用户身份与用户对于程序的授权。这一课演示了如何使用OAuth2连接到Google Server。同样在其他支持OAuth2协议的服务上都可以使用类似的方法。</p>
+
+<p>使用OAuth2有利于:</p>
+
+<ul>
+<li>从用户那得到授权，使用账户信息来访问online service。</li>
+<li>对online service进行鉴定，保护用户利益。</li>
+<li>处理认证错误。</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/android-training-06-remembering-users-lesson-2/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/android-training-06-remembering-users-lesson-1/">Android Training(06) - 记住用户的信息(Lesson 1 - 使用AccountManager来记录用户)</a></h1>
     
     
@@ -131,158 +283,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/android-training-05-transferring-data-without-draining-the-battery-lesson-3/">Android Training(05) - 优化下载效率(Lesson 3 - 使用缓存来避免重复下载)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-26T17:59:00+08:00" pubdate data-updated="true">Mar 26<span>th</span>, 2012</time>
-        
-         | <a href="/blog/android-training-05-transferring-data-without-draining-the-battery-lesson-3/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Redundant Downloads are Redundant[重复下载是冗余的]</h2>
-
-<p>减少下载的最基本方法是仅仅下载那些你需要的。从数据的角度看，我们可以通过传递类似上次更新时间这样的参数来制定查询数据的条件。同样，在下载图片的时候，server那边最好能够减少图片的大小，而不是让我们下载完整大小的图片。</p>
-
-<h2>1.Cache Files Locally[缓存文件到本地]</h2>
-
-<p>避免下载重复的数据是很重要的。可以使用缓存机制来处理这个问题。缓存static的资源，例如完整的图片。这些缓存的资源需要分开存放。为了保证app不会因为缓存而导致显示的是旧数据，请从缓存中获取最新的数据，当数据过期的时候，会提示进行刷新。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/android-training-05-transferring-data-without-draining-the-battery-lesson-3/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/android-training-05-transferring-data-without-draining-the-battery-lesson-2/">Android Training(05) - 优化下载效率(Lesson 2 - 调整更新的频率[C2DM与退避算法])</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-26T16:51:00+08:00" pubdate data-updated="true">Mar 26<span>th</span>, 2012</time>
-        
-         | <a href="/blog/android-training-05-transferring-data-without-draining-the-battery-lesson-2/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Minimizing the Effect of Regular Updates[最小化定期更新操作的副作用]</h2>
-
-<p>最佳的定时更新频率是不确定的，通常由设备状态，网络连接状态，用户行为与用户定义明确的偏好而决定。</p>
-
-<p><a href="http://developer.android.com/training/monitoring-device-state/index.html">Optimizing Battery Life</a>这一章有讨论如何根据设备状态来修改更新频率。里面介绍了当断开网络连接的时候去关闭后台服务，在电量比较低的时候减少更新的频率。</p>
-
-<p>这一课会介绍更新频率是多少才会使得更新操作对无线电状态机的影响最小。(C2DM与指数退避算法的使用)</p>
-
-<h2>Use Google Cloud Messaging as an Alternative to Polling[使用C2DM作为轮询方式之一]</h2>
-
-<p>关于<code>Android Cloud to Device Messaging</code> (C2DM)详情 ,请参考:<a href="http://code.google.com/intl/zh-CN/android/c2dm/">http://code.google.com/intl/zh-CN/android/c2dm/</a></p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/android-training-05-transferring-data-without-draining-the-battery-lesson-2/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/android-training-05-transferring-data-without-draining-the-battery-lesson-4/">Android Training(05) - 优化下载效率(Lesson 4 - 根据网络类型来切换下载模式)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-26T00:00:00+08:00" pubdate data-updated="true">Mar 26<span>th</span>, 2012</time>
-        
-         | <a href="/blog/android-training-05-transferring-data-without-draining-the-battery-lesson-4/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Modifying your Download Patterns Based on the Connectivity Type</h2>
-
-<p>并不是所有的网络类型(Wi-Fi,3G,2G,etc)对电量的消耗是同等的。不仅仅Wi-Fi电波比无线电波消耗的电量要少很多，而且不同的无线电波(3G,2G,LTE……)也存在使用不同电量的区别。</p>
-
-<h2>1.Use Wi-Fi[使用Wi-Fi]</h2>
-
-<p>在大多数情况下，Wi-Fi电波会在使用相对较低的电量的情况下提供一个相对较大的带宽。因此，我们需要努力争取尽量使用Wi-Fi来传递数据。
-我们可以使用Broadcast Receiver来监听当网络连接切换为Wi-Fi，这个时候我们可以进行大量的数据传递操作，例如下载，执行定时的更新操作，甚至是在这个时候加大更新的频率。这些内容都可以在前面的课程中找到。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/android-training-05-transferring-data-without-draining-the-battery-lesson-4/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/15/">&larr; Older</a>
@@ -298,6 +298,18 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/android-training-volley-custom-request/">Android Training - Volley(Lesson 4 - 实现自定义的请求)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-volley-standard-request/">Android Training - Volley(Lesson 3 - 创建标准的请求)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-volley-request-queue/">Android Training - Volley(Lesson 2 - 建立请求队列)</a>
+      </li>
     
       <li class="post">
         <a href="/blog/android-training-volley-simple-request/">Android Training - Volley(Lesson 1 - 发送简单的请求)</a>
@@ -319,28 +331,16 @@
         <a href="/blog/android-training-18-running-background-service-lesson-3/">Android Training(18) - 使用IntentService执行任务(Lesson 3 - 回传任务状态给发送方)</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/android-training-18-running-background-service-lesson-2/">Android Training(18) - 使用IntentService执行任务(Lesson 2 - 发送任务给IntentService)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-18-running-background-service-lesson-1/">Android Training(18) - 使用IntentService执行任务(Lesson 1 - 创建IntentService)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-deeper-00-touch-event-dispatch-process/">Android Deeper(00) - Touch事件分发响应机制</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (74)</a></li>
+  <li><a href='/blog/categories/android'>Android (77)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (7)</a></li>
-  <li><a href='/blog/categories/android-training'>Android:training (65)</a></li>
+  <li><a href='/blog/categories/android-training'>Android:training (68)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
 </ul>

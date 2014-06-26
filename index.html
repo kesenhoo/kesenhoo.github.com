@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="使用Volley的方式是，你通过创建一个RequestQueue并传递Request对象给它。RequestQueue管理工作线程用来执行网络操作，从Cache中读取与写入数据，以及解析Http的响应内容。Requests执行raw responses的解析，Volley会把响应的数据分发给主线程 &hellip;">
+  <meta name="description" content="这节课会介绍如何实现你自定义的请求类型，这些自定义的类型不属于Volley内置支持包里面。 编写一个自定义的请求Write a Custom Request 大多数的请求类型都已经包含在Volley的工具箱里面。如果你的请求返回数值是一个string，image或者JSON， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +81,867 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/android-training-volley-custom-request/">Android Training - Volley(Lesson 4 - 实现自定义的请求)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-25T23:20:00+08:00" pubdate data-updated="true">Jun 25<span>th</span>, 2014</time>
+        
+         | <a href="/blog/android-training-volley-custom-request/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>这节课会介绍如何实现你自定义的请求类型，这些自定义的类型不属于Volley内置支持包里面。</p>
+
+<h2>编写一个自定义的请求Write a Custom Request</h2>
+
+<p>大多数的请求类型都已经包含在Volley的工具箱里面。如果你的请求返回数值是一个string，image或者JSON，那么你是不需要自己去实现请求类的。</p>
+
+<p>对于那些你需要自定义的请求类型，下面是你需要做得步骤：</p>
+
+<ul>
+<li>继承<code>Request&lt;T&gt;</code>类，<code>&lt;T&gt;</code>表示了请求返回的数据类型。因此如果你需要解析的响应类型是一个String，可以通过继承<code>Request&lt;String&gt;</code>来创建你自定义的请求。请参考Volley工具类中的StringRequest与 ImageRequest来学习如何继承Request<T>。</li>
+<li>实现抽象方法<code>parseNetworkResponse()</code>与<code>deliverResponse()</code>，下面会详细介绍。</li>
+</ul>
+
+
+<h3>parseNetworkResponse</h3>
+
+<p>为了能够提交一种指定类型的数据(例如，string，image，JSON等)，需要对解析后的结果进行封装。下面会演示如何实现<code>parseNetworkResponse()</code>。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">protected</span> <span class="n">Response</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">parseNetworkResponse</span><span class="o">(</span>
+</span><span class='line'>        <span class="n">NetworkResponse</span> <span class="n">response</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">String</span> <span class="n">json</span> <span class="o">=</span> <span class="k">new</span> <span class="n">String</span><span class="o">(</span><span class="n">response</span><span class="o">.</span><span class="na">data</span><span class="o">,</span>
+</span><span class='line'>        <span class="n">HttpHeaderParser</span><span class="o">.</span><span class="na">parseCharset</span><span class="o">(</span><span class="n">response</span><span class="o">.</span><span class="na">headers</span><span class="o">));</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">Response</span><span class="o">.</span><span class="na">success</span><span class="o">(</span><span class="n">gson</span><span class="o">.</span><span class="na">fromJson</span><span class="o">(</span><span class="n">json</span><span class="o">,</span> <span class="n">clazz</span><span class="o">),</span>
+</span><span class='line'>    <span class="n">HttpHeaderParser</span><span class="o">.</span><span class="na">parseCacheHeaders</span><span class="o">(</span><span class="n">response</span><span class="o">));</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="c1">// handle errors</span>
+</span><span class='line'><span class="o">...</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>请注意：</p>
+
+<ul>
+<li><code>parseNetworkResponse()</code>的参数是类型是<code>NetworkResponse</code>，这种参数包含了的响应数据内容有一个byte[]，HTTP status code以及response headers.</li>
+<li>你实现的方法必须返回一个Response<T>，它包含了你响应对象与缓存metadata或者是一个错误。</li>
+</ul>
+
+
+<p>如果你的协议没有标准的cache机制，你可以自己建立一个<code>Cache.Entry</code>, 但是大多数请求都可以用下面的方式来处理:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="k">return</span> <span class="n">Response</span><span class="o">.</span><span class="na">success</span><span class="o">(</span><span class="n">myDecodedObject</span><span class="o">,</span>
+</span><span class='line'>        <span class="n">HttpHeaderParser</span><span class="o">.</span><span class="na">parseCacheHeaders</span><span class="o">(</span><span class="n">response</span><span class="o">));</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Volley在工作线程中执行parseNetworkResponse()方法。这确保了耗时的解析操作，例如decode一张JPEG图片成bitmap，不会阻塞UI线程。</p>
+
+<h3>deliverResponse</h3>
+
+<p>Volley会把parseNetworkResponse()方法返回的数据带到主线程的回调中。如下所示：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">protected</span> <span class="kt">void</span> <span class="nf">deliverResponse</span><span class="o">(</span><span class="n">T</span> <span class="n">response</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">listener</span><span class="o">.</span><span class="na">onResponse</span><span class="o">(</span><span class="n">response</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Example: GsonRequest</h3>
+
+<p><a href="http://code.google.com/p/google-gson/">Gson</a>是一个使用映射支持JSON与Java对象之间相互转换的库文件。你可以定义和JSON keys想对应名称的Java对象。把对象传递给传递Gson，然后Gson会帮你为对象填充字段值。 下面是一个完整的示例：演示了使用Gson解析Volley数据：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">GsonRequest</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="kd">extends</span> <span class="n">Request</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">final</span> <span class="n">Gson</span> <span class="n">gson</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Gson</span><span class="o">();</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">final</span> <span class="n">Class</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">clazz</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">final</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">headers</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">final</span> <span class="n">Listener</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">listener</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="cm">/**</span>
+</span><span class='line'><span class="cm">     * Make a GET request and return a parsed object from JSON.</span>
+</span><span class='line'><span class="cm">     *</span>
+</span><span class='line'><span class="cm">     * @param url URL of the request to make</span>
+</span><span class='line'><span class="cm">     * @param clazz Relevant class object, for Gson&#39;s reflection</span>
+</span><span class='line'><span class="cm">     * @param headers Map of request headers</span>
+</span><span class='line'><span class="cm">     */</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">GsonRequest</span><span class="o">(</span><span class="n">String</span> <span class="n">url</span><span class="o">,</span> <span class="n">Class</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">clazz</span><span class="o">,</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">headers</span><span class="o">,</span>
+</span><span class='line'>            <span class="n">Listener</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">listener</span><span class="o">,</span> <span class="n">ErrorListener</span> <span class="n">errorListener</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">(</span><span class="n">Method</span><span class="o">.</span><span class="na">GET</span><span class="o">,</span> <span class="n">url</span><span class="o">,</span> <span class="n">errorListener</span><span class="o">);</span>
+</span><span class='line'>        <span class="k">this</span><span class="o">.</span><span class="na">clazz</span> <span class="o">=</span> <span class="n">clazz</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">this</span><span class="o">.</span><span class="na">headers</span> <span class="o">=</span> <span class="n">headers</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">this</span><span class="o">.</span><span class="na">listener</span> <span class="o">=</span> <span class="n">listener</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">getHeaders</span><span class="o">()</span> <span class="kd">throws</span> <span class="n">AuthFailureError</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">headers</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">?</span> <span class="n">headers</span> <span class="o">:</span> <span class="kd">super</span><span class="o">.</span><span class="na">getHeaders</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">deliverResponse</span><span class="o">(</span><span class="n">T</span> <span class="n">response</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">listener</span><span class="o">.</span><span class="na">onResponse</span><span class="o">(</span><span class="n">response</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">protected</span> <span class="n">Response</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">parseNetworkResponse</span><span class="o">(</span><span class="n">NetworkResponse</span> <span class="n">response</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">String</span> <span class="n">json</span> <span class="o">=</span> <span class="k">new</span> <span class="n">String</span><span class="o">(</span>
+</span><span class='line'>                    <span class="n">response</span><span class="o">.</span><span class="na">data</span><span class="o">,</span>
+</span><span class='line'>                    <span class="n">HttpHeaderParser</span><span class="o">.</span><span class="na">parseCharset</span><span class="o">(</span><span class="n">response</span><span class="o">.</span><span class="na">headers</span><span class="o">));</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">Response</span><span class="o">.</span><span class="na">success</span><span class="o">(</span>
+</span><span class='line'>                    <span class="n">gson</span><span class="o">.</span><span class="na">fromJson</span><span class="o">(</span><span class="n">json</span><span class="o">,</span> <span class="n">clazz</span><span class="o">),</span>
+</span><span class='line'>                    <span class="n">HttpHeaderParser</span><span class="o">.</span><span class="na">parseCacheHeaders</span><span class="o">(</span><span class="n">response</span><span class="o">));</span>
+</span><span class='line'>        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">UnsupportedEncodingException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">Response</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="k">new</span> <span class="n">ParseError</span><span class="o">(</span><span class="n">e</span><span class="o">));</span>
+</span><span class='line'>        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">JsonSyntaxException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">Response</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="k">new</span> <span class="n">ParseError</span><span class="o">(</span><span class="n">e</span><span class="o">));</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果你愿意使用的话，Volley提供了现成的<code>JsonArrayRequest</code>与<code>JsonArrayObject</code>类。参考上一课:创建标准的请求</p>
+
+<hr />
+
+<p><strong>学习自<a href="http://developer.android.com/training/volley/request-custom.html">http://developer.android.com/training/volley/request-custom.html</a>,欢迎交流讨论</strong></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/android-training-volley-standard-request/">Android Training - Volley(Lesson 3 - 创建标准的请求)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-24T22:10:00+08:00" pubdate data-updated="true">Jun 24<span>th</span>, 2014</time>
+        
+         | <a href="/blog/android-training-volley-standard-request/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>这一课会介绍如何使用Volley支持的常用请求类型：</p>
+
+<ul>
+<li><code>StringRequest</code>。指定一个URL并在相应回调中接受一个原始的raw string数据。请参考前一课的示例。</li>
+<li><code>ImageRequest</code>。指定一个URL并在相应回调中接受一个image。</li>
+<li><code>JsonObjectRequest</code>与<code>JsonArrayRequest</code> (均为<code>JsonRequest</code>的子类)。指定一个URL并在相应回调中获取到一个JSON对象或者JSON数组。</li>
+</ul>
+
+
+<p>如果你需要的是上面演示的请求类型，那么你应该不需要自己实现一个自定义的请求。这节课会演示如何使用那些标准的请求类型。关于如何实现自定义的请求，请看下一课：<a href="request-costom.html">实现自定义的请求</a>。</p>
+
+<h2>1)Request an Image</h2>
+
+<p>Volley为请求图片提供了如下的类。这些类依次有着依赖关系，用来支持在不同的层级进行图片处理：</p>
+
+<ul>
+<li><p><code>ImageRequest</code> - 一个封装好的，用来处理URL请求图片并且返回一张decode好的bitmap的类。它同样提供了一些简便的接口方法，例如指定一个大小进行重新裁剪。它的主要好处是Volley回确保类似decode，resize等耗时的操作执行在工作线程中。</p></li>
+<li><p><code>ImageLoader</code> - 一个用来处理加载与缓存从网络上获取到的图片的帮助类。ImageLoader是管理协调大量的ImageRequest的类。例如，在ListView中需要显示大量缩略图的时候。ImageLoader为通常的Volley cache提供了更加前瞻的内存缓存，这个缓存对于防止图片抖动非常有用。。这还使得能够在避免阻挡或者延迟主线程的前提下在缓存中能够被Hit到。ImageLoader还能够实现响应联合Coalescing，每一个响应回调里面都可以设置bitmap到view上面。联合Coalescing使得能够同时提交多个响应，这提升了性能。</p></li>
+<li><p><code>NetworkImageView</code> - 在ImageLoader的基础上建立，替换ImageView进行使用。对于需要对ImageView设置网络图片的情况下使用很有效。NetworkImageView同样可以在view被detached的时候取消pending的请求。</p></li>
+</ul>
+
+
+<h3>1.1)Use ImageRequest</h3>
+
+<p>下面是一个使用ImageRequest的示例。它会获取指定URL的image病显示到app上。里面演示的RequestQueue是通过上一课提到的单例类实现的。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">ImageView</span> <span class="n">mImageView</span><span class="o">;</span>
+</span><span class='line'><span class="n">String</span> <span class="n">url</span> <span class="o">=</span> <span class="s">&quot;http://i.imgur.com/7spzG.png&quot;</span><span class="o">;</span>
+</span><span class='line'><span class="n">mImageView</span> <span class="o">=</span> <span class="o">(</span><span class="n">ImageView</span><span class="o">)</span> <span class="n">findViewById</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">myImage</span><span class="o">);</span>
+</span><span class='line'><span class="o">...</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Retrieves an image specified by the URL, displays it in the UI.</span>
+</span><span class='line'><span class="n">ImageRequest</span> <span class="n">request</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ImageRequest</span><span class="o">(</span><span class="n">url</span><span class="o">,</span>
+</span><span class='line'>    <span class="k">new</span> <span class="n">Response</span><span class="o">.</span><span class="na">Listener</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="nd">@Override</span>
+</span><span class='line'>        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onResponse</span><span class="o">(</span><span class="n">Bitmap</span> <span class="n">bitmap</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">mImageView</span><span class="o">.</span><span class="na">setImageBitmap</span><span class="o">(</span><span class="n">bitmap</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">},</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span>
+</span><span class='line'>    <span class="k">new</span> <span class="n">Response</span><span class="o">.</span><span class="na">ErrorListener</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onErrorResponse</span><span class="o">(</span><span class="n">VolleyError</span> <span class="n">error</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">mImageView</span><span class="o">.</span><span class="na">setImageResource</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">image_load_error</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">});</span>
+</span><span class='line'><span class="c1">// Access the RequestQueue through your singleton class.</span>
+</span><span class='line'><span class="n">MySingleton</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="k">this</span><span class="o">).</span><span class="na">addToRequestQueue</span><span class="o">(</span><span class="n">request</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>1.2)Use ImageLoader and NetworkImageView</h3>
+
+<p>你可以使用ImageLoader与NetworkImageView用来处理类似ListView等大量显示图片的情况。在你的layout XML文件中，你可以使用NetworkImageView来替代通常的ImageView， 例如:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;com.android.volley.toolbox.NetworkImageView</span>
+</span><span class='line'>        <span class="na">android:id=</span><span class="s">&quot;@+id/networkImageView&quot;</span>
+</span><span class='line'>        <span class="na">android:layout_width=</span><span class="s">&quot;150dp&quot;</span>
+</span><span class='line'>        <span class="na">android:layout_height=</span><span class="s">&quot;170dp&quot;</span>
+</span><span class='line'>        <span class="na">android:layout_centerHorizontal=</span><span class="s">&quot;true&quot;</span> <span class="nt">/&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>你可以使用ImageLoader来显示一张图片，例如：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">ImageLoader</span> <span class="n">mImageLoader</span><span class="o">;</span>
+</span><span class='line'><span class="n">ImageView</span> <span class="n">mImageView</span><span class="o">;</span>
+</span><span class='line'><span class="c1">// The URL for the image that is being loaded.</span>
+</span><span class='line'><span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">IMAGE_URL</span> <span class="o">=</span>
+</span><span class='line'>    <span class="s">&quot;http://developer.android.com/images/training/system-ui.png&quot;</span><span class="o">;</span>
+</span><span class='line'><span class="o">...</span>
+</span><span class='line'><span class="n">mImageView</span> <span class="o">=</span> <span class="o">(</span><span class="n">ImageView</span><span class="o">)</span> <span class="n">findViewById</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">regularImageView</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Get the ImageLoader through your singleton class.</span>
+</span><span class='line'><span class="n">mImageLoader</span> <span class="o">=</span> <span class="n">MySingleton</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="k">this</span><span class="o">).</span><span class="na">getImageLoader</span><span class="o">();</span>
+</span><span class='line'><span class="n">mImageLoader</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">IMAGE_URL</span><span class="o">,</span> <span class="n">ImageLoader</span><span class="o">.</span><span class="na">getImageListener</span><span class="o">(</span><span class="n">mImageView</span><span class="o">,</span>
+</span><span class='line'>         <span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">def_image</span><span class="o">,</span> <span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">err_image</span><span class="o">));</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然而，如果你要做得是为ImageView进行图片设置，你可以使用NetworkImageView来实现，例如：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">ImageLoader</span> <span class="n">mImageLoader</span><span class="o">;</span>
+</span><span class='line'><span class="n">NetworkImageView</span> <span class="n">mNetworkImageView</span><span class="o">;</span>
+</span><span class='line'><span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">IMAGE_URL</span> <span class="o">=</span>
+</span><span class='line'>    <span class="s">&quot;http://developer.android.com/images/training/system-ui.png&quot;</span><span class="o">;</span>
+</span><span class='line'><span class="o">...</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Get the NetworkImageView that will display the image.</span>
+</span><span class='line'><span class="n">mNetworkImageView</span> <span class="o">=</span> <span class="o">(</span><span class="n">NetworkImageView</span><span class="o">)</span> <span class="n">findViewById</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">networkImageView</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Get the ImageLoader through your singleton class.</span>
+</span><span class='line'><span class="n">mImageLoader</span> <span class="o">=</span> <span class="n">MySingleton</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="k">this</span><span class="o">).</span><span class="na">getImageLoader</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Set the URL of the image that should be loaded into this view, and</span>
+</span><span class='line'><span class="c1">// specify the ImageLoader that will be used to make the request.</span>
+</span><span class='line'><span class="n">mNetworkImageView</span><span class="o">.</span><span class="na">setImageUrl</span><span class="o">(</span><span class="n">IMAGE_URL</span><span class="o">,</span> <span class="n">mImageLoader</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面的代码是通过前一节课的单例模式来实现访问到RequestQueue与ImageLoader的。之所以这样做得原因是：对于ImageLoader(一个用来处理加载与缓存图片的帮助类)来说，单例模式可以避免旋转所带来的抖动。使用单例模式可以使得bitmap的缓存与activity的生命周期无关。如果你在activity中创建ImageLoader，这个ImageLoader有可能会在手机进行旋转的时候被重新创建。这可能会导致抖动。</p>
+
+<h3>1.3)Example LRU cache</h3>
+
+<p>Volley工具箱中提供了通过DiskBasedCache实现的一种标准缓存。这个类能够缓存文件到磁盘的制定目录。但是为了使用ImageLoader，你应该提供一个自定义的内存LRC缓存，这个缓存需要实现<code>ImageLoader.ImageCache</code>的接口。你可能想把你的缓存设置成一个单例。关于更多的有关内容，请参考<a href="request.html">建立请求队列Setting Up a RequestQueue</a>.</p>
+
+<p>下面是一个内存LRU Cache的实例。它继承自LruCache并实现了ImageLoader.ImageCache的接口：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">import</span> <span class="nn">android.graphics.Bitmap</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">android.support.v4.util.LruCache</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">android.util.DisplayMetrics</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">com.android.volley.toolbox.ImageLoader.ImageCache</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">LruBitmapCache</span> <span class="kd">extends</span> <span class="n">LruCache</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">Bitmap</span><span class="o">&gt;</span>
+</span><span class='line'>        <span class="kd">implements</span> <span class="n">ImageCache</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">LruBitmapCache</span><span class="o">(</span><span class="kt">int</span> <span class="n">maxSize</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">(</span><span class="n">maxSize</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">LruBitmapCache</span><span class="o">(</span><span class="n">Context</span> <span class="n">ctx</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">this</span><span class="o">(</span><span class="n">getCacheSize</span><span class="o">(</span><span class="n">ctx</span><span class="o">));</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">protected</span> <span class="kt">int</span> <span class="nf">sizeOf</span><span class="o">(</span><span class="n">String</span> <span class="n">key</span><span class="o">,</span> <span class="n">Bitmap</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="na">getRowBytes</span><span class="o">()</span> <span class="o">*</span> <span class="n">value</span><span class="o">.</span><span class="na">getHeight</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">Bitmap</span> <span class="nf">getBitmap</span><span class="o">(</span><span class="n">String</span> <span class="n">url</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="nf">get</span><span class="o">(</span><span class="n">url</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">putBitmap</span><span class="o">(</span><span class="n">String</span> <span class="n">url</span><span class="o">,</span> <span class="n">Bitmap</span> <span class="n">bitmap</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">put</span><span class="o">(</span><span class="n">url</span><span class="o">,</span> <span class="n">bitmap</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Returns a cache size equal to approximately three screens worth of images.</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">int</span> <span class="nf">getCacheSize</span><span class="o">(</span><span class="n">Context</span> <span class="n">ctx</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">final</span> <span class="n">DisplayMetrics</span> <span class="n">displayMetrics</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="na">getResources</span><span class="o">().</span>
+</span><span class='line'>                <span class="n">getDisplayMetrics</span><span class="o">();</span>
+</span><span class='line'>        <span class="kd">final</span> <span class="kt">int</span> <span class="n">screenWidth</span> <span class="o">=</span> <span class="n">displayMetrics</span><span class="o">.</span><span class="na">widthPixels</span><span class="o">;</span>
+</span><span class='line'>        <span class="kd">final</span> <span class="kt">int</span> <span class="n">screenHeight</span> <span class="o">=</span> <span class="n">displayMetrics</span><span class="o">.</span><span class="na">heightPixels</span><span class="o">;</span>
+</span><span class='line'>        <span class="c1">// 4 bytes per pixel</span>
+</span><span class='line'>        <span class="kd">final</span> <span class="kt">int</span> <span class="n">screenBytes</span> <span class="o">=</span> <span class="n">screenWidth</span> <span class="o">*</span> <span class="n">screenHeight</span> <span class="o">*</span> <span class="mi">4</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">return</span> <span class="n">screenBytes</span> <span class="o">*</span> <span class="mi">3</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>下面是如何初始化ImageLoader并使用cache的实例:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">RequestQueue</span> <span class="n">mRequestQueue</span><span class="o">;</span> <span class="c1">// assume this exists.</span>
+</span><span class='line'><span class="n">ImageLoader</span> <span class="n">mImageLoader</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ImageLoader</span><span class="o">(</span><span class="n">mRequestQueue</span><span class="o">,</span> <span class="k">new</span> <span class="n">LruBitmapCache</span><span class="o">(</span><span class="n">LruBitmapCache</span><span class="o">.</span><span class="na">getCacheSize</span><span class="o">()));</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>2)Request JSON</h2>
+
+<p>Volley提供了以下的类用来执行JSON请求：</p>
+
+<ul>
+<li><code>JsonArrayRequest</code> - 一个为了获取JSONArray返回数据的请求。</li>
+<li><code>JsonObjectRequest</code> - 一个为了获取JSONObject返回数据的请求。允许把一个JSONObject作为请求参数。</li>
+</ul>
+
+
+<p>这两个类都是继承自JsonRequest的。你可以使用类似的方法来处理这两种类型的请求。如下演示了如果获取一个JSON feed并显示到UI上：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">TextView</span> <span class="n">mTxtDisplay</span><span class="o">;</span>
+</span><span class='line'><span class="n">ImageView</span> <span class="n">mImageView</span><span class="o">;</span>
+</span><span class='line'><span class="n">mTxtDisplay</span> <span class="o">=</span> <span class="o">(</span><span class="n">TextView</span><span class="o">)</span> <span class="n">findViewById</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">txtDisplay</span><span class="o">);</span>
+</span><span class='line'><span class="n">String</span> <span class="n">url</span> <span class="o">=</span> <span class="s">&quot;http://my-json-feed&quot;</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">JsonObjectRequest</span> <span class="n">jsObjRequest</span> <span class="o">=</span> <span class="k">new</span> <span class="n">JsonObjectRequest</span>
+</span><span class='line'>        <span class="o">(</span><span class="n">Request</span><span class="o">.</span><span class="na">Method</span><span class="o">.</span><span class="na">GET</span><span class="o">,</span> <span class="n">url</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="k">new</span> <span class="n">Response</span><span class="o">.</span><span class="na">Listener</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onResponse</span><span class="o">(</span><span class="n">JSONObject</span> <span class="n">response</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mTxtDisplay</span><span class="o">.</span><span class="na">setText</span><span class="o">(</span><span class="s">&quot;Response: &quot;</span> <span class="o">+</span> <span class="n">response</span><span class="o">.</span><span class="na">toString</span><span class="o">());</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">},</span> <span class="k">new</span> <span class="n">Response</span><span class="o">.</span><span class="na">ErrorListener</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onErrorResponse</span><span class="o">(</span><span class="n">VolleyError</span> <span class="n">error</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// TODO Auto-generated method stub</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Access the RequestQueue through your singleton class.</span>
+</span><span class='line'><span class="n">MySingleton</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="k">this</span><span class="o">).</span><span class="na">addToRequestQueue</span><span class="o">(</span><span class="n">jsObjRequest</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>关于基于<a href="http://code.google.com/p/google-gson/">Gson</a>实现一个自定义的JSON请求对象，请参考下一节课：<a href="request-custom.html">实现一个自定义的请求Implementing a Custom Request</a>.</p>
+
+<hr />
+
+<p><strong>学习自<a href="http://developer.android.com/training/volley/request.html">http://developer.android.com/training/volley/request.html</a>,欢迎交流讨论</strong></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/android-training-volley-request-queue/">Android Training - Volley(Lesson 2 - 建立请求队列)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-24T21:03:00+08:00" pubdate data-updated="true">Jun 24<span>th</span>, 2014</time>
+        
+         | <a href="/blog/android-training-volley-request-queue/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>前一节课演示了如何使用<code>Volley.newRequestQueue</code>这一简便的方法来建立一个<code>RequestQueue</code>，这是利用了Volley默认的优势。这节课会介绍如何显式的建立一个RequestQueue，以便满足你自定义的需求。</p>
+
+<p>这节课同样会介绍一种推荐的实现方式：创建一个单例的RequestQueue，这使得RequestQueue能够持续保持在你的app的生命周期中。</p>
+
+<h2>Set Up a Network and Cache</h2>
+
+<p>一个RequestQueue需要两部分来支持它的工作：一部分是网络操作用来执行请求的数据传输，另外一个是用来处理缓存操作的Cache。在Volley的工具箱中包含了标准的实现方式：<code>DiskBasedCache</code>提供了每个文件与对应响应数据一一映射的缓存实现。 <code>BasicNetwork</code>提供了一个网络传输的实现，连接方式可以是<a href="http://developer.android.com/reference/android/net/http/AndroidHttpClient.html">AndroidHttpClient</a> 或者是 <a href="http://developer.android.com/reference/java/net/HttpURLConnection.html">HttpURLConnection</a>.</p>
+
+<p><code>BasicNetwork</code>是Volley默认的网络操作实现方式。一个BasicNetwork必须使用HTTP Client进行初始化。这个Client通常是AndroidHttpClient 或者 HttpURLConnection:</p>
+
+<ul>
+<li>对于app target API level低于API 9(Gingerbread)的使用AndroidHttpClient。在Gingerbread之前，HttpURLConnection是不可靠的。对于这个的细节，请参考<a href="http://android-developers.blogspot.com/2011/09/androids-http-clients.html">Android&#8217;s HTTP Clients</a>。</li>
+<li>对于API Level 9以及以上的，会使用HttpURLConnection。</li>
+</ul>
+
+
+<p>为了创建一个能够执行在所有Android版本上的应用，你可以通过检查系统版本选择合适的HTTP Client。例如：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">HttpStack</span> <span class="n">stack</span><span class="o">;</span>
+</span><span class='line'><span class="o">...</span>
+</span><span class='line'><span class="c1">// If the device is running a version &gt;= Gingerbread...</span>
+</span><span class='line'><span class="k">if</span> <span class="o">(</span><span class="n">Build</span><span class="o">.</span><span class="na">VERSION</span><span class="o">.</span><span class="na">SDK_INT</span> <span class="o">&gt;=</span> <span class="n">Build</span><span class="o">.</span><span class="na">VERSION_CODES</span><span class="o">.</span><span class="na">GINGERBREAD</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="c1">// ...use HttpURLConnection for stack.</span>
+</span><span class='line'><span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>    <span class="c1">// ...use AndroidHttpClient for stack.</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="n">Network</span> <span class="n">network</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BasicNetwork</span><span class="o">(</span><span class="n">stack</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>下面的代码片段会掩饰如何一步步建立一个RequestQueue:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">RequestQueue</span> <span class="n">mRequestQueue</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Instantiate the cache</span>
+</span><span class='line'><span class="n">Cache</span> <span class="n">cache</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DiskBasedCache</span><span class="o">(</span><span class="n">getCacheDir</span><span class="o">(),</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="o">);</span> <span class="c1">// 1MB cap</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Set up the network to use HttpURLConnection as the HTTP client.</span>
+</span><span class='line'><span class="n">Network</span> <span class="n">network</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BasicNetwork</span><span class="o">(</span><span class="k">new</span> <span class="n">HurlStack</span><span class="o">());</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Instantiate the RequestQueue with the cache and network.</span>
+</span><span class='line'><span class="n">mRequestQueue</span> <span class="o">=</span> <span class="k">new</span> <span class="n">RequestQueue</span><span class="o">(</span><span class="n">cache</span><span class="o">,</span> <span class="n">network</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Start the queue</span>
+</span><span class='line'><span class="n">mRequestQueue</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">String</span> <span class="n">url</span> <span class="o">=</span><span class="s">&quot;http://www.myurl.com&quot;</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Formulate the request and handle the response.</span>
+</span><span class='line'><span class="n">StringRequest</span> <span class="n">stringRequest</span> <span class="o">=</span> <span class="k">new</span> <span class="n">StringRequest</span><span class="o">(</span><span class="n">Request</span><span class="o">.</span><span class="na">Method</span><span class="o">.</span><span class="na">GET</span><span class="o">,</span> <span class="n">url</span><span class="o">,</span>
+</span><span class='line'>        <span class="k">new</span> <span class="n">Response</span><span class="o">.</span><span class="na">Listener</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onResponse</span><span class="o">(</span><span class="n">String</span> <span class="n">response</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// Do something with the response</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">},</span>
+</span><span class='line'>    <span class="k">new</span> <span class="n">Response</span><span class="o">.</span><span class="na">ErrorListener</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="nd">@Override</span>
+</span><span class='line'>        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onErrorResponse</span><span class="o">(</span><span class="n">VolleyError</span> <span class="n">error</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="c1">// Handle error</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Add the request to the RequestQueue.</span>
+</span><span class='line'><span class="n">mRequestQueue</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">stringRequest</span><span class="o">);</span>
+</span><span class='line'><span class="o">...</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果你仅仅是想做一个单次的请求并且不想要线程池一直保留，你可以通过使用在前面一课：<a href="simple.html">发送一个简单的请求(Sending a Simple Request)</a>文章中提到<code>Volley.newRequestQueue()</code>方法在任何需要的时刻创建RequestQueue，然后在你的响应回调里面执行<code>stop()</code>方法来停止操作。但是更通常的做法是创建一个RequestQueue并设置为一个单例。下面将演示这种做法。</p>
+
+<h2>Use a Singleton Pattern</h2>
+
+<p>如果你的程序需要持续的使用网络，更加高效的方式应该是建立一个RequestQueue的单例，这样它能够持续保持在整个app的生命周期中。你可以通过多种方式来实现这个单例。推荐的方式是实现一个单例类，里面封装了RequestQueue对象与其他Volley的方法。另外一个方法是继承Application类，并在<code>Application.OnCreate()</code>方法里面建立RequestQueue。但是这个方法是不推荐的。因为一个static的单例能够以一种更加模块化的方式提供同样的功能。</p>
+
+<p>一个关键的概念是RequestQueue必须和Application context所关联的。而不是Activity的context。这可以确保RequestQueue可以在你的app生命周期中一直存活，而不会因为activity的重新创建而重新创建RequestQueue。(例如，当用户旋转设备时)。</p>
+
+<p>下面是一个单例类，提供了RequestQueue与ImageLoader的功能：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="kd">static</span> <span class="n">MySingleton</span> <span class="n">mInstance</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">RequestQueue</span> <span class="n">mRequestQueue</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">ImageLoader</span> <span class="n">mImageLoader</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">static</span> <span class="n">Context</span> <span class="n">mCtx</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">private</span> <span class="nf">MySingleton</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mCtx</span> <span class="o">=</span> <span class="n">context</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">mRequestQueue</span> <span class="o">=</span> <span class="n">getRequestQueue</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">mImageLoader</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ImageLoader</span><span class="o">(</span><span class="n">mRequestQueue</span><span class="o">,</span>
+</span><span class='line'>                <span class="k">new</span> <span class="n">ImageLoader</span><span class="o">.</span><span class="na">ImageCache</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>            <span class="kd">private</span> <span class="kd">final</span> <span class="n">LruCache</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">Bitmap</span><span class="o">&gt;</span>
+</span><span class='line'>                    <span class="n">cache</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LruCache</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">Bitmap</span><span class="o">&gt;(</span><span class="mi">20</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="nd">@Override</span>
+</span><span class='line'>            <span class="kd">public</span> <span class="n">Bitmap</span> <span class="nf">getBitmap</span><span class="o">(</span><span class="n">String</span> <span class="n">url</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="k">return</span> <span class="n">cache</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">url</span><span class="o">);</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="nd">@Override</span>
+</span><span class='line'>            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">putBitmap</span><span class="o">(</span><span class="n">String</span> <span class="n">url</span><span class="o">,</span> <span class="n">Bitmap</span> <span class="n">bitmap</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">cache</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">url</span><span class="o">,</span> <span class="n">bitmap</span><span class="o">);</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="o">});</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">synchronized</span> <span class="n">MySingleton</span> <span class="nf">getInstance</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">mInstance</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">mInstance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">MySingleton</span><span class="o">(</span><span class="n">context</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">mInstance</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">RequestQueue</span> <span class="nf">getRequestQueue</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">mRequestQueue</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="c1">// getApplicationContext() is key, it keeps you from leaking the</span>
+</span><span class='line'>            <span class="c1">// Activity or BroadcastReceiver if someone passes one in.</span>
+</span><span class='line'>            <span class="n">mRequestQueue</span> <span class="o">=</span> <span class="n">Volley</span><span class="o">.</span><span class="na">newRequestQueue</span><span class="o">(</span><span class="n">mCtx</span><span class="o">.</span><span class="na">getApplicationContext</span><span class="o">());</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">mRequestQueue</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="kt">void</span> <span class="n">addToRequestQueue</span><span class="o">(</span><span class="n">Request</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">req</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">getRequestQueue</span><span class="o">().</span><span class="na">add</span><span class="o">(</span><span class="n">req</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">ImageLoader</span> <span class="nf">getImageLoader</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">mImageLoader</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>下面演示了利用单例类来执行RequestQueue的操作：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="c1">// Get a RequestQueue</span>
+</span><span class='line'><span class="n">RequestQueue</span> <span class="n">queue</span> <span class="o">=</span> <span class="n">MySingleton</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="k">this</span><span class="o">.</span><span class="na">getApplicationContext</span><span class="o">()).</span>
+</span><span class='line'>    <span class="n">getRequestQueue</span><span class="o">();</span>
+</span><span class='line'><span class="o">...</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Add a request (in this example, called stringRequest) to your RequestQueue.</span>
+</span><span class='line'><span class="n">MySingleton</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="k">this</span><span class="o">).</span><span class="na">addToRequestQueue</span><span class="o">(</span><span class="n">stringRequest</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<hr />
+
+<p><strong>学习自<a href="http://developer.android.com/training/volley/request-queue.html">http://developer.android.com/training/volley/request-queue.html</a>,欢迎交流讨论</strong></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/android-training-volley-simple-request/">Android Training - Volley(Lesson 1 - 发送简单的请求)</a></h1>
     
     
@@ -131,196 +992,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/android-training-volley-index/">Android Training - Volley(Lesson 0 - 序言)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-24T08:30:00+08:00" pubdate data-updated="true">Jun 24<span>th</span>, 2014</time>
-        
-         | <a href="/blog/android-training-volley-index/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><code>Volley</code> 是一个HTTP库，它能够帮助Android apps更方便的执行网络操作，最重要的是，它更快速高效。可以通过开源的 <a href="https://android.googlesource.com/platform/frameworks/volley">AOSP</a> 仓库获取到Volley 。</p>
-
-<hr />
-
-<p><strong>DEPENDENCIES AND PREREQUISITES</strong></p>
-
-<p>Android 1.6 (API Level 4) or higher</p>
-
-<p><strong>YOU SHOULD ALSO SEE</strong></p>
-
-<p>使用Volley来编写一个app，请参考<a href="https://github.com/google/iosched">2013 Google I/O schedule app</a>. 另外需要特别关注下面2个部分：
-* <a href="https://github.com/google/iosched/blob/master/android/src/main/java/com/google/android/apps/iosched/util/ImageLoader.java">ImageLoader</a>
-* <a href="https://github.com/google/iosched/blob/master/android/src/main/java/com/google/android/apps/iosched/util/BitmapCache.java">BitmapCache</a></p>
-
-<p><strong> <a href="https://developers.google.com/events/io/sessions/325304728">VIDEO - Volley:Easy,Fast Networking for Android</a> </strong></p>
-
-<hr />
-
-<p>Volley 有如下的优点：</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/android-training-volley-index/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/android-deeper-01-graphics-architecture/">Android Deeper(01) - Graphic Architecture</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-15T14:25:00+08:00" pubdate data-updated="true">May 15<span>th</span>, 2014</time>
-        
-         | <a href="/blog/android-deeper-01-graphics-architecture/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Android中有几个很重要的概念Surface, SurfaceHolder, EGLSurface, SurfaceView, GLSurfaceView, SurfaceTexture, TextureView与SurfaceFlinger。</p>
-
-<p>这篇文章会介绍Android图形架构的基本构成以及它们是如何在程序framework与多媒体系统中运作的。核心关注点是，图形数据的buffer是如何在系统中传递的。如果你曾经好奇过SurfaceView与TextureView的工作方式，或者是想知道Surface与EGLSurface是如何交互的，那么这篇文章将给你解答这些疑问。<strong>You&#8217;ve come to the right place.</strong></p>
-
-<p>大多数时候，我们都不需要了解这些类的使用原理，但是学习这些它们的工作原理可以为我们提供一种Sense，用来更加高效的工作。所以这里我们学习它们是如何工作的，而不仅仅是它们是如何使用的。</p>
-
-<h2>BufferQueue and gralloc</h2>
-
-<p>BufferQueue and grallocGraphiccal的核心是BufferQueue,它的角色是连接产生图形数据的生产者与显示数据的消费者。生产者与消费者可以再两个不同的进程，那么数据在系统中进行传递就依赖于BufferQueue。</p>
-
-<p>基础的用法是很直接简单的。生产者获取到一个buffer，制定了宽，高，pixel format与usage flags之后，再放到queue中。消费者获取到buffer，消费数据后，把buffer返回到queue中。</p>
-
-<ul>
-<li>生产者：dequeueBuffer() -> queueBuffer()</li>
-<li>消费者：acquireBuffer() -> releaseBuffer()</li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/android-deeper-01-graphics-architecture/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/android-notes-06-camera/">Android Notes(06) - Camera</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-04-21T21:24:00+08:00" pubdate data-updated="true">Apr 21<span>st</span>, 2014</time>
-        
-         | <a href="/blog/android-notes-06-camera/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Android framework为各种不同的Camera与Camera的特色功能提供了支持，使得可以在应用中进行拍照与录像。这篇文章会讨论一种简便，快速的拍照录像方式，为了给用户创建定制的相机体验，文章也会概述相机的高级功能。</p>
-
-<h2>0)开始之前</h2>
-
-<p>在应用中开启Android设备的相机功能之前，应该考量如下几个问题：</p>
-
-<ul>
-<li><strong>必须的相机硬件</strong> - 当然不能把一个包含相机功能的应用安装到一个连相机硬件都没有的设备上。因此，应该在mainfest文件中声明需要使用到相机。</li>
-<li><strong>快速获取图片还是定制相机</strong> - 应用将如何使用相机？是想做一个快速的抓拍还是录制一小段视频剪辑？还是说想提供一种新的相机使用方式？如果是快速的获取一张抓拍图片或者是一小段视频剪辑，建议查看下面的<strong>3)使用已经安装的相机应用。</strong>如果是为了开发一个定制相机功能的应用，查看下面的<strong>4)创建一个相机应用</strong>。</li>
-<li><strong>存储位置</strong> - 生成的图片与视频是只对自己的应用可见还是其它类似Gallery的应用也可以访问？即使自己的应用被卸载后也不能被其他应用访问吗？建议查看<strong>5)保存媒体文件</strong></li>
-</ul>
-
-
-<h2>1)简要概述</h2>
-
-<p>Android framework通过提供Camera API来支持拍照与录制视频的功能。下面是相关的类：</p>
-
-<ul>
-<li><a href="http://developer.android.com/reference/android/hardware/Camera.html"><strong>Camera</strong></a><br/>
-该类是控制相机硬件的基础的API。它可以用来拍照或者录制视频。</li>
-<li><a href="http://developer.android.com/reference/android/view/SurfaceView.html"><strong>SurfaceView</strong></a><br/>
-该类是用来呈现一个动态的相机预览界面。</li>
-<li><a href="http://developer.android.com/reference/android/media/MediaRecorder.html"><strong>MediaRecorder</strong></a><br/>
-该类用来使用相机录制视频。</li>
-<li><a href="http://developer.android.com/reference/android/content/Intent.html"><strong>Intent</strong></a><br/>
-使用<a href="http://developer.android.com/reference/android/provider/MediaStore.html#ACTION_IMAGE_CAPTURE">MediaStore.ACTION_IMAGE_CAPTURE</a> 或者 <a href="http://developer.android.com/reference/android/provider/MediaStore.html#ACTION_VIDEO_CAPTURE">MediaStore.ACTION_VIDEO_CAPTURE</a>作为Intent的action可以用来拍照与录制视频。</li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/android-notes-06-camera/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -334,6 +1005,18 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/android-training-volley-custom-request/">Android Training - Volley(Lesson 4 - 实现自定义的请求)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-volley-standard-request/">Android Training - Volley(Lesson 3 - 创建标准的请求)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-volley-request-queue/">Android Training - Volley(Lesson 2 - 建立请求队列)</a>
+      </li>
     
       <li class="post">
         <a href="/blog/android-training-volley-simple-request/">Android Training - Volley(Lesson 1 - 发送简单的请求)</a>
@@ -355,28 +1038,16 @@
         <a href="/blog/android-training-18-running-background-service-lesson-3/">Android Training(18) - 使用IntentService执行任务(Lesson 3 - 回传任务状态给发送方)</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/android-training-18-running-background-service-lesson-2/">Android Training(18) - 使用IntentService执行任务(Lesson 2 - 发送任务给IntentService)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-18-running-background-service-lesson-1/">Android Training(18) - 使用IntentService执行任务(Lesson 1 - 创建IntentService)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-deeper-00-touch-event-dispatch-process/">Android Deeper(00) - Touch事件分发响应机制</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (74)</a></li>
+  <li><a href='/blog/categories/android'>Android (77)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (7)</a></li>
-  <li><a href='/blog/categories/android-training'>Android:training (65)</a></li>
+  <li><a href='/blog/categories/android-training'>Android:training (68)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
 </ul>

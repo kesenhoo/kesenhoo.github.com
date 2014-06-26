@@ -9,7 +9,8 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="启动另外一个activity并不一定是单向的。你也可以启动另外一个activity然后接受一个result回来。为了接受这个result,你需要使用startActivityForResult()) (而不是startActivity()))。 例如， &hellip;">
+  <meta name="description" content="这节课会介绍如何使用现有的Camera程序来录制一个视频。和拍照一样，我们没有必要去重新发明录像程序。大多数的Android程序都有自带Camera来进行录像。(这一课的内容大多数与前面一课类似，简要带过，一些细节不赘述了) Request Camera Permission [请求权限] 1
+2 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +82,163 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/android-training-14-capturing-photos-lesson-2/">Android Training(14) - 捕获照片(Lesson 2 - 简单的录像动作)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-18T23:21:00+08:00" pubdate data-updated="true">Dec 18<span>th</span>, 2012</time>
+        
+         | <a href="/blog/android-training-14-capturing-photos-lesson-2/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>这节课会介绍如何使用现有的Camera程序来录制一个视频。和拍照一样，我们没有必要去重新发明录像程序。大多数的Android程序都有自带Camera来进行录像。(<em>这一课的内容大多数与前面一课类似，简要带过，一些细节不赘述了</em>)</p>
+
+<h2>Request Camera Permission [请求权限]</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;manifest</span> <span class="err">...</span> <span class="nt">&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;uses-feature</span> <span class="na">android:name=</span><span class="s">&quot;android.hardware.camera&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>    ...
+</span><span class='line'><span class="err">&lt;</span>/manifest ... &gt;
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>与上一课的拍照一样，你可以在启动Camera之前，使用hasSystemFeature(PackageManager.FEATURE_CAMERA).来检查是否存在Camera。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/android-training-14-capturing-photos-lesson-2/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/android-training-14-capturing-photos-lesson-1/">Android Training(14) - 捕获照片(Lesson 1 - 简单的拍照动作)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-18T22:21:00+08:00" pubdate data-updated="true">Dec 18<span>th</span>, 2012</time>
+        
+         | <a href="/blog/android-training-14-capturing-photos-lesson-1/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>在多媒体流行之前，世界是沉闷(dismal)并且特色稀少(featureless)的。还记得Gopher? (<em>Gopher是计算机上的一个工具软件，是Internet提供的一种由菜单式驱动的信息查询工具，采用客户机/服务器模式</em>)。因为你的app将要成为你的用户的生活的一部分，请赋予你的app能够把用户生活装进去的功能。使用内置的Camera，你的程序可以使得用户扩展（augment）他们所看的事物，生成唯一的头像，查找角落的人偶（zombies）,或者仅仅是分享他们的经验。</p>
+
+<p>这一章节，会教你如何简单的使用已经存在的Camera程序。在后面的课程中，你会更加深入的（ dive deeper ）学习如何直接控制Camera的硬件。</p>
+
+<p><strong>试试下面的例子程序</strong>
+<a href="http://developer.android.com/shareables/training/PhotoIntentActivity.zip">PhotoIntentActivity.zip</a></p>
+
+<hr />
+
+<p>假设你想通过你的客户端程序实现一个聚合全球天气的地图，上面会有各地的当前天气图片。那么集合图片只是你程序的一部分。你想要最简单的动作来获取图片，而不是重新发明（reinvent）一个camera。幸运的是，大多数Android设备都已经至少安装了一款相机程序。在这节课中，你会学习，如何拍照。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/android-training-14-capturing-photos-lesson-1/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/android-training-13-interacting-with-other-apps-lesson-3/">Android Training(13) - 与其他Apps进行交互(Lesson 3 - 允许其他app启动你的activity)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-04T22:12:00+08:00" pubdate data-updated="true">Dec 4<span>th</span>, 2012</time>
+        
+         | <a href="/blog/android-training-13-interacting-with-other-apps-lesson-3/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>前两节课主要讲了从你的app启动另外一个app。但是如果你的app可以响应前面发出的action，那么你的app应该做好响应的准备。例如，如果你创建了一个social app，它可以分享messages 或者 photos 给好友，那么最好你的app能够接收ACTION_SEND 的intent,这样当用户在其他app触发分享功能的时候，你的app能够出现在待选对话框。</p>
+
+<p>为了使得其他的app能够启动你的activity，你需要在你的manifest文件的<activity> 标签下添加<intent-filter> 的属性。</p>
+
+<p>当你的app被安装到设备上时，系统可以识别你的intent filter并把这些信息记录下来。当其他app通过执行 startActivity() 或者 startActivityForResult()方法，并使用implicit intent时，系统可以自动查找出那些可以响应这个intent的activity。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/android-training-13-interacting-with-other-apps-lesson-3/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/android-training-13-interacting-with-other-apps-lesson-2/">Android Training(13) - 与其他Apps进行交互(Lesson 2 - 从activity获取Result)</a></h1>
     
     
@@ -125,146 +283,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/android-training-13-interacting-with-other-apps-lesson-1/">Android Training(13) - 与其他Apps进行交互(Lesson 1 - 启动到另外一个app)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-12-03T20:55:00+08:00" pubdate data-updated="true">Dec 3<span>rd</span>, 2012</time>
-        
-         | <a href="/blog/android-training-13-interacting-with-other-apps-lesson-1/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><strong>章节概要：</strong></p>
-
-<ul>
-<li>一个Android app通常都会有好几个activities. 每一个activity的界面都可能允许用户执行一些特殊任务（例如查看地图或者是开始拍照等）。为了让用户从一个activity跳到另外一个activity，你的app必须使用Intent来定义你的app想做的事情。当你使用startActivity()的方法，而且参数是intent时，系统会使用这个 Intent 来定义并启动合适的app组件。使用intents还可以让你的app来启动另外一个app里面的activity。</li>
-<li>一个 Intent 可以显式的指明需要启动的模块，也可以隐式的指明自己可以处理哪种类型的动作。<em>(一个主动叫起别人，一个被特定类型的别人叫起)</em></li>
-<li>这一章节会演示如何使用Intent 来做一些与其他app之间的简单交互。类似，启动另外一个app,从其他app接受数据，并且使得你的app能够响应从其他发出的intent。</li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/android-training-13-interacting-with-other-apps-lesson-1/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/android-training-12-saving-data-lesson-3/">Android Training(12) - 保存数据(Lesson 3 - 保存到SQLite)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-11-30T21:46:00+08:00" pubdate data-updated="true">Nov 30<span>th</span>, 2012</time>
-        
-         | <a href="/blog/android-training-12-saving-data-lesson-3/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>对于重复或者结构化的数据（如联系人信息）等保存到DB是个不错的主意。这节课假定你已经熟悉SQL数据库的操作。在Android上可能会使用到的APIs，可以从<a href="http://developer.android.com/reference/android/database/sqlite/package-summary.html">android.database.sqlite</a>包中找到。</p>
-
-<h2>Define a Schema and Contract[定义Schema与Contract]</h2>
-
-<p>SQL中一个中重要的概念是schema：一种DB结构的正式声明。schema是从你创建DB的SQL语句中生成的。你可能会发现创建一个创建一个伴随类（companion class）是很有益的，这个类成为合约类（contract class）,它用一种系统化并且自动生成文档的方式，显示指定了你的schema样式。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/android-training-12-saving-data-lesson-3/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/android-training-12-saving-data-lesson-2/">Android Training(12) - 保存数据(Lesson 2 - 保存到文件)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-11-29T20:37:00+08:00" pubdate data-updated="true">Nov 29<span>th</span>, 2012</time>
-        
-         | <a href="/blog/android-training-12-saving-data-lesson-2/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Android使用与其他平台类似的基于磁盘文件系统(disk-based file systems)。这节课会描述如何在Android文件系统上使用 <a href="http://developer.android.com/reference/java/io/File.html">File</a> 的读写APIs。File 对象非常适合用来读写那种流式顺序的数据。例如，很适合用来读写图片文件或者是网络中交换的数据。这节课会演示在app中如何执行基本的文件操作任务。假定你已经对linux的文件系统与java.io中标准的I/O APIs有一定认识。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/android-training-12-saving-data-lesson-2/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/9/">&larr; Older</a>
@@ -280,6 +298,18 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/android-training-volley-custom-request/">Android Training - Volley(Lesson 4 - 实现自定义的请求)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-volley-standard-request/">Android Training - Volley(Lesson 3 - 创建标准的请求)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-volley-request-queue/">Android Training - Volley(Lesson 2 - 建立请求队列)</a>
+      </li>
     
       <li class="post">
         <a href="/blog/android-training-volley-simple-request/">Android Training - Volley(Lesson 1 - 发送简单的请求)</a>
@@ -301,28 +331,16 @@
         <a href="/blog/android-training-18-running-background-service-lesson-3/">Android Training(18) - 使用IntentService执行任务(Lesson 3 - 回传任务状态给发送方)</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/android-training-18-running-background-service-lesson-2/">Android Training(18) - 使用IntentService执行任务(Lesson 2 - 发送任务给IntentService)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-18-running-background-service-lesson-1/">Android Training(18) - 使用IntentService执行任务(Lesson 1 - 创建IntentService)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-deeper-00-touch-event-dispatch-process/">Android Deeper(00) - Touch事件分发响应机制</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (74)</a></li>
+  <li><a href='/blog/categories/android'>Android (77)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (7)</a></li>
-  <li><a href='/blog/categories/android-training'>Android:training (65)</a></li>
+  <li><a href='/blog/categories/android-training'>Android:training (68)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
 </ul>

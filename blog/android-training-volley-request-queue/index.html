@@ -1,0 +1,480 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Android Training - Volley(Lesson 2 - 建立请求队列) - 胡凯</title>
+  <meta name="author" content="Kesen Hoo">
+
+  
+  <meta name="description" content="前一节课演示了如何使用Volley.newRequestQueue这一简便的方法来建立一个RequestQueue，这是利用了Volley默认的优势。这节课会介绍如何显式的建立一个RequestQueue，以便满足你自定义的需求。 这节课同样会介绍一种推荐的实现方式： &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://hukai.me/blog/android-training-volley-request-queue/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="胡凯" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-37679268-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   class="no-sidebar"  >
+  <header role="banner"><hgroup>
+  <h1><a href="/">胡凯</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:hukai.me" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Android Training - Volley(Lesson 2 - 建立请求队列)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-24T21:03:00+08:00" pubdate data-updated="true">Jun 24<span>th</span>, 2014</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>前一节课演示了如何使用<code>Volley.newRequestQueue</code>这一简便的方法来建立一个<code>RequestQueue</code>，这是利用了Volley默认的优势。这节课会介绍如何显式的建立一个RequestQueue，以便满足你自定义的需求。</p>
+
+<p>这节课同样会介绍一种推荐的实现方式：创建一个单例的RequestQueue，这使得RequestQueue能够持续保持在你的app的生命周期中。</p>
+
+<h2>Set Up a Network and Cache</h2>
+
+<p>一个RequestQueue需要两部分来支持它的工作：一部分是网络操作用来执行请求的数据传输，另外一个是用来处理缓存操作的Cache。在Volley的工具箱中包含了标准的实现方式：<code>DiskBasedCache</code>提供了每个文件与对应响应数据一一映射的缓存实现。 <code>BasicNetwork</code>提供了一个网络传输的实现，连接方式可以是<a href="http://developer.android.com/reference/android/net/http/AndroidHttpClient.html">AndroidHttpClient</a> 或者是 <a href="http://developer.android.com/reference/java/net/HttpURLConnection.html">HttpURLConnection</a>.</p>
+
+<p><code>BasicNetwork</code>是Volley默认的网络操作实现方式。一个BasicNetwork必须使用HTTP Client进行初始化。这个Client通常是AndroidHttpClient 或者 HttpURLConnection:</p>
+
+<ul>
+<li>对于app target API level低于API 9(Gingerbread)的使用AndroidHttpClient。在Gingerbread之前，HttpURLConnection是不可靠的。对于这个的细节，请参考<a href="http://android-developers.blogspot.com/2011/09/androids-http-clients.html">Android&#8217;s HTTP Clients</a>。</li>
+<li>对于API Level 9以及以上的，会使用HttpURLConnection。</li>
+</ul>
+
+
+<p>为了创建一个能够执行在所有Android版本上的应用，你可以通过检查系统版本选择合适的HTTP Client。例如：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">HttpStack</span> <span class="n">stack</span><span class="o">;</span>
+</span><span class='line'><span class="o">...</span>
+</span><span class='line'><span class="c1">// If the device is running a version &gt;= Gingerbread...</span>
+</span><span class='line'><span class="k">if</span> <span class="o">(</span><span class="n">Build</span><span class="o">.</span><span class="na">VERSION</span><span class="o">.</span><span class="na">SDK_INT</span> <span class="o">&gt;=</span> <span class="n">Build</span><span class="o">.</span><span class="na">VERSION_CODES</span><span class="o">.</span><span class="na">GINGERBREAD</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="c1">// ...use HttpURLConnection for stack.</span>
+</span><span class='line'><span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>    <span class="c1">// ...use AndroidHttpClient for stack.</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="n">Network</span> <span class="n">network</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BasicNetwork</span><span class="o">(</span><span class="n">stack</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>下面的代码片段会掩饰如何一步步建立一个RequestQueue:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">RequestQueue</span> <span class="n">mRequestQueue</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Instantiate the cache</span>
+</span><span class='line'><span class="n">Cache</span> <span class="n">cache</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DiskBasedCache</span><span class="o">(</span><span class="n">getCacheDir</span><span class="o">(),</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="o">);</span> <span class="c1">// 1MB cap</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Set up the network to use HttpURLConnection as the HTTP client.</span>
+</span><span class='line'><span class="n">Network</span> <span class="n">network</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BasicNetwork</span><span class="o">(</span><span class="k">new</span> <span class="n">HurlStack</span><span class="o">());</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Instantiate the RequestQueue with the cache and network.</span>
+</span><span class='line'><span class="n">mRequestQueue</span> <span class="o">=</span> <span class="k">new</span> <span class="n">RequestQueue</span><span class="o">(</span><span class="n">cache</span><span class="o">,</span> <span class="n">network</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Start the queue</span>
+</span><span class='line'><span class="n">mRequestQueue</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">String</span> <span class="n">url</span> <span class="o">=</span><span class="s">&quot;http://www.myurl.com&quot;</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Formulate the request and handle the response.</span>
+</span><span class='line'><span class="n">StringRequest</span> <span class="n">stringRequest</span> <span class="o">=</span> <span class="k">new</span> <span class="n">StringRequest</span><span class="o">(</span><span class="n">Request</span><span class="o">.</span><span class="na">Method</span><span class="o">.</span><span class="na">GET</span><span class="o">,</span> <span class="n">url</span><span class="o">,</span>
+</span><span class='line'>        <span class="k">new</span> <span class="n">Response</span><span class="o">.</span><span class="na">Listener</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onResponse</span><span class="o">(</span><span class="n">String</span> <span class="n">response</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// Do something with the response</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">},</span>
+</span><span class='line'>    <span class="k">new</span> <span class="n">Response</span><span class="o">.</span><span class="na">ErrorListener</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="nd">@Override</span>
+</span><span class='line'>        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onErrorResponse</span><span class="o">(</span><span class="n">VolleyError</span> <span class="n">error</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="c1">// Handle error</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Add the request to the RequestQueue.</span>
+</span><span class='line'><span class="n">mRequestQueue</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">stringRequest</span><span class="o">);</span>
+</span><span class='line'><span class="o">...</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果你仅仅是想做一个单次的请求并且不想要线程池一直保留，你可以通过使用在前面一课：<a href="simple.html">发送一个简单的请求(Sending a Simple Request)</a>文章中提到<code>Volley.newRequestQueue()</code>方法在任何需要的时刻创建RequestQueue，然后在你的响应回调里面执行<code>stop()</code>方法来停止操作。但是更通常的做法是创建一个RequestQueue并设置为一个单例。下面将演示这种做法。</p>
+
+<h2>Use a Singleton Pattern</h2>
+
+<p>如果你的程序需要持续的使用网络，更加高效的方式应该是建立一个RequestQueue的单例，这样它能够持续保持在整个app的生命周期中。你可以通过多种方式来实现这个单例。推荐的方式是实现一个单例类，里面封装了RequestQueue对象与其他Volley的方法。另外一个方法是继承Application类，并在<code>Application.OnCreate()</code>方法里面建立RequestQueue。但是这个方法是不推荐的。因为一个static的单例能够以一种更加模块化的方式提供同样的功能。</p>
+
+<p>一个关键的概念是RequestQueue必须和Application context所关联的。而不是Activity的context。这可以确保RequestQueue可以在你的app生命周期中一直存活，而不会因为activity的重新创建而重新创建RequestQueue。(例如，当用户旋转设备时)。</p>
+
+<p>下面是一个单例类，提供了RequestQueue与ImageLoader的功能：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="kd">static</span> <span class="n">MySingleton</span> <span class="n">mInstance</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">RequestQueue</span> <span class="n">mRequestQueue</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">ImageLoader</span> <span class="n">mImageLoader</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">static</span> <span class="n">Context</span> <span class="n">mCtx</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">private</span> <span class="nf">MySingleton</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mCtx</span> <span class="o">=</span> <span class="n">context</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">mRequestQueue</span> <span class="o">=</span> <span class="n">getRequestQueue</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">mImageLoader</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ImageLoader</span><span class="o">(</span><span class="n">mRequestQueue</span><span class="o">,</span>
+</span><span class='line'>                <span class="k">new</span> <span class="n">ImageLoader</span><span class="o">.</span><span class="na">ImageCache</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>            <span class="kd">private</span> <span class="kd">final</span> <span class="n">LruCache</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">Bitmap</span><span class="o">&gt;</span>
+</span><span class='line'>                    <span class="n">cache</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LruCache</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">Bitmap</span><span class="o">&gt;(</span><span class="mi">20</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="nd">@Override</span>
+</span><span class='line'>            <span class="kd">public</span> <span class="n">Bitmap</span> <span class="nf">getBitmap</span><span class="o">(</span><span class="n">String</span> <span class="n">url</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="k">return</span> <span class="n">cache</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">url</span><span class="o">);</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="nd">@Override</span>
+</span><span class='line'>            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">putBitmap</span><span class="o">(</span><span class="n">String</span> <span class="n">url</span><span class="o">,</span> <span class="n">Bitmap</span> <span class="n">bitmap</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">cache</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">url</span><span class="o">,</span> <span class="n">bitmap</span><span class="o">);</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="o">});</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">synchronized</span> <span class="n">MySingleton</span> <span class="nf">getInstance</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">mInstance</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">mInstance</span> <span class="o">=</span> <span class="k">new</span> <span class="n">MySingleton</span><span class="o">(</span><span class="n">context</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">mInstance</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">RequestQueue</span> <span class="nf">getRequestQueue</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">mRequestQueue</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="c1">// getApplicationContext() is key, it keeps you from leaking the</span>
+</span><span class='line'>            <span class="c1">// Activity or BroadcastReceiver if someone passes one in.</span>
+</span><span class='line'>            <span class="n">mRequestQueue</span> <span class="o">=</span> <span class="n">Volley</span><span class="o">.</span><span class="na">newRequestQueue</span><span class="o">(</span><span class="n">mCtx</span><span class="o">.</span><span class="na">getApplicationContext</span><span class="o">());</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">mRequestQueue</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="kt">void</span> <span class="n">addToRequestQueue</span><span class="o">(</span><span class="n">Request</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">req</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">getRequestQueue</span><span class="o">().</span><span class="na">add</span><span class="o">(</span><span class="n">req</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">ImageLoader</span> <span class="nf">getImageLoader</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">mImageLoader</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>下面演示了利用单例类来执行RequestQueue的操作：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="c1">// Get a RequestQueue</span>
+</span><span class='line'><span class="n">RequestQueue</span> <span class="n">queue</span> <span class="o">=</span> <span class="n">MySingleton</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="k">this</span><span class="o">.</span><span class="na">getApplicationContext</span><span class="o">()).</span>
+</span><span class='line'>    <span class="n">getRequestQueue</span><span class="o">();</span>
+</span><span class='line'><span class="o">...</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Add a request (in this example, called stringRequest) to your RequestQueue.</span>
+</span><span class='line'><span class="n">MySingleton</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="k">this</span><span class="o">).</span><span class="na">addToRequestQueue</span><span class="o">(</span><span class="n">stringRequest</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<hr />
+
+<p><strong>学习自<a href="http://developer.android.com/training/volley/request-queue.html">http://developer.android.com/training/volley/request-queue.html</a>,欢迎交流讨论</strong></p>
+</div>
+
+
+  <footer>
+    <p>
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Text" property="dct:title" rel="dct:type">本站作品</span> 由 <a xmlns:cc="http://creativecommons.org/ns#" href="hukai.me" property="cc:attributionName" rel="cc:attributionURL">Kesen Hoo</a> 创作，采用 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a>进行许可。
+    </p>
+
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Kesen Hoo</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-24T21:03:00+08:00" pubdate data-updated="true">Jun 24<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/android/'>Android</a>, <a class='category' href='/blog/categories/android-training/'>Android:Training</a>
+  
+</span>
+
+
+    </p>
+    
+    
+      <div class="sharing">
+  
+  
+  
+  
+	<!-- JiaThis Button BEGIN -->
+<div class="jiathis_style_32x32">
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_renren"></a>
+	<a class="jiathis_button_linkedin"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share?uid=1723296" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript">
+var jiathis_config = {data_track_clickback:'true'};
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1342501457879302" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+  
+  
+</div>
+
+    
+    <br></br>
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/android-training-volley-simple-request/" title="Previous Post: Android Training - Volley(Lesson 1 - 发送简单的请求)">&laquo; Android Training - Volley(Lesson 1 - 发送简单的请求)</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/android-training-volley-standard-request/" title="Next Post: Android Training - Volley(Lesson 3 - 创建标准的请求)">Android Training - Volley(Lesson 3 - 创建标准的请求) &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Kesen Hoo -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'kesenhoo';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://hukai.me/blog/android-training-volley-request-queue/';
+        var disqus_url = 'http://hukai.me/blog/android-training-volley-request-queue/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
