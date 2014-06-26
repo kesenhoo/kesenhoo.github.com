@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android:Training | 胡凯]]></title>
   <link href="http://hukai.me/blog/categories/android-training/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2014-06-26T22:39:28+08:00</updated>
+  <updated>2014-06-26T22:53:15+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -53,6 +53,9 @@ HttpHeaderParser.parseCacheHeaders(response));
 <p>...
 }
 ```</p>
+
+<!-- More -->
+
 
 <p>请注意：</p>
 
@@ -176,6 +179,9 @@ protected Response&lt;T&gt; parseNetworkResponse(NetworkResponse response) {
 <li><p><code>ImageLoader</code> - 一个用来处理加载与缓存从网络上获取到的图片的帮助类。ImageLoader是管理协调大量的ImageRequest的类。例如，在ListView中需要显示大量缩略图的时候。ImageLoader为通常的Volley cache提供了更加前瞻的内存缓存，这个缓存对于防止图片抖动非常有用。。这还使得能够在避免阻挡或者延迟主线程的前提下在缓存中能够被Hit到。ImageLoader还能够实现响应联合Coalescing，每一个响应回调里面都可以设置bitmap到view上面。联合Coalescing使得能够同时提交多个响应，这提升了性能。</p></li>
 <li><p><code>NetworkImageView</code> - 在ImageLoader的基础上建立，替换ImageView进行使用。对于需要对ImageView设置网络图片的情况下使用很有效。NetworkImageView同样可以在view被detached的时候取消pending的请求。</p></li>
 </ul>
+
+
+<!-- More -->
 
 
 <h3>1.1)Use ImageRequest</h3>
@@ -398,6 +404,9 @@ MySingleton.getInstance(this).addToRequestQueue(jsObjRequest);
 <p>一个RequestQueue需要两部分来支持它的工作：一部分是网络操作用来执行请求的数据传输，另外一个是用来处理缓存操作的Cache。在Volley的工具箱中包含了标准的实现方式：<code>DiskBasedCache</code>提供了每个文件与对应响应数据一一映射的缓存实现。 <code>BasicNetwork</code>提供了一个网络传输的实现，连接方式可以是<a href="http://developer.android.com/reference/android/net/http/AndroidHttpClient.html">AndroidHttpClient</a> 或者是 <a href="http://developer.android.com/reference/java/net/HttpURLConnection.html">HttpURLConnection</a>.</p>
 
 <p><code>BasicNetwork</code>是Volley默认的网络操作实现方式。一个BasicNetwork必须使用HTTP Client进行初始化。这个Client通常是AndroidHttpClient 或者 HttpURLConnection:</p>
+
+<!-- More -->
+
 
 <ul>
 <li>对于app target API level低于API 9(Gingerbread)的使用AndroidHttpClient。在Gingerbread之前，HttpURLConnection是不可靠的。对于这个的细节，请参考<a href="http://android-developers.blogspot.com/2011/09/androids-http-clients.html">Android's HTTP Clients</a>。</li>
