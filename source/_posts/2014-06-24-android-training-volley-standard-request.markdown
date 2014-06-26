@@ -25,6 +25,9 @@ Volley为请求图片提供了如下的类。这些类依次有着依赖关系�
 
 * `NetworkImageView` - 在ImageLoader的基础上建立，替换ImageView进行使用。对于需要对ImageView设置网络图片的情况下使用很有效。NetworkImageView同样可以在view被detached的时候取消pending的请求。
 
+
+<!-- More -->
+
 ### 1.1)Use ImageRequest
 
 下面是一个使用ImageRequest的示例。它会获取指定URL的image病显示到app上。里面演示的RequestQueue是通过上一课提到的单例类实现的。

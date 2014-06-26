@@ -37,6 +37,9 @@ protected Response<T> parseNetworkResponse(
 }
 ```
 
+<!-- More -->
+
+
 请注意：
 
 * `parseNetworkResponse()`的参数是类型是`NetworkResponse`，这种参数包含了的响应数据内容有一个byte[]，HTTP status code以及response headers.
