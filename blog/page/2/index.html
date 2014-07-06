@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="Volley 是一个HTTP库，它能够帮助Android apps更方便的执行网络操作，最重要的是，它更快速高效。可以通过开源的 AOSP 仓库获取到Volley 。 DEPENDENCIES AND PREREQUISITES Android 1.6 (API Level 4) or &hellip;">
+  <meta name="description" content="使用Volley的方式是，你通过创建一个RequestQueue并传递Request对象给它。RequestQueue管理工作线程用来执行网络操作，从Cache中读取与写入数据，以及解析Http的响应内容。Requests执行raw responses的解析，Volley会把响应的数据分发给主线程 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -76,6 +76,61 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/android-training-volley-simple-request/">Android Training - Volley(Lesson 1 - 发送简单的请求)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-24T09:00:00+08:00" pubdate data-updated="true">Jun 24<span>th</span>, 2014</time>
+        
+         | <a href="/blog/android-training-volley-simple-request/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>使用Volley的方式是，你通过创建一个<code>RequestQueue</code>并传递<code>Request</code>对象给它。RequestQueue管理工作线程用来执行网络操作，从Cache中读取与写入数据，以及解析Http的响应内容。<code>Requests</code>执行raw responses的解析，Volley会把响应的数据分发给主线程。</p>
+
+<p>这节课会介绍如何使用<code>Volley.newRequestQueue</code>这个建立请求队列的方法来发送一个请求，在下一节课<a href="request-queue.html">建立一个请求队列Setting Up a RequestQueue</a>中会介绍你自己如何建立一个请求队列。</p>
+
+<p>这节课也会介绍如何添加一个请求到RequesutQueue以及如何取消一个请求。</p>
+
+<h2>Add the INTERNET Permission</h2>
+
+<p>为了使用Volley，你必须添加<code>android.permission.INTERNET</code>权限到你的manifest文件中。没有这个权限，你的app将无法访问网络。</p>
+
+<h2>Use newRequestQueue</h2>
+
+<p>Volley提供了一个简便的方法：<code>Volley.newRequestQueue</code>用来为你建立一个<code>RequestQueue</code>，使用默认值，并启动这个队列。例如：</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/android-training-volley-simple-request/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -267,110 +322,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/android-training-18-running-background-service-lesson-3/">Android Training(18) - 使用IntentService执行任务(Lesson 3 - 回传任务状态给发送方)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-04-20T22:01:00+08:00" pubdate data-updated="true">Apr 20<span>th</span>, 2014</time>
-        
-         | <a href="/blog/android-training-18-running-background-service-lesson-3/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>这章节会演示如何回传IntentService中执行的任务状态与结果给发送方。 例如，回传任务的状态给Activity并进行更新UI。推荐的方式是使用<a href="http://developer.android.com/reference/android/support/v4/content/LocalBroadcastManager.html">LocalBroadcastManager</a>，这个组件可以限制broadcast只在自己的App中进行传递。</p>
-
-<h2>Report Status From an IntentService</h2>
-
-<p>为了在IntentService中向其他组件发送任务状态，首先创建一个Intent并在data字段中包含需要传递的信息。作为一个可选项，还可以给这个Intent添加一个action与data URI。</p>
-
-<p>下一步，通过执行<a href="http://developer.android.com/reference/android/support/v4/content/LocalBroadcastManager.html#sendBroadcast(android.content.Intent">LocalBroadcastManager.sendBroadcast()</a>))来发送Intent。Intent被发送到任何有注册接受它的组件中。为了获取到LocalBroadcastManager的实例，可以执行getInstance().代码示例如下：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">Constants</span> <span class="o">{</span>
-</span><span class='line'>    <span class="o">...</span>
-</span><span class='line'>    <span class="c1">// Defines a custom Intent action</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">BROADCAST_ACTION</span> <span class="o">=</span>
-</span><span class='line'>        <span class="s">&quot;com.example.android.threadsample.BROADCAST&quot;</span><span class="o">;</span>
-</span><span class='line'>    <span class="o">...</span>
-</span><span class='line'>    <span class="c1">// Defines the key for the status &quot;extra&quot; in an Intent</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">EXTENDED_DATA_STATUS</span> <span class="o">=</span>
-</span><span class='line'>        <span class="s">&quot;com.example.android.threadsample.STATUS&quot;</span><span class="o">;</span>
-</span><span class='line'>    <span class="o">...</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">RSSPullService</span> <span class="kd">extends</span> <span class="n">IntentService</span> <span class="o">{</span>
-</span><span class='line'><span class="o">...</span>
-</span><span class='line'>    <span class="cm">/*</span>
-</span><span class='line'><span class="cm">     * Creates a new Intent containing a Uri object</span>
-</span><span class='line'><span class="cm">     * BROADCAST_ACTION is a custom Intent action</span>
-</span><span class='line'><span class="cm">     */</span>
-</span><span class='line'>    <span class="n">Intent</span> <span class="n">localIntent</span> <span class="o">=</span>
-</span><span class='line'>            <span class="k">new</span> <span class="nf">Intent</span><span class="o">(</span><span class="n">Constants</span><span class="o">.</span><span class="na">BROADCAST_ACTION</span><span class="o">)</span>
-</span><span class='line'>            <span class="c1">// Puts the status into the Intent</span>
-</span><span class='line'>            <span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="n">Constants</span><span class="o">.</span><span class="na">EXTENDED_DATA_STATUS</span><span class="o">,</span> <span class="n">status</span><span class="o">);</span>
-</span><span class='line'>    <span class="c1">// Broadcasts the Intent to receivers in this app.</span>
-</span><span class='line'>    <span class="n">LocalBroadcastManager</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="k">this</span><span class="o">).</span><span class="na">sendBroadcast</span><span class="o">(</span><span class="n">localIntent</span><span class="o">);</span>
-</span><span class='line'><span class="o">...</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/android-training-18-running-background-service-lesson-3/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -386,6 +337,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/android-training-performance-anr/">Android Training - 避免程序无响应ANR</a>
+      </li>
     
       <li class="post">
         <a href="/blog/android-training-volley-custom-request/">Android Training - Volley(Lesson 4 - 实现自定义的请求)</a>
@@ -415,20 +370,16 @@
         <a href="/blog/android-notes-06-camera/">Android Notes(06) - Camera</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/android-training-18-running-background-service-lesson-3/">Android Training(18) - 使用IntentService执行任务(Lesson 3 - 回传任务状态给发送方)</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (77)</a></li>
+  <li><a href='/blog/categories/android'>Android (78)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (7)</a></li>
-  <li><a href='/blog/categories/android-training'>Android:training (68)</a></li>
+  <li><a href='/blog/categories/android-training'>Android:training (69)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
 </ul>

@@ -4,7 +4,7 @@
   <title><![CDATA[胡凯]]></title>
   <link href="http://hukai.me/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2014-06-28T17:12:33+08:00</updated>
+  <updated>2014-07-06T12:25:27+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -12,6 +12,130 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training - 避免程序无响应ANR]]></title>
+    <link href="http://hukai.me/blog/android-training-performance-anr/"/>
+    <updated>2014-07-06T12:09:00+08:00</updated>
+    <id>http://hukai.me/blog/android-training-performance-anr</id>
+    <content type="html"><![CDATA[<p>可能你写的代码在性能测试上表现良好，但是你的应用仍然有时候会反应迟缓(sluggish)，停顿(hang)或者长时间卡死(frezze)，或者应用处理输入的数据花费时间过长。对于你的应用来说最槽糕的事情是出现&#8221;程序无响应(Application Not Responding)&#8221; (ANR)的警示框。</p>
+
+<p>在Android中，系统通过显示ANR警示框来保护程序的长时间无响应。对话框如下：</p>
+
+<p><img src="http://hukai.me/images/anr.png" alt="anr" /></p>
+
+<p>此时，你的应用已经经历过一段时间的无法响应了，因此系统提供用户可以退出应用的选择。为你的程序提供良好的响应性是至关重要的，这样才能够避免系统为用户显示ANR的警示框。</p>
+
+<p>这节课描述了Android系统是如何判断一个应用不可响应的。这节课还会提供程序编写的指导原则，确保你的程序保持响应性。</p>
+
+<h2>是什么导致了ANR?(What Triggers ANR?)</h2>
+
+<p>通常来说，系统会在程序无法响应用户的输入事件时显示ANR。例如，如果一个程序在UI线程执行I/O操作(通常是网络请求或者是文件读写)，这样系统就无法处理用户的输入事件。或者是应用在UI线程花费了太多的时间用来建立一个复杂的在内存中的数据结构，又或者是在一个游戏程序的UI线程中执行了一个复杂耗时的计算移动的操作。确保那些计算操作高效是很重要的，不过即使是最高效的代码也是需要花时间执行的。</p>
+
+<!-- More -->
+
+
+<p><strong>对于你的应用中任何可能执行时间长的操作，你都不应该执行在UI线程</strong>。你可以创建一个工作线程，把那些操作都执行在工作线程中。这确保了UI线程(这个线程会负责处理UI事件) 能够顺利执行，也预防了系统因代码僵死而崩溃。因为UI线程是和类级别相关联的，你可以把相应性作为一个类级别(class-level)的问题(相比来说，代码性能则属于方法级别(method-level)的问题)</p>
+
+<p>在Android中，程序的响应性是由Activity Manager与Window Manager系统服务来负责监控的。当系统监测到下面的条件之一时会显示ANR的对话框:</p>
+
+<ul>
+<li>对输入事件(例如硬件点击或者屏幕触摸事件)，5秒内都无响应。</li>
+<li>BroadReceiver不能够在10秒内结束接收到任务。</li>
+</ul>
+
+
+<h2>如何避免ANRs(How to Avoid ANRs)</h2>
+
+<p>Android程序通常是执行在默认的UI线程(也可以成为main线程)中的。这意味着在UI线程中执行的任何长时间的操作都可能触发ANR，因为程序没有给自己处理输入事件或者broadcast事件的机会。</p>
+
+<p>因此，任何执行在UI线程的方法都应该尽可能的简短快速。特别是，在activity的生命周期的关键方法<code>onCreate()</code>与<code>onResume()</code>方法中应该尽可能的做比较少的事情。类似网络或者DB操作等可能长时间执行的操作，或者是类似调整bitmap大小等需要长时间计算的操作，都应该执行在工作线程中。(在DB操作中，可以通过异步的网络请求)。</p>
+
+<p>为了执行一个长时间的耗时操作而创建一个工作线程最方便高效的方式是使用<code>AsyncTask</code>。只需要继承AsyncTask并实现<code>doInBackground()</code>方法来执行任务即可。为了把任务执行的进度呈现给用户，你可以执行<code>publishProgress()</code>方法，这个方法会触发<code>onProgressUpdate()</code>的回调方法。在<code>onProgressUpdate()</code>的回调方法中(它执行在UI线程)，你可以执行通知用户进度的操作，例如：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="kd">class</span> <span class="nc">DownloadFilesTask</span> <span class="kd">extends</span> <span class="n">AsyncTask</span><span class="o">&lt;</span><span class="n">URL</span><span class="o">,</span> <span class="n">Integer</span><span class="o">,</span> <span class="n">Long</span><span class="o">&gt;</span> <span class="o">{</span>
+</span><span class='line'>    <span class="c1">// Do the long-running work in here</span>
+</span><span class='line'>    <span class="kd">protected</span> <span class="n">Long</span> <span class="nf">doInBackground</span><span class="o">(</span><span class="n">URL</span><span class="o">...</span> <span class="n">urls</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kt">int</span> <span class="n">count</span> <span class="o">=</span> <span class="n">urls</span><span class="o">.</span><span class="na">length</span><span class="o">;</span>
+</span><span class='line'>        <span class="kt">long</span> <span class="n">totalSize</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">count</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">totalSize</span> <span class="o">+=</span> <span class="n">Downloader</span><span class="o">.</span><span class="na">downloadFile</span><span class="o">(</span><span class="n">urls</span><span class="o">[</span><span class="n">i</span><span class="o">]);</span>
+</span><span class='line'>            <span class="n">publishProgress</span><span class="o">((</span><span class="kt">int</span><span class="o">)</span> <span class="o">((</span><span class="n">i</span> <span class="o">/</span> <span class="o">(</span><span class="kt">float</span><span class="o">)</span> <span class="n">count</span><span class="o">)</span> <span class="o">*</span> <span class="mi">100</span><span class="o">));</span>
+</span><span class='line'>            <span class="c1">// Escape early if cancel() is called</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">isCancelled</span><span class="o">())</span> <span class="k">break</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">totalSize</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// This is called each time you call publishProgress()</span>
+</span><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onProgressUpdate</span><span class="o">(</span><span class="n">Integer</span><span class="o">...</span> <span class="n">progress</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">setProgressPercent</span><span class="o">(</span><span class="n">progress</span><span class="o">[</span><span class="mi">0</span><span class="o">]);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// This is called when doInBackground() is finished</span>
+</span><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onPostExecute</span><span class="o">(</span><span class="n">Long</span> <span class="n">result</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">showNotification</span><span class="o">(</span><span class="s">&quot;Downloaded &quot;</span> <span class="o">+</span> <span class="n">result</span> <span class="o">+</span> <span class="s">&quot; bytes&quot;</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>为了能够执行这个工作线程，只需要创建一个实例并执行<code>execute()</code>:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="k">new</span> <span class="nf">DownloadFilesTask</span><span class="o">().</span><span class="na">execute</span><span class="o">(</span><span class="n">url1</span><span class="o">,</span> <span class="n">url2</span><span class="o">,</span> <span class="n">url3</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>相比起AsycnTask来说，创建自己的线程或者HandlerThread稍微复杂一点。如果你想这样做，<strong>你应该通过<code>Process.setThreadPriority()</code>并传递<code>THREAD_PRIORITY_BACKGROUND</code>来设置线程的优先级为&#8221;background&#8221;。</strong>如果你不通过这个方式来给线程设置一个低的优先级，那么这个线程仍然会使得你的应用显得卡顿，因为这个线程默认与UI线程有着同样的优先级。</p>
+
+<p>如果你实现了Thread或者HandlerThread，请确保你的UI线程不会因为等待工作线程的某个任务而去执行Thread.wait()或者Thread.sleep()。UI线程不应该去等待工作线程完成某个任务，你的UI现场应该提供一个Handler给其他工作线程，这样工作线程能够通过这个Handler在任务结束的时候通知UI线程。使用这样的方式来设计你的应用程序可以使得你的程序UI线程保持响应性，以此来避免ANR。</p>
+
+<p>BroadcastReceiver有特定执行时间的限制说明了broadcast receivers应该做的是：简短快速的任务，避免执行费时的操作，例如保存数据或者注册一个Notification。正如在UI线程中执行的方法一样，程序应该避免在broadcast receiver中执行费时的长任务。但不是采用通过工作线程来执行复杂的任务的方式，你的程序应该启动一个IntentService来响应intent broadcast的长时间任务。</p>
+
+<blockquote><p><strong>Tip:</strong> 你可以使用StrictMode来帮助寻找因为不小心加入到UI线程的潜在的长时间执行的操作，例如网络或者DB相关的任务。</p></blockquote>
+
+<h2>增加响应性(Reinforce Responsiveness)</h2>
+
+<p>通常来说，100ms - 200ms是用户能够察觉到卡顿的上限。这样的话，下面有一些避免ANR的技巧：</p>
+
+<ul>
+<li>如果你的程序需要响应正在后台加载的任务，在你的UI中可以显示ProgressBar来显示进度。</li>
+<li>对游戏程序，在工作线程执行计算的任务。</li>
+<li>如果你的程序在启动阶段有一个耗时的初始化操作，可以考虑显示一个闪屏，要么尽快的显示主界面，然后马上显示一个加载的对话框，异步加载数据。无论哪种情况，你都应该显示一个进度信息，以免用户感觉程序有卡顿的情况。</li>
+<li>使用性能测试工具，例如Systrace与Traceview来判断程序中影响响应性的瓶颈。</li>
+</ul>
+
+
+<hr />
+
+<p><strong>学习自<a href="http://developer.android.com/training/perf-anr.html">http://developer.android.com/training/perf-anr.html</a>,欢迎交流讨论</strong></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Android Training - Volley(Lesson 4 - 实现自定义的请求)]]></title>
@@ -4999,245 +5123,6 @@
 
 <p><strong>学习自：<a href="http://developer.android.com/training/displaying-bitmaps/manage-memory.html">http://developer.android.com/training/displaying-bitmaps/manage-memory.html</a>，请多指教，谢谢！</strong><br/>
 <strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Notes(05) - Tasks and Back Stack]]></title>
-    <link href="http://hukai.me/blog/android-notes-05-task-and-back-stack/"/>
-    <updated>2013-04-20T20:42:00+08:00</updated>
-    <id>http://hukai.me/blog/android-notes-05-task-and-back-stack</id>
-    <content type="html"><![CDATA[<ul>
-<li>所有的activities都归属于一个task。</li>
-<li>一个task包含了一些activities，这些activities以用户与他们的交互前后为顺序存放在task中。</li>
-<li>Tasks可以把activies放置在background并且保存每一个activites的状态，以便于用户可以切换到其他task而不至于丢失之前的活动状态。</li>
-</ul>
-
-
-<h1>要点概述</h1>
-
-<p>一个程序通常包含了多个actvities。每一个activity都应该围绕用户需要执行的一个特定功能而进行设计，并且可以启动其他的activites。例如:一个邮件程序应该拥有一个显示新邮件的列表。当用户选择其中一封邮件，一个新的activity将打开用来显示邮件内容。</p>
-
-<!-- more -->
-
-
-<p>一个activity甚至可以启动设备上其他程序的activites。例如：如果你的程序想要发送邮件，你可以定义一个intent来表达你的请求。其他可以接收这个请求的程序则会对这个请求作出响应。当使用其他程序的组件把邮件发送出去之后，你自己的activity将会resume，这样另外一个程序的发邮件组件看起来像是你的程序中的一部分。尽管真正发邮件的activites也许是来自其他不同的程序，Android会通过保存那些activites到同一个task中的方式让用户感觉到无缝的体验。</p>
-
-<p>一个task是用户执行一个确定的动作所会用到的activites的集合。那些activities被安置到一个stack中 (也就是&#8221;back stack&#8221;), 他们以每个activity被打开的顺序方式存放在stack中。</p>
-
-<p>设备Home界面是大多数tasks的起始点。当用户点击程序在launcher或者Home上的启动图标时，这个程序的task则变成了foreground的。如果程序之前不存在task(程序最近并没有被使用过), 那么一个新的task将被创建并且程序的&#8221;main&#8221; activity将被打开并作为stack的root activity。</p>
-
-<p>当目前的activity启动另外一个activity时，新的activity被压入栈中作为栈顶并且获取到了focus。前面的那个activity则以stopped的状态继续保留在stack中。当一个activity stops时，系统会保留它的UI状态。当用户点击back按钮时，当前的activity从栈顶退出并被destroyed，之前的activity则resume(之前保存的UI状态得到恢复). 在栈中的Activities的是不会被重新排序的，仅仅是做入栈与出栈的动作。当被启动时入栈，用户点击后退时出栈。下图演示了上面提到的情况：</p>
-
-<p><img src="http://hukai.me/images/articles/diagram_backstack.png" title="Figure 1. A representation of how each new activity in a task adds an item to the back stack. When the user presses the Back button, the current activity is destroyed and the previous activity resumes." alt="diagram_backstack.png" /></p>
-
-<p>如果用户持续点击back按钮，那么在栈中的每一个activity都会做退栈并显示之前activity的动作, 直到用户退回到Home界面(或者是用户开始task的地方).当所有的activities都从栈中被移除之后，这个task也就消失了。</p>
-
-<p>一个task是一个紧密结合的单元，当用户开始一个新的task或者通过点击Home按钮回到Home桌面时，之前的task会整体移动到background。当在background时，在task中的所有的activity都是stopped状态的。但是这个task的回退栈仍然保留了与系统交互的特质，仅仅是失去了focus而已。如下图所示：</p>
-
-<p><img src="http://hukai.me/images/articles/diagram_multitasking.png" title="Figure 2. Two tasks: Task B receives user interaction in the foreground, while Task A is in the background, waiting to be resumed." alt="diagram_multitasking.png" /></p>
-
-<p>一个task可以返回到&#8221;foreground&#8221;，这样用户可以从他们离开的地方重新开始操作。例如，当前task(Task A)的栈中有三个activities. 用户点击Home按钮，然后从桌面启动一个新的程序. 当Home界面出现时，Task A变成了background的. 当新的程序启动，系统为它启动一个新的task，里面包含了它自己的activites. 在用户与那个程序交互完之后，重新退回桌面并选择之前启动的task A. 这个时候，Task A重新回到foreground, 在stack中的那三个activities被重新选中，栈顶的那个activity被resume. 此时，用户仍然可以选择通过切回Home，再次启动task B.( 或者通过长按Home按钮触发最近使用的task界面进行选择). 这便是Android中的多任务的一个例子.</p>
-
-<p><strong>Note:</strong> 众多tasks都可以一并在后台被Hold住。然而，如果用户同时执行了多个后台任务，系统便会为了恢复内存而开始销毁后台activities. 这会导致activity状态丢失. 关于着部分内容，请看下面的Activity state部分.</p>
-
-<p>因为在back stack中的activities是不会被重新调整顺序的。如果你的程序中的某个特定的activity可以被多个activity所叫起，那么将会为那个特定activity创建一个新的实例并压入栈中(而不是把那个activity之前的实例移动到栈顶). 如下图所示:你程序中的一个activity可以被多次实例化(即使是在不同的task中)。如果用户通过点击Back按钮回退，每一个实例都将以他们被打开的顺序依次被重新呈现。然而，如果你不想一个activity被重复实例化，你可以修改这种行为。关于如何修改这种行为，将在下面的Managing Tasks中讲到.</p>
-
-<p><img src="http://hukai.me/images/articles/diagram_multiple_instances.png" title="Figure 3. A single activity is instantiated multiple times." alt="diagram_multiple_instances.png" /></p>
-
-<p><strong>总结一下系统默认的activities与tasks的行为:</strong></p>
-
-<ul>
-<li>当Activity A启动Activity B时, Activity A会是stopped, 但是系统会保存它的状态(例如scroll的位置与填表格的文字). 如果用户在activity B时点击Back按钮，那么activity A会恢复它之前保存的状态信息.</li>
-<li>当用户通过点击Home按钮离开一个task时，当前的activity会是stopped并且它的task会退到background. 系统保留task中的每一个activity. 如果用户之后通过点击启动图标来重新叫起它,task会成为foreground的并且栈顶的activity会得到恢复.</li>
-<li>如果用户点击Back按钮, 当前activity会从栈中退出并被destroyed. 在栈中的前一个activity得到resumed. 当一个activity被destroyed, 系统不会再保留activity的状态信息.</li>
-<li>Activities可以被多次实例化，即使是请求来自其他tasks.</li>
-</ul>
-
-
-<h1>Saving Activity State(保存Activity状态)</h1>
-
-<p>正如上面提到的，当activity stopped时，系统默认会保存它的状态. 这样的话, 当用户回退到之前的activity, 它的UI将和离开时一致. 然而, 如果activity被destoryed并且需要recreated时，你可以并且应该主动使用activity的callback方法来保存它的状态信息.</p>
-
-<p>当系统stop你的某个activity时, 系统可能会在需要恢复内存时destory那个stop状态的activity. 当发生这件事时，关于activity的状态信息则会丢失. 即使真的发生那样的情况, 系统仍然为那个activity在back stack中保留了位置, 但是当这个activity成为栈顶activity时, 系统必须recreate它(而不是resume它). 为了避免丢失用户的工作内容, 你应该主动通过实现<a href="http://developer.android.com/reference/android/app/Activity.html#onSaveInstanceState(android.os.Bundle">onSaveInstanceState()</a>)回调方法来保存那些信息.</p>
-
-<p>想了解更多关于如何保存activity的状态，请参考<a href="http://developer.android.com/guide/components/activities.html#SavingActivityState">Activities</a>.</p>
-
-<h1>Managing Tasks(管理Tasks)</h1>
-
-<p>Android系统默认的管理tasks与back stack的方法使用于大部分情况, 对于大多数程序来说, 你不需要担心你的activites是如何与task进行联系的，它们又是如何存放在back stack中的. 但是你可能想要打断通常的行为, 可能你想要在你的程序中的某个activity被启动时会创建一个新的task而不是放置到旧的task中; 或者, 当你启动一个activity，你想要把已经存在的某个实例放置到栈顶(而不是在栈顶创建一个新的实例); 又或者说, 你想要在用户退出task时除了根activity之外清除栈中其它的activities.</p>
-
-<p>你可以通过在manifest的<activity>标签下设置属性，并且在把intent传递给startActivity()方法之前为intent设置flag.</p>
-
-<p>关于此事, 在<activity>标签下可以设置的主要属性为:<br/>
-* taskAffinity
-* launchMode
-* allowTaskReparenting
-* clearTaskOnLaunch
-* alwaysRetainTaskState
-* finishOnTaskLaunch</p>
-
-<p>你可以为intent设置flag的主要值有:<br/>
-* FLAG_ACTIVITY_NEW_TASK
-* FLAG_ACTIVITY_CLEAR_TOP
-* FLAG_ACTIVITY_SINGLE_TOP</p>
-
-<p>下面将会讲解如何使用上面定义的方法<br/>
-<strong>Caution:</strong> 大多数程序不应该打断系统默认的activities与tasks之间的行为. 如果你确定有必要修改默认的行为, 请谨慎使用并确保用户切换与回退的行为是可用正常的. 请确保你的设计行为不会对用户期待的体验有冲突.</p>
-
-<h2>(0)Defining launch modes(定义启动模式)</h2>
-
-<p>启动模式允许你定义一个activity的实例与当前task是如何结合的. 你可以用下面两种方式来定义不同的启动模式:</p>
-
-<ul>
-<li><p><strong>Using the manifest file</strong><br/>
-当你在manifest文件中定义一个activity时，你可以指定当它启动时与task的结合方式.</p></li>
-<li><p><strong>Using Intent flags</strong><br/>
-当你调用startActivity(), 你可以对intent进行设置flag来表示这个activity将与task如何进行结合.</p></li>
-</ul>
-
-
-<p>像这样, 如果Activity A 启动 Activity B, 那么Activity B 可以在它的manifest中定义它应该如何与当前的task进行联合，同样Activity A 也可以请求Activity B 应该如何与当前task进行结合. <strong>如果两个都有定义，那么A的请求(定义在Intent中的)的优先级比B的请求(定义在manifest中)要更高</strong>.</p>
-
-<p><strong>Note:</strong>某些可以定义在manifest中的启动模式并不一定在intent flag中可以找到对应的方式. 同样,某些在intent flag中可以找到的并不一定可以在manifest中进行设置.</p>
-
-<h3>Using the manifest file</h3>
-
-<p>在manifest的<activity>标签下设置<strong>launchMode</strong>属性，一共可以设置下面4种类型的启动模式:</p>
-
-<hr />
-
-<ul>
-<li><strong>&#8220;standard&#8221;</strong> (the default mode)</li>
-</ul>
-
-
-<p>系统默认的启动模式. 系统在task中创建一个新的实例，activity可以被多次实例化. 每一个实例可以属于不同的task, 同样一个task可以有多个实例.</p>
-
-<ul>
-<li><strong>&#8220;singleTop&#8221;</strong></li>
-</ul>
-
-
-<p>如果activity的实例已经存在于当前task的栈顶, 系统会通过调用它的onNewIntent()方法把intent导向那个实例, 而不是为那个activity创建新的实例. activity可以被多次实例化，每一个实例可以属于不同的tasks, 同样一个task可以有多个实例 (仅仅当目前栈顶activity不是那个activity时才行，否则栈顶元素就是想要创建的activity的实例的话，则不会重复创建).</p>
-
-<p>例如, 某个栈中的元素由root至top依次为activity A-B-C-D; Acivity D是栈顶. 一个intent来到activity D中. 如果D是默认的&#8221;standard&#8221;启动模式, 那么stack则会变成A-B-C-D-D. 然而, 如果D的启动模式是&#8221;singleTop&#8221;, 那么D将通过onNewIntent()来接受那个intent, 栈结构仍然是A-B-C-D. 然而, 如果Activity B接受到一个intent, 那么即使现在是single top模式，仍然会创建一个新的B加入到栈中.(A-B-C-D-B)</p>
-
-<p><strong>Note:</strong> 当一个activity的实例被创建时，用户可以点击Back按钮来回退到之前的activity. <strong>但是当已经存在的某个实例需要处理一个新的intent时，用户在这个intent还没有到达onNewIntent()方法之前是没有办法通过点击back按钮来回退的.</strong></p>
-
-<ul>
-<li><strong>&#8220;singleTask&#8221;</strong></li>
-</ul>
-
-
-<p>系统会创建一个新的task并把实例化的activity作为task的root元素(这个task还可以继续添加其他activity的实例). <strong>然而, 如果这个activity的实例已经存在于另外一个task中，系统会通过调用onNewIntent()方法把intent导向已经存在的实例中, 而不是创建一个新的实例. 某一时刻，activity的实例只能存在一个.</strong></p>
-
-<p><strong>Note:</strong>尽管activity是在一个新的task中被启动的, Back按钮仍然是可以回退到上一个activity的.</p>
-
-<ul>
-<li><strong>&#8220;singleInstance&#8221;.</strong></li>
-</ul>
-
-
-<p>除了系统不会再对拥有的那个activity的task添加新的其他实例之外，与&#8221;singleTask&#8221;是类似的. activity的实例总是唯一的，并且是task中唯一的一个元素. 并且task是新创建的.</p>
-
-<hr />
-
-<p>另外一个例子, Android的Browser程序通过为web browser activity在manifest中指定singleTask模式定义了activity总是在它自己的taks中打开. 这意味着，如果你的程序定义了一个intent来打开Android Browser, 它的activity并不是在你的程序task中被打开的. 要么为browser启动一个新的task，要么把browser正在后台允运行的task带到forgound来处理那个Intent.<br/>
-<strong>???</strong>(<em>奇怪，前面不是说intent请求的优先级比manifest中的要高吗？这里怎么会这样？</em>)</p>
-
-<p>不管是启动一个新的task还是在原来的task中，Back按钮都可以回退到前面的activity. 然而，如果你启动的activity的launch mode定义为singleTask, 然后如果那个activity的某个实例已经存在于一个background的task中，那么这个background的task的所有activites会<strong>整个全部</strong>被带到foreground的. 下图Figure 4 演示了这种情况：</p>
-
-<p><img src="http://hukai.me/images/articles/diagram_backstack_singletask_multiactivity.png" title="Figure 4. A representation of how an activity with launch mode &quot;singleTask&quot; is added to the back stack. If the activity is already a part of a background task with its own back stack, then the entire back stack also comes forward, on top of the current task." alt="diagram_backstack_singletask_multiactivity.png" /></p>
-
-<p><strong>Note:</strong> 通过manifest中launchMode属性设置的方式定义的启动模式可以被intent中的flag所覆盖，请看下面的解释.</p>
-
-<h3>Using Intent flags</h3>
-
-<ul>
-<li><p>FLAG_ACTIVITY_NEW_TASK<br/>
-在新的task中启动activity. 如果你要启动的activity已经存在于某个运行的task中, 那么这个task会整个被提升为foregound的，activity会通过onNewIntent()来接收intent.这部分的行为与singleTask启动模式是一致的.</p></li>
-<li><p>FLAG_ACTIVITY_SINGLE_TOP<br/>
-如果在栈顶的activity接受到这样的intent, 那么已经存在于栈顶的实例会通过onNewIntent()来获取intent, 而不是创建一个新的实例. 这部门的行为与singleTop启动模式是一致的.</p></li>
-<li><p>FLAG_ACTIVITY_CLEAR_TOP<br/>
-如果被启动的activity已经存在于当前运行的task中, 不是为那个activity启动一个新的实例，而是在这个activity实例之上的activities都被destoryed，intent被通过onNewIntent()传递到这个实例中，并且这个时候，它就成了栈顶元素. 这个行为在launchMode的属性中并没有对应的值.<br/>
-FLAG_ACTIVITY_CLEAR_TOP通常与FLAG_ACTIVITY_NEW_TASK同时使用. 当他们结合一起时，那意味着把已经存在的activity放置到另外一个task中并且把它作为栈顶元素开始与用户进行交互.</p></li>
-</ul>
-
-
-<p><strong>Note:</strong>如果被启动的activity的launch mode是&#8221;standard&#8221;, 那么这个activity同样会被先清除掉，然后创建一个新的实例来接受intent. 那是因为当launch mode是standard时，新的实例总是为了新的intent而被创建.</p>
-
-<h2>(1)Handling affinities(处理联姻关系)</h2>
-
-<p>Affinity(联姻)意味着activity更倾向归属于哪一个task. 默认的，来自同一程序的所有的activities会拥有同样的联姻关系. 因此，他们更倾向于处于同一个task中. 然而, 你可以修改这种默认的行为. 在不同程序中的activites可以有同样的联姻关系，或者同一程序中的不同activites可以分配到不同的task联姻关系中</p>
-
-<p>可以在manifest的activity中设置taskAffinity属性，一共有下面两种情况：</p>
-
-<ul>
-<li>When the intent that launches an activity contains the FLAG_ACTIVITY_NEW_TASK flag.</li>
-</ul>
-
-
-<p>A new activity is, by default, launched into the task of the activity that called startActivity(). It&#8217;s pushed onto the same back stack as the caller. However, if the intent passed to startActivity() contains the FLAG_ACTIVITY_NEW_TASK flag, the system looks for a different task to house the new activity. Often, it&#8217;s a new task. However, it doesn&#8217;t have to be. If there&#8217;s already an existing task with the same affinity as the new activity, the activity is launched into that task. If not, it begins a new task.<br/>
-If this flag causes an activity to begin a new task and the user presses the Home button to leave it, there must be some way for the user to navigate back to the task. Some entities (such as the notification manager) always start activities in an external task, never as part of their own, so they always put FLAG_ACTIVITY_NEW_TASK in the intents they pass to startActivity(). If you have an activity that can be invoked by an external entity that might use this flag, take care that the user has a independent way to get back to the task that&#8217;s started, such as with a launcher icon (the root activity of the task has a CATEGORY_LAUNCHER intent filter; see the Starting a task section below).</p>
-
-<ul>
-<li>When an activity has its allowTaskReparenting attribute set to &#8220;true&#8221;.</li>
-</ul>
-
-
-<p>In this case, the activity can move from the task it starts to the task it has an affinity for, when that task comes to the foreground.<br/>
-For example, suppose that an activity that reports weather conditions in selected cities is defined as part of a travel application. It has the same affinity as other activities in the same application (the default application affinity) and it allows re-parenting with this attribute. When one of your activities starts the weather reporter activity, it initially belongs to the same task as your activity. However, when the travel application&#8217;s task comes to the foreground, the weather reporter activity is reassigned to that task and displayed within it.</p>
-
-<p><strong>Tip:</strong> 如果一个.apk文件从用户的角度看包含了不止一个&#8221;application&#8221;的话，你可能会想要使用taskAffinity属性来为那些activites设置不同的联姻关系.</p>
-
-<h2>(2)Clearing the back stack(清除回退栈)</h2>
-
-<p>如果用户长时间离开一个task, 系统会清除task中root activity之外的所有的activites. 当用户回退到task时，仅仅只有root activity会被恢复.</p>
-
-<p>有下面一些值可以用来设置，如果你想修改系统默认的行为的话:</p>
-
-<ul>
-<li><p><strong>alwaysRetainTaskState</strong><br/>
-设置了这个属性为true之后，即使很长时间，也不会被destory的</p></li>
-<li><p><strong>clearTaskOnLaunch</strong><br/>
-如果这个属性设置为true，那么就是与alwaysRetainTaskState相反的. 每次启动都会清除root以上的activities.</p></li>
-<li><p><strong>finishOnTaskLaunch</strong><br/>
-这个属性与clearTaskOnLaunch类似, 但是它仅仅是对单个activity进行操作，而不是整个task. It can also cause any activity to go away, including the root activity. When it&#8217;s set to &#8220;true&#8221;, the activity remains part of the task only for the current session. If the user leaves and then returns to the task, it is no longer present.</p></li>
-</ul>
-
-
-<h2>(3)Starting a task(启动一个任务)</h2>
-
-<p>你可以启动一个activity作为一个task的起点，通过为它的intent filter设置&#8221;android.intent.action.MAIN&#8221;作为特定的action，设置&#8221;android.intent.category.LAUNCHER&#8221;作为特定的category. 例如：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;activity</span> <span class="err">...</span> <span class="nt">&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;intent-filter</span> <span class="err">...</span> <span class="nt">&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;action</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.action.MAIN&quot;</span> <span class="nt">/&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;category</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.category.LAUNCHER&quot;</span> <span class="nt">/&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;/intent-filter&gt;</span>
-</span><span class='line'>    ...
-</span><span class='line'><span class="nt">&lt;/activity&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>上面的设置方式不仅仅是使得这个activity作为launcher的图标，允许用户通过点击它启动activity并且随时通过点击它来触发恢复之前的task.</p>
-
-<p>第二点非常重要: 用户必须能够在离开task之后通过activity的launcher来回到task. 因为这点, &#8220;singleTask&#8221; 与 &#8220;&#8221;singleInstance&#8221; 这两种启动模式总是会初始化一个task, 需要有ACTION_MAIN 与 CATEGORY_LAUNCHER 配合. 例如，用户启动了一个task做了一些动作，然后点击Home回到桌面，这个时候想要回到刚才的task，需要有launcher作为入口.</p>
-
-<p>对于那些你不想用户可以回退的情况，请设置<activity>标签下的finishOnTaskLaunch属性为&#8221;true&#8221; (参考上面的章节).</p>
-
-<hr />
-
-<p><strong>文章学习自<a href="http://developer.android.com/guide/components/tasks-and-back-stack.html">http://developer.android.com/guide/components/tasks-and-back-stack.html</a></strong><br/>
-<strong>转载请注明出自<a href="http:://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢</strong></p>
 ]]></content>
   </entry>
   
