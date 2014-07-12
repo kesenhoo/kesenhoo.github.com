@@ -249,19 +249,19 @@
         <lastmod>2014-04-10T23:54:00+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/android-notes-00-services/</loc>
+        <loc>http://hukai.me/blog/android-notes-services/</loc>
         <lastmod>2014-04-10T23:54:00+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/android-notes-01-bound-services/</loc>
+        <loc>http://hukai.me/blog/android-notes-bound-services/</loc>
         <lastmod>2014-04-10T23:54:00+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/android-notes-02-aidl/</loc>
+        <loc>http://hukai.me/blog/android-notes-aidl/</loc>
         <lastmod>2014-04-10T23:54:00+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/android-notes-03-process-and-thread/</loc>
+        <loc>http://hukai.me/blog/android-notes-process-and-thread/</loc>
         <lastmod>2014-04-10T23:54:00+08:00</lastmod>
     </url>
     <url>
@@ -269,11 +269,11 @@
         <lastmod>2014-04-15T00:11:12+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/android-notes-04-intent-and-intentFilter/</loc>
+        <loc>http://hukai.me/blog/android-notes-intent-and-intentFilter/</loc>
         <lastmod>2014-04-10T23:54:00+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/android-notes-05-task-and-back-stack/</loc>
+        <loc>http://hukai.me/blog/android-notes-task-and-back-stack/</loc>
         <lastmod>2014-04-10T23:54:00+08:00</lastmod>
     </url>
     <url>
@@ -307,11 +307,11 @@
         <lastmod>2014-04-18T20:13:12+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/java-notes-00-singleton-pattern/</loc>
+        <loc>http://hukai.me/blog/java-notes-singleton-pattern/</loc>
         <lastmod>2014-04-10T23:54:00+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/android-deeper-00-touch-event-dispatch-process/</loc>
+        <loc>http://hukai.me/blog/android-deeper-touch-event-dispatch-process/</loc>
         <lastmod>2014-05-15T16:19:04+08:00</lastmod>
     </url>
     <url>
@@ -327,11 +327,11 @@
         <lastmod>2014-04-20T22:01:37+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/android-notes-06-camera/</loc>
+        <loc>http://hukai.me/blog/android-notes-camera/</loc>
         <lastmod>2014-05-18T17:06:53+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/android-deeper-01-graphics-architecture/</loc>
+        <loc>http://hukai.me/blog/android-deeper-graphics-architecture/</loc>
         <lastmod>2014-05-23T09:39:12+08:00</lastmod>
     </url>
     <url>
@@ -355,8 +355,12 @@
         <lastmod>2014-06-26T22:52:44+08:00</lastmod>
     </url>
     <url>
-        <loc>http://hukai.me/blog/android-training-performance-anr/</loc>
+        <loc>http://hukai.me/blog/android-training-performance-anr+copy/</loc>
         <lastmod>2014-07-06T12:24:50+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://hukai.me/blog/android-notes-add-copy-text-option-to-share-list/</loc>
+        <lastmod>2014-07-12T16:19:02+08:00</lastmod>
     </url>
     <url>
         <loc>http://hukai.me/404.html</loc>
@@ -364,7 +368,7 @@
     </url>
     <url>
         <loc>http://hukai.me/about/</loc>
-        <lastmod>2014-07-08T10:23:48+08:00</lastmod>
+        <lastmod>2014-07-12T16:19:02+08:00</lastmod>
     </url>
     <url>
         <loc>
@@ -374,10 +378,10 @@
     </url>
     <url>
         <loc>http://hukai.me/blog/archives/</loc>
-        <lastmod>2014-07-06T12:24:50+08:00</lastmod>
+        <lastmod>2014-07-12T16:19:02+08:00</lastmod>
     </url>
     <url>
         <loc>http://hukai.me/</loc>
-        <lastmod>2014-07-06T12:24:50+08:00</lastmod>
+        <lastmod>2014-07-12T16:19:02+08:00</lastmod>
     </url>
 </urlset>

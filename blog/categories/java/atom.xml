@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Java | 胡凯]]></title>
   <link href="http://hukai.me/blog/categories/java/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2014-07-12T14:34:02+08:00</updated>
+  <updated>2014-07-12T16:23:19+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Java Notes 00 - Singleton Pattern(单例总结)]]></title>
-    <link href="http://hukai.me/blog/java-notes-00-singleton-pattern/"/>
+    <link href="http://hukai.me/blog/java-notes-singleton-pattern/"/>
     <updated>2013-11-17T14:21:00+08:00</updated>
-    <id>http://hukai.me/blog/java-notes-00-singleton-pattern</id>
+    <id>http://hukai.me/blog/java-notes-singleton-pattern</id>
     <content type="html"><![CDATA[<p>这里不赘述单例模式的概念了，直接演示几种不同的实现方式。</p>
 
 <h2>0)Eager initialization</h2>

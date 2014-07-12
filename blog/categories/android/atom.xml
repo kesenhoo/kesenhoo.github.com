@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android | 胡凯]]></title>
   <link href="http://hukai.me/blog/categories/android/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2014-07-12T14:34:02+08:00</updated>
+  <updated>2014-07-12T16:23:19+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -14,10 +14,124 @@
 
   
   <entry>
+    <title type="html"><![CDATA[Android Notes - 添加Copy to Clipboard的选项到分享列表中]]></title>
+    <link href="http://hukai.me/blog/android-notes-add-copy-text-option-to-share-list/"/>
+    <updated>2014-07-12T15:26:00+08:00</updated>
+    <id>http://hukai.me/blog/android-notes-add-copy-text-option-to-share-list</id>
+    <content type="html"><![CDATA[<p>偶然被人问到如何添加复制到剪切板的选项到分享列表，如下图所示：</p>
+
+<p><img src="images/copy_link_option_at_share_list.png" alt="copy_link_option_at_share_list" /></p>
+
+<p>一般情况下，分享一段文字或者图片，我们会使用如下Android默认的方式：</p>
+
+<p>```java
+public void shareText(Context context, String text) {</p>
+
+<pre><code>Intent sendIntent = new Intent();
+sendIntent.setAction(Intent.ACTION_SEND);
+sendIntent.putExtra(Intent.EXTRA_TEXT, text);
+sendIntent.setType("text/plain");
+context.startActivity(Intent.createChooser(sendIntent, "Share via..."));
+</code></pre>
+
+<p>}
+```</p>
+
+<p>这样系统能够帮忙筛选出那些符合这个Intent的所有Activity，生成分享列表，呈现给用户。因为分享列表的信息是由系统过滤生成的，UI界面也是交给系统进行绘制的，我们的应用无法给这个分享列表设置点击监听器，那么如何才能实现添加一个<strong>"Copy to Clipboard"</strong>的选项到分享列表中，并在点击该选项之后执行对应的动作呢？当然，自己去实现这个分享列表的效果，UI完全交给自己的应用来控制，是可以轻松做到的，可是自己去过滤符合条件的应用，并绘制分享列表的代码量会大很多，实现起来更加复杂？下面介绍一个虽然写法有点奇怪却相对简便很多的方法。</p>
+
+<!-- More -->
+
+
+<p>实现步骤如下：</p>
+
+<h3>1)创建一个新的Intent</h3>
+
+<p>```java
+Intent intent = new Intent(Intent.ACTION_SEND);
+intent.setType("text/plain");
+intent.putExtra(Intent.EXTRA_SUBJECT, title);
+intent.putExtra(Intent.EXTRA_TEXT, body);</p>
+
+<p>Intent clipboardIntent = new Intent("ACTION_COPY_TO_CLIPBOARD");
+clipboardIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+clipboardIntent.putExtra("KEY_SHARE_TITLE", title);
+clipboardIntent.putExtra("KEY_SHARE_BODY", body);</p>
+
+<p>try {</p>
+
+<pre><code>Intent chooserIntent = Intent.createChooser(intent, "Share via");
+chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] {clipboardIntent});
+context.startActivity(chooserIntent);
+</code></pre>
+
+<p>} catch (android.content.ActivityNotFoundException ex) {</p>
+
+<pre><code>Toast.makeText(context, "There are no share clients installed.", Toast.LENGTH_SHORT).show();
+</code></pre>
+
+<p>}
+```</p>
+
+<p>请注意：Action与Flag。</p>
+
+<h3>2)在manifest文件中为当前的actiivty添加Intent Filter</h3>
+
+<p>```xml
+&lt;activity</p>
+
+<pre><code>android:name=".TestActivity"
+android:label="Copy to clipboard"
+android:icon="@drawable/ic_action_copy"
+android:launchMode="singleTop"
+android:screenOrientation="portrait"
+android:windowSoftInputMode="adjustPan"&gt;
+&lt;intent-filter&gt;
+    &lt;action android:name="ACTION_COPY_TO_CLIPBOARD"/&gt;
+    &lt;category android:name="android.intent.category.DEFAULT"/&gt;
+&lt;/intent-filter&gt;
+</code></pre>
+
+<p></activity>
+```</p>
+
+<p>icon与label组成了分享列表中的"复制到剪切板"。launchMode定义为singleTop是因为当前activity已经在栈顶，没有必要因为intent的到来而重新创建一个，所以维持目前的activity，使得点击”复制到剪切板“之后，activity会直接执行onNewIntent()的回调，在这里获取到之前定义的intent，从这个intent获取后续操作的数据。</p>
+
+<h3>3)在onNewIntent()中执行把文字复制到剪切板的任务</h3>
+
+<p>```java
+@Override
+protected void onNewIntent(Intent intent) {</p>
+
+<pre><code>super.onNewIntent(intent);
+Log.i(TAG, "[onNewIntent] intent = " + intent);
+if (intent != null &amp;&amp; intent.getAction().equalsIgnoreCase("ACTION_COPY_TO_CLIPBOARD")) {
+    String title = intent.getStringExtra("KEY_SHARE_TITLE");
+    String body = intent.getStringExtra("KEY_SHARE_BODY");
+
+    ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+    // clipboard.setText(title + body);
+    // Creates a new text clip to put on the clipboard
+    ClipData clip = ClipData.newPlainText(title, body);
+    clipboard.setPrimaryClip(clip);
+    Log.d(TAG, "[onNewIntent] copy text title = " + title + ", body = " + body);
+    Toast.makeText(this, "Copy Succussed!", Toast.LENGTH_SHORT).show();
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<hr />
+
+<p>至此，这个功能就实现了，这种写法还给了我们更多的启发：可以使用类似的方式添加其他的选项到分享列表中，在activity的onNewIntent回调里面处理这个选项要求实现的任务。这种方式相比起自己去过滤并绘制分享列表要简单很多！欢迎有其他实现方法的同学留言交流！</p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Android Training - 避免程序无响应ANR]]></title>
-    <link href="http://hukai.me/blog/android-training-performance-anr/"/>
+    <link href="http://hukai.me/blog/android-training-performance-anr+copy/"/>
     <updated>2014-07-06T12:09:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-performance-anr</id>
+    <id>http://hukai.me/blog/android-training-performance-anr copy</id>
     <content type="html"><![CDATA[<p>可能你写的代码在性能测试上表现良好，但是你的应用仍然有时候会反应迟缓(sluggish)，停顿(hang)或者长时间卡死(frezze)，或者应用处理输入的数据花费时间过长。对于你的应用来说最槽糕的事情是出现"程序无响应(Application Not Responding)" (ANR)的警示框。</p>
 
 <p>在Android中，系统通过显示ANR警示框来保护程序的长时间无响应。对话框如下：</p>
@@ -665,127 +779,6 @@ MySingleton.getInstance(this).addToRequestQueue(stringRequest);
 <hr />
 
 <p><strong>学习自<a href="http://developer.android.com/training/volley/request-queue.html">http://developer.android.com/training/volley/request-queue.html</a>,欢迎交流讨论</strong></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Training - Volley(Lesson 1 - 发送简单的请求)]]></title>
-    <link href="http://hukai.me/blog/android-training-volley-simple-request/"/>
-    <updated>2014-06-24T09:00:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-volley-simple-request</id>
-    <content type="html"><![CDATA[<p>使用Volley的方式是，你通过创建一个<code>RequestQueue</code>并传递<code>Request</code>对象给它。RequestQueue管理工作线程用来执行网络操作，从Cache中读取与写入数据，以及解析Http的响应内容。<code>Requests</code>执行raw responses的解析，Volley会把响应的数据分发给主线程。</p>
-
-<p>这节课会介绍如何使用<code>Volley.newRequestQueue</code>这个建立请求队列的方法来发送一个请求，在下一节课<a href="request-queue.html">建立一个请求队列Setting Up a RequestQueue</a>中会介绍你自己如何建立一个请求队列。</p>
-
-<p>这节课也会介绍如何添加一个请求到RequesutQueue以及如何取消一个请求。</p>
-
-<h2>Add the INTERNET Permission</h2>
-
-<p>为了使用Volley，你必须添加<code>android.permission.INTERNET</code>权限到你的manifest文件中。没有这个权限，你的app将无法访问网络。</p>
-
-<h2>Use newRequestQueue</h2>
-
-<p>Volley提供了一个简便的方法：<code>Volley.newRequestQueue</code>用来为你建立一个<code>RequestQueue</code>，使用默认值，并启动这个队列。例如：</p>
-
-<!-- More -->
-
-
-<p>```java
-final TextView mTextView = (TextView) findViewById(R.id.text);
-...</p>
-
-<p>// Instantiate the RequestQueue.
-RequestQueue queue = Volley.newRequestQueue(this);
-String url ="http://www.google.com";</p>
-
-<p>// Request a string response from the provided URL.
-StringRequest stringRequest = new StringRequest(Request.Method.GET, url,</p>
-
-<pre><code>        new Response.Listener() {
-@Override
-public void onResponse(String response) {
-    // Display the first 500 characters of the response string.
-    mTextView.setText("Response is: "+ response.substring(0,500));
-}
-</code></pre>
-
-<p>}, new Response.ErrorListener() {</p>
-
-<pre><code>@Override
-public void onErrorResponse(VolleyError error) {
-    mTextView.setText("That didn't work!");
-}
-</code></pre>
-
-<p>});
-// Add the request to the RequestQueue.
-queue.add(stringRequest);
-```</p>
-
-<p>Volley总是把解析过后的数据返回到主线程中。在主线程中更加合适使用接收到到的数据用来操作UI控件，这样你可以在响应的handler中轻松的修改UI，但是对于库提供的一些其他方法是有些特殊的，例如与取消有关的。</p>
-
-<p>关于如何创建你自己的请求队列，不要使用Volley.newRequestQueue方法，请查看<a href="request-queue.html">建立一个请求队列Setting Up a RequestQueue</a>。</p>
-
-<h2>Send a Request</h2>
-
-<p>为了发送一个请求，你只需要构造一个请求并通过<code>add()</code>方法添加到<code>RequestQueue</code>中。一旦你添加了这个请求，它会通过队列，得到处理，然后得到原始的响应数据并返回。</p>
-
-<p>当你执行<code>add()</code>方法时，Volley触发执行一个缓存处理线程以及网络一系列的网络处理线程。当你添加一个请求到队列中，它将被缓存线程所捕获并触发：如果这个请求可以被缓存处理，那么会在缓存线程中执行响应数据的解析并返回到主线程。如果请求不能被缓存所处理，它会被放到网络队列中。网络线程池中的第一个可用的网络线程会从队列中获取到这个请求并执行HTTP操作，解析响应数据，把数据写到缓存中之后再把解析之后的数据返回到主线程。</p>
-
-<p>请注意那些比较耗时的操作，例如I/O与解析parsing/decoding都是执行在工作线程。<strong>你可以在任何线程中添加一个请求，但是响应结果都是返回到主线程的。</strong></p>
-
-<p>下图1，演示了一个请求的生命周期：</p>
-
-<p><img src="/images/articles/volley-request.png" alt="volley-request" /></p>
-
-<h2>Cancel a Request</h2>
-
-<p>为了取消一个请求，对你的请求对象执行<code>cancel()</code>方法。一旦取消，Volley会确保你的响应Handler不会被执行。这意味着在实际操作中你可以在activity的<code>onStop()</code>方法中取消所有pending在队列中的请求。你不需要通过检测<code>getActivity() == null</code>来丢弃你的响应handler，其他类似<code>onSaveInstanceState()</code>等保护性的方法里面也都不需要检测。</p>
-
-<p>为了利用这种优势，你应该跟踪所有已经发送的请求，以便在需要的时候，可以取消他们。<strong>有一个简便的方法</strong>：你可以为每一个请求对象都绑定一个tag对象。你可以使用这个tag来提供取消的范围。例如，你可以为你的所有请求都绑定到执行的Activity上，然后你可以在<code>onStop()</code>方法执行<code>requestQueue.cancelAll(this)</code> 。同样的，你可以为ViewPager中的所有请求缩略图Request对象分别打上对应Tab的tag。并在滑动时取消这些请求，用来确保新生成的tab不会被前面tab的请求任务所卡到。</p>
-
-<p>下面一个使用String来打Tag的例子：</p>
-
-<ul>
-<li>定义你的tag并添加到你的请求任务中。</li>
-</ul>
-
-
-<p>```java
-public static final String TAG = "MyTag";
-StringRequest stringRequest; // Assume this exists.
-RequestQueue mRequestQueue;  // Assume this exists.</p>
-
-<p>// Set the tag on the request.
-stringRequest.setTag(TAG);</p>
-
-<p>// Add the request to the RequestQueue.
-mRequestQueue.add(stringRequest);
-```</p>
-
-<ul>
-<li>在activity的onStop()方法里面，取消所有的包含这个tag的请求任务。</li>
-</ul>
-
-
-<p>```java
-@Override
-protected void onStop () {</p>
-
-<pre><code>super.onStop();
-if (mRequestQueue != null) {
-    mRequestQueue.cancelAll(TAG);
-}
-</code></pre>
-
-<p>}
-```</p>
-
-<p>当取消请求时请注意：如果你依赖你的响应handler来标记状态或者触发另外一个进程，你需要为此给出有力的解释。再说一次，response handler是不会被执行的。</p>
-
-<hr />
-
-<p><strong>学习自<a href="http://developer.android.com/training/volley/simple.html">http://developer.android.com/training/volley/simple.html</a>,欢迎交流讨论</strong></p>
 ]]></content>
   </entry>
   

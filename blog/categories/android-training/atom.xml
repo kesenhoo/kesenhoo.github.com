@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android:Training | 胡凯]]></title>
   <link href="http://hukai.me/blog/categories/android-training/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2014-07-12T14:34:02+08:00</updated>
+  <updated>2014-07-12T16:23:19+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Training - 避免程序无响应ANR]]></title>
-    <link href="http://hukai.me/blog/android-training-performance-anr/"/>
+    <link href="http://hukai.me/blog/android-training-performance-anr+copy/"/>
     <updated>2014-07-06T12:09:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-performance-anr</id>
+    <id>http://hukai.me/blog/android-training-performance-anr copy</id>
     <content type="html"><![CDATA[<p>可能你写的代码在性能测试上表现良好，但是你的应用仍然有时候会反应迟缓(sluggish)，停顿(hang)或者长时间卡死(frezze)，或者应用处理输入的数据花费时间过长。对于你的应用来说最槽糕的事情是出现"程序无响应(Application Not Responding)" (ANR)的警示框。</p>
 
 <p>在Android中，系统通过显示ANR警示框来保护程序的长时间无响应。对话框如下：</p>

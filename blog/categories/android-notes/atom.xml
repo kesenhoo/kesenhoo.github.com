@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android:Notes | 胡凯]]></title>
   <link href="http://hukai.me/blog/categories/android-notes/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2014-07-12T14:34:02+08:00</updated>
+  <updated>2014-07-12T16:23:19+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -14,10 +14,124 @@
 
   
   <entry>
+    <title type="html"><![CDATA[Android Notes - 添加Copy to Clipboard的选项到分享列表中]]></title>
+    <link href="http://hukai.me/blog/android-notes-add-copy-text-option-to-share-list/"/>
+    <updated>2014-07-12T15:26:00+08:00</updated>
+    <id>http://hukai.me/blog/android-notes-add-copy-text-option-to-share-list</id>
+    <content type="html"><![CDATA[<p>偶然被人问到如何添加复制到剪切板的选项到分享列表，如下图所示：</p>
+
+<p><img src="images/copy_link_option_at_share_list.png" alt="copy_link_option_at_share_list" /></p>
+
+<p>一般情况下，分享一段文字或者图片，我们会使用如下Android默认的方式：</p>
+
+<p>```java
+public void shareText(Context context, String text) {</p>
+
+<pre><code>Intent sendIntent = new Intent();
+sendIntent.setAction(Intent.ACTION_SEND);
+sendIntent.putExtra(Intent.EXTRA_TEXT, text);
+sendIntent.setType("text/plain");
+context.startActivity(Intent.createChooser(sendIntent, "Share via..."));
+</code></pre>
+
+<p>}
+```</p>
+
+<p>这样系统能够帮忙筛选出那些符合这个Intent的所有Activity，生成分享列表，呈现给用户。因为分享列表的信息是由系统过滤生成的，UI界面也是交给系统进行绘制的，我们的应用无法给这个分享列表设置点击监听器，那么如何才能实现添加一个<strong>"Copy to Clipboard"</strong>的选项到分享列表中，并在点击该选项之后执行对应的动作呢？当然，自己去实现这个分享列表的效果，UI完全交给自己的应用来控制，是可以轻松做到的，可是自己去过滤符合条件的应用，并绘制分享列表的代码量会大很多，实现起来更加复杂？下面介绍一个虽然写法有点奇怪却相对简便很多的方法。</p>
+
+<!-- More -->
+
+
+<p>实现步骤如下：</p>
+
+<h3>1)创建一个新的Intent</h3>
+
+<p>```java
+Intent intent = new Intent(Intent.ACTION_SEND);
+intent.setType("text/plain");
+intent.putExtra(Intent.EXTRA_SUBJECT, title);
+intent.putExtra(Intent.EXTRA_TEXT, body);</p>
+
+<p>Intent clipboardIntent = new Intent("ACTION_COPY_TO_CLIPBOARD");
+clipboardIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+clipboardIntent.putExtra("KEY_SHARE_TITLE", title);
+clipboardIntent.putExtra("KEY_SHARE_BODY", body);</p>
+
+<p>try {</p>
+
+<pre><code>Intent chooserIntent = Intent.createChooser(intent, "Share via");
+chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] {clipboardIntent});
+context.startActivity(chooserIntent);
+</code></pre>
+
+<p>} catch (android.content.ActivityNotFoundException ex) {</p>
+
+<pre><code>Toast.makeText(context, "There are no share clients installed.", Toast.LENGTH_SHORT).show();
+</code></pre>
+
+<p>}
+```</p>
+
+<p>请注意：Action与Flag。</p>
+
+<h3>2)在manifest文件中为当前的actiivty添加Intent Filter</h3>
+
+<p>```xml
+&lt;activity</p>
+
+<pre><code>android:name=".TestActivity"
+android:label="Copy to clipboard"
+android:icon="@drawable/ic_action_copy"
+android:launchMode="singleTop"
+android:screenOrientation="portrait"
+android:windowSoftInputMode="adjustPan"&gt;
+&lt;intent-filter&gt;
+    &lt;action android:name="ACTION_COPY_TO_CLIPBOARD"/&gt;
+    &lt;category android:name="android.intent.category.DEFAULT"/&gt;
+&lt;/intent-filter&gt;
+</code></pre>
+
+<p></activity>
+```</p>
+
+<p>icon与label组成了分享列表中的"复制到剪切板"。launchMode定义为singleTop是因为当前activity已经在栈顶，没有必要因为intent的到来而重新创建一个，所以维持目前的activity，使得点击”复制到剪切板“之后，activity会直接执行onNewIntent()的回调，在这里获取到之前定义的intent，从这个intent获取后续操作的数据。</p>
+
+<h3>3)在onNewIntent()中执行把文字复制到剪切板的任务</h3>
+
+<p>```java
+@Override
+protected void onNewIntent(Intent intent) {</p>
+
+<pre><code>super.onNewIntent(intent);
+Log.i(TAG, "[onNewIntent] intent = " + intent);
+if (intent != null &amp;&amp; intent.getAction().equalsIgnoreCase("ACTION_COPY_TO_CLIPBOARD")) {
+    String title = intent.getStringExtra("KEY_SHARE_TITLE");
+    String body = intent.getStringExtra("KEY_SHARE_BODY");
+
+    ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+    // clipboard.setText(title + body);
+    // Creates a new text clip to put on the clipboard
+    ClipData clip = ClipData.newPlainText(title, body);
+    clipboard.setPrimaryClip(clip);
+    Log.d(TAG, "[onNewIntent] copy text title = " + title + ", body = " + body);
+    Toast.makeText(this, "Copy Succussed!", Toast.LENGTH_SHORT).show();
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<hr />
+
+<p>至此，这个功能就实现了，这种写法还给了我们更多的启发：可以使用类似的方式添加其他的选项到分享列表中，在activity的onNewIntent回调里面处理这个选项要求实现的任务。这种方式相比起自己去过滤并绘制分享列表要简单很多！欢迎有其他实现方法的同学留言交流！</p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Android Notes(06) - Camera]]></title>
-    <link href="http://hukai.me/blog/android-notes-06-camera/"/>
+    <link href="http://hukai.me/blog/android-notes-camera/"/>
     <updated>2014-04-21T21:24:00+08:00</updated>
-    <id>http://hukai.me/blog/android-notes-06-camera</id>
+    <id>http://hukai.me/blog/android-notes-camera</id>
     <content type="html"><![CDATA[<p>Android framework为各种不同的Camera与Camera的特色功能提供了支持，使得可以在应用中进行拍照与录像。这篇文章会讨论一种简便，快速的拍照录像方式，为了给用户创建定制的相机体验，文章也会概述相机的高级功能。</p>
 
 <h2>0)开始之前</h2>
@@ -818,9 +932,9 @@ mMediaRecorder.setCaptureRate(0.1); // capture a frame every 10 seconds
   
   <entry>
     <title type="html"><![CDATA[Android Notes(05) - Tasks and Back Stack]]></title>
-    <link href="http://hukai.me/blog/android-notes-05-task-and-back-stack/"/>
+    <link href="http://hukai.me/blog/android-notes-task-and-back-stack/"/>
     <updated>2013-04-20T20:42:00+08:00</updated>
-    <id>http://hukai.me/blog/android-notes-05-task-and-back-stack</id>
+    <id>http://hukai.me/blog/android-notes-task-and-back-stack</id>
     <content type="html"><![CDATA[<ul>
 <li>所有的activities都归属于一个task。</li>
 <li>一个task包含了一些activities，这些activities以用户与他们的交互前后为顺序存放在task中。</li>
@@ -1051,9 +1165,9 @@ For example, suppose that an activity that reports weather conditions in selecte
   
   <entry>
     <title type="html"><![CDATA[Android Notes(04) - Intents and Intent Filters]]></title>
-    <link href="http://hukai.me/blog/android-notes-04-intent-and-intentFilter/"/>
+    <link href="http://hukai.me/blog/android-notes-intent-and-intentFilter/"/>
     <updated>2013-04-12T18:27:00+08:00</updated>
-    <id>http://hukai.me/blog/android-notes-04-intent-and-intentFilter</id>
+    <id>http://hukai.me/blog/android-notes-intent-and-intentFilter</id>
     <content type="html"><![CDATA[<h2>Intent与Intent Filter</h2>
 
 <p>Android其中的三大组件，Activity,Service与broadcast receivers是通过Intent来触发彼此的。Intent本身会携带一些信息，它是一种组件内部或者组件间进行交互的中介。<br/>
@@ -1292,10 +1406,10 @@ scheme://host:port/path
   
   <entry>
     <title type="html"><![CDATA[Android Notes(03) - Process and Thread]]></title>
-    <link href="http://hukai.me/blog/android-notes-03-process-and-thread/"/>
+    <link href="http://hukai.me/blog/android-notes-process-and-thread/"/>
     <updated>2013-03-31T16:27:00+08:00</updated>
-    <id>http://hukai.me/blog/android-notes-03-process-and-thread</id>
-    <content type="html"><![CDATA[<p><img src="/images/articles/process_and_thread.jpg"></p>
+    <id>http://hukai.me/blog/android-notes-process-and-thread</id>
+    <content type="html"><![CDATA[<p>{% img /images/articles/process_and_thread.jpg %}</p>
 
 <p>当程序的第一个组件开始启动时，Android系统会为这个程序启动一个新的Linux进程。默认的，程序中的后续其他组件都是运行在这个进程的线程中(这个线程被成为"主"线程:main thread)。如果程序的组件在启动时发现已经存在这个程序的进程了(因为其他组件正在运行)， 那么这个组件将启动在该进程中，并使用同一线程。然而，你可以安排程序中的不同组件运行在另外一个进程中，而且你可以为任何进程创建其它的线程。</p>
 
@@ -1463,482 +1577,6 @@ private class DownloadImageTask extends AsyncTask&lt;String, Void, Bitmap&gt; {
 <hr />
 
 <p><strong>文章学习自http://developer.android.com/guide/components/processes-and-threads.html</strong><br/>
-<strong>转载请注明出自<a href="http:://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢</strong></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Notes(02) - AIDL]]></title>
-    <link href="http://hukai.me/blog/android-notes-02-aidl/"/>
-    <updated>2013-02-19T21:18:00+08:00</updated>
-    <id>http://hukai.me/blog/android-notes-02-aidl</id>
-    <content type="html"><![CDATA[<ul>
-<li>在Android process之间不能用通常的方式去访问彼此的内存数据。 他们把需要传递的数据解析成基础对象，使得系统能够识别并处理这些对象。因为这个处理过程很难写，所以Android使用AIDL来解决这个问题。</li>
-<li>在定义AIDL接口之前，请意识到call这些接口是direct function call。 请不要认为这些call 接口的行为是发生在另外一个线程里面的。具体的不同因这个调用是发生在local process还是remote process而异。
-
-<ul>
-<li>发生在local process里面的调用会跑在这个local process的thread里面。如果这是你的主UI线程，那么AIDL接口的调用也会发生在这个UI thread里面。如果这是发生在另外一个thread，那么调用会发生在service里面。因此，如果仅仅是发生在local process的调用，则你可以完全控制这些调用，当然这样的话，也就不需要用AIDL了。因为你完全可以使用Bound Service的第一种方式去实现。</li>
-<li>发生在remote process里面的调用是会跑在你自己的process所维护的一个thread pool里面。那么你需要注意可能会在同一时刻接受到多个请求。所以AIDL的操作需要做到thread-safe。(<em>每次请求，都会交给Service，在线程池里面启动一个thread去执行那些请求，所以那些方法需要是线程安全的</em>)</li>
-<li>oneway关键字改变了remote call的行为。当使用这个关键字时，remote call不会被阻塞住，它仅仅是发送交互数据后再立即返回。IBinder thread pool 之后会把它当作一个通常的remote call呼叫。</li>
-</ul>
-</li>
-</ul>
-
-
-<!-- more -->
-
-
-<h2>定义一个AIDL接口</h2>
-
-<ul>
-<li>需要在src的目录下使用Java的语法去定义一个.aidl的文件，Android SDK tools会基于这个文件在gen目录下生成一个IBinder的接口（与.aidl同名，后缀名为java的文件）。Service需要实现这个接口，然后Client程序才可以bind到service并执行接口的方法，从而实现IPC。</li>
-<li>具体实现一个AIDL接口，需要下面几个步骤：(请注意，aidl的文件需要向后兼容[能增加，不能减少与修改之前的接口]，因为这个文件需要提供给客户端程序)
-
-<ul>
-<li>创建一个.aidl文件</li>
-<li>实现接口</li>
-<li>暴露接口给Client</li>
-</ul>
-</li>
-</ul>
-
-
-<h3>1)Create the .aidl file</h3>
-
-<p>```java
-// IRemoteService.aidl
-package com.example.android;</p>
-
-<p>// Declare any non-default types here with import statements</p>
-
-<p>/<em>* Example service interface </em>/
-interface IRemoteService{</p>
-
-<pre><code>/** Request the process ID of this service, to do evil things with it. */
-int getPid();
-
-/** Demonstrates some basic types that you can use as parameters
- * and return values in AIDL.
- */
-void basicTypes(int anInt,long aLong,boolean aBoolean,float aFloat,
-        double aDouble,String aString);
-</code></pre>
-
-<p>}
-```</p>
-
-<h3>2)Implement the interface</h3>
-
-<p>```java
-private final IRemoteService.Stub mBinder = new IRemoteService.Stub(){</p>
-
-<pre><code>public int getPid(){
-    returnProcess.myPid();
-}
-public void basicTypes(int anInt,long aLong,boolean aBoolean,
-    float aFloat,double aDouble,String aString){
-    // Does nothing
-}
-</code></pre>
-
-<p>};
-```</p>
-
-<h3>3)Expose the interface to clients</h3>
-
-<ul>
-<li>Service端：
-```java
-public class RemoteService extends Service{    @Override
-  public void onCreate(){
-
-<pre><code>  super.onCreate();
-</code></pre>
-
-<p>  }</p>
-
-<p>  @Override
-  public IBinder onBind(Intent intent){</p>
-
-<pre><code>  // Return the interface
-  return mBinder;
-</code></pre>
-
-<p>  }</p>
-
-<p>  private finalI RemoteService.Stub mBinder = newIRemoteService.Stub(){</p>
-
-<pre><code>  public int getPid(){
-      returnProcess.myPid();
-  }
-  public void basicTypes(int anInt,long aLong,boolean aBoolean,
-      float aFloat,double aDouble,String aString){
-      // Does nothing
-  }
-</code></pre>
-
-<p>  };
-}
-```</p></li>
-<li>Client端
-```java
-IRemoteService mIRemoteService;
-private ServiceConnection mConnection = new ServiceConnection(){
-  // Called when the connection with the service is established
-  public void onServiceConnected(ComponentName className,IBinder service){
-
-<pre><code>  // Following the example above for an AIDL interface,
-  // this gets an instance of the IRemoteInterface, which we can use to call on the service
-  mIRemoteService = IRemoteService.Stub.asInterface(service);
-</code></pre>
-
-<p>  }</p>
-
-<p>  // Called when the connection with the service disconnects unexpectedly
-  public void onServiceDisconnected(ComponentName className){</p>
-
-<pre><code>  Log.e(TAG,"Service has unexpectedly disconnected");
-  mIRemoteService =null;
-</code></pre>
-
-<p>  }
-};
-```</p></li>
-</ul>
-
-
-<h2>通过IPC传递对象</h2>
-
-<ul>
-<li><p>某些时候传递的对象不是Android默认支持的那些，我们需要自己使得这个对象Parcelable化，实现步骤如下：</p>
-
-<ul>
-<li>Make your class implement the Parcelable interface.</li>
-<li>Implement writeToParcel, which takes the current state of the object and writes it to a Parcel.</li>
-<li>Add a static field called CREATOR to your class which is an object implementing the Parcelable.Creator interface.</li>
-<li>Finally, create an .aidl file that declares your parcelable class (as shown for the Rect.aidl file, below).If you are using a custom build process, do not add the .aidl file to your build. Similar to a header file in the C language, this .aidl file isn't compiled.</li>
-</ul>
-</li>
-<li><p>首先需要在aidl文件中声明这个对象类型
-```java
-package android.graphics;</p></li>
-</ul>
-
-
-<p>// Declare Rect so AIDL can find it and knows that it implements
-// the parcelable protocol.
-parcelable Rect;
-import android.os.Parcel;
-import android.os.Parcelable;</p>
-
-<p>public final class Rect implements Parcelable{</p>
-
-<pre><code>public int left;
-public int top;
-public int right;
-public int bottom;
-
-public static final Parcelable.Creator&lt;Rect&gt; CREATOR = new
-</code></pre>
-
-<p>Parcelable.Creator<Rect>(){</p>
-
-<pre><code>    public Rect createFromParcel(Parcelin){
-        return new Rect(in);
-    }
-
-    public Rect[] newArray(int size){
-        return new Rect[size];
-    }
-};
-
-public Rect(){
-}
-
-private Rect(Parcelin){
-    readFromParcel(in);
-}
-
-public void writeToParcel(Parcelout){
-    out.writeInt(left);
-    out.writeInt(top);
-    out.writeInt(right);
-    out.writeInt(bottom);
-}
-
-public void readFromParcel(Parcelin){
-    left = in.readInt();
-    top = in.readInt();
-    right = in.readInt();
-    bottom = in.readInt();
-}
-</code></pre>
-
-<p>}
-```</p>
-
-<h2>调用IPC的方法</h2>
-
-<ul>
-<li>Include the .aidl file in the project src/ directory.</li>
-<li>Declare an instance of the IBinder interface (generated based on the AIDL).</li>
-<li>Implement ServiceConnection.</li>
-<li>Call Context.bindService(), passing in your ServiceConnection implementation.</li>
-<li>In your implementation of onServiceConnected(), you will receive an IBinder instance (called service). Call YourInterfaceName.Stub.asInterface((IBinder)service) to cast the returned parameter toYourInterface type.</li>
-<li>Call the methods that you defined on your interface. You should always trap DeadObjectException exceptions, which are thrown when the connection has broken; this will be the only exception thrown by remote methods.</li>
-<li><p>To disconnect, call Context.unbindService() with the instance of your interface.
-```java
-public static class Binding extends Activity {
-  /<strong> The primary interface we will be calling on the service. */
-  IRemoteService mService = null;
-  /</strong> Another interface we use on the service. */
-  ISecondary mSecondaryService = null;</p>
-
-<p>  Button mKillButton;
-  TextView mCallbackText;</p>
-
-<p>  private boolean mIsBound;</p>
-
-<p>  /**</p>
-
-<ul>
-<li> Standard initialization of this activity.  Set up the UI, then wait</li>
-<li><p> for the user to poke it before doing anything.
-*/
-@Override
-protected void onCreate(Bundle savedInstanceState) {
-  super.onCreate(savedInstanceState);</p>
-
-<p>  setContentView(R.layout.remote_service_binding);</p>
-
-<p>  // Watch for button clicks.
-  Button button = (Button)findViewById(R.id.bind);
-  button.setOnClickListener(mBindListener);
-  button = (Button)findViewById(R.id.unbind);
-  button.setOnClickListener(mUnbindListener);
-  mKillButton = (Button)findViewById(R.id.kill);
-  mKillButton.setOnClickListener(mKillListener);
-  mKillButton.setEnabled(false);</p>
-
-<p>  mCallbackText = (TextView)findViewById(R.id.callback);
-  mCallbackText.setText("Not attached.");
-}</p></li>
-</ul>
-
-
-<p>  /**</p>
-
-<ul>
-<li> Class for interacting with the main interface of the service.
-*/
-private ServiceConnection mConnection = new ServiceConnection() {
-  public void onServiceConnected(ComponentName className,
-
-<pre><code>      IBinder service) {
-  // This is called when the connection with the service has been
-  // established, giving us the service object we can use to
-  // interact with the service.  We are communicating with our
-  // service through an IDL interface, so get a client-side
-  // representation of that from the raw service object.
-  mService = IRemoteService.Stub.asInterface(service);
-  mKillButton.setEnabled(true);
-  mCallbackText.setText("Attached.");
-
-  // We want to monitor the service for as long as we are
-  // connected to it.
-  try {
-      mService.registerCallback(mCallback);
-  } catch (RemoteException e) {
-      // In this case the service has crashed before we could even
-      // do anything with it; we can count on soon being
-      // disconnected (and then reconnected if it can be restarted)
-      // so there is no need to do anything here.
-  }
-
-  // As part of the sample, tell the user what happened.
-  Toast.makeText(Binding.this, R.string.remote_service_connected,
-          Toast.LENGTH_SHORT).show();
-</code></pre>
-
-<p>  }</p>
-
-<p>  public void onServiceDisconnected(ComponentName className) {</p>
-
-<pre><code>  // This is called when the connection with the service has been
-  // unexpectedly disconnected -- that is, its process crashed.
-  mService = null;
-  mKillButton.setEnabled(false);
-  mCallbackText.setText("Disconnected.");
-
-  // As part of the sample, tell the user what happened.
-  Toast.makeText(Binding.this, R.string.remote_service_disconnected,
-          Toast.LENGTH_SHORT).show();
-</code></pre>
-
-<p>  }
-};</p></li>
-</ul>
-
-
-<p>  /**</p>
-
-<ul>
-<li> Class for interacting with the secondary interface of the service.
-*/
-private ServiceConnection mSecondaryConnection = new ServiceConnection() {
-  public void onServiceConnected(ComponentName className,
-
-<pre><code>      IBinder service) {
-  // Connecting to a secondary interface is the same as any
-  // other interface.
-  mSecondaryService = ISecondary.Stub.asInterface(service);
-  mKillButton.setEnabled(true);
-</code></pre>
-
-<p>  }</p>
-
-<p>  public void onServiceDisconnected(ComponentName className) {</p>
-
-<pre><code>  mSecondaryService = null;
-  mKillButton.setEnabled(false);
-</code></pre>
-
-<p>  }
-};</p></li>
-</ul>
-
-
-<p>  private OnClickListener mBindListener = new OnClickListener() {</p>
-
-<pre><code>  public void onClick(View v) {
-      // Establish a couple connections with the service, binding
-      // by interface names.  This allows other applications to be
-      // installed that replace the remote service by implementing
-      // the same interface.
-      bindService(new Intent(IRemoteService.class.getName()),
-              mConnection, Context.BIND_AUTO_CREATE);
-      bindService(new Intent(ISecondary.class.getName()),
-              mSecondaryConnection, Context.BIND_AUTO_CREATE);
-      mIsBound = true;
-      mCallbackText.setText("Binding.");
-  }
-</code></pre>
-
-<p>  };</p>
-
-<p>  private OnClickListener mUnbindListener = new OnClickListener() {</p>
-
-<pre><code>  public void onClick(View v) {
-      if (mIsBound) {
-          // If we have received the service, and hence registered with
-          // it, then now is the time to unregister.
-          if (mService != null) {
-              try {
-                  mService.unregisterCallback(mCallback);
-              } catch (RemoteException e) {
-                  // There is nothing special we need to do if the service
-                  // has crashed.
-              }
-          }
-
-          // Detach our existing connection.
-          unbindService(mConnection);
-          unbindService(mSecondaryConnection);
-          mKillButton.setEnabled(false);
-          mIsBound = false;
-          mCallbackText.setText("Unbinding.");
-      }
-  }
-</code></pre>
-
-<p>  };</p>
-
-<p>  private OnClickListener mKillListener = new OnClickListener() {</p>
-
-<pre><code>  public void onClick(View v) {
-      // To kill the process hosting our service, we need to know its
-      // PID.  Conveniently our service has a call that will return
-      // to us that information.
-      if (mSecondaryService != null) {
-          try {
-              int pid = mSecondaryService.getPid();
-              // Note that, though this API allows us to request to
-              // kill any process based on its PID, the kernel will
-              // still impose standard restrictions on which PIDs you
-              // are actually able to kill.  Typically this means only
-              // the process running your application and any additional
-              // processes created by that app as shown here; packages
-              // sharing a common UID will also be able to kill each
-              // other's processes.
-              Process.killProcess(pid);
-              mCallbackText.setText("Killed service process.");
-          } catch (RemoteException ex) {
-              // Recover gracefully from the process hosting the
-              // server dying.
-              // Just for purposes of the sample, put up a notification.
-              Toast.makeText(Binding.this,
-                      R.string.remote_call_failed,
-                      Toast.LENGTH_SHORT).show();
-          }
-      }
-  }
-</code></pre>
-
-<p>  };</p>
-
-<p>  // ----------------------------------------------------------------------
-  // Code showing how to deal with callbacks.
-  // ----------------------------------------------------------------------</p>
-
-<p>  /**</p>
-
-<ul>
-<li> This implementation is used to receive callbacks from the remote</li>
-<li> service.
-*/
-private IRemoteServiceCallback mCallback = new IRemoteServiceCallback.Stub() {
-  /**
-
-<ul>
-<li> This is called by the remote service regularly to tell us about</li>
-<li> new values.  Note that IPC calls are dispatched through a thread</li>
-<li> pool running in each process, so the code executing here will</li>
-<li> NOT be running in our main thread like most other things -- so,</li>
-<li> to update the UI, we need to use a Handler to hop over there.
-*/
-public void valueChanged(int value) {
-  mHandler.sendMessage(mHandler.obtainMessage(BUMP_MSG, value, 0));
-}
-};</li>
-</ul>
-</li>
-</ul>
-
-
-<p>  private static final int BUMP_MSG = 1;</p>
-
-<p>  private Handler mHandler = new Handler() {</p>
-
-<pre><code>  @Override public void handleMessage(Message msg) {
-      switch (msg.what) {
-          case BUMP_MSG:
-              mCallbackText.setText("Received from service: " + msg.arg1);
-              break;
-          default:
-              super.handleMessage(msg);
-      }
-  }
-</code></pre>
-
-<p>  };
-}
-```</p></li>
-</ul>
-
-
-<hr />
-
-<p><strong>文章学习自<a href="http://developer.android.com/guide/components/aidl.html">http://developer.android.com/guide/components/aidl.html</a></strong><br/>
 <strong>转载请注明出自<a href="http:://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢</strong></p>
 ]]></content>
   </entry>
