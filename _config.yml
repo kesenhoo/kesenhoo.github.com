@@ -91,7 +91,7 @@ share_function: true
 ujian_function: false
 
 # Twitter
-twitter_user: kesenhoo
+twitter_user:
 twitter_tweet_count: 3
 twitter_show_replies: false
 twitter_follow_button: false
@@ -120,7 +120,7 @@ disqus_short_name: kesenhoo
 disqus_show_comment_count: true
 
 # Google Analytics
-google_analytics_tracking_id: UA-37679268-1
+# google_analytics_tracking_id: UA-37679268-1
 
 # Facebook Like
 facebook_like: false
