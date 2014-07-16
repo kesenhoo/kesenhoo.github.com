@@ -9,7 +9,8 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="在上一课中有介绍一系列的BitmapFactory.decode* 方法，当数据源是网络或者是磁盘时(或者是任何实际源不在内存的)，这些方法都不应该在main UI 线程中执行。那些情况下加载数据是不可以预知的，它依赖于许多因素(从网络或者硬盘读取数据的速度, 图片的大小, CPU的速度, etc &hellip;">
+  <meta name="description" content="Building a Dynamic UI with Fragments 学习这章节的先决条件: 了解Activity的基本概念 (see Managing the Activity Lifecycle)
+有使用 XML layouts 的经验 你还需要看的有: Fragments &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -70,7 +71,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-training-09-displaying-bitmaps-efficiently-lesson-2/">Android Training(09) - 高效地显示Bitmap(Lesson 2 - 在UI线程之外处理Bitmaps)</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-training-11-building-a-dynamic-ui-with-fragments-lesson-0/">Android Training(11) - 使用Fragments建立动态的UI(Lesson 0 - 章节概览)</a></h1>
     
     
       <p class="meta">
@@ -86,70 +87,34 @@
   
 
 
-<time datetime="2012-04-23T19:55:00+08:00" pubdate data-updated="true">Apr 23<span>rd</span>, 2012</time>
+<time datetime="2012-11-27T14:38:00+08:00" pubdate data-updated="true">Nov 27<span>th</span>, 2012</time>
         
-         | <a href="/blog/android-training-09-displaying-bitmaps-efficiently-lesson-2/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>在上一课中有介绍一系列的BitmapFactory.decode* 方法，当数据源是网络或者是磁盘时(或者是任何实际源不在内存的)，这些方法都不应该在main UI 线程中执行。那些情况下加载数据是不可以预知的，它依赖于许多因素(从网络或者硬盘读取数据的速度, 图片的大小, CPU的速度, etc.)。如果其中任何一个任务卡住了UI thread, 系统会出现ANR的错误。</p>
-
-<p>这一节课会介绍如何使用 AsyncTask 在后台线程中处理bitmap并且演示了如何处理并发(concurrency)的问题。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/android-training-09-displaying-bitmaps-efficiently-lesson-2/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/android-training-09-displaying-bitmaps-efficiently-lesson-1/">Android Training(09) - 高效地显示Bitmap(Lesson 1 - 有效地加载大尺寸图片)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-04-23T11:57:00+08:00" pubdate data-updated="true">Apr 23<span>rd</span>, 2012</time>
-        
-         | <a href="/blog/android-training-09-displaying-bitmaps-efficiently-lesson-1/#disqus_thread">Comments</a>
+         | <a href="/blog/android-training-11-building-a-dynamic-ui-with-fragments-lesson-0/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h1>章节概要</h1>
-
-<p>这一章节会介绍一些通用的用来处理与加载Bitmap对象的方法，这些技术能够使得不会卡到程序的UI并且避免程序消耗过度内存.如果你不注意这些，Bitmaps会迅速的消耗你可用的内存而导致程序crash,出现下面的异常:java.lang.OutofMemoryError: bitmap size exceeds VM budget.</p>
-
-<p>有许多原因说明在你的Android程序中加载Bitmaps是非常棘手的，需要你特别注意:</p>
+  <div class="entry-content"><h1>Building a Dynamic UI with Fragments</h1>
 
 <ul>
-<li>移动设备的系统资源有限。Android设备对于单个程序至少需要16MB的内存。<a href="http://source.android.com/compatibility/downloads.html">Android Compatibility Definition Document (CDD)</a>, Section 3.7. Virtual Machine Compatibility 给出了对于不同大小与密度的屏幕的最低内存需求. 程序应该在这个最低内存限制下最优化程序的效率。当然，大多数设备的都有更高的限制需求.</li>
-<li>Bitmap会消耗很多内存，特别是对于类似照片等更加丰富的图片. 例如，Galaxy Nexus的照相机能够拍摄2592x1936 pixels (5 MB)的图片. 如果bitmap的配置是使用ARGB_8888 (the default from the Android 2.3 onward) ，那么加载这张照片到内存会大概需要19MB(2592<em>1936</em>4 bytes) 的内存, 这样的话会迅速消耗掉设备的整个内存.</li>
-<li>Android app的UI通常会在一次操作中立即加载许多张bitmaps. 例如在ListView, GridView 与 ViewPager 等组件中通常会需要一次加载许多张bitmaps，而且需要多加载一些内容为了用户可能的滑动操作。</li>
+<li>学习这章节的先决条件:
+
+<ul>
+<li>了解Activity的基本概念 (see <a href="http://developer.android.com/training/basics/activity-lifecycle/index.html">Managing the Activity Lifecycle</a>)</li>
+<li>有使用 XML layouts 的经验</li>
+</ul>
+</li>
+<li>你还需要看的有:
+
+<ul>
+<li><a href="http://developer.android.com/guide/components/fragments.html">Fragments</a></li>
+<li><a href="http://developer.android.com/guide/practices/tablets-and-handsets.html">Supporting Tablets and Handsets</a></li>
+</ul>
+</li>
+<li>DEMO:
+<a href="http://developer.android.com/shareables/training/FragmentBasics.zip">FragmentBasics.zip</a></li>
 </ul>
 
 
@@ -157,7 +122,7 @@
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-training-09-displaying-bitmaps-efficiently-lesson-1/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-training-11-building-a-dynamic-ui-with-fragments-lesson-0/">Read on &rarr;</a>
     </footer>
   
 
@@ -169,7 +134,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-training-08-syncing-to-the-cloud-lesson-2/">Android Training(08) - 云同步(Lesson 2 - 使用Backup API)</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-training-10-network-operations-lesson-3/">Android Training(10) - 执行网络操作(Lesson 3 - 解析XML数据)</a></h1>
     
     
       <p class="meta">
@@ -185,30 +150,39 @@
   
 
 
-<time datetime="2012-04-22T18:27:00+08:00" pubdate data-updated="true">Apr 22<span>nd</span>, 2012</time>
+<time datetime="2012-05-07T17:05:00+08:00" pubdate data-updated="true">May 7<span>th</span>, 2012</time>
         
-         | <a href="/blog/android-training-08-syncing-to-the-cloud-lesson-2/#disqus_thread">Comments</a>
+         | <a href="/blog/android-training-10-network-operations-lesson-3/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h2>Using the Backup API[使用Backup API]</h2>
+  <div class="entry-content"><p><strong>第3课:Parsing XML Data</strong>
+Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来记录更新的信息，以便用户进行订阅读取。</p>
 
-<p>当一个用户购买了新的设备或者是把当前的设备做了的恢复出厂设置的操作，用户希望在进行初始化设置的时候，Google Play能够把之前安装过的应用恢复到设备上。默认情况是，那些操作不会发生，用户之前的设置与数据都会丢失.</p>
+<p>那么上传[?]与解析XML数据就成了app的一个常见的功能。 这一课会介绍如何解析XML文档并使用他们的数据。</p>
 
-<p>对于一些数据量相对较少的情况下(通常少于1MB)，例如用户偏好设置，笔记，游戏分数或者是其他的一些状态数据，可以使用Backup API来提供一个轻量级的解决方案。这一课会介绍如何使用Backup API.</p>
+<p><em>([?]这里很奇怪，为什么是Upload，看文章最后一段代码示例的注释，应该是Download才对)</em></p>
 
-<h2>(1)Register for the Android Backup Service[为Android备份服务进行注册]</h2>
+<h2>Choose a Parser(选择一个解析器)</h2>
 
-<p>这一课会使用Android Backup Service, 它需要进行注册. 点击这个链接进行注册:<a href="http://code.google.com/android/backup/signup.html">register here</a>. 注册成功后，服务器会提供一段类似下面的代码用来添加到程序的Manifest文件中:</p>
+<p>我们推荐<a href="http://developer.android.com/reference/org/xmlpull/v1/XmlPullParser.html">XmlPullParser</a>, 它是在Android上一个高效且可维护的解析XML方法。 Android 上有这个接口的两种实现方式：</p>
+
+<ul>
+<li><a href="http://kxml.sourceforge.net/">KXmlParser</a> via <a href="http://developer.android.com/reference/org/xmlpull/v1/XmlPullParserFactory.html#newPullParser(">XmlPullParserFactory.newPullParser()</a>).</li>
+<li>ExpatPullParser, via <a href="http://developer.android.com/reference/android/util/Xml.html#newPullParser(">Xml.newPullParser()</a>).</li>
+</ul>
+
+
+<p>两个选择都是比较好的。下面的示例中是使用ExpatPullParser, via Xml.newPullParser().</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-training-08-syncing-to-the-cloud-lesson-2/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-training-10-network-operations-lesson-3/">Read on &rarr;</a>
     </footer>
   
 
@@ -220,7 +194,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-training-08-syncing-to-the-cloud-lesson-1/">Android Training(08) - 云同步(Lesson 1 - 使用App Engine进行同步)</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-training-10-network-operations-lesson-2/">Android Training(10) - 执行网络操作(Lesson 2 - 管理网络使用方法)</a></h1>
     
     
       <p class="meta">
@@ -236,30 +210,85 @@
   
 
 
-<time datetime="2012-04-22T13:56:00+08:00" pubdate data-updated="true">Apr 22<span>nd</span>, 2012</time>
+<time datetime="2012-05-07T13:43:00+08:00" pubdate data-updated="true">May 7<span>th</span>, 2012</time>
         
-         | <a href="/blog/android-training-08-syncing-to-the-cloud-lesson-1/#disqus_thread">Comments</a>
+         | <a href="/blog/android-training-10-network-operations-lesson-2/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h2>Syncing with App Engine[使用App Engine进行同步]</h2>
+  <div class="entry-content"><p><strong>第2课:Managing Network Usage</strong></p>
 
-<p>写一个能够同步到云端的app是具有挑战性的。那存在许多细节需要处理，例如服务端身份验证，客户端身份验证，分享数据的模块，还有API。简化这些操作的一个方法是使用<strong>Google Plugin for Eclipse</strong>，这个插件帮你垂直整合处理了那些Android系统与App Engine程序交互的操作。这一课会介绍如何创建那样一个项目。</p>
+<p>这一课会介绍如何细化管理使用的网络资源。如果你的程序需要执行很多网络操作，你应该提供用户设置选项来允许用户控制程序的数据偏好。例如，同步数据的频率，是否只在连接到WiFi才进行下载与上传操作，是否在漫游时使用套餐数据流量等等。这样用户才能在快到达流量上限时关闭你的程序获取数据功能。</p>
 
-<p>关于App Engine，请参考：https://developers.google.com/appengine/docs/whatisgoogleappengine?hl=zh-CN</p>
+<p>关于如何编写一个最小化下载与网络操作对电量影响的程序，请参考：</p>
 
-<p>下面会介绍:  <br/>
-* 建立Android与App engine apps能够交互的程序。<br/>
-* 利用Cloud to Device Messaging(C2DM)的优势，这样app就不需要使用轮询机制去更新。[关于C2DM的详情请参考前面课程与http://code.google.com/intl/zh-CN/android/c2dm/)]</p>
+<p><a href="http://developer.android.com/training/monitoring-device-state/index.html">Optimizing Battery Life</a>:
+<a href="http://developer.android.com/training/efficient-downloads/index.html">Transferring Data Without Draining the Battery</a>:</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-training-08-syncing-to-the-cloud-lesson-1/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-training-10-network-operations-lesson-2/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/android-training-10-network-operations-lesson-1/">Android Training(10) - 执行网络操作(Lesson 1 - HTTP连接网络)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-05-03T15:21:00+08:00" pubdate data-updated="true">May 3<span>rd</span>, 2012</time>
+        
+         | <a href="/blog/android-training-10-network-operations-lesson-1/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>这一章会介绍一些基本的网络操作，监视网络链接（包括网络改变），让用户来控制app对网络的选择使用。还会介绍如何解析与使用XML数据。</p>
+
+<p><a href="http://developer.android.com/shareables/training/NetworkUsage.zip">NetworkUsage.zip</a></p>
+
+<p>通过学习这章节的课程，你已经会学习一些基础知识，如何在最小化网络阻塞的情况下，创建一个高效的app，用来下载数据与解析数据。</p>
+
+<p>你还可以参考下面文章进阶学习:</p>
+
+<ul>
+<li><a href="http://developer.android.com/training/monitoring-device-state/index.html">Optimizing Battery Life</a></li>
+<li><a href="http://developer.android.com/training/efficient-downloads/index.html">Transferring Data Without Draining the Battery</a></li>
+<li><a href="http://developer.android.com/guide/webapps/index.html">Web Apps Overview</a></li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/android-training-10-network-operations-lesson-1/">Read on &rarr;</a>
     </footer>
   
 
@@ -283,35 +312,35 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/android-training-wearable-app-bt-debug/">Android Training - 创建可穿戴应用(5 - 通过蓝牙进行调试)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-packaging/">Android Training - 创建可穿戴应用(4 - 打包可穿戴应用)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-voice-input/">Android Training - 创建可穿戴应用(3 - 添加语音能力)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-layouts/">Android Training - 创建可穿戴应用(2 - 创建自定义的布局)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-creating/">Android Training - 创建可穿戴应用(1 - 创建并执行可穿戴应用)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-index/">Android Training - 创建可穿戴应用(0 - 序言)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/android-notes-add-copy-text-option-to-share-list/">Android Notes - 添加Copy to Clipboard的选项到分享列表中</a>
       </li>
     
       <li class="post">
         <a href="/blog/android-training-performance-anr/">Android Training - 避免程序无响应ANR</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-custom-request/">Android Training - Volley(Lesson 4 - 实现自定义的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-standard-request/">Android Training - Volley(Lesson 3 - 创建标准的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-request-queue/">Android Training - Volley(Lesson 2 - 建立请求队列)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-simple-request/">Android Training - Volley(Lesson 1 - 发送简单的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-index/">Android Training - Volley(Lesson 0 - 序言)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-deeper-graphics-architecture/">Android Deeper(01) - Graphic Architecture</a>
       </li>
     
   </ul>
@@ -320,10 +349,10 @@
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (79)</a></li>
+  <li><a href='/blog/categories/android'>Android (85)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (8)</a></li>
-  <li><a href='/blog/categories/android-training'>Android:training (69)</a></li>
+  <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
 </ul>

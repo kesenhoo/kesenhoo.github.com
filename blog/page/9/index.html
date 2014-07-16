@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="前两节课主要讲了从你的app启动另外一个app。但是如果你的app可以响应前面发出的action，那么你的app应该做好响应的准备。例如，如果你创建了一个social app，它可以分享messages 或者 photos 给好友，那么最好你的app能够接收ACTION_SEND 的intent, &hellip;">
+  <meta name="description" content="一个bound的service是C/S的接口。它允许其他组件绑定到service,发送请求，接收回应并执行IPC。通常是需要给其他程序组件提供服务。 A bound service allows other components to bind to it, in order to &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -70,7 +70,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-training-13-interacting-with-other-apps-lesson-3/">Android Training(13) - 与其他Apps进行交互(Lesson 3 - 允许其他app启动你的activity)</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-notes-bound-services/">Android Notes(01) - Bound Services</a></h1>
     
     
       <p class="meta">
@@ -86,117 +86,27 @@
   
 
 
-<time datetime="2012-12-04T22:12:00+08:00" pubdate data-updated="true">Dec 4<span>th</span>, 2012</time>
+<time datetime="2013-02-18T22:30:00+08:00" pubdate data-updated="true">Feb 18<span>th</span>, 2013</time>
         
-         | <a href="/blog/android-training-13-interacting-with-other-apps-lesson-3/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>前两节课主要讲了从你的app启动另外一个app。但是如果你的app可以响应前面发出的action，那么你的app应该做好响应的准备。例如，如果你创建了一个social app，它可以分享messages 或者 photos 给好友，那么最好你的app能够接收ACTION_SEND 的intent,这样当用户在其他app触发分享功能的时候，你的app能够出现在待选对话框。</p>
-
-<p>为了使得其他的app能够启动你的activity，你需要在你的manifest文件的<activity> 标签下添加<intent-filter> 的属性。</p>
-
-<p>当你的app被安装到设备上时，系统可以识别你的intent filter并把这些信息记录下来。当其他app通过执行 startActivity() 或者 startActivityForResult()方法，并使用implicit intent时，系统可以自动查找出那些可以响应这个intent的activity。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/android-training-13-interacting-with-other-apps-lesson-3/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/android-training-13-interacting-with-other-apps-lesson-2/">Android Training(13) - 与其他Apps进行交互(Lesson 2 - 从activity获取Result)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-12-03T22:39:00+08:00" pubdate data-updated="true">Dec 3<span>rd</span>, 2012</time>
-        
-         | <a href="/blog/android-training-13-interacting-with-other-apps-lesson-2/#disqus_thread">Comments</a>
+         | <a href="/blog/android-notes-bound-services/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>启动另外一个activity并不一定是单向的。你也可以启动另外一个activity然后接受一个result回来。为了接受这个result,你需要使用<a href="http://developer.android.com/reference/android/app/Activity.html#startActivityForResult(android.content.Intent,%20int">startActivityForResult()</a>) (而不是<a href="http://developer.android.com/reference/android/app/Activity.html#startActivity(android.content.Intent">startActivity()</a>))。</p>
-
-<p>例如，你的app可以启动一个camera程序并接受拍的照片作为result。或者你可以启动People程序并获取其中联系的人的详情作为result。</p>
-
-<p>当然，被启动的activity需要指定返回的result。它需要把这个result作为另外一个intent对象返回，你的activity需要在<a href="http://developer.android.com/reference/android/app/Activity.html#onActivityResult(int,%20int,%20android.content.Intent">onActivityResult()</a>)的回调方法里面去接收result。</p>
-
-<p><strong>Note:</strong>在执行 startActivityForResult()时，你可以使用explicit 或者 implicit 的intent。当你启动另外一个位于你的程序中的activity时，你应该使用explicit intent来确保你可以接收到期待的结果。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/android-training-13-interacting-with-other-apps-lesson-2/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/android-training-13-interacting-with-other-apps-lesson-1/">Android Training(13) - 与其他Apps进行交互(Lesson 1 - 启动到另外一个app)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-12-03T20:55:00+08:00" pubdate data-updated="true">Dec 3<span>rd</span>, 2012</time>
-        
-         | <a href="/blog/android-training-13-interacting-with-other-apps-lesson-1/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><strong>章节概要：</strong></p>
+  <div class="entry-content"><ul>
+<li>一个bound的service是C/S的接口。它允许其他组件绑定到service,发送请求，接收回应并执行IPC。通常是需要给其他程序组件提供服务。
 
 <ul>
-<li>一个Android app通常都会有好几个activities. 每一个activity的界面都可能允许用户执行一些特殊任务（例如查看地图或者是开始拍照等）。为了让用户从一个activity跳到另外一个activity，你的app必须使用Intent来定义你的app想做的事情。当你使用startActivity()的方法，而且参数是intent时，系统会使用这个 Intent 来定义并启动合适的app组件。使用intents还可以让你的app来启动另外一个app里面的activity。</li>
-<li>一个 Intent 可以显式的指明需要启动的模块，也可以隐式的指明自己可以处理哪种类型的动作。<em>(一个主动叫起别人，一个被特定类型的别人叫起)</em></li>
-<li>这一章节会演示如何使用Intent 来做一些与其他app之间的简单交互。类似，启动另外一个app,从其他app接受数据，并且使得你的app能够响应从其他发出的intent。</li>
+<li>A bound service allows other components to bind to it, in order to interact with it and perform interprocess communication。</li>
+<li>A bound service is destroyed once all clients unbind, unless the service was also started。</li>
+</ul>
+</li>
+<li>客户端通过执行 bindService()绑定到service。这样的话，客户端需要实现一个ServiceConnection, 它可以监视与service的连接状态。bindService() 并不会有返回值，但是Android系统会在client与service连接上时，执行onServiceConnected() 的callback。在这个回调方法里面传递IBinder给client用来与service进行交互。</li>
+<li>前面提到可以有多个Client同时bind到service。然而，系统只会在第一个client做绑定时才会执行service的onBind() 方法。对于随后需要绑定的客户端，系统会直接传递同一个 IBinder 对象给Client，而不是去再次执行onBind方法。(<em>那么也就是onBind方法只会被执行一次</em>)</li>
+<li>通常来说，Music程序需要实现service的两种方式，这样既可以在activity被销毁之后(<em>假设只实现bound的方式的话，这个时候，unbind了，Music会停止</em>)音乐可以继续播放，当重新进入activity时又会重新bind上。这刚好验证了下面的说法：</li>
+<li>如果一个service既可以started与bound。当一个service是started的，系统并不会在所有的Client都unbind之后去杀死这个service，我们需要显示的去停止这个service，通过stopSelf或者stopService的方式。</li>
 </ul>
 
 
@@ -204,7 +114,7 @@
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-training-13-interacting-with-other-apps-lesson-1/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-notes-bound-services/">Read on &rarr;</a>
     </footer>
   
 
@@ -216,7 +126,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-training-12-saving-data-lesson-3/">Android Training(12) - 保存数据(Lesson 3 - 保存到SQLite)</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-notes-services/">Android Notes(00) - Services</a></h1>
     
     
       <p class="meta">
@@ -232,26 +142,121 @@
   
 
 
-<time datetime="2012-11-30T21:46:00+08:00" pubdate data-updated="true">Nov 30<span>th</span>, 2012</time>
+<time datetime="2013-02-04T18:37:00+08:00" pubdate data-updated="true">Feb 4<span>th</span>, 2013</time>
         
-         | <a href="/blog/android-training-12-saving-data-lesson-3/#disqus_thread">Comments</a>
+         | <a href="/blog/android-notes-services/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>对于重复或者结构化的数据（如联系人信息）等保存到DB是个不错的主意。这节课假定你已经熟悉SQL数据库的操作。在Android上可能会使用到的APIs，可以从<a href="http://developer.android.com/reference/android/database/sqlite/package-summary.html">android.database.sqlite</a>包中找到。</p>
+  <div class="entry-content"><h2>概要</h2>
 
-<h2>Define a Schema and Contract[定义Schema与Contract]</h2>
+<ul>
+<li>Service是一个可以在后台长时间进行工作的一个程序组件。这个组件并没有提供UI。其他的程序组件可以Start一个Service，并且可以在用户切换到另外一个程序的时候继续工作。另外，某个组件可以Bind到一个Service上，并与他进行交互，甚至是进行IPC操作。例如，一个Service可以处理网络交互，播放音乐，执行I/O操作，或者与Content Provider进行交互，他们都是在后台的。
 
-<p>SQL中一个中重要的概念是schema：一种DB结构的正式声明。schema是从你创建DB的SQL语句中生成的。你可能会发现创建一个创建一个伴随类（companion class）是很有益的，这个类成为合约类（contract class）,它用一种系统化并且自动生成文档的方式，显示指定了你的schema样式。</p>
+<ul>
+<li>Service可以跑在后台进行工作，即使用户在切换到另外一个程序。</li>
+<li>Service可以允许其他组件与它进行Bind，从而进行IPC操作。</li>
+<li>Service默认是跑在host程序的main thread。</li>
+</ul>
+</li>
+</ul>
+
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-training-12-saving-data-lesson-3/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-notes-services/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/hi/">Hello, World</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-20T00:57:00+08:00" pubdate data-updated="true">Dec 20<span>th</span>, 2012</time>
+        
+         | <a href="/blog/hi/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img src="/images/articles/hello_world.jpg"></p>
+
+<p>Hi.This is my first post. <strong>By markdown.</strong></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/android-training-14-capturing-photos-lesson-3/">Android Training(14) - 捕获照片(Lesson 3 - 直接操控相机)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-18T23:59:00+08:00" pubdate data-updated="true">Dec 18<span>th</span>, 2012</time>
+        
+         | <a href="/blog/android-training-14-capturing-photos-lesson-3/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>在这一节课，我们会讨论如何通过使用framework的APIs来直接控制相机的硬件。直接控制设备的相机，相比起拍照与录像来说，要复杂一些。然而，如果你想要创建一个专业的特殊的相机程序，这节课会演示这部分内容。</p>
+
+<h2>Open the Camera Object(打开相机对象)</h2>
+
+<p>获取到 Camera 对象是直接控制Camera的第一步。正如Android自带的相机程序一样，推荐访问Camera的方式是在onCreate方法里面另起一个Thread来打开Camera。这个方法可以避免因为打开工作比较费时而引起ANR。在一个更加基础的实现方法里面，打开Camera的动作被延迟到onResume()方法里面去执行，这样使得代码能够更好的重用，并且保持控制流程不会复杂化。(原文是：In a more basic implementation, opening the camera can be deferred to the onResume() method to facilitate code reuse and keep the flow of control simple.)</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/android-training-14-capturing-photos-lesson-3/">Read on &rarr;</a>
     </footer>
   
 
@@ -275,35 +280,35 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/android-training-wearable-app-bt-debug/">Android Training - 创建可穿戴应用(5 - 通过蓝牙进行调试)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-packaging/">Android Training - 创建可穿戴应用(4 - 打包可穿戴应用)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-voice-input/">Android Training - 创建可穿戴应用(3 - 添加语音能力)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-layouts/">Android Training - 创建可穿戴应用(2 - 创建自定义的布局)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-creating/">Android Training - 创建可穿戴应用(1 - 创建并执行可穿戴应用)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-index/">Android Training - 创建可穿戴应用(0 - 序言)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/android-notes-add-copy-text-option-to-share-list/">Android Notes - 添加Copy to Clipboard的选项到分享列表中</a>
       </li>
     
       <li class="post">
         <a href="/blog/android-training-performance-anr/">Android Training - 避免程序无响应ANR</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-custom-request/">Android Training - Volley(Lesson 4 - 实现自定义的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-standard-request/">Android Training - Volley(Lesson 3 - 创建标准的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-request-queue/">Android Training - Volley(Lesson 2 - 建立请求队列)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-simple-request/">Android Training - Volley(Lesson 1 - 发送简单的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-index/">Android Training - Volley(Lesson 0 - 序言)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-deeper-graphics-architecture/">Android Deeper(01) - Graphic Architecture</a>
       </li>
     
   </ul>
@@ -312,10 +317,10 @@
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (79)</a></li>
+  <li><a href='/blog/categories/android'>Android (85)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (8)</a></li>
-  <li><a href='/blog/categories/android-training'>Android:training (69)</a></li>
+  <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
 </ul>

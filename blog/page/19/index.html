@@ -9,7 +9,8 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="Optimizing Layout Hierarchies Layout是Android程序影响用户体验最关键的一部分。如果布局文件不好会使得程序比较卡。SDK里面包含了一些工具用来帮助我们发现布局文件的性能问题 使用基本的Layout结构是最有效的。但是，每一个添加到系统的组件都需要初始化， &hellip;">
+  <meta name="description" content="用户在播放音乐的时候有多个选择，可以使用内置的扬声器，有线耳机或者是支持A2DP的蓝牙耳机。
+【补充：A2DP全名是Advanced Audio Distribution Profile 蓝牙音频传输模型协定! A2DP是能够采用耳机内的芯片来堆栈数据，达到声音的高清晰度。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -70,7 +71,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-training-02-improve-layouts-lesson-1/">Android Training(02)- 提升布局文件的性能(Lesson 1 - 优化布局的层级)</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-training-03-managing-audio-playback-lesson-3/">Android Training(03) - 音频播放(Lesson 3 - 音频设备的相关问题)</a></h1>
     
     
       <p class="meta">
@@ -86,28 +87,23 @@
   
 
 
-<time datetime="2012-03-21T17:14:00+08:00" pubdate data-updated="true">Mar 21<span>st</span>, 2012</time>
+<time datetime="2012-03-23T15:28:00+08:00" pubdate data-updated="true">Mar 23<span>rd</span>, 2012</time>
         
-         | <a href="/blog/android-training-02-improve-layouts-lesson-1/#disqus_thread">Comments</a>
+         | <a href="/blog/android-training-03-managing-audio-playback-lesson-3/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h2>Optimizing Layout Hierarchies</h2>
-
-<p>Layout是Android程序影响用户体验最关键的一部分。如果布局文件不好会使得程序比较卡。SDK里面包含了一些工具用来帮助我们发现布局文件的性能问题</p>
-
-<p>使用基本的Layout结构是最有效的。但是，每一个添加到系统的组件都需要初始化，进行布局，绘制的过程。比如，使用在LinearLayout里面使用子组件会导致一个过于deep的层级结构。而且内嵌使用包含layout_weight属性的LinearLayout会在绘制时花费昂贵的系统资源，因为每一个子组件都需要被测量两次。在使用ListView与GridView的时候，这个问题显的尤其重要，因为子组件会重复被创建</p>
-
-<p>这一课我们会学习使用Hierarchy Viewer and Lint 来检查并最优化布局文件。</p>
+  <div class="entry-content"><p>用户在播放音乐的时候有多个选择，可以使用内置的扬声器，有线耳机或者是支持A2DP的蓝牙耳机。
+【补充：A2DP全名是Advanced Audio Distribution Profile 蓝牙音频传输模型协定! A2DP是能够采用耳机内的芯片来堆栈数据，达到声音的高清晰度。有A2DP的耳机就是蓝牙立体声耳机。声音能达到44.1kHz，一般的耳机只能达到8kHz。如果手机支持蓝牙，只要装载A2DP协议，就能使用A2DP耳机了。还有消费者看到技术参数提到蓝牙V1.0 V1.1 V1.2 V2.0——这些是指蓝牙的技术版本，是指通过蓝牙传输的速度，他们是否支持A2DP具体要看蓝牙产品制造商是否使用这个技术。来自<a href="http://baike.baidu.com/view/551149.htm">百度百科</a>】</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-training-02-improve-layouts-lesson-1/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-training-03-managing-audio-playback-lesson-3/">Read on &rarr;</a>
     </footer>
   
 
@@ -119,7 +115,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-training-01-supporting-different-device-lesson-3/">Android Training(01) - 适配不同的屏幕(Lesson 3 - 实现可适配的UI流程)</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-training-03-managing-audio-playback-lesson-2/">Android Training(03) - 音频播放(Lesson 2 - 管理音频焦点Audio Focus)</a></h1>
     
     
       <p class="meta">
@@ -135,27 +131,24 @@
   
 
 
-<time datetime="2012-03-21T14:38:00+08:00" pubdate data-updated="true">Mar 21<span>st</span>, 2012</time>
+<time datetime="2012-03-22T23:16:00+08:00" pubdate data-updated="true">Mar 22<span>nd</span>, 2012</time>
         
-         | <a href="/blog/android-training-01-supporting-different-device-lesson-3/#disqus_thread">Comments</a>
+         | <a href="/blog/android-training-03-managing-audio-playback-lesson-2/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h1>Implementing Adaptative UI Flows</h1>
+  <div class="entry-content"><p>很多App都可以播放音频，因此在播放前如何获取到音频焦点就显得很重要了，这样可以避免同时出现多个声音，Android使用audio focus来节制音频的播放，仅仅是获取到audio focus的App才能够播放音频。</p>
 
-<p>根据显示不同的layout，我们需要设计不同的UI flow。比如如果你的AP是dual-pane的模式，点击左边list的item的时候，会在右边直接显示对应的内容，如果是single-pane的模式，那么需要跳转到另外一个Activity来显示对于的内容</p>
-
-<p><strong>注：</strong>个人认为目前很多AP都会针对比较大的屏幕设计一个对于的版本，比如QQ Pad版，QQ HD版，QQ Pad Mini版，这些信息可以看出来大多数情况，还是不太会采取同一份代码适应所有屏幕的方案。
-这一课主要就是讲如何在运行的时候判断当前的布局，从而让AP选择不同行为。</p>
+<p>在App开始播放音频之前，它需要经过发出请求[request]->接受请求[receive]->音频焦点锁定[Audio Focus]的过程。同样，它需要知道如何监听失去音频焦点[lose of audio focus]的事件并进行合适的响应。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-training-01-supporting-different-device-lesson-3/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-training-03-managing-audio-playback-lesson-2/">Read on &rarr;</a>
     </footer>
   
 
@@ -167,7 +160,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-training-01-supporting-different-device-lesson-2/">Android Training(01) - 适配不同的屏幕(Lesson 2 - 适配不同屏幕密度)</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-training-03-managing-audio-playback-lesson-1/">Android Training(03) - 音频播放(Lesson 1 - 控制app的音量与播放)</a></h1>
     
     
       <p class="meta">
@@ -183,30 +176,27 @@
   
 
 
-<time datetime="2012-03-20T20:32:00+08:00" pubdate data-updated="true">Mar 20<span>th</span>, 2012</time>
+<time datetime="2012-03-21T23:27:00+08:00" pubdate data-updated="true">Mar 21<span>st</span>, 2012</time>
         
-         | <a href="/blog/android-training-01-supporting-different-device-lesson-2/#disqus_thread">Comments</a>
+         | <a href="/blog/android-training-03-managing-audio-playback-lesson-1/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h1>Supporting Different Densities</h1>
+  <div class="entry-content"><p>如果你的App在播放音频，显然用户能够以预期的方式来控制音频是很重要的。为了保证好的用户体验，同样App能够获取音频焦点是很重要的，这样才能确保不会在同一时刻出现多个App的声音。在学习这个课程后，你将能够创建对硬件音量按钮进行响应的App，当按下音量按钮的时候需要获取到当前音频的焦点，然后以适当的方式改变音量从而进行响应用户的行为。</p>
 
-<p>上一篇文章和大家分享了如何适配不同大小的屏幕，有个概念需要提前弄清楚，屏幕大的不一定就分辨率高，详细请看下面的内容。<br/>
-This lesson shows you how to support different screen densities by providing different resources and using resolution-independent units of measurements.<br/>
-我们需要通过提供不同的resources来support不同的屏幕密度，使用一种独立与分辨率的测量单元来表示（也就是dp）</p>
+<hr />
 
-<h2>Use Density-independent Pixels[使用设备独立像素dp/sp]</h2>
-
-<p>前一节，我们就提到过，一定要避免使用绝对pixels(像素)的方式来设计layout的大小或者距离，因为不同的的屏幕有不同的像素密度，所以相同的像素在不同的设备上物理大小会有区别。通常我们都会在需要的时候使用dp，或者sp来表示大小</p>
+<p>一个好的用户体验是可预期可控的。如果App是在播放音频，那么显然我们需要做到能够通过硬件按钮，软件按钮，蓝牙耳麦等来控制音量。
+同样的，我们需要能够进行play, stop, pause, skip, and previous等动作，并且进行对应的响应。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-training-01-supporting-different-device-lesson-2/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-training-03-managing-audio-playback-lesson-1/">Read on &rarr;</a>
     </footer>
   
 
@@ -218,7 +208,7 @@ This lesson shows you how to support different screen densities by providing dif
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-training-01-supporting-different-device-lesson-1/">Android Training(01) - 适配不同的屏幕(Lesson 1 - 支持不同的屏幕大小)</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-training-02-improve-layouts-lesson-4/">Android Training(02) - 提升布局文件的性能(Lesson 4 - 使用ViewHolder来提升ListView的性能)</a></h1>
     
     
       <p class="meta">
@@ -234,46 +224,25 @@ This lesson shows you how to support different screen densities by providing dif
   
 
 
-<time datetime="2012-03-16T21:09:00+08:00" pubdate data-updated="true">Mar 16<span>th</span>, 2012</time>
+<time datetime="2012-03-21T21:20:00+08:00" pubdate data-updated="true">Mar 21<span>st</span>, 2012</time>
         
-         | <a href="/blog/android-training-01-supporting-different-device-lesson-1/#disqus_thread">Comments</a>
+         | <a href="/blog/android-training-02-improve-layouts-lesson-4/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p><strong>Android设备屏幕不一，为了更好的用户体验，我们必须做适配不同屏幕的操作</strong></p>
+  <div class="entry-content"><h2>Making ListView Scrolling Smooth</h2>
 
-<ul>
-<li>Dependencies and prerequisites<br/>
-Android 1.6 or higher (2.1+ for the sample app)<br/>
-Basic knowledge of Activities and Fragment<br/>
-Experience building an Android User Interface<br/>
-Several features require the use of the support library</li>
-<li>You should also read<br/>
-<a href="http://developer.android.com/guide/practices/screens_support.html">Supporting Multiple Screens</a></li>
-<li>Download the sample app<br/>
-<a href="http://developer.android.com/shareables/training/NewsReader.zip">NewsReader.zip</a></li>
-</ul>
-
-
-<h1>Supporting Different Screen Sizes</h1>
-
-<h2>Use &#8220;wrap_content&#8221; and &#8220;match_parent&#8221;[使用wrap_content与match_parent]</h2>
-
-<ul>
-<li>wrap_content：宽高根据内容大小调整</li>
-<li>match_parent：伸展至与父控件一致<br/>
-显然我们不能hard-coded（写死大小）</li>
-</ul>
-
+<p>使得滚动ListView平滑的关键在与保持APP的UI thread与复杂的操作隔离。确保另起一个Thread来处理Disk IO，network access或者SQL access.
+为了测试AP的状态，可以enable <a href="http://developer.android.com/reference/android/os/StrictMode.html">StrictMode</a>.(Android ICS 4.0上已经默认开启了StrickMode)</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-training-01-supporting-different-device-lesson-1/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-training-02-improve-layouts-lesson-4/">Read on &rarr;</a>
     </footer>
   
 
@@ -297,35 +266,35 @@ Several features require the use of the support library</li>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/android-training-wearable-app-bt-debug/">Android Training - 创建可穿戴应用(5 - 通过蓝牙进行调试)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-packaging/">Android Training - 创建可穿戴应用(4 - 打包可穿戴应用)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-voice-input/">Android Training - 创建可穿戴应用(3 - 添加语音能力)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-layouts/">Android Training - 创建可穿戴应用(2 - 创建自定义的布局)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-creating/">Android Training - 创建可穿戴应用(1 - 创建并执行可穿戴应用)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-index/">Android Training - 创建可穿戴应用(0 - 序言)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/android-notes-add-copy-text-option-to-share-list/">Android Notes - 添加Copy to Clipboard的选项到分享列表中</a>
       </li>
     
       <li class="post">
         <a href="/blog/android-training-performance-anr/">Android Training - 避免程序无响应ANR</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-custom-request/">Android Training - Volley(Lesson 4 - 实现自定义的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-standard-request/">Android Training - Volley(Lesson 3 - 创建标准的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-request-queue/">Android Training - Volley(Lesson 2 - 建立请求队列)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-simple-request/">Android Training - Volley(Lesson 1 - 发送简单的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-index/">Android Training - Volley(Lesson 0 - 序言)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-deeper-graphics-architecture/">Android Deeper(01) - Graphic Architecture</a>
       </li>
     
   </ul>
@@ -334,10 +303,10 @@ Several features require the use of the support library</li>
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (79)</a></li>
+  <li><a href='/blog/categories/android'>Android (85)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (8)</a></li>
-  <li><a href='/blog/categories/android-training'>Android:training (69)</a></li>
+  <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
 </ul>

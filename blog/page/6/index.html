@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="作为缓存Bitmaps的进一步延伸, 为了促进GC与bitmap的重用，你还有一些特定的事情可以做. 推荐的策略会根据Android的版本不同而有所差异. BitmapFun的示例程序会演示如何设计你的程序使得能够在不同的Android平台上高效的运行. &hellip;">
+  <meta name="description" content="Random Access Memory(RAM)在任何软件开发环境中都是一个很宝贵的资源。这一点在物理内存通常很有限的移动操作系统上，显得尤为突出。尽管Android的Dalvik虚拟机扮演了常规的垃圾回收的角色，但这并不意味着你可以忽视app的内存分配与释放的时机与地点。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -70,7 +70,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-training-09-displaying-bitmaps-efficiently-lesson-4/">Android Training(09) - 高效地显示Bitmap(Lesson 4 - 优化Bitmap的内存使用)</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-training-17-managing_your_app_memory/">Android Training(17) - 管理应用的内存</a></h1>
     
     
       <p class="meta">
@@ -86,32 +86,26 @@
   
 
 
-<time datetime="2013-05-19T14:43:00+08:00" pubdate data-updated="true">May 19<span>th</span>, 2013</time>
+<time datetime="2013-10-19T15:18:00+08:00" pubdate data-updated="true">Oct 19<span>th</span>, 2013</time>
         
-         | <a href="/blog/android-training-09-displaying-bitmaps-efficiently-lesson-4/#disqus_thread">Comments</a>
+         | <a href="/blog/android-training-17-managing_your_app_memory/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>作为缓存Bitmaps的进一步延伸, 为了促进GC与bitmap的重用，你还有一些特定的事情可以做. 推荐的策略会根据Android的版本不同而有所差异. <a href="http://developer.android.com/shareables/training/BitmapFun.zip">BitmapFun</a>的示例程序会演示如何设计你的程序使得能够在不同的Android平台上高效的运行.</p>
+  <div class="entry-content"><p>Random Access Memory(RAM)在任何软件开发环境中都是一个很宝贵的资源。这一点在物理内存通常很有限的移动操作系统上，显得尤为突出。尽管Android的Dalvik虚拟机扮演了常规的垃圾回收的角色，但这并不意味着你可以忽视app的内存分配与释放的时机与地点。</p>
 
-<p>我们首先要知道Android管理bitmap memory的演变进程:</p>
+<p>为了GC能够从你的app中及时回收内存，你需要避免Memory Leaks(这通常由引用的不能释放而导致)并且在适当的时机(下面会讲到的lifecycle callbacks)来释放引用。对于大多数apps来说，Dalvik的GC会自动把离开活动线程的对象进行回收。</p>
 
-<ul>
-<li>在Android 2.2 (API level 8)以及之前, 当GC发生时, 你的应用的线程是会stopped的. 这导致了一个滞后，它会降低效率. <strong>在Android 2.3上，添加了并发GC的机制, 这意味着在一个bitmap不再被引用到之后，内存会被立即reclaimed.</strong></li>
-<li>在Android 2.3.3 (API level 10)已经之后, 一个bitmap的像素级数据是存放在native内存中的. 这些数据与bitmap本身是隔离的, bitmap本身是被存放在Dalvik heap中. 在native内存中的pixel数据不是以可以预测的方式去释放的, 这意味着有可能导致一个程序容易超过它的内存限制并Crash. <strong>在Android 3.0 (API Level 11), pixel数据则是与bitmap本身一起存放在dalvik heap中.</strong></li>
-</ul>
-
-
-<p>下面会介绍如何在不同的Android版本上优化bitmap内存使用.</p>
+<p>这篇文章会解释Android如何管理app的进程与内存分配，并且你可以在开发Android应用的时候主动的减少内存的使用。关于Java的资源管理机制，请参加其它书籍或者线上材料。如果你正在寻找如何分析你的内存使用情况的文章，请参考这里<a href="http://developer.android.com/tools/debugging/debugging-memory.html">Investigating Your RAM Usage</a>。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-training-09-displaying-bitmaps-efficiently-lesson-4/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-training-17-managing_your_app_memory/">Read on &rarr;</a>
     </footer>
   
 
@@ -123,7 +117,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-notes-task-and-back-stack/">Android Notes(05) - Tasks and Back Stack</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-training-16-creating-custom-views-lesson-4/">Android Training(16) - 创建自定义的Views(Lesson 4 - 优化Views)</a></h1>
     
     
       <p class="meta">
@@ -139,31 +133,22 @@
   
 
 
-<time datetime="2013-04-20T20:42:00+08:00" pubdate data-updated="true">Apr 20<span>th</span>, 2013</time>
+<time datetime="2013-08-18T17:30:00+08:00" pubdate data-updated="true">Aug 18<span>th</span>, 2013</time>
         
-         | <a href="/blog/android-notes-task-and-back-stack/#disqus_thread">Comments</a>
+         | <a href="/blog/android-training-16-creating-custom-views-lesson-4/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><ul>
-<li>所有的activities都归属于一个task。</li>
-<li>一个task包含了一些activities，这些activities以用户与他们的交互前后为顺序存放在task中。</li>
-<li>Tasks可以把activies放置在background并且保存每一个activites的状态，以便于用户可以切换到其他task而不至于丢失之前的活动状态。</li>
-</ul>
-
-
-<h1>要点概述</h1>
-
-<p>一个程序通常包含了多个actvities。每一个activity都应该围绕用户需要执行的一个特定功能而进行设计，并且可以启动其他的activites。例如:一个邮件程序应该拥有一个显示新邮件的列表。当用户选择其中一封邮件，一个新的activity将打开用来显示邮件内容。</p>
+  <div class="entry-content"><p>前面的课程学习到了如何创建设计良好的View，并且能够使之在手势与状态切换时得到正确的反馈。下面要介绍的是如何使得view能够执行更快。为了避免UI显得卡顿，你必须确保动画能够保持在60fps以上。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-notes-task-and-back-stack/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-training-16-creating-custom-views-lesson-4/">Read on &rarr;</a>
     </footer>
   
 
@@ -175,7 +160,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-notes-intent-and-intentFilter/">Android Notes(04) - Intents and Intent Filters</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-training-16-creating-custom-views-lesson-3/">Android Training(16) - 创建自定义的Views(Lesson 3 - 处理View的交互性)</a></h1>
     
     
       <p class="meta">
@@ -191,32 +176,26 @@
   
 
 
-<time datetime="2013-04-12T18:27:00+08:00" pubdate data-updated="true">Apr 12<span>th</span>, 2013</time>
+<time datetime="2013-08-18T15:01:00+08:00" pubdate data-updated="true">Aug 18<span>th</span>, 2013</time>
         
-         | <a href="/blog/android-notes-intent-and-intentFilter/#disqus_thread">Comments</a>
+         | <a href="/blog/android-training-16-creating-custom-views-lesson-3/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h2>Intent与Intent Filter</h2>
+  <div class="entry-content"><p>绘制UI仅仅是创建自定义View的一部分。你还需要使得你的View能够以模拟现实世界的方式来进行反馈。Objects应该总是与现实情景能够保持一致。例如，图片不应该突然消失又从另外一个地方出现，因为在现实世界里面不会发生那样的事情。正确的应该是，图片从一个地方移动到另外一个地方。</p>
 
-<p>Android其中的三大组件，Activity,Service与broadcast receivers是通过Intent来触发彼此的。Intent本身会携带一些信息，它是一种组件内部或者组件间进行交互的中介。<br/>
-对于不同的组件之间有着不同的机制：</p>
+<p>用户应该可以感受到UI上的微小变化，并对这些变化反馈到现实世界中。例如，当用户做fling(迅速滑动)的动作，应该再滑动开始与结束的时候给用户一定的反馈。</p>
 
-<ul>
-<li>一个Intent对象通过Context.startActivity()或者Activity.startActivityForResult()来启动一个activity或者让已经存在的activity做一些更新的操作。</li>
-<li>一个Intent对象通过Context.startService()来初始化一个Service或者给已经在运行的Service传递新的指令。同样的，对于Context.bindService()是一样的道理。</li>
-<li>Intent对象通过broadcast的方法（例如Context.sendBroadcast(), Context.sendOrderedBroadcast()或者Context.sendStickyBroadcast())传递给那些感兴趣的broadcast receivers.</li>
-</ul>
-
+<p>这节课会演示如何使用Android framework的功能来为自定义的View添加那些现实世界中的行为。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-notes-intent-and-intentFilter/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-training-16-creating-custom-views-lesson-3/">Read on &rarr;</a>
     </footer>
   
 
@@ -228,7 +207,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-training-15-performance-tips/">Android Training(15) - 代码性能优化小技巧</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-training-16-creating-custom-views-lesson-2/">Android Training(16) - 创建自定义的Views(Lesson 2 - 自定义Drawing)</a></h1>
     
     
       <p class="meta">
@@ -244,26 +223,28 @@
   
 
 
-<time datetime="2013-04-06T18:27:00+08:00" pubdate data-updated="true">Apr 6<span>th</span>, 2013</time>
+<time datetime="2013-06-30T20:15:00+08:00" pubdate data-updated="true">Jun 30<span>th</span>, 2013</time>
         
-         | <a href="/blog/android-training-15-performance-tips/#disqus_thread">Comments</a>
+         | <a href="/blog/android-training-16-creating-custom-views-lesson-2/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h2>Performance Tips</h2>
+  <div class="entry-content"><p>自定义view的最重要的一个部分是自定义它的外观。根据你的程序的需求，自定义绘制动作可能简单也可能很复杂。这节课会演示一些最常见的操作。</p>
 
-<p><img src="/images/articles/performance_improve.jpg"></p>
+<h2>Override onDraw()</h2>
 
-<p>这篇文章主要是介绍了一些小细节的优化技巧，当这些小技巧综合使用起来的时候，对于整个App的性能提升还是有作用的，只是不能较大幅度的提升性能而已。选择合适的算法与数据结构才应该是你首要考虑的因素，在这篇文章中不会涉及这方面。你应该使用这篇文章中的小技巧作为平时写代码的习惯，这样能够提升代码的效率。</p>
+<p>重绘一个自定义的view的最重要的步骤是重写onDraw()方法。onDraw()的参数是一个Canvas对象。Canvas类定义了绘制文本，线条，图像与许多其他图形的方法。你可以在onDraw方法里面使用那些方法来创建你的UI。</p>
+
+<p>在你调用任何绘制方法之前，你需要创建一个Paint对象。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-training-15-performance-tips/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-training-16-creating-custom-views-lesson-2/">Read on &rarr;</a>
     </footer>
   
 
@@ -287,35 +268,35 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/android-training-wearable-app-bt-debug/">Android Training - 创建可穿戴应用(5 - 通过蓝牙进行调试)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-packaging/">Android Training - 创建可穿戴应用(4 - 打包可穿戴应用)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-voice-input/">Android Training - 创建可穿戴应用(3 - 添加语音能力)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-layouts/">Android Training - 创建可穿戴应用(2 - 创建自定义的布局)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-creating/">Android Training - 创建可穿戴应用(1 - 创建并执行可穿戴应用)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-index/">Android Training - 创建可穿戴应用(0 - 序言)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/android-notes-add-copy-text-option-to-share-list/">Android Notes - 添加Copy to Clipboard的选项到分享列表中</a>
       </li>
     
       <li class="post">
         <a href="/blog/android-training-performance-anr/">Android Training - 避免程序无响应ANR</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-custom-request/">Android Training - Volley(Lesson 4 - 实现自定义的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-standard-request/">Android Training - Volley(Lesson 3 - 创建标准的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-request-queue/">Android Training - Volley(Lesson 2 - 建立请求队列)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-simple-request/">Android Training - Volley(Lesson 1 - 发送简单的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-index/">Android Training - Volley(Lesson 0 - 序言)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-deeper-graphics-architecture/">Android Deeper(01) - Graphic Architecture</a>
       </li>
     
   </ul>
@@ -324,10 +305,10 @@
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (79)</a></li>
+  <li><a href='/blog/categories/android'>Android (85)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (8)</a></li>
-  <li><a href='/blog/categories/android-training'>Android:training (69)</a></li>
+  <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
 </ul>

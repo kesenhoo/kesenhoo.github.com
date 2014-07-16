@@ -1,0 +1,364 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Android Training - 创建可穿戴应用(4 - 打包可穿戴应用) - 胡凯</title>
+  <meta name="author" content="Kesen Hoo">
+
+  
+  <meta name="description" content="当发布应用给用户之前，你必须把可穿戴应用打包到手持应用内。因为不能直接在可穿戴设备上浏览并安装应用。如果打包正确，当用户下载手持应用时，系统会自动下发可穿戴应用到匹对的可穿戴设备上。 Note: 如果开发时签名用的是debug key，这个特性是无法正常工作的。在开发时，需要使用adb &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://hukai.me/blog/android-training-wearable-app-packaging/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="胡凯" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   class="no-sidebar"  >
+  <header role="banner"><hgroup>
+  <h1><a href="/">胡凯</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:hukai.me" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/android-training-course-in-chinese/index.html">Android Training in Chinese</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Android Training - 创建可穿戴应用(4 - 打包可穿戴应用)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-14T23:32:00+08:00" pubdate data-updated="true">Jul 14<span>th</span>, 2014</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>当发布应用给用户之前，你必须把可穿戴应用打包到手持应用内。因为不能直接在可穿戴设备上浏览并安装应用。如果打包正确，当用户下载手持应用时，系统会自动下发可穿戴应用到匹对的可穿戴设备上。</p>
+
+<blockquote><p><strong>Note:</strong> 如果开发时签名用的是debug key，这个特性是无法正常工作的。在开发时，需要使用<code>adb install</code>的命令或者Android Studio来安装可穿戴应用。</p></blockquote>
+
+<h2>使用Android Studio打包</h2>
+
+<p>在Android Studio中打包可穿戴应用有下面几个步骤：</p>
+
+<ol>
+<li>在手持应用的buidl.gradle文件中把可穿戴应用声明为依赖：</li>
+</ol>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'>dependencies {
+</span><span class='line'>   compile &#39;com.google.android.gms:play-services:5.0.+@aar&#39;
+</span><span class='line'>   compile &#39;com.android.support:support-v4:20.0.+&#39;&#39;
+</span><span class='line'>   wearApp project(&#39;:wearable&#39;)
+</span><span class='line'>}
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<!-- More -->
+
+
+<ol>
+<li>点击<strong>Build</strong> > <strong>Generate Signed APK</strong>&#8230; 安装屏幕上的指示来制定你的release key并为你的app进行签名。Android Studio导出签名好的手持应用，他内置了可穿戴应用。
+或者，你可以在可穿戴应用与手持应用的build.gradle文件里面建立一个签名规则。为了能够正常自动推送可穿戴应用，这两个应用都必须签名。</li>
+</ol>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'>android {
+</span><span class='line'>  ...
+</span><span class='line'>  signingConfigs {
+</span><span class='line'>    release {
+</span><span class='line'>      keyAlias &#39;myAlias&#39;
+</span><span class='line'>      keyPassword &#39;myPw&#39;
+</span><span class='line'>      storeFile file(&#39;path/to/release.keystore&#39;)
+</span><span class='line'>      storePassword &#39;myPw&#39;
+</span><span class='line'>    }
+</span><span class='line'>  }
+</span><span class='line'>  buildTypes {
+</span><span class='line'>    release {
+</span><span class='line'>      ...
+</span><span class='line'>      signingConfig signingConfigs.release
+</span><span class='line'>    }d
+</span><span class='line'>  }
+</span><span class='line'>  ...
+</span><span class='line'>}
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>通过点击Android Studio右边的Gradle按钮来建立手持应用，并执行<strong>assembleRelease</strong>任务。这个任务放在<strong>Project name</strong> > <strong>Handheld module name</strong> > <strong>assembleRelease.</strong></p>
+
+<blockquote><p><strong>Note:</strong>这个例子中把密码写在了Gradle文件中，这应该不是期待的写法。请参考<a href="http://developer.android.com/sdk/installing/studio-build.html#configureSigning">Configure signing settings</a>学习如何为密码创建环境变量。</p></blockquote>
+
+<h3>分别为可穿戴应用与手持应用进行签名</h3>
+
+<p>如果你的Build任务需要为可穿戴应用与手持应用签不同的Key，你可以像下面一样在手持应用的build.gradle文件中声明规则。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'>dependencies {
+</span><span class='line'>  ...
+</span><span class='line'>  wearApp files(&#39;/path/to/wearable_app.apk&#39;)
+</span><span class='line'>}
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>你可以为手持应用手动进行签任何形式的Key (可以是Android Studio Build > Generate Signed APK&#8230;的方式，也可以是Gradle signingConfig规则的方式)</p>
+
+<h2>手动打包</h2>
+
+<p>如果你使用的是其他IDE，你仍然可以把可穿戴应用打包到手持应用中。</p>
+
+<ol>
+<li>把签好名的可穿戴应用放到手持应用的<code>res/raw</code>目录下。 我们把这个应用作为<code>wearable_app.apk</code>。</li>
+<li>创建<code>res/xml/wearable_app_desc.xml</code>文件，里面包含可穿戴设备的版本信息与路径。例如:</li>
+</ol>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;wearableApp</span> <span class="na">package=</span><span class="s">&quot;wearable.app.package.name&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;versionCode&gt;</span>1<span class="nt">&lt;/versionCode&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;versionName&gt;</span>1.0<span class="nt">&lt;/versionName&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;rawPathResId&gt;</span>wearable_app<span class="nt">&lt;/rawPathResId&gt;</span>
+</span><span class='line'><span class="nt">&lt;/wearableApp&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>package, versionCode, 与 versionName需要和可穿戴应用的AndroidManifest.xml里面的信息一致。<code>rawPathResId</code>是一个static的变量表示APK的名称。。
+3. 添加<code>meta-data</code>标签到你的手持应用的<code>&lt;application&gt;</code>标签下，指明引用wearable_app_desc.xml文件</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;meta-data</span> <span class="na">android:name=</span><span class="s">&quot;com.google.android.wearable.beta.app&quot;</span>
+</span><span class='line'>                 <span class="na">android:resource=</span><span class="s">&quot;@xml/wearable_app_desc&quot;</span><span class="nt">/&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>构建并签名手持应用。</li>
+</ol>
+
+
+<h2>关闭资源压缩</h2>
+
+<p>许多构建工具会自动压缩放在res/raw目录下的文件。因为可穿戴APK已经被压缩过了，那些压缩工作再次压缩会导致应用无法正常安装。</p>
+
+<p>这样的话，安装失败。在手持应用上，<code>PackageUpdateService</code>会输出如下的错误日志：&#8221;this file cannot be opened as a file descriptor; it is probably compressed.&#8221;</p>
+
+<p>Android Studio 默认不会压缩你的APK，如果你使用另外一个构建流程，需要确保不会发生重复压缩可穿戴应用的事情。</p>
+</div>
+
+
+  <footer>
+    <p>
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Text" property="dct:title" rel="dct:type">本站作品</span> 由 <a xmlns:cc="http://creativecommons.org/ns#" href="hukai.me" property="cc:attributionName" rel="cc:attributionURL">Kesen Hoo</a> 创作，采用 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a>进行许可。
+    </p>
+
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Kesen Hoo</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-14T23:32:00+08:00" pubdate data-updated="true">Jul 14<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/android/'>Android</a>, <a class='category' href='/blog/categories/android-training/'>Android:Training</a>
+  
+</span>
+
+
+    </p>
+    
+    
+      <div class="sharing">
+  
+  
+  
+  
+	<!-- JiaThis Button BEGIN -->
+<div class="jiathis_style_32x32">
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_renren"></a>
+	<a class="jiathis_button_linkedin"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share?uid=1723296" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript">
+var jiathis_config = {data_track_clickback:'true'};
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1342501457879302" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+  
+  
+</div>
+
+    
+    <br></br>
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/android-training-wearable-app-voice-input/" title="Previous Post: Android Training - 创建可穿戴应用(3 - 添加语音能力)">&laquo; Android Training - 创建可穿戴应用(3 - 添加语音能力)</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/android-training-wearable-app-bt-debug/" title="Next Post: Android Training - 创建可穿戴应用(5 - 通过蓝牙进行调试)">Android Training - 创建可穿戴应用(5 - 通过蓝牙进行调试) &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Kesen Hoo -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'kesenhoo';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://hukai.me/blog/android-training-wearable-app-packaging/';
+        var disqus_url = 'http://hukai.me/blog/android-training-wearable-app-packaging/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

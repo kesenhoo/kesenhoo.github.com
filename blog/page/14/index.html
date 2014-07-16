@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="这一课会介绍在ActionBar 中添加一个高效率且比较友好的Share功能，会使用到ActionProvider(在Android 4.0上才被引进)。它会handle出现share功能的appearance与hehavior。在ShareActionProvider的例子里面， &hellip;">
+  <meta name="description" content="这一课会演示如何运用前面几节课的内容，使用后台线程与Cache机制来加载图片到 ViewPager 与 GridView 组件，并且学习处理并发与配置改变问题。(并发问题的处理确实需要好好考虑，大多数App都没有仔细考虑到这个问题，会导致浪费更多的资源，效率不够) ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -70,7 +70,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-training-07-share-simple-data-lesson-3/">Android Training(07) - 分享简单数据(Lesson 3 - 在Actionbar上添加分享功能)</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-training-09-displaying-bitmaps-efficiently-lesson-5/">Android Training(09) - 高效地显示Bitmap(Lesson 5 - 呈现Bitmap到UI上)</a></h1>
     
     
       <p class="meta">
@@ -86,24 +86,22 @@
   
 
 
-<time datetime="2012-03-31T19:16:00+08:00" pubdate data-updated="true">Mar 31<span>st</span>, 2012</time>
+<time datetime="2012-04-26T22:27:00+08:00" pubdate data-updated="true">Apr 26<span>th</span>, 2012</time>
         
-         | <a href="/blog/android-training-07-share-simple-data-lesson-3/#disqus_thread">Comments</a>
+         | <a href="/blog/android-training-09-displaying-bitmaps-efficiently-lesson-5/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>这一课会介绍在ActionBar 中添加一个高效率且比较友好的Share功能，会使用到ActionProvider(在Android 4.0上才被引进)。它会handle出现share功能的appearance与hehavior。在ShareActionProvider的例子里面，你之需要提供一个share intent，剩下的就交给<a href="https://developer.android.com/reference/android/widget/ShareActionProvider.html">ShareActionProvider</a>来做。</p>
-
-<p><img src="/images/articles/actionbar-shareaction.png" title="Figure 1. The ShareActionProvider in the Gallery app." alt="actionbar-shareaction.png" /></p>
+  <div class="entry-content"><p>这一课会演示如何运用前面几节课的内容，使用后台线程与Cache机制来加载图片到 ViewPager 与 GridView 组件，并且学习处理并发与配置改变问题。(<em>并发问题的处理确实需要好好考虑，大多数App都没有仔细考虑到这个问题，会导致浪费更多的资源，效率不够</em>)</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-training-07-share-simple-data-lesson-3/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-training-09-displaying-bitmaps-efficiently-lesson-5/">Read on &rarr;</a>
     </footer>
   
 
@@ -115,7 +113,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-training-07-share-simple-data-lesson-2/">Android Training(07) - 分享简单数据(Lesson 2 - 接收从其它Apps分享过来的简单数据)</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-training-09-displaying-bitmaps-efficiently-lesson-3/">Android Training(09) - 高效地显示Bitmap(Lesson 3 - 两种缓存Bitmap的方式)</a></h1>
     
     
       <p class="meta">
@@ -131,22 +129,26 @@
   
 
 
-<time datetime="2012-03-31T18:28:00+08:00" pubdate data-updated="true">Mar 31<span>st</span>, 2012</time>
+<time datetime="2012-04-24T12:59:00+08:00" pubdate data-updated="true">Apr 24<span>th</span>, 2012</time>
         
-         | <a href="/blog/android-training-07-share-simple-data-lesson-2/#disqus_thread">Comments</a>
+         | <a href="/blog/android-training-09-displaying-bitmaps-efficiently-lesson-3/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>就像你的程序能够发送数据到其他程序一样，其他程序也能够方便的接收发送过来的数据。需要考虑的是用户与你的程序如何进行交互，你想要从其他程序接收哪些数据类型。例如，一个社交网络程序会希望能够从其他程序接受文本数据，像一个有趣的网址链接。Google+的Android客户端会接受文本数据与单张或者多张图片。用这个app，用户可以简单的从Gallery程序选择一张图片来启动Google+进行发布。</p>
+  <div class="entry-content"><p>加载单个Bitmap到UI是简单直接的，但是如果你需要一次加载大量的图片，事情则会变得复杂起来。在大多数情况下(例如在ListView,GridView or ViewPager), 显示图片的数量通常是没有限制的。</p>
+
+<p>通过循环利用子视图可以抑制内存的使用，GC(garbage collector)也会释放那些不再需要使用的bitmap。这些机制都非常好，但是为了保持一个流畅的用户体验，你想要在屏幕滑回来时避免每次重复处理那些图片。内存与磁盘缓存通常可以起到帮助的作用，允许组件快速的重新加载那些处理过的图片。</p>
+
+<p>这一课会介绍在加载多张位图时使用内存Cache与磁盘Cache来提高反应速度与UI的流畅度。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-training-07-share-simple-data-lesson-2/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-training-09-displaying-bitmaps-efficiently-lesson-3/">Read on &rarr;</a>
     </footer>
   
 
@@ -158,7 +160,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-training-07-share-simple-data-lesson-1/">Android Training(07) - 分享简单数据(Lesson 1 - 发送简单数据到其他Apps)</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-training-09-displaying-bitmaps-efficiently-lesson-2/">Android Training(09) - 高效地显示Bitmap(Lesson 2 - 在UI线程之外处理Bitmaps)</a></h1>
     
     
       <p class="meta">
@@ -174,26 +176,24 @@
   
 
 
-<time datetime="2012-03-31T14:00:00+08:00" pubdate data-updated="true">Mar 31<span>st</span>, 2012</time>
+<time datetime="2012-04-23T19:55:00+08:00" pubdate data-updated="true">Apr 23<span>rd</span>, 2012</time>
         
-         | <a href="/blog/android-training-07-share-simple-data-lesson-1/#disqus_thread">Comments</a>
+         | <a href="/blog/android-training-09-displaying-bitmaps-efficiently-lesson-2/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p><strong>章节序言</strong></p>
+  <div class="entry-content"><p>在上一课中有介绍一系列的BitmapFactory.decode* 方法，当数据源是网络或者是磁盘时(或者是任何实际源不在内存的)，这些方法都不应该在main UI 线程中执行。那些情况下加载数据是不可以预知的，它依赖于许多因素(从网络或者硬盘读取数据的速度, 图片的大小, CPU的速度, etc.)。如果其中任何一个任务卡住了UI thread, 系统会出现ANR的错误。</p>
 
-<p>Android程序中很炫的一个功能是程序之间可以互相通信。为什么要重新发明一个已经存在于另外一个程序中的功能呢，而且这个功能并非自己程序的核心部分。</p>
-
-<p>这一章节会讲述一些通常使用的方法来在不同程序之间通过使用<a href="https://developer.android.com/reference/android/content/Intent.html">Intent</a> APIs与<a href="https://developer.android.com/reference/android/view/ActionProvider.html">ActionProvider</a>对象来发送与接受content。</p>
+<p>这一节课会介绍如何使用 AsyncTask 在后台线程中处理bitmap并且演示了如何处理并发(concurrency)的问题。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-training-07-share-simple-data-lesson-1/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-training-09-displaying-bitmaps-efficiently-lesson-2/">Read on &rarr;</a>
     </footer>
   
 
@@ -205,7 +205,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-training-06-remembering-users-lesson-3/">Android Training(06) - 记住用户的信息(Lesson 3 - 创建自定义的账户类型)</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-training-09-displaying-bitmaps-efficiently-lesson-1/">Android Training(09) - 高效地显示Bitmap(Lesson 1 - 有效地加载大尺寸图片)</a></h1>
     
     
       <p class="meta">
@@ -221,28 +221,33 @@
   
 
 
-<time datetime="2012-03-29T12:37:00+08:00" pubdate data-updated="true">Mar 29<span>th</span>, 2012</time>
+<time datetime="2012-04-23T11:57:00+08:00" pubdate data-updated="true">Apr 23<span>rd</span>, 2012</time>
         
-         | <a href="/blog/android-training-06-remembering-users-lesson-3/#disqus_thread">Comments</a>
+         | <a href="/blog/android-training-09-displaying-bitmaps-efficiently-lesson-1/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h2>Creating a Custom Account Type</h2>
+  <div class="entry-content"><h1>章节概要</h1>
 
-<p>到目前为止，我们讨论了如何使用Google APIs。但是我们应该不仅仅是只需要Google的服务而已，比如增加QQ账户，Sina账户等。那么这一课会讲述如何创建一个自定义的账户，并且像内置的账户那样进行工作。</p>
+<p>这一章节会介绍一些通用的用来处理与加载Bitmap对象的方法，这些技术能够使得不会卡到程序的UI并且避免程序消耗过度内存.如果你不注意这些，Bitmaps会迅速的消耗你可用的内存而导致程序crash,出现下面的异常:java.lang.OutofMemoryError: bitmap size exceeds VM budget.</p>
 
-<h2>(1)Implement Your Custom Account Code</h2>
+<p>有许多原因说明在你的Android程序中加载Bitmaps是非常棘手的，需要你特别注意:</p>
 
-<p>首先需要做的是从用户那获取证书[输入账户与密码后进行验证],这个过程也许只是简单的显示一个对话框来输入用户名与密码，或者是比较复杂的操作来获取证书，比如一次性的密码口令或者精密的扫描。不管怎么样，你需要实现下面的操作:</p>
+<ul>
+<li>移动设备的系统资源有限。Android设备对于单个程序至少需要16MB的内存。<a href="http://source.android.com/compatibility/downloads.html">Android Compatibility Definition Document (CDD)</a>, Section 3.7. Virtual Machine Compatibility 给出了对于不同大小与密度的屏幕的最低内存需求. 程序应该在这个最低内存限制下最优化程序的效率。当然，大多数设备的都有更高的限制需求.</li>
+<li>Bitmap会消耗很多内存，特别是对于类似照片等更加丰富的图片. 例如，Galaxy Nexus的照相机能够拍摄2592x1936 pixels (5 MB)的图片. 如果bitmap的配置是使用ARGB_8888 (the default from the Android 2.3 onward) ，那么加载这张照片到内存会大概需要19MB(2592<em>1936</em>4 bytes) 的内存, 这样的话会迅速消耗掉设备的整个内存.</li>
+<li>Android app的UI通常会在一次操作中立即加载许多张bitmaps. 例如在ListView, GridView 与 ViewPager 等组件中通常会需要一次加载许多张bitmaps，而且需要多加载一些内容为了用户可能的滑动操作。</li>
+</ul>
+
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-training-06-remembering-users-lesson-3/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-training-09-displaying-bitmaps-efficiently-lesson-1/">Read on &rarr;</a>
     </footer>
   
 
@@ -266,35 +271,35 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/android-training-wearable-app-bt-debug/">Android Training - 创建可穿戴应用(5 - 通过蓝牙进行调试)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-packaging/">Android Training - 创建可穿戴应用(4 - 打包可穿戴应用)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-voice-input/">Android Training - 创建可穿戴应用(3 - 添加语音能力)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-layouts/">Android Training - 创建可穿戴应用(2 - 创建自定义的布局)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-creating/">Android Training - 创建可穿戴应用(1 - 创建并执行可穿戴应用)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-index/">Android Training - 创建可穿戴应用(0 - 序言)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/android-notes-add-copy-text-option-to-share-list/">Android Notes - 添加Copy to Clipboard的选项到分享列表中</a>
       </li>
     
       <li class="post">
         <a href="/blog/android-training-performance-anr/">Android Training - 避免程序无响应ANR</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-custom-request/">Android Training - Volley(Lesson 4 - 实现自定义的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-standard-request/">Android Training - Volley(Lesson 3 - 创建标准的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-request-queue/">Android Training - Volley(Lesson 2 - 建立请求队列)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-simple-request/">Android Training - Volley(Lesson 1 - 发送简单的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-index/">Android Training - Volley(Lesson 0 - 序言)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-deeper-graphics-architecture/">Android Deeper(01) - Graphic Architecture</a>
       </li>
     
   </ul>
@@ -303,10 +308,10 @@
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (79)</a></li>
+  <li><a href='/blog/categories/android'>Android (85)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (8)</a></li>
-  <li><a href='/blog/categories/android-training'>Android:training (69)</a></li>
+  <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
 </ul>

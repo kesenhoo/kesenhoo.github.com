@@ -1,0 +1,351 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Android Training - 创建可穿戴应用(3 - 添加语音能力) - 胡凯</title>
+  <meta name="author" content="Kesen Hoo">
+
+  
+  <meta name="description" content="语音指令是可穿戴体验的一个重要的部分。这使得用户可以释放双手，快速发出指令。穿戴提供了2种类型的语音操作： 系统提供的 这些语音指令都是基于任务的，并且内置在Wear的平台内。你在activity中过滤你想要接收的指令。例如包含&#8221;Take a note&#8221; 或者 &#8220 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://hukai.me/blog/android-training-wearable-app-voice-input/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="胡凯" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   class="no-sidebar"  >
+  <header role="banner"><hgroup>
+  <h1><a href="/">胡凯</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:hukai.me" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/android-training-course-in-chinese/index.html">Android Training in Chinese</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Android Training - 创建可穿戴应用(3 - 添加语音能力)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-14T21:43:00+08:00" pubdate data-updated="true">Jul 14<span>th</span>, 2014</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>语音指令是可穿戴体验的一个重要的部分。这使得用户可以释放双手，快速发出指令。穿戴提供了2种类型的语音操作：</p>
+
+<ul>
+<li><p><strong>系统提供的</strong></p>
+
+<p>这些语音指令都是基于任务的，并且内置在Wear的平台内。你在activity中过滤你想要接收的指令。例如包含&#8221;Take a note&#8221; 或者 &#8220;Set an alarm&#8221;的指令。</p></li>
+<li><p><strong>应用提供的</strong></p>
+
+<p>这些语音指令都是基于应用的，你需要像声明一个Launcher Icon一样定义这些指令。用户通过说&#8221;Start XXX&#8221;来使用那些语音指令，然后会启动你指定启动的activity。</p></li>
+</ul>
+
+
+<h2>声明系统提供的语音指令</h2>
+
+<p>Android Wear平台基于用户的操作提供了一些语音指令，例如&#8221;Take a note&#8221; 或者 &#8220;Set an alarm&#8221;。用户发出想要做的操作指令，让系统寻找应该启动最合适的activity。</p>
+
+<p>当用户说出语音指令时，你的应用能够被过滤出来启动一个activity。如果你想要启动一个service在后台执行任务，需要显示一个activity呈现作为线索。当你想要废弃这个可见的线索时，需要确保执行了finish()。</p>
+
+<!-- More -->
+
+
+<p>例如，对于&#8221;Take a note&#8221;的指令，定义一个MyNoteActivity来接收这个指令:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="o">&lt;</span><span class="n">activity</span> <span class="nl">android:</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;MyNoteActivity&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>      <span class="o">&lt;</span><span class="n">intent</span><span class="o">-</span><span class="n">filter</span><span class="o">&gt;</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="n">action</span> <span class="nl">android:</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;android.intent.action.SEND&quot;</span> <span class="o">/&gt;</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="n">category</span> <span class="nl">android:</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;com.google.android.voicesearch.SELF_NOTE&quot;</span> <span class="o">/&gt;</span>
+</span><span class='line'>      <span class="o">&lt;/</span><span class="n">intent</span><span class="o">-</span><span class="n">filter</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;/</span><span class="n">activity</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>下面列出了Wear平台支持的语音指令：</p>
+
+<p><img src="/images/voice_intent_1.png" alt="voice_intent_1" />
+<img src="/images/voice_intent_2.png" alt="voice_intent_2" />
+<img src="/images/voice_intent_3.png" alt="voice_intent_3" /></p>
+
+<p>关于注册intent与获取intent extra的信息，请参考<a href="http://developer.android.com/guide/components/intents-common.html">Common intents</a>.</p>
+
+<h2>声明应用提供的语音指令</h2>
+
+<p>如果系统提供的语音指令无法满足你的需求，你可以使用&#8221;Start MyActivityName&#8221;的指令来直接启动你的应用。</p>
+
+<p>注册一个&#8221;Start&#8221;指令和注册手持应用上得Launcher是一样的。</p>
+
+<p>在&#8221;Start&#8221;指令的后面需要指定的文字, 这个文字需要注册在activity的label属性上。例如，下面的设置能够识别&#8221;Start MyRunningApp&#8221;的语音指令并启动StartRunActivity.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;application&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;activity</span> <span class="na">android:name=</span><span class="s">&quot;StartRunActivity&quot;</span> <span class="na">android:label=</span><span class="s">&quot;MyRunningApp&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;intent-filter&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;action</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.action.MAIN&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;category</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.category.LAUNCHER&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/intent-filter&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/activity&gt;</span>
+</span><span class='line'><span class="nt">&lt;/application&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>获取输入的自由语音</h2>
+
+<p>除了使用语音指令来启动activity之外，你也可以执行系统内置的语言识别activity来获取用户的语音输入。这对于获取用户的输入信息非常有帮助，例如执行搜索或者发送一个消息。</p>
+
+<p>在你的应用中，startActivityForResult()使用<code>ACTION_RECOGNIZE_SPEECH</code>启动系统语音识别应用。在onActivityResult()中处理返回的结果：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">SPEECH_REQUEST_CODE</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Create an intent that can start the Speech Recognizer activity</span>
+</span><span class='line'><span class="kd">private</span> <span class="kt">void</span> <span class="nf">displaySpeechRecognizer</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">RecognizerIntent</span><span class="o">.</span><span class="na">ACTION_RECOGNIZE_SPEECH</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">intent</span><span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="n">RecognizerIntent</span><span class="o">.</span><span class="na">EXTRA_LANGUAGE_MODEL</span><span class="o">,</span>
+</span><span class='line'>            <span class="n">RecognizerIntent</span><span class="o">.</span><span class="na">LANGUAGE_MODEL_FREE_FORM</span><span class="o">);</span>
+</span><span class='line'><span class="c1">// Start the activity, the intent will be populated with the speech text</span>
+</span><span class='line'>    <span class="n">startActivityForResult</span><span class="o">(</span><span class="n">intent</span><span class="o">,</span> <span class="n">SPEECH_REQUEST_CODE</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// This callback is invoked when the Speech Recognizer returns.</span>
+</span><span class='line'><span class="c1">// This is where you process the intent and extract the speech text from the intent.</span>
+</span><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onActivityResult</span><span class="o">(</span><span class="kt">int</span> <span class="n">requestCode</span><span class="o">,</span> <span class="kt">int</span> <span class="n">resultCode</span><span class="o">,</span>
+</span><span class='line'>        <span class="n">Intent</span> <span class="n">data</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">requestCode</span> <span class="o">==</span> <span class="n">SPEECH_REQUEST</span> <span class="o">&amp;&amp;</span> <span class="n">resultCode</span> <span class="o">==</span> <span class="n">RESULT_OK</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">results</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="na">getStringArrayListExtra</span><span class="o">(</span>
+</span><span class='line'>                <span class="n">RecognizerIntent</span><span class="o">.</span><span class="na">EXTRA_RESULTS</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">String</span> <span class="n">spokenText</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span>
+</span><span class='line'>        <span class="c1">// Do something with spokenText</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="kd">super</span><span class="o">.</span><span class="na">onActivityResult</span><span class="o">(</span><span class="n">requestCode</span><span class="o">,</span> <span class="n">resultCode</span><span class="o">,</span> <span class="n">data</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+
+  <footer>
+    <p>
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Text" property="dct:title" rel="dct:type">本站作品</span> 由 <a xmlns:cc="http://creativecommons.org/ns#" href="hukai.me" property="cc:attributionName" rel="cc:attributionURL">Kesen Hoo</a> 创作，采用 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a>进行许可。
+    </p>
+
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Kesen Hoo</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-14T21:43:00+08:00" pubdate data-updated="true">Jul 14<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/android/'>Android</a>, <a class='category' href='/blog/categories/android-training/'>Android:Training</a>
+  
+</span>
+
+
+    </p>
+    
+    
+      <div class="sharing">
+  
+  
+  
+  
+	<!-- JiaThis Button BEGIN -->
+<div class="jiathis_style_32x32">
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_renren"></a>
+	<a class="jiathis_button_linkedin"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share?uid=1723296" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript">
+var jiathis_config = {data_track_clickback:'true'};
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1342501457879302" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+  
+  
+</div>
+
+    
+    <br></br>
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/android-training-wearable-app-layouts/" title="Previous Post: Android Training - 创建可穿戴应用(2 - 创建自定义的布局)">&laquo; Android Training - 创建可穿戴应用(2 - 创建自定义的布局)</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/android-training-wearable-app-packaging/" title="Next Post: Android Training - 创建可穿戴应用(4 - 打包可穿戴应用)">Android Training - 创建可穿戴应用(4 - 打包可穿戴应用) &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Kesen Hoo -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'kesenhoo';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://hukai.me/blog/android-training-wearable-app-voice-input/';
+        var disqus_url = 'http://hukai.me/blog/android-training-wearable-app-voice-input/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

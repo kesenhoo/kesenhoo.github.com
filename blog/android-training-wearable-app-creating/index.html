@@ -1,0 +1,350 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Android Training - 创建可穿戴应用(1 - 创建并执行可穿戴应用) - 胡凯</title>
+  <meta name="author" content="Kesen Hoo">
+
+  
+  <meta name="description" content="可穿戴应用可以直接运行在可穿戴的设备上。拥有访问类似传感器的硬件权限，还有操作activity，services等权限。 你无法直接发布可穿戴应用到Google Play商城，需要利用手持应用来达到目的。因为可穿戴的设备不支持Google Play商城，所以当用户下载手持设备应用的时候，， &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://hukai.me/blog/android-training-wearable-app-creating/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="胡凯" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   class="no-sidebar"  >
+  <header role="banner"><hgroup>
+  <h1><a href="/">胡凯</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:hukai.me" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/android-training-course-in-chinese/index.html">Android Training in Chinese</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Android Training - 创建可穿戴应用(1 - 创建并执行可穿戴应用)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-14T19:26:00+08:00" pubdate data-updated="true">Jul 14<span>th</span>, 2014</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>可穿戴应用可以直接运行在可穿戴的设备上。拥有访问类似传感器的硬件权限，还有操作activity，services等权限。</p>
+
+<p>你无法直接发布可穿戴应用到Google Play商城，需要利用手持应用来达到目的。因为可穿戴的设备不支持Google Play商城，所以当用户下载手持设备应用的时候，，会自动安装可穿戴应用到可穿戴设备上。手持应用还可以用来处理一些复杂繁重的任务，网络指令，或者其他的任务，最好发送操作结果返回给可穿戴设备。</p>
+
+<p>这节课会介绍如何创建一个包含了手持应用与可穿戴应用的工程。</p>
+
+<h2>搭建Android Wear模拟器或者真机设备。</h2>
+
+<p>我们推荐在真机上进行开发，这样可以更好的评估用户体验。然而，模拟器可以使得你在不同类型的设备屏幕上进行模拟，这对测试来说更加有用。</p>
+
+<h3>搭建Android Wear虚拟设备</h3>
+
+<p>建立Android Wear虚拟设备需要下面几个步骤：</p>
+
+<!-- More -->
+
+
+<ol>
+<li>点击<strong>Tools</strong> > <strong>Android</strong> > <strong>AVD Manager</strong>.</li>
+<li>点击<strong>Create</strong>&#8230;.</li>
+<li>填写下面几项详细的设置，其余选项保留默认：
+
+<ul>
+<li><strong>AVD Name</strong> - AVD的名字</li>
+<li><strong>Device</strong> - Android Wear圆形还是方形</li>
+<li><strong>Target</strong> - Android 4.4W - API Level 20</li>
+<li><strong>CPU/ABI</strong> - Android Wear ARM (armeabi-v7a)</li>
+<li><strong>Keyboard</strong> - 选择Hardware keyboard present</li>
+<li><strong>Skin</strong> - 圆形还是方形取决于选择的设备类型</li>
+<li><strong>Snapshot</strong> - 不勾选 selected</li>
+<li><strong>Use Host GPU</strong> - 勾选，为了支持自定义的activity能够显示可穿戴的notification。</li>
+</ul>
+</li>
+<li>点击<strong>OK.</strong></li>
+<li>启动模拟器:
+
+<ul>
+<li>选择你刚才创建的虚拟设备</li>
+<li>点击<strong>Start</strong>&#8230;，然后选择<strong>Launch.</strong></li>
+<li>等待模拟器初始化直到显示Android Wear的主界面。</li>
+</ul>
+</li>
+<li>匹配你的手持和模拟器:
+
+<ul>
+<li>在你的手持设备上，从Google Play安装<code>Android Wear</code>应用(这是一个由Google公司写的用来匹配的应用)</li>
+<li>通过USB连接你的手持设备到你的电脑。</li>
+<li>切换AVD的接口到手持设备(这个步骤需要每次连接都执行)
+<code>git
+adb -d forward tcp:5601 tcp:5601
+</code></li>
+<li>启动手持设备上的<code>Android Wear</code>应用，并连接到模拟器。</li>
+<li>点击右上角的菜单，选择Demo Cards。</li>
+<li>你选择的卡片呈现在模拟器上会类似一个Notification。</li>
+</ul>
+</li>
+</ol>
+
+
+<h3>搭建Android Wear真机</h3>
+
+<p>建立Android Wear真机，需要下面几个步骤：</p>
+
+<ul>
+<li>在你的手持设备的Google Play上安装<code>Android Wear</code>应用。</li>
+<li>按照应用的命令指示与你的可穿戴设备进行匹对。如果你有做建立notification的操作，这个步骤刚好可以测试这一功能。</li>
+<li>保持<code>Android Wear</code>应用在手机上的打开状态。</li>
+<li>通过USB连接可穿戴设备到电脑上，这样你能够直接安装应用到可穿戴设备上。在可穿戴设备与<code>Android Wear</code>应用上会显示一个消息提示，是否允许进行调试。</li>
+<li>在<code>Android Wear</code>应用上，总是选择允许连接。</li>
+</ul>
+
+
+<p>Android Studio上的Tool的窗口可以显示可穿戴设备的日志。当你执行<code>adb devices</code>命令的时候，也可以看到wearable的存在。</p>
+
+<h2>创建Wear项目</h2>
+
+<p>在开始开发之前，需要创建一个项目包含可穿戴应用与手持应用这两个模块。在Android Studio中，点击<strong>File</strong> > <strong>New Project</strong> 然后按照<a href="http://developer.android.com/sdk/installing/create-project.html">创建项目</a>的指引进行操作。如果你按照安装向导操作，需要输入下面的信息：</p>
+
+<ol>
+<li>在确认项目的窗口，输入你的应用的名称与包名。</li>
+<li>在应用参数选择窗口:
+
+<ul>
+<li>勾选Phone 与 Tablet 并选择API 8: Android 2.2 (Froyo) 作为Minimum SDK.</li>
+<li>勾选可穿戴并选择API 20: Android 4.4 (KitKat Wear) 作为Minimum SDK.</li>
+</ul>
+</li>
+<li>在第一个添加activity的窗口，选择为Mobile模块添加一个空白的activity。</li>
+<li>在第二个添加activity的窗口，选择为Wear模块添加一个空白的activity。</li>
+</ol>
+
+
+<p>当安装向导完成后，Andorid Studio创建了一个包含Mobile与Wear两个模块的项目。你可以在这2个模块中各自创建activity，service，layout等等。在手持应用里面，需要承担大部分繁重的任务，例如网络请求，密集计算任务或者是需要大量用户交互的任务。待这些任务完成之后，再通常把任务结果通过notification发送给可穿戴设备上，或者是通过同步机制发送数据给可穿戴设备。</p>
+
+<blockquote><p><strong>Note:</strong> 可穿戴模块包含了一个&#8221;Hello World&#8221;的activity，它是使用<code>WatchViewStub</code>的布局。WatchViewStub是可穿戴support library中的一个UI组件。</p></blockquote>
+
+<h2>安装可穿戴应用</h2>
+
+<p>在开发过程中，你可以像安装手持应用一样直接安装可穿戴应用。可以使用<code>adb install</code>命令也可以使用Android Studio上面的Play按钮。</p>
+
+<p>当需要把应用发布给用户的时候，你需要把可穿戴应用打包到手持应用中。当用户从Google Play安装手持应用时，连接上得可穿戴设备会自动收到可穿戴应用。</p>
+
+<blockquote><p><strong>Note:</strong> 如果你给应用签名是Debug Key，是无法完成自动安装可穿戴应用的。请参考<a href="packaging.html">打包可穿戴应用</a>获取更多信息，学习如何正确的打包。</p></blockquote>
+
+<p>为了安装&#8221;Hello World&#8221;应用到可穿戴设备，在Android Studiod的Run/Debug的下拉选项中选中Wear模块，点击Play按钮即可。在可穿戴设备上会显示activity并打印&#8221;Hello world!&#8221;</p>
+
+<h2>include需要的libraries</h2>
+
+<p>项目安装向导会自动把合适的模块依赖添加到对应的build.gradle文件中。然而，这些依赖并不是必须得，请阅读下面描述判断你是否需要这些依赖。</p>
+
+<ul>
+<li><p><strong>Notifications</strong></p>
+
+<p><a href="http://developer.android.com/tools/support-library/features.html#v4">The Android v4 support library</a> (or v13)能够支持运行在手持应用的notification也能够在可穿戴设备上显示。</p></li>
+</ul>
+
+
+<p> 对于只显示在可穿戴设备上得notification(这意味着，他们是由直接执行在可穿戴设备上得app进行处理的)，你可以在Wear模块仅仅使用标准APIs (API Level 20) 并且把Mobile模块的依赖support library移除。</p>
+
+<ul>
+<li><p><strong>Wearable Data Layer</strong></p>
+
+<p>可穿戴与手持设备之间进行同步与发送数据需要使用Wearable Data Layer APIs, 你需要最新版本的<a href="http://developer.android.com/google/play-services/setup.html">Google Play Services</a>。如果你不需要这些APIs，可以从这两个模块中把这部分的依赖移除。</p></li>
+<li><p><strong>Wearable UI support library</strong></p>
+
+<p>这是一个非官方正式的library，它包含了为可穿戴设备设计的UI组件。我们鼓励你在你的应用中使用他们。因为这些组件是最佳实践的例证。但是他们可能随时发生变化。然而，如果library有更新，你的应用并不会发送崩溃，因为那些代码已经编译到你的应用中了。为了获取更新包中新的功能，你只需要更新链接到新的版本并相应的更新你的应用就好了。这个library只是在你需要创建可穿戴应用时才会使用到。</p></li>
+</ul>
+
+</div>
+
+
+  <footer>
+    <p>
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Text" property="dct:title" rel="dct:type">本站作品</span> 由 <a xmlns:cc="http://creativecommons.org/ns#" href="hukai.me" property="cc:attributionName" rel="cc:attributionURL">Kesen Hoo</a> 创作，采用 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a>进行许可。
+    </p>
+
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Kesen Hoo</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-14T19:26:00+08:00" pubdate data-updated="true">Jul 14<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/android/'>Android</a>, <a class='category' href='/blog/categories/android-training/'>Android:Training</a>
+  
+</span>
+
+
+    </p>
+    
+    
+      <div class="sharing">
+  
+  
+  
+  
+	<!-- JiaThis Button BEGIN -->
+<div class="jiathis_style_32x32">
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_renren"></a>
+	<a class="jiathis_button_linkedin"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share?uid=1723296" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript">
+var jiathis_config = {data_track_clickback:'true'};
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1342501457879302" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+  
+  
+</div>
+
+    
+    <br></br>
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/android-training-wearable-app-index/" title="Previous Post: Android Training - 创建可穿戴应用(0 - 序言)">&laquo; Android Training - 创建可穿戴应用(0 - 序言)</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/android-training-wearable-app-layouts/" title="Next Post: Android Training - 创建可穿戴应用(2 - 创建自定义的布局)">Android Training - 创建可穿戴应用(2 - 创建自定义的布局) &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Kesen Hoo -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'kesenhoo';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://hukai.me/blog/android-training-wearable-app-creating/';
+        var disqus_url = 'http://hukai.me/blog/android-training-wearable-app-creating/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

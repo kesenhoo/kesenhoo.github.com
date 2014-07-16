@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="你可以把fragment当作activity的一部分，它有自己的lifecycle,它会接受自己的输入事件。你可以在activity运行的时候增加或者拿掉fragment。（类似子activity，你可以在不同的activity中重用fragment）。这节课演示如何使用support &hellip;">
+  <meta name="description" content="章节概要： 一个Android app通常都会有好几个activities. 每一个activity的界面都可能允许用户执行一些特殊任务（例如查看地图或者是开始拍照等）。为了让用户从一个activity跳到另外一个activity，你的app必须使用Intent来定义你的app想做的事情。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -70,7 +70,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-training-11-building-a-dynamic-ui-with-fragments-lesson-2/">Android Training(11) - 使用Fragments建立动态的UI(Lesson 2 - 新建一个Fragment)</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-training-13-interacting-with-other-apps-lesson-1/">Android Training(13) - 与其他Apps进行交互(Lesson 1 - 启动到另外一个app)</a></h1>
     
     
       <p class="meta">
@@ -86,18 +86,21 @@
   
 
 
-<time datetime="2012-11-27T16:48:00+08:00" pubdate data-updated="true">Nov 27<span>th</span>, 2012</time>
+<time datetime="2012-12-03T20:55:00+08:00" pubdate data-updated="true">Dec 3<span>rd</span>, 2012</time>
         
-         | <a href="/blog/android-training-11-building-a-dynamic-ui-with-fragments-lesson-2/#disqus_thread">Comments</a>
+         | <a href="/blog/android-training-13-interacting-with-other-apps-lesson-1/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><ul>
-<li>你可以把fragment当作activity的一部分，它有自己的lifecycle,它会接受自己的输入事件。你可以在activity运行的时候增加或者拿掉fragment。（类似子activity，你可以在不同的activity中重用fragment）。这节课演示如何使用support library来创建一个继承自 Fragment 的类。</li>
-<li>Note: 如果你的app决定跑在Level 11或者更高的系统上，你不需要添加这个support library,你可以使用那个版本的系统自带的API来实现。请注意这节课是专注于使用support library里面的API，这里面的API名称与那些本身就包含这些功能的平台上的名称有可能不一样。</li>
+  <div class="entry-content"><p><strong>章节概要：</strong></p>
+
+<ul>
+<li>一个Android app通常都会有好几个activities. 每一个activity的界面都可能允许用户执行一些特殊任务（例如查看地图或者是开始拍照等）。为了让用户从一个activity跳到另外一个activity，你的app必须使用Intent来定义你的app想做的事情。当你使用startActivity()的方法，而且参数是intent时，系统会使用这个 Intent 来定义并启动合适的app组件。使用intents还可以让你的app来启动另外一个app里面的activity。</li>
+<li>一个 Intent 可以显式的指明需要启动的模块，也可以隐式的指明自己可以处理哪种类型的动作。<em>(一个主动叫起别人，一个被特定类型的别人叫起)</em></li>
+<li>这一章节会演示如何使用Intent 来做一些与其他app之间的简单交互。类似，启动另外一个app,从其他app接受数据，并且使得你的app能够响应从其他发出的intent。</li>
 </ul>
 
 
@@ -105,7 +108,7 @@
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-training-11-building-a-dynamic-ui-with-fragments-lesson-2/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-training-13-interacting-with-other-apps-lesson-1/">Read on &rarr;</a>
     </footer>
   
 
@@ -117,7 +120,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-training-11-building-a-dynamic-ui-with-fragments-lesson-1/">Android Training(11) - 使用Fragments建立动态的UI(Lesson 1 - 使用Support Library)</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-training-12-saving-data-lesson-3/">Android Training(12) - 保存数据(Lesson 3 - 保存到SQLite)</a></h1>
     
     
       <p class="meta">
@@ -133,36 +136,26 @@
   
 
 
-<time datetime="2012-11-27T15:08:00+08:00" pubdate data-updated="true">Nov 27<span>th</span>, 2012</time>
+<time datetime="2012-11-30T21:46:00+08:00" pubdate data-updated="true">Nov 30<span>th</span>, 2012</time>
         
-         | <a href="/blog/android-training-11-building-a-dynamic-ui-with-fragments-lesson-1/#disqus_thread">Comments</a>
+         | <a href="/blog/android-training-12-saving-data-lesson-3/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h1>Using the Support Library</h1>
+  <div class="entry-content"><p>对于重复或者结构化的数据（如联系人信息）等保存到DB是个不错的主意。这节课假定你已经熟悉SQL数据库的操作。在Android上可能会使用到的APIs，可以从<a href="http://developer.android.com/reference/android/database/sqlite/package-summary.html">android.database.sqlite</a>包中找到。</p>
 
-<ul>
-<li>Android Support Library 提供了一个包含了API库的JAR 文件，它可以允许你在你的app在更老的Android平台上使用一些比较新的API。例如，它提供了一些fragment的API，这样你可以在1.6或者更高的平台上使用fragment。</li>
-<li>这节课会演示如何使用fragment来建立一个动态的app UI。</li>
-</ul>
+<h2>Define a Schema and Contract[定义Schema与Contract]</h2>
 
-
-<h3>使用Support Library来建立你的Project</h3>
-
-<ul>
-<li>使用SDK Manager来下载Android Support Library。</li>
-<li>在Android项目的根目录下创建 libs的目录。</li>
-</ul>
-
+<p>SQL中一个中重要的概念是schema：一种DB结构的正式声明。schema是从你创建DB的SQL语句中生成的。你可能会发现创建一个创建一个伴随类（companion class）是很有益的，这个类成为合约类（contract class）,它用一种系统化并且自动生成文档的方式，显示指定了你的schema样式。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-training-11-building-a-dynamic-ui-with-fragments-lesson-1/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-training-12-saving-data-lesson-3/">Read on &rarr;</a>
     </footer>
   
 
@@ -174,7 +167,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-training-11-building-a-dynamic-ui-with-fragments-lesson-0/">Android Training(11) - 使用Fragments建立动态的UI(Lesson 0 - 章节概览)</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-training-12-saving-data-lesson-2/">Android Training(12) - 保存数据(Lesson 2 - 保存到文件)</a></h1>
     
     
       <p class="meta">
@@ -190,42 +183,22 @@
   
 
 
-<time datetime="2012-11-27T14:38:00+08:00" pubdate data-updated="true">Nov 27<span>th</span>, 2012</time>
+<time datetime="2012-11-29T20:37:00+08:00" pubdate data-updated="true">Nov 29<span>th</span>, 2012</time>
         
-         | <a href="/blog/android-training-11-building-a-dynamic-ui-with-fragments-lesson-0/#disqus_thread">Comments</a>
+         | <a href="/blog/android-training-12-saving-data-lesson-2/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h1>Building a Dynamic UI with Fragments</h1>
-
-<ul>
-<li>学习这章节的先决条件:
-
-<ul>
-<li>了解Activity的基本概念 (see <a href="http://developer.android.com/training/basics/activity-lifecycle/index.html">Managing the Activity Lifecycle</a>)</li>
-<li>有使用 XML layouts 的经验</li>
-</ul>
-</li>
-<li>你还需要看的有:
-
-<ul>
-<li><a href="http://developer.android.com/guide/components/fragments.html">Fragments</a></li>
-<li><a href="http://developer.android.com/guide/practices/tablets-and-handsets.html">Supporting Tablets and Handsets</a></li>
-</ul>
-</li>
-<li>DEMO:
-<a href="http://developer.android.com/shareables/training/FragmentBasics.zip">FragmentBasics.zip</a></li>
-</ul>
-
+  <div class="entry-content"><p>Android使用与其他平台类似的基于磁盘文件系统(disk-based file systems)。这节课会描述如何在Android文件系统上使用 <a href="http://developer.android.com/reference/java/io/File.html">File</a> 的读写APIs。File 对象非常适合用来读写那种流式顺序的数据。例如，很适合用来读写图片文件或者是网络中交换的数据。这节课会演示在app中如何执行基本的文件操作任务。假定你已经对linux的文件系统与java.io中标准的I/O APIs有一定认识。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-training-11-building-a-dynamic-ui-with-fragments-lesson-0/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-training-12-saving-data-lesson-2/">Read on &rarr;</a>
     </footer>
   
 
@@ -237,7 +210,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-training-10-network-operations-lesson-3/">Android Training(10) - 执行网络操作(Lesson 3 - 解析XML数据)</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-training-12-saving-data-lesson-1/">Android Training(12) - 保存数据(Lesson 1 - 保存Key-Value)</a></h1>
     
     
       <p class="meta">
@@ -253,39 +226,31 @@
   
 
 
-<time datetime="2012-05-07T17:05:00+08:00" pubdate data-updated="true">May 7<span>th</span>, 2012</time>
+<time datetime="2012-11-29T13:59:00+08:00" pubdate data-updated="true">Nov 29<span>th</span>, 2012</time>
         
-         | <a href="/blog/android-training-10-network-operations-lesson-3/#disqus_thread">Comments</a>
+         | <a href="/blog/android-training-12-saving-data-lesson-1/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p><strong>第3课:Parsing XML Data</strong>
-Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来记录更新的信息，以便用户进行订阅读取。</p>
+  <div class="entry-content"><p><strong>章节概要：</strong></p>
 
-<p>那么上传[?]与解析XML数据就成了app的一个常见的功能。 这一课会介绍如何解析XML文档并使用他们的数据。</p>
-
-<p><em>([?]这里很奇怪，为什么是Upload，看文章最后一段代码示例的注释，应该是Download才对)</em></p>
-
-<h2>Choose a Parser(选择一个解析器)</h2>
-
-<p>我们推荐<a href="http://developer.android.com/reference/org/xmlpull/v1/XmlPullParser.html">XmlPullParser</a>, 它是在Android上一个高效且可维护的解析XML方法。 Android 上有这个接口的两种实现方式：</p>
+<p>虽然可以在onPause()的时候保存一些信息以免用户的使用进度被丢失，但是大多数Android app仍然是需要做保存数据的动作。大多数比较好的apps都需要保存用户的设置信息，而且有一些apps必须维护大量的文件信息与DB信息。这一章节会介绍给你在Android中一些重要的数据存储方法，例如：</p>
 
 <ul>
-<li><a href="http://kxml.sourceforge.net/">KXmlParser</a> via <a href="http://developer.android.com/reference/org/xmlpull/v1/XmlPullParserFactory.html#newPullParser(">XmlPullParserFactory.newPullParser()</a>).</li>
-<li>ExpatPullParser, via <a href="http://developer.android.com/reference/android/util/Xml.html#newPullParser(">Xml.newPullParser()</a>).</li>
+<li>以key-value的方式保存一些简单的数据到shared preferences文件中</li>
+<li>在Android文件系统中保存任意格式的文件</li>
+<li>通过SQLite来使用DB</li>
 </ul>
 
-
-<p>两个选择都是比较好的。下面的示例中是使用ExpatPullParser, via Xml.newPullParser().</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-training-10-network-operations-lesson-3/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-training-12-saving-data-lesson-1/">Read on &rarr;</a>
     </footer>
   
 
@@ -309,35 +274,35 @@ Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来�
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/android-training-wearable-app-bt-debug/">Android Training - 创建可穿戴应用(5 - 通过蓝牙进行调试)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-packaging/">Android Training - 创建可穿戴应用(4 - 打包可穿戴应用)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-voice-input/">Android Training - 创建可穿戴应用(3 - 添加语音能力)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-layouts/">Android Training - 创建可穿戴应用(2 - 创建自定义的布局)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-creating/">Android Training - 创建可穿戴应用(1 - 创建并执行可穿戴应用)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-index/">Android Training - 创建可穿戴应用(0 - 序言)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/android-notes-add-copy-text-option-to-share-list/">Android Notes - 添加Copy to Clipboard的选项到分享列表中</a>
       </li>
     
       <li class="post">
         <a href="/blog/android-training-performance-anr/">Android Training - 避免程序无响应ANR</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-custom-request/">Android Training - Volley(Lesson 4 - 实现自定义的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-standard-request/">Android Training - Volley(Lesson 3 - 创建标准的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-request-queue/">Android Training - Volley(Lesson 2 - 建立请求队列)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-simple-request/">Android Training - Volley(Lesson 1 - 发送简单的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-index/">Android Training - Volley(Lesson 0 - 序言)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-deeper-graphics-architecture/">Android Deeper(01) - Graphic Architecture</a>
       </li>
     
   </ul>
@@ -346,10 +311,10 @@ Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来�
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (79)</a></li>
+  <li><a href='/blog/categories/android'>Android (85)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (8)</a></li>
-  <li><a href='/blog/categories/android-training'>Android:training (69)</a></li>
+  <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
 </ul>

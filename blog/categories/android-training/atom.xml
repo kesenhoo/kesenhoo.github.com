@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android:Training | 胡凯]]></title>
   <link href="http://hukai.me/blog/categories/android-training/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2014-07-12T16:25:57+08:00</updated>
+  <updated>2014-07-16T23:44:13+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -14,778 +14,518 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Android Training - 避免程序无响应ANR]]></title>
-    <link href="http://hukai.me/blog/android-training-performance-anr/"/>
-    <updated>2014-07-06T12:09:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-performance-anr</id>
-    <content type="html"><![CDATA[<p>可能你写的代码在性能测试上表现良好，但是你的应用仍然有时候会反应迟缓(sluggish)，停顿(hang)或者长时间卡死(frezze)，或者应用处理输入的数据花费时间过长。对于你的应用来说最槽糕的事情是出现"程序无响应(Application Not Responding)" (ANR)的警示框。</p>
+    <title type="html"><![CDATA[Android Training - 创建可穿戴应用(5 - 通过蓝牙进行调试)]]></title>
+    <link href="http://hukai.me/blog/android-training-wearable-app-bt-debug/"/>
+    <updated>2014-07-15T00:23:00+08:00</updated>
+    <id>http://hukai.me/blog/android-training-wearable-app-bt-debug</id>
+    <content type="html"><![CDATA[<p>你可以通过蓝牙来调试你的可穿戴应用，通过蓝牙把调试数据输出到手持设备上，手持设备是有连接到开发电脑上的。</p>
 
-<p>在Android中，系统通过显示ANR警示框来保护程序的长时间无响应。对话框如下：</p>
+<h2>搭建好设备用来调试</h2>
 
-<p><img src="/images/anr.png" alt="anr" /></p>
+<ul>
+<li>开启手持设备的USB调试：
 
-<p>此时，你的应用已经经历过一段时间的无法响应了，因此系统提供用户可以退出应用的选择。为你的程序提供良好的响应性是至关重要的，这样才能够避免系统为用户显示ANR的警示框。</p>
+<ul>
+<li>打开设置应用并滑动到底部。</li>
+<li>如果在设置里面没有开发者选项，点击关于手机，滑动到底部，点击build number 7次。</li>
+<li>返回并点击开发者选项。</li>
+<li>开启USB调试。</li>
+</ul>
+</li>
+<li>开启可穿戴设备的蓝牙调试：
 
-<p>这节课描述了Android系统是如何判断一个应用不可响应的。这节课还会提供程序编写的指导原则，确保你的程序保持响应性。</p>
+<ul>
+<li>点击主界面2次，来到Wear菜单界面。</li>
+<li>滑动到底部，点击设置。</li>
+<li>滑动到底部，如果没有开发者选项，点击Build Number 7次。</li>
+<li>点击开发者选项。</li>
+<li>开启蓝牙调试。</li>
+</ul>
+</li>
+</ul>
 
-<h2>是什么导致了ANR?(What Triggers ANR?)</h2>
-
-<p>通常来说，系统会在程序无法响应用户的输入事件时显示ANR。例如，如果一个程序在UI线程执行I/O操作(通常是网络请求或者是文件读写)，这样系统就无法处理用户的输入事件。或者是应用在UI线程花费了太多的时间用来建立一个复杂的在内存中的数据结构，又或者是在一个游戏程序的UI线程中执行了一个复杂耗时的计算移动的操作。确保那些计算操作高效是很重要的，不过即使是最高效的代码也是需要花时间执行的。</p>
 
 <!-- More -->
 
 
-<p><strong>对于你的应用中任何可能执行时间长的操作，你都不应该执行在UI线程</strong>。你可以创建一个工作线程，把那些操作都执行在工作线程中。这确保了UI线程(这个线程会负责处理UI事件) 能够顺利执行，也预防了系统因代码僵死而崩溃。因为UI线程是和类级别相关联的，你可以把相应性作为一个类级别(class-level)的问题(相比来说，代码性能则属于方法级别(method-level)的问题)</p>
+<h2>建立调试会话</h2>
 
-<p>在Android中，程序的响应性是由Activity Manager与Window Manager系统服务来负责监控的。当系统监测到下面的条件之一时会显示ANR的对话框:</p>
+<ol>
+<li>在手持设备上，打开<code>Android Wear</code>这个伴侣应用。</li>
+<li>点击右上角的菜单，选择设置。</li>
+<li>开启蓝牙调试。你将会在选项下面看到一个小的状态信息：
+<code>xml
+Host: disconnected
+Target: connected
+</code></li>
+<li>通过USB连接手持设备到你的电脑上，并执行下面的命令：
+<code>xml
+adb forward tcp:4444 localabstract:/adb-hub; adb connect localhost:4444
+</code>
 
-<ul>
-<li>对输入事件(例如硬件点击或者屏幕触摸事件)，5秒内都无响应。</li>
-<li>BroadReceiver不能够在10秒内结束接收到任务。</li>
-</ul>
+<blockquote><p><strong>Note:</strong> 你可以使用任何可用的端口。</p></blockquote></li>
+</ol>
 
 
-<h2>如何避免ANRs(How to Avoid ANRs)</h2>
-
-<p>Android程序通常是执行在默认的UI线程(也可以成为main线程)中的。这意味着在UI线程中执行的任何长时间的操作都可能触发ANR，因为程序没有给自己处理输入事件或者broadcast事件的机会。</p>
-
-<p>因此，任何执行在UI线程的方法都应该尽可能的简短快速。特别是，在activity的生命周期的关键方法<code>onCreate()</code>与<code>onResume()</code>方法中应该尽可能的做比较少的事情。类似网络或者DB操作等可能长时间执行的操作，或者是类似调整bitmap大小等需要长时间计算的操作，都应该执行在工作线程中。(在DB操作中，可以通过异步的网络请求)。</p>
-
-<p>为了执行一个长时间的耗时操作而创建一个工作线程最方便高效的方式是使用<code>AsyncTask</code>。只需要继承AsyncTask并实现<code>doInBackground()</code>方法来执行任务即可。为了把任务执行的进度呈现给用户，你可以执行<code>publishProgress()</code>方法，这个方法会触发<code>onProgressUpdate()</code>的回调方法。在<code>onProgressUpdate()</code>的回调方法中(它执行在UI线程)，你可以执行通知用户进度的操作，例如：</p>
-
-<p>```java
-private class DownloadFilesTask extends AsyncTask&lt;URL, Integer, Long> {</p>
-
-<pre><code>// Do the long-running work in here
-protected Long doInBackground(URL... urls) {
-    int count = urls.length;
-    long totalSize = 0;
-    for (int i = 0; i &lt; count; i++) {
-        totalSize += Downloader.downloadFile(urls[i]);
-        publishProgress((int) ((i / (float) count) * 100));
-        // Escape early if cancel() is called
-        if (isCancelled()) break;
-    }
-    return totalSize;
-}
-
-// This is called each time you call publishProgress()
-protected void onProgressUpdate(Integer... progress) {
-    setProgressPercent(progress[0]);
-}
-
-// This is called when doInBackground() is finished
-protected void onPostExecute(Long result) {
-    showNotification("Downloaded " + result + " bytes");
-}
-</code></pre>
-
-<p>}
-```</p>
-
-<p>为了能够执行这个工作线程，只需要创建一个实例并执行<code>execute()</code>:</p>
-
-<p><code>java
-new DownloadFilesTask().execute(url1, url2, url3);
+<p>在<code>Android Wear</code>伴侣应用上，你将会看到状态变为：
+<code>xml
+Host: connected
+Target: connected
 </code></p>
 
-<p>相比起AsycnTask来说，创建自己的线程或者HandlerThread稍微复杂一点。如果你想这样做，<strong>你应该通过<code>Process.setThreadPriority()</code>并传递<code>THREAD_PRIORITY_BACKGROUND</code>来设置线程的优先级为"background"。</strong>如果你不通过这个方式来给线程设置一个低的优先级，那么这个线程仍然会使得你的应用显得卡顿，因为这个线程默认与UI线程有着同样的优先级。</p>
+<h2>调试你的应用</h2>
 
-<p>如果你实现了Thread或者HandlerThread，请确保你的UI线程不会因为等待工作线程的某个任务而去执行Thread.wait()或者Thread.sleep()。UI线程不应该去等待工作线程完成某个任务，你的UI现场应该提供一个Handler给其他工作线程，这样工作线程能够通过这个Handler在任务结束的时候通知UI线程。使用这样的方式来设计你的应用程序可以使得你的程序UI线程保持响应性，以此来避免ANR。</p>
-
-<p>BroadcastReceiver有特定执行时间的限制说明了broadcast receivers应该做的是：简短快速的任务，避免执行费时的操作，例如保存数据或者注册一个Notification。正如在UI线程中执行的方法一样，程序应该避免在broadcast receiver中执行费时的长任务。但不是采用通过工作线程来执行复杂的任务的方式，你的程序应该启动一个IntentService来响应intent broadcast的长时间任务。</p>
-
-<blockquote><p><strong>Tip:</strong> 你可以使用StrictMode来帮助寻找因为不小心加入到UI线程的潜在的长时间执行的操作，例如网络或者DB相关的任务。</p></blockquote>
-
-<h2>增加响应性(Reinforce Responsiveness)</h2>
-
-<p>通常来说，100ms - 200ms是用户能够察觉到卡顿的上限。这样的话，下面有一些避免ANR的技巧：</p>
-
-<ul>
-<li>如果你的程序需要响应正在后台加载的任务，在你的UI中可以显示ProgressBar来显示进度。</li>
-<li>对游戏程序，在工作线程执行计算的任务。</li>
-<li>如果你的程序在启动阶段有一个耗时的初始化操作，可以考虑显示一个闪屏，要么尽快的显示主界面，然后马上显示一个加载的对话框，异步加载数据。无论哪种情况，你都应该显示一个进度信息，以免用户感觉程序有卡顿的情况。</li>
-<li>使用性能测试工具，例如Systrace与Traceview来判断程序中影响响应性的瓶颈。</li>
-</ul>
-
-
-<hr />
-
-<p><strong>学习自<a href="http://developer.android.com/training/perf-anr.html">http://developer.android.com/training/perf-anr.html</a>,欢迎交流讨论</strong></p>
+<p>当运行abd devices的命令时，你的可穿戴设备是作为localhost:4444的。执行任何的adb命令，需要使用下面的格式：
+<code>xml
+adb -s localhost:4444 &lt;command&gt;
+</code>
+如果没有任何其他的设备通过TCP/IP连接到手持设备，你可以使用下面的简短命令：
+<code>xml
+adb -e &lt;command&gt;
+</code>
+例如：
+<code>xml
+adb -e logcat
+adb -e shell
+adb -e bugreport
+</code></p>
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training - Volley(Lesson 4 - 实现自定义的请求)]]></title>
-    <link href="http://hukai.me/blog/android-training-volley-custom-request/"/>
-    <updated>2014-06-25T23:20:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-volley-custom-request</id>
-    <content type="html"><![CDATA[<p>这节课会介绍如何实现你自定义的请求类型，这些自定义的类型不属于Volley内置支持包里面。</p>
+    <title type="html"><![CDATA[Android Training - 创建可穿戴应用(4 - 打包可穿戴应用)]]></title>
+    <link href="http://hukai.me/blog/android-training-wearable-app-packaging/"/>
+    <updated>2014-07-14T23:32:00+08:00</updated>
+    <id>http://hukai.me/blog/android-training-wearable-app-packaging</id>
+    <content type="html"><![CDATA[<p>当发布应用给用户之前，你必须把可穿戴应用打包到手持应用内。因为不能直接在可穿戴设备上浏览并安装应用。如果打包正确，当用户下载手持应用时，系统会自动下发可穿戴应用到匹对的可穿戴设备上。</p>
 
-<h2>编写一个自定义的请求Write a Custom Request</h2>
+<blockquote><p><strong>Note:</strong> 如果开发时签名用的是debug key，这个特性是无法正常工作的。在开发时，需要使用<code>adb install</code>的命令或者Android Studio来安装可穿戴应用。</p></blockquote>
 
-<p>大多数的请求类型都已经包含在Volley的工具箱里面。如果你的请求返回数值是一个string，image或者JSON，那么你是不需要自己去实现请求类的。</p>
+<h2>使用Android Studio打包</h2>
 
-<p>对于那些你需要自定义的请求类型，下面是你需要做得步骤：</p>
+<p>在Android Studio中打包可穿戴应用有下面几个步骤：</p>
 
-<ul>
-<li>继承<code>Request&lt;T&gt;</code>类，<code>&lt;T&gt;</code>表示了请求返回的数据类型。因此如果你需要解析的响应类型是一个String，可以通过继承<code>Request&lt;String&gt;</code>来创建你自定义的请求。请参考Volley工具类中的StringRequest与 ImageRequest来学习如何继承Request<T>。</li>
-<li>实现抽象方法<code>parseNetworkResponse()</code>与<code>deliverResponse()</code>，下面会详细介绍。</li>
-</ul>
-
-
-<h3>parseNetworkResponse</h3>
-
-<p>为了能够提交一种指定类型的数据(例如，string，image，JSON等)，需要对解析后的结果进行封装。下面会演示如何实现<code>parseNetworkResponse()</code>。</p>
-
-<p>```java
-@Override
-protected Response<T> parseNetworkResponse(</p>
-
-<pre><code>    NetworkResponse response) {
-try {
-    String json = new String(response.data,
-    HttpHeaderParser.parseCharset(response.headers));
-return Response.success(gson.fromJson(json, clazz),
-HttpHeaderParser.parseCacheHeaders(response));
+<ol>
+<li>在手持应用的buidl.gradle文件中把可穿戴应用声明为依赖：
+<code>xml
+dependencies {
+compile 'com.google.android.gms:play-services:5.0.+@aar'
+compile 'com.android.support:support-v4:20.0.+''
+wearApp project(':wearable')
 }
-// handle errors
-</code></pre>
-
-<p>...
-}
-```</p>
-
-<!-- More -->
-
-
-<p>请注意：</p>
-
-<ul>
-<li><code>parseNetworkResponse()</code>的参数是类型是<code>NetworkResponse</code>，这种参数包含了的响应数据内容有一个byte[]，HTTP status code以及response headers.</li>
-<li>你实现的方法必须返回一个Response<T>，它包含了你响应对象与缓存metadata或者是一个错误。</li>
-</ul>
-
-
-<p>如果你的协议没有标准的cache机制，你可以自己建立一个<code>Cache.Entry</code>, 但是大多数请求都可以用下面的方式来处理:</p>
-
-<p>```java
-return Response.success(myDecodedObject,</p>
-
-<pre><code>    HttpHeaderParser.parseCacheHeaders(response));
-</code></pre>
-
-<p>```</p>
-
-<p>Volley在工作线程中执行parseNetworkResponse()方法。这确保了耗时的解析操作，例如decode一张JPEG图片成bitmap，不会阻塞UI线程。</p>
-
-<h3>deliverResponse</h3>
-
-<p>Volley会把parseNetworkResponse()方法返回的数据带到主线程的回调中。如下所示：</p>
-
-<p>```java
-protected void deliverResponse(T response) {</p>
-
-<pre><code>    listener.onResponse(response);
-</code></pre>
-
-<p>```</p>
-
-<h3>Example: GsonRequest</h3>
-
-<p><a href="http://code.google.com/p/google-gson/">Gson</a>是一个使用映射支持JSON与Java对象之间相互转换的库文件。你可以定义和JSON keys想对应名称的Java对象。把对象传递给传递Gson，然后Gson会帮你为对象填充字段值。 下面是一个完整的示例：演示了使用Gson解析Volley数据：</p>
-
-<p>```java
-public class GsonRequest<T> extends Request<T> {</p>
-
-<pre><code>private final Gson gson = new Gson();
-private final Class&lt;T&gt; clazz;
-private final Map&lt;String, String&gt; headers;
-private final Listener&lt;T&gt; listener;
-
-/**
- * Make a GET request and return a parsed object from JSON.
- *
- * @param url URL of the request to make
- * @param clazz Relevant class object, for Gson's reflection
- * @param headers Map of request headers
- */
-public GsonRequest(String url, Class&lt;T&gt; clazz, Map&lt;String, String&gt; headers,
-        Listener&lt;T&gt; listener, ErrorListener errorListener) {
-    super(Method.GET, url, errorListener);
-    this.clazz = clazz;
-    this.headers = headers;
-    this.listener = listener;
-}
-
-@Override
-public Map&lt;String, String&gt; getHeaders() throws AuthFailureError {
-    return headers != null ? headers : super.getHeaders();
-}
-
-@Override
-protected void deliverResponse(T response) {
-    listener.onResponse(response);
-}
-
-@Override
-protected Response&lt;T&gt; parseNetworkResponse(NetworkResponse response) {
-    try {
-        String json = new String(
-                response.data,
-                HttpHeaderParser.parseCharset(response.headers));
-        return Response.success(
-                gson.fromJson(json, clazz),
-                HttpHeaderParser.parseCacheHeaders(response));
-    } catch (UnsupportedEncodingException e) {
-        return Response.error(new ParseError(e));
-    } catch (JsonSyntaxException e) {
-        return Response.error(new ParseError(e));
-    }
-}
-</code></pre>
-
-<p>}
-```</p>
-
-<p>如果你愿意使用的话，Volley提供了现成的<code>JsonArrayRequest</code>与<code>JsonArrayObject</code>类。参考上一课:创建标准的请求</p>
-
-<hr />
-
-<p><strong>学习自<a href="http://developer.android.com/training/volley/request-custom.html">http://developer.android.com/training/volley/request-custom.html</a>,欢迎交流讨论</strong></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Training - Volley(Lesson 3 - 创建标准的请求)]]></title>
-    <link href="http://hukai.me/blog/android-training-volley-standard-request/"/>
-    <updated>2014-06-24T22:10:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-volley-standard-request</id>
-    <content type="html"><![CDATA[<p>这一课会介绍如何使用Volley支持的常用请求类型：</p>
-
-<ul>
-<li><code>StringRequest</code>。指定一个URL并在相应回调中接受一个原始的raw string数据。请参考前一课的示例。</li>
-<li><code>ImageRequest</code>。指定一个URL并在相应回调中接受一个image。</li>
-<li><code>JsonObjectRequest</code>与<code>JsonArrayRequest</code> (均为<code>JsonRequest</code>的子类)。指定一个URL并在相应回调中获取到一个JSON对象或者JSON数组。</li>
-</ul>
-
-
-<p>如果你需要的是上面演示的请求类型，那么你应该不需要自己实现一个自定义的请求。这节课会演示如何使用那些标准的请求类型。关于如何实现自定义的请求，请看下一课：<a href="request-costom.html">实现自定义的请求</a>。</p>
-
-<h2>1)Request an Image</h2>
-
-<p>Volley为请求图片提供了如下的类。这些类依次有着依赖关系，用来支持在不同的层级进行图片处理：</p>
-
-<ul>
-<li><p><code>ImageRequest</code> - 一个封装好的，用来处理URL请求图片并且返回一张decode好的bitmap的类。它同样提供了一些简便的接口方法，例如指定一个大小进行重新裁剪。它的主要好处是Volley回确保类似decode，resize等耗时的操作执行在工作线程中。</p></li>
-<li><p><code>ImageLoader</code> - 一个用来处理加载与缓存从网络上获取到的图片的帮助类。ImageLoader是管理协调大量的ImageRequest的类。例如，在ListView中需要显示大量缩略图的时候。ImageLoader为通常的Volley cache提供了更加前瞻的内存缓存，这个缓存对于防止图片抖动非常有用。。这还使得能够在避免阻挡或者延迟主线程的前提下在缓存中能够被Hit到。ImageLoader还能够实现响应联合Coalescing，每一个响应回调里面都可以设置bitmap到view上面。联合Coalescing使得能够同时提交多个响应，这提升了性能。</p></li>
-<li><p><code>NetworkImageView</code> - 在ImageLoader的基础上建立，替换ImageView进行使用。对于需要对ImageView设置网络图片的情况下使用很有效。NetworkImageView同样可以在view被detached的时候取消pending的请求。</p></li>
-</ul>
+</code></li>
+</ol>
 
 
 <!-- More -->
 
 
-<h3>1.1)Use ImageRequest</h3>
+<ol>
+<li>点击<strong>Build</strong> > <strong>Generate Signed APK</strong>... 安装屏幕上的指示来制定你的release key并为你的app进行签名。Android Studio导出签名好的手持应用，他内置了可穿戴应用。
+或者，你可以在可穿戴应用与手持应用的build.gradle文件里面建立一个签名规则。为了能够正常自动推送可穿戴应用，这两个应用都必须签名。
+<code>xml
+android {
+...
+signingConfigs {
+ release {
+   keyAlias 'myAlias'
+   keyPassword 'myPw'
+   storeFile file('path/to/release.keystore')
+   storePassword 'myPw'
+ }
+}
+buildTypes {
+ release {
+   ...
+   signingConfig signingConfigs.release
+ }d
+}
+...
+}
+</code>
+通过点击Android Studio右边的Gradle按钮来建立手持应用，并执行<strong>assembleRelease</strong>任务。这个任务放在<strong>Project name</strong> > <strong>Handheld module name</strong> > <strong>assembleRelease.</strong></li>
+</ol>
 
-<p>下面是一个使用ImageRequest的示例。它会获取指定URL的image病显示到app上。里面演示的RequestQueue是通过上一课提到的单例类实现的。</p>
 
-<p>```java
-ImageView mImageView;
-String url = "http://i.imgur.com/7spzG.png";
-mImageView = (ImageView) findViewById(R.id.myImage);
-...</p>
+<blockquote><p><strong>Note:</strong>这个例子中把密码写在了Gradle文件中，这应该不是期待的写法。请参考<a href="http://developer.android.com/sdk/installing/studio-build.html#configureSigning">Configure signing settings</a>学习如何为密码创建环境变量。</p></blockquote>
 
-<p>// Retrieves an image specified by the URL, displays it in the UI.
-ImageRequest request = new ImageRequest(url,</p>
+<h3>分别为可穿戴应用与手持应用进行签名</h3>
 
-<pre><code>new Response.Listener() {
-    @Override
-    public void onResponse(Bitmap bitmap) {
-        mImageView.setImageBitmap(bitmap);
-    }
-}, 0, 0, null,
-new Response.ErrorListener() {
-    public void onErrorResponse(VolleyError error) {
-        mImageView.setImageResource(R.drawable.image_load_error);
-    }
-});
+<p>如果你的Build任务需要为可穿戴应用与手持应用签不同的Key，你可以像下面一样在手持应用的build.gradle文件中声明规则。
+<code>xml
+dependencies {
+  ...
+  wearApp files('/path/to/wearable_app.apk')
+}
+</code>
+你可以为手持应用手动进行签任何形式的Key (可以是Android Studio Build > Generate Signed APK...的方式，也可以是Gradle signingConfig规则的方式)</p>
+
+<h2>手动打包</h2>
+
+<p>如果你使用的是其他IDE，你仍然可以把可穿戴应用打包到手持应用中。</p>
+
+<ol>
+<li>把签好名的可穿戴应用放到手持应用的<code>res/raw</code>目录下。 我们把这个应用作为<code>wearable_app.apk</code>。</li>
+<li>创建<code>res/xml/wearable_app_desc.xml</code>文件，里面包含可穿戴设备的版本信息与路径。例如:
+<code>xml
+&lt;wearableApp package="wearable.app.package.name"&gt;
+&lt;versionCode&gt;1&lt;/versionCode&gt;
+&lt;versionName&gt;1.0&lt;/versionName&gt;
+&lt;rawPathResId&gt;wearable_app&lt;/rawPathResId&gt;
+&lt;/wearableApp&gt;
+</code>
+package, versionCode, 与 versionName需要和可穿戴应用的AndroidManifest.xml里面的信息一致。<code>rawPathResId</code>是一个static的变量表示APK的名称。。</li>
+<li>添加<code>meta-data</code>标签到你的手持应用的<code>&lt;application&gt;</code>标签下，指明引用wearable_app_desc.xml文件
+```xml
+&lt;meta-data android:name="com.google.android.wearable.beta.app"
+
+<pre><code>          android:resource="@xml/wearable_app_desc"/&gt;
 </code></pre>
 
-<p>// Access the RequestQueue through your singleton class.
-MySingleton.getInstance(this).addToRequestQueue(request);
+<p>```</p></li>
+<li>构建并签名手持应用。</li>
+</ol>
+
+
+<h2>关闭资源压缩</h2>
+
+<p>许多构建工具会自动压缩放在res/raw目录下的文件。因为可穿戴APK已经被压缩过了，那些压缩工作再次压缩会导致应用无法正常安装。</p>
+
+<p>这样的话，安装失败。在手持应用上，<code>PackageUpdateService</code>会输出如下的错误日志："this file cannot be opened as a file descriptor; it is probably compressed."</p>
+
+<p>Android Studio 默认不会压缩你的APK，如果你使用另外一个构建流程，需要确保不会发生重复压缩可穿戴应用的事情。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training - 创建可穿戴应用(3 - 添加语音能力)]]></title>
+    <link href="http://hukai.me/blog/android-training-wearable-app-voice-input/"/>
+    <updated>2014-07-14T21:43:00+08:00</updated>
+    <id>http://hukai.me/blog/android-training-wearable-app-voice-input</id>
+    <content type="html"><![CDATA[<p>语音指令是可穿戴体验的一个重要的部分。这使得用户可以释放双手，快速发出指令。穿戴提供了2种类型的语音操作：</p>
+
+<ul>
+<li><p><strong>系统提供的</strong></p>
+
+<p>这些语音指令都是基于任务的，并且内置在Wear的平台内。你在activity中过滤你想要接收的指令。例如包含"Take a note" 或者 "Set an alarm"的指令。</p></li>
+<li><p><strong>应用提供的</strong></p>
+
+<p>这些语音指令都是基于应用的，你需要像声明一个Launcher Icon一样定义这些指令。用户通过说"Start XXX"来使用那些语音指令，然后会启动你指定启动的activity。</p></li>
+</ul>
+
+
+<h2>声明系统提供的语音指令</h2>
+
+<p>Android Wear平台基于用户的操作提供了一些语音指令，例如"Take a note" 或者 "Set an alarm"。用户发出想要做的操作指令，让系统寻找应该启动最合适的activity。</p>
+
+<p>当用户说出语音指令时，你的应用能够被过滤出来启动一个activity。如果你想要启动一个service在后台执行任务，需要显示一个activity呈现作为线索。当你想要废弃这个可见的线索时，需要确保执行了finish()。</p>
+
+<!-- More -->
+
+
+<p>例如，对于"Take a note"的指令，定义一个MyNoteActivity来接收这个指令:</p>
+
+<p>```java
+<activity android:name="MyNoteActivity"></p>
+
+<pre><code>  &lt;intent-filter&gt;
+      &lt;action android:name="android.intent.action.SEND" /&gt;
+      &lt;category android:name="com.google.android.voicesearch.SELF_NOTE" /&gt;
+  &lt;/intent-filter&gt;
+</code></pre>
+
+<p>  </activity>
 ```</p>
 
-<h3>1.2)Use ImageLoader and NetworkImageView</h3>
+<p>下面列出了Wear平台支持的语音指令：</p>
 
-<p>你可以使用ImageLoader与NetworkImageView用来处理类似ListView等大量显示图片的情况。在你的layout XML文件中，你可以使用NetworkImageView来替代通常的ImageView， 例如:</p>
+<p><img src="/images/voice_intent_1.png" alt="voice_intent_1" />
+<img src="/images/voice_intent_2.png" alt="voice_intent_2" />
+<img src="/images/voice_intent_3.png" alt="voice_intent_3" /></p>
+
+<p>关于注册intent与获取intent extra的信息，请参考<a href="http://developer.android.com/guide/components/intents-common.html">Common intents</a>.</p>
+
+<h2>声明应用提供的语音指令</h2>
+
+<p>如果系统提供的语音指令无法满足你的需求，你可以使用"Start MyActivityName"的指令来直接启动你的应用。</p>
+
+<p>注册一个"Start"指令和注册手持应用上得Launcher是一样的。</p>
+
+<p>在"Start"指令的后面需要指定的文字, 这个文字需要注册在activity的label属性上。例如，下面的设置能够识别"Start MyRunningApp"的语音指令并启动StartRunActivity.</p>
 
 <p>```xml
-&lt;com.android.volley.toolbox.NetworkImageView</p>
+<application>
+  <activity android:name="StartRunActivity" android:label="MyRunningApp"></p>
 
-<pre><code>    android:id="@+id/networkImageView"
-    android:layout_width="150dp"
-    android:layout_height="170dp"
-    android:layout_centerHorizontal="true" /&gt;
+<pre><code>  &lt;intent-filter&gt;
+      &lt;action android:name="android.intent.action.MAIN" /&gt;
+      &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+  &lt;/intent-filter&gt;
 </code></pre>
 
-<p>```</p>
-
-<p>你可以使用ImageLoader来显示一张图片，例如：</p>
-
-<p>```java
-ImageLoader mImageLoader;
-ImageView mImageView;
-// The URL for the image that is being loaded.
-private static final String IMAGE_URL =</p>
-
-<pre><code>"http://developer.android.com/images/training/system-ui.png";
-</code></pre>
-
-<p>...
-mImageView = (ImageView) findViewById(R.id.regularImageView);</p>
-
-<p>// Get the ImageLoader through your singleton class.
-mImageLoader = MySingleton.getInstance(this).getImageLoader();
-mImageLoader.get(IMAGE_URL, ImageLoader.getImageListener(mImageView,</p>
-
-<pre><code>     R.drawable.def_image, R.drawable.err_image));
-</code></pre>
-
-<p>```</p>
-
-<p>然而，如果你要做得是为ImageView进行图片设置，你可以使用NetworkImageView来实现，例如：</p>
-
-<p>```java
-ImageLoader mImageLoader;
-NetworkImageView mNetworkImageView;
-private static final String IMAGE_URL =</p>
-
-<pre><code>"http://developer.android.com/images/training/system-ui.png";
-</code></pre>
-
-<p>...</p>
-
-<p>// Get the NetworkImageView that will display the image.
-mNetworkImageView = (NetworkImageView) findViewById(R.id.networkImageView);</p>
-
-<p>// Get the ImageLoader through your singleton class.
-mImageLoader = MySingleton.getInstance(this).getImageLoader();</p>
-
-<p>// Set the URL of the image that should be loaded into this view, and
-// specify the ImageLoader that will be used to make the request.
-mNetworkImageView.setImageUrl(IMAGE_URL, mImageLoader);
+<p>  </activity>
+</application>
 ```</p>
 
-<p>上面的代码是通过前一节课的单例模式来实现访问到RequestQueue与ImageLoader的。之所以这样做得原因是：对于ImageLoader(一个用来处理加载与缓存图片的帮助类)来说，单例模式可以避免旋转所带来的抖动。使用单例模式可以使得bitmap的缓存与activity的生命周期无关。如果你在activity中创建ImageLoader，这个ImageLoader有可能会在手机进行旋转的时候被重新创建。这可能会导致抖动。</p>
+<h2>获取输入的自由语音</h2>
 
-<h3>1.3)Example LRU cache</h3>
+<p>除了使用语音指令来启动activity之外，你也可以执行系统内置的语言识别activity来获取用户的语音输入。这对于获取用户的输入信息非常有帮助，例如执行搜索或者发送一个消息。</p>
 
-<p>Volley工具箱中提供了通过DiskBasedCache实现的一种标准缓存。这个类能够缓存文件到磁盘的制定目录。但是为了使用ImageLoader，你应该提供一个自定义的内存LRC缓存，这个缓存需要实现<code>ImageLoader.ImageCache</code>的接口。你可能想把你的缓存设置成一个单例。关于更多的有关内容，请参考<a href="request.html">建立请求队列Setting Up a RequestQueue</a>.</p>
-
-<p>下面是一个内存LRU Cache的实例。它继承自LruCache并实现了ImageLoader.ImageCache的接口：</p>
+<p>在你的应用中，startActivityForResult()使用<code>ACTION_RECOGNIZE_SPEECH</code>启动系统语音识别应用。在onActivityResult()中处理返回的结果：</p>
 
 <p>```java
-import android.graphics.Bitmap;
-import android.support.v4.util.LruCache;
-import android.util.DisplayMetrics;
-import com.android.volley.toolbox.ImageLoader.ImageCache;</p>
+private static final int SPEECH_REQUEST_CODE = 0;</p>
 
-<p>public class LruBitmapCache extends LruCache&lt;String, Bitmap></p>
+<p>// Create an intent that can start the Speech Recognizer activity
+private void displaySpeechRecognizer() {</p>
 
-<pre><code>    implements ImageCache {
+<pre><code>Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+        RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+</code></pre>
 
-public LruBitmapCache(int maxSize) {
-    super(maxSize);
-}
+<p>// Start the activity, the intent will be populated with the speech text</p>
 
-public LruBitmapCache(Context ctx) {
-    this(getCacheSize(ctx));
-}
+<pre><code>startActivityForResult(intent, SPEECH_REQUEST_CODE);
+</code></pre>
 
+<p>}</p>
+
+<p>// This callback is invoked when the Speech Recognizer returns.
+// This is where you process the intent and extract the speech text from the intent.
 @Override
-protected int sizeOf(String key, Bitmap value) {
-    return value.getRowBytes() * value.getHeight();
-}
+protected void onActivityResult(int requestCode, int resultCode,</p>
 
-@Override
-public Bitmap getBitmap(String url) {
-    return get(url);
+<pre><code>    Intent data) {
+if (requestCode == SPEECH_REQUEST &amp;&amp; resultCode == RESULT_OK) {
+    List&lt;String&gt; results = data.getStringArrayListExtra(
+            RecognizerIntent.EXTRA_RESULTS);
+    String spokenText = results.get(0);
+    // Do something with spokenText
 }
-
-@Override
-public void putBitmap(String url, Bitmap bitmap) {
-    put(url, bitmap);
-}
-
-// Returns a cache size equal to approximately three screens worth of images.
-public static int getCacheSize(Context ctx) {
-    final DisplayMetrics displayMetrics = ctx.getResources().
-            getDisplayMetrics();
-    final int screenWidth = displayMetrics.widthPixels;
-    final int screenHeight = displayMetrics.heightPixels;
-    // 4 bytes per pixel
-    final int screenBytes = screenWidth * screenHeight * 4;
-
-    return screenBytes * 3;
-}
+super.onActivityResult(requestCode, resultCode, data);
 </code></pre>
 
 <p>}
 ```</p>
-
-<p>下面是如何初始化ImageLoader并使用cache的实例:</p>
-
-<p><code>java
-RequestQueue mRequestQueue; // assume this exists.
-ImageLoader mImageLoader = new ImageLoader(mRequestQueue, new LruBitmapCache(LruBitmapCache.getCacheSize()));
-</code></p>
-
-<h2>2)Request JSON</h2>
-
-<p>Volley提供了以下的类用来执行JSON请求：</p>
-
-<ul>
-<li><code>JsonArrayRequest</code> - 一个为了获取JSONArray返回数据的请求。</li>
-<li><code>JsonObjectRequest</code> - 一个为了获取JSONObject返回数据的请求。允许把一个JSONObject作为请求参数。</li>
-</ul>
-
-
-<p>这两个类都是继承自JsonRequest的。你可以使用类似的方法来处理这两种类型的请求。如下演示了如果获取一个JSON feed并显示到UI上：</p>
-
-<p>```java
-TextView mTxtDisplay;
-ImageView mImageView;
-mTxtDisplay = (TextView) findViewById(R.id.txtDisplay);
-String url = "http://my-json-feed";</p>
-
-<p>JsonObjectRequest jsObjRequest = new JsonObjectRequest</p>
-
-<pre><code>    (Request.Method.GET, url, null, new Response.Listener() {
-
-@Override
-public void onResponse(JSONObject response) {
-    mTxtDisplay.setText("Response: " + response.toString());
-}
-</code></pre>
-
-<p>}, new Response.ErrorListener() {</p>
-
-<pre><code>@Override
-public void onErrorResponse(VolleyError error) {
-    // TODO Auto-generated method stub
-
-}
-</code></pre>
-
-<p>});</p>
-
-<p>// Access the RequestQueue through your singleton class.
-MySingleton.getInstance(this).addToRequestQueue(jsObjRequest);
-```</p>
-
-<p>关于基于<a href="http://code.google.com/p/google-gson/">Gson</a>实现一个自定义的JSON请求对象，请参考下一节课：<a href="request-custom.html">实现一个自定义的请求Implementing a Custom Request</a>.</p>
-
-<hr />
-
-<p><strong>学习自<a href="http://developer.android.com/training/volley/request.html">http://developer.android.com/training/volley/request.html</a>,欢迎交流讨论</strong></p>
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training - Volley(Lesson 2 - 建立请求队列)]]></title>
-    <link href="http://hukai.me/blog/android-training-volley-request-queue/"/>
-    <updated>2014-06-24T21:03:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-volley-request-queue</id>
-    <content type="html"><![CDATA[<p>前一节课演示了如何使用<code>Volley.newRequestQueue</code>这一简便的方法来建立一个<code>RequestQueue</code>，这是利用了Volley默认的优势。这节课会介绍如何显式的建立一个RequestQueue，以便满足你自定义的需求。</p>
+    <title type="html"><![CDATA[Android Training - 创建可穿戴应用(2 - 创建自定义的布局)]]></title>
+    <link href="http://hukai.me/blog/android-training-wearable-app-layouts/"/>
+    <updated>2014-07-14T20:16:00+08:00</updated>
+    <id>http://hukai.me/blog/android-training-wearable-app-layouts</id>
+    <content type="html"><![CDATA[<p>为可穿戴设备创建布局是和手持设备是一样的。但是 不要期望通过搬迁手持应用的功能与UI到可穿戴上会有一个好的用户体验。仅仅在有需要的时候，你才应该创建自定义的布局。请参考可穿戴设备的<a href="http://developer.android.com/design/wear/index.html">design guidelines</a>学习如何设计一个优秀的可穿戴应用。</p>
 
-<p>这节课同样会介绍一种推荐的实现方式：创建一个单例的RequestQueue，这使得RequestQueue能够持续保持在你的app的生命周期中。</p>
+<p><a name="CustomNotification"></a></p>
 
-<h2>Set Up a Network and Cache</h2>
+<h2>创建自定义Notification</h2>
 
-<p>一个RequestQueue需要两部分来支持它的工作：一部分是网络操作用来执行请求的数据传输，另外一个是用来处理缓存操作的Cache。在Volley的工具箱中包含了标准的实现方式：<code>DiskBasedCache</code>提供了每个文件与对应响应数据一一映射的缓存实现。 <code>BasicNetwork</code>提供了一个网络传输的实现，连接方式可以是<a href="http://developer.android.com/reference/android/net/http/AndroidHttpClient.html">AndroidHttpClient</a> 或者是 <a href="http://developer.android.com/reference/java/net/HttpURLConnection.html">HttpURLConnection</a>.</p>
+<p>通常来说，你应该在手持应用上创建好notification，然后让它自动同步到可穿戴设备上。这使得你只需要创建一次notification，然后可以在不同类型的设备(不仅仅是可穿戴设备，也包含车载设备与电视)上进行显示，免去为不同设备进行重新设计。</p>
 
-<p><code>BasicNetwork</code>是Volley默认的网络操作实现方式。一个BasicNetwork必须使用HTTP Client进行初始化。这个Client通常是AndroidHttpClient 或者 HttpURLConnection:</p>
+<p>如果标准的notification风格无法满足你的需求(例如<a href="http://developer.android.com/reference/android/support/v4/app/NotificationCompat.BigTextStyle.html">NotificationCompat.BigTextStyle</a> 或者 <a href="http://developer.android.com/reference/android/support/v4/app/NotificationCompat.InboxStyle.html">NotificationCompat.InboxStyle</a>)，你可以使用activity，显示一个自定义的布局来达到目的。在可穿戴设备上你只可以创建并处理自定义的notification，同时系统无法为这些notification同步到手持设备上。</p>
+
+<p><strong>Note:</strong>当在可穿戴设备上创建自定义的notification时，你可以使用API Level 20上标准的APIs，不需要使用Support Library。</p>
+
+<p>为了创建自定义的notification，步骤如下：</p>
 
 <!-- More -->
 
 
-<ul>
-<li>对于app target API level低于API 9(Gingerbread)的使用AndroidHttpClient。在Gingerbread之前，HttpURLConnection是不可靠的。对于这个的细节，请参考<a href="http://android-developers.blogspot.com/2011/09/androids-http-clients.html">Android's HTTP Clients</a>。</li>
-<li>对于API Level 9以及以上的，会使用HttpURLConnection。</li>
-</ul>
+<ol>
+<li>创建布局并设置这个布局为需要显示的activity的content view:
+<code>java
+public void onCreate(Bundle bundle){
+ ...
+ setContentView(R.layout.notification_activity);
+}
+</code></li>
+<li>为了使得activity能够显示在可穿戴设备上，需要在manifest文件中为activity定义必须的属性。你需要把activity声明为exportable，embeddable以及拥有一个空的task affinity。我们也推荐把activity的主题设置为<code>Theme.DeviceDefault.Light</code>。例如：
+<code>xml
+&lt;activity android:name="com.example.MyDisplayActivity"
+  android:exported="true"
+  android:allowEmbedded="true"
+  android:taskAffinity=""
+  android:theme="@android:style/Theme.DeviceDefault.Light" /&gt;
+</code></li>
+<li>为activity创建<a href="http://developer.android.com/reference/android/app/PendingIntent.html">PendingIntent</a>，例如：：
+```java
+Intent notificationIntent = new Intent(this, NotificationActivity.class);
+PendingIntent notificationPendingIntent = PendingIntent.getActivity(this, 0, notificationIntent,
 
-
-<p>为了创建一个能够执行在所有Android版本上的应用，你可以通过检查系统版本选择合适的HTTP Client。例如：</p>
-
-<p>```java
-HttpStack stack;
-...
-// If the device is running a version >= Gingerbread...
-if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {</p>
-
-<pre><code>// ...use HttpURLConnection for stack.
+<pre><code> PendingIntent.FLAG_UPDATE_CURRENT);
 </code></pre>
 
-<p>} else {</p>
+<p>```</p></li>
+<li>创建<a href="http://developer.android.com/reference/android/app/Notification.html">Notification</a>并执行<a href="http://developer.android.com/reference/android/app/Notification.WearableExtender.html#setDisplayIntent(android.app.PendingIntent">setDisplayIntent()</a>)方法，参数是前面创建的PendingIntent。当用户查看这个notification时，系统使用这个PendingIntent来启动activity。</li>
+<li>触发notification使用<a href="http://developer.android.com/reference/java/lang/Object.html#notify(">notify()</a>)的方法。</li>
+</ol>
 
-<pre><code>// ...use AndroidHttpClient for stack.
-</code></pre>
 
-<p>}
-Network network = new BasicNetwork(stack);
-```</p>
+<blockquote><p><strong>Note:</strong> 当notification呈现在主页时，系统会根据notification的语义，使用一个标准的模板来呈现它。这个模板可以在所有的表盘上进行显示。当用户往上滑动notification时，将会看到为这个notification准备的自定义的activity。</p></blockquote>
 
-<p>下面的代码片段会掩饰如何一步步建立一个RequestQueue:</p>
+<h2>使用Wearable UI库创建布局</h2>
 
-<p>```java
-RequestQueue mRequestQueue;</p>
+<p>当你使用Android Studio的引导功能创建一个Wearable应用的时候，会自动包含一个非官方的UI库文件。你也可以通过给build.gradle文件添加下面的依赖声明把库文件添加到项目：
+```xml
+dependencies {</p>
 
-<p>// Instantiate the cache
-Cache cache = new DiskBasedCache(getCacheDir(), 1024 * 1024); // 1MB cap</p>
-
-<p>// Set up the network to use HttpURLConnection as the HTTP client.
-Network network = new BasicNetwork(new HurlStack());</p>
-
-<p>// Instantiate the RequestQueue with the cache and network.
-mRequestQueue = new RequestQueue(cache, network);</p>
-
-<p>// Start the queue
-mRequestQueue.start();</p>
-
-<p>String url ="http://www.myurl.com";</p>
-
-<p>// Formulate the request and handle the response.
-StringRequest stringRequest = new StringRequest(Request.Method.GET, url,</p>
-
-<pre><code>    new Response.Listener&lt;String&gt;() {
-@Override
-public void onResponse(String response) {
-    // Do something with the response
-}
-</code></pre>
-
-<p>},</p>
-
-<pre><code>new Response.ErrorListener() {
-    @Override
-    public void onErrorResponse(VolleyError error) {
-        // Handle error
-}
-</code></pre>
-
-<p>});</p>
-
-<p>// Add the request to the RequestQueue.
-mRequestQueue.add(stringRequest);
-...
-```</p>
-
-<p>如果你仅仅是想做一个单次的请求并且不想要线程池一直保留，你可以通过使用在前面一课：<a href="simple.html">发送一个简单的请求(Sending a Simple Request)</a>文章中提到<code>Volley.newRequestQueue()</code>方法在任何需要的时刻创建RequestQueue，然后在你的响应回调里面执行<code>stop()</code>方法来停止操作。但是更通常的做法是创建一个RequestQueue并设置为一个单例。下面将演示这种做法。</p>
-
-<h2>Use a Singleton Pattern</h2>
-
-<p>如果你的程序需要持续的使用网络，更加高效的方式应该是建立一个RequestQueue的单例，这样它能够持续保持在整个app的生命周期中。你可以通过多种方式来实现这个单例。推荐的方式是实现一个单例类，里面封装了RequestQueue对象与其他Volley的方法。另外一个方法是继承Application类，并在<code>Application.OnCreate()</code>方法里面建立RequestQueue。但是这个方法是不推荐的。因为一个static的单例能够以一种更加模块化的方式提供同样的功能。</p>
-
-<p>一个关键的概念是RequestQueue必须和Application context所关联的。而不是Activity的context。这可以确保RequestQueue可以在你的app生命周期中一直存活，而不会因为activity的重新创建而重新创建RequestQueue。(例如，当用户旋转设备时)。</p>
-
-<p>下面是一个单例类，提供了RequestQueue与ImageLoader的功能：</p>
-
-<p>```java
-private static MySingleton mInstance;</p>
-
-<pre><code>private RequestQueue mRequestQueue;
-private ImageLoader mImageLoader;
-private static Context mCtx;
-
-private MySingleton(Context context) {
-    mCtx = context;
-    mRequestQueue = getRequestQueue();
-
-    mImageLoader = new ImageLoader(mRequestQueue,
-            new ImageLoader.ImageCache() {
-        private final LruCache&lt;String, Bitmap&gt;
-                cache = new LruCache&lt;String, Bitmap&gt;(20);
-
-        @Override
-        public Bitmap getBitmap(String url) {
-            return cache.get(url);
-        }
-
-        @Override
-        public void putBitmap(String url, Bitmap bitmap) {
-            cache.put(url, bitmap);
-        }
-    });
-}
-
-public static synchronized MySingleton getInstance(Context context) {
-    if (mInstance == null) {
-        mInstance = new MySingleton(context);
-    }
-    return mInstance;
-}
-
-public RequestQueue getRequestQueue() {
-    if (mRequestQueue == null) {
-        // getApplicationContext() is key, it keeps you from leaking the
-        // Activity or BroadcastReceiver if someone passes one in.
-        mRequestQueue = Volley.newRequestQueue(mCtx.getApplicationContext());
-    }
-    return mRequestQueue;
-}
-
-public &lt;T&gt; void addToRequestQueue(Request&lt;T&gt; req) {
-    getRequestQueue().add(req);
-}
-
-public ImageLoader getImageLoader() {
-    return mImageLoader;
-}
+<pre><code>compile fileTree(dir: 'libs', include: ['*.jar'])
+compile 'com.google.android.support:wearable:+'
+compile 'com.google.android.gms:play-services-wearable:+'
 </code></pre>
 
 <p>}
-```</p>
+```
+这个库文件帮助你建立你设计的UI。下面是一些主要的类：
+* <strong>BoxInsetLayout</strong> - 一个能够感知屏幕的形状并把子控件居中摆放的FrameLayout，。
+* <strong>CardFragment</strong> - 一个能够可拉伸，垂直可滑动卡片的fragment。
+* <strong>CircledImageView</strong> - 一个圆形的image view。
+* <strong>ConfirmationActivity</strong> - 一个在用户完成一个操作之后用来显示确认动画的activity。* <strong>DismissOverlayView</strong> - 一个用来实现长按消失的View。
+* <strong>GridViewPager</strong> - 一个可以横向与纵向滑动的局部控制器。你需要提供一个GridPagerAdapter用来生成显示页面的数据。
+* <strong>GridPagerAdapter</strong> - 一个提供给GridViewPager显示页面的适配器。
+* <strong>FragmentGridPagerAdapter</strong> - 一个为每个页面提供单独的fragment的适配器。
+* <strong>WatchViewStub</strong> - 一个可以根据屏幕的形状生成特定布局的类。
+* <strong>WearableListView</strong> - 一个针对可穿戴设备优化过后的ListView。它会垂直的显示列表内容，并在用户停止滑动时自动显示最靠近的Item。</p>
 
-<p>下面演示了利用单例类来执行RequestQueue的操作：</p>
-
-<p>```java
-// Get a RequestQueue
-RequestQueue queue = MySingleton.getInstance(this.getApplicationContext()).</p>
-
-<pre><code>getRequestQueue();
-</code></pre>
-
-<p>...</p>
-
-<p>// Add a request (in this example, called stringRequest) to your RequestQueue.
-MySingleton.getInstance(this).addToRequestQueue(stringRequest);
-```</p>
-
-<hr />
-
-<p><strong>学习自<a href="http://developer.android.com/training/volley/request-queue.html">http://developer.android.com/training/volley/request-queue.html</a>,欢迎交流讨论</strong></p>
+<blockquote><p><a href="http://developer.android.com/shareables/training/wearable-support-docs.zip">点击下载完整的API说明文档</a> 这个文档会详细的介绍每一个UI组件。</p></blockquote>
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android Training - Volley(Lesson 1 - 发送简单的请求)]]></title>
-    <link href="http://hukai.me/blog/android-training-volley-simple-request/"/>
-    <updated>2014-06-24T09:00:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-volley-simple-request</id>
-    <content type="html"><![CDATA[<p>使用Volley的方式是，你通过创建一个<code>RequestQueue</code>并传递<code>Request</code>对象给它。RequestQueue管理工作线程用来执行网络操作，从Cache中读取与写入数据，以及解析Http的响应内容。<code>Requests</code>执行raw responses的解析，Volley会把响应的数据分发给主线程。</p>
+    <title type="html"><![CDATA[Android Training - 创建可穿戴应用(1 - 创建并执行可穿戴应用)]]></title>
+    <link href="http://hukai.me/blog/android-training-wearable-app-creating/"/>
+    <updated>2014-07-14T19:26:00+08:00</updated>
+    <id>http://hukai.me/blog/android-training-wearable-app-creating</id>
+    <content type="html"><![CDATA[<p>可穿戴应用可以直接运行在可穿戴的设备上。拥有访问类似传感器的硬件权限，还有操作activity，services等权限。</p>
 
-<p>这节课会介绍如何使用<code>Volley.newRequestQueue</code>这个建立请求队列的方法来发送一个请求，在下一节课<a href="request-queue.html">建立一个请求队列Setting Up a RequestQueue</a>中会介绍你自己如何建立一个请求队列。</p>
+<p>你无法直接发布可穿戴应用到Google Play商城，需要利用手持应用来达到目的。因为可穿戴的设备不支持Google Play商城，所以当用户下载手持设备应用的时候，，会自动安装可穿戴应用到可穿戴设备上。手持应用还可以用来处理一些复杂繁重的任务，网络指令，或者其他的任务，最好发送操作结果返回给可穿戴设备。</p>
 
-<p>这节课也会介绍如何添加一个请求到RequesutQueue以及如何取消一个请求。</p>
+<p>这节课会介绍如何创建一个包含了手持应用与可穿戴应用的工程。</p>
 
-<h2>Add the INTERNET Permission</h2>
+<h2>搭建Android Wear模拟器或者真机设备。</h2>
 
-<p>为了使用Volley，你必须添加<code>android.permission.INTERNET</code>权限到你的manifest文件中。没有这个权限，你的app将无法访问网络。</p>
+<p>我们推荐在真机上进行开发，这样可以更好的评估用户体验。然而，模拟器可以使得你在不同类型的设备屏幕上进行模拟，这对测试来说更加有用。</p>
 
-<h2>Use newRequestQueue</h2>
+<h3>搭建Android Wear虚拟设备</h3>
 
-<p>Volley提供了一个简便的方法：<code>Volley.newRequestQueue</code>用来为你建立一个<code>RequestQueue</code>，使用默认值，并启动这个队列。例如：</p>
+<p>建立Android Wear虚拟设备需要下面几个步骤：</p>
 
 <!-- More -->
 
 
-<p>```java
-final TextView mTextView = (TextView) findViewById(R.id.text);
-...</p>
-
-<p>// Instantiate the RequestQueue.
-RequestQueue queue = Volley.newRequestQueue(this);
-String url ="http://www.google.com";</p>
-
-<p>// Request a string response from the provided URL.
-StringRequest stringRequest = new StringRequest(Request.Method.GET, url,</p>
-
-<pre><code>        new Response.Listener() {
-@Override
-public void onResponse(String response) {
-    // Display the first 500 characters of the response string.
-    mTextView.setText("Response is: "+ response.substring(0,500));
-}
-</code></pre>
-
-<p>}, new Response.ErrorListener() {</p>
-
-<pre><code>@Override
-public void onErrorResponse(VolleyError error) {
-    mTextView.setText("That didn't work!");
-}
-</code></pre>
-
-<p>});
-// Add the request to the RequestQueue.
-queue.add(stringRequest);
-```</p>
-
-<p>Volley总是把解析过后的数据返回到主线程中。在主线程中更加合适使用接收到到的数据用来操作UI控件，这样你可以在响应的handler中轻松的修改UI，但是对于库提供的一些其他方法是有些特殊的，例如与取消有关的。</p>
-
-<p>关于如何创建你自己的请求队列，不要使用Volley.newRequestQueue方法，请查看<a href="request-queue.html">建立一个请求队列Setting Up a RequestQueue</a>。</p>
-
-<h2>Send a Request</h2>
-
-<p>为了发送一个请求，你只需要构造一个请求并通过<code>add()</code>方法添加到<code>RequestQueue</code>中。一旦你添加了这个请求，它会通过队列，得到处理，然后得到原始的响应数据并返回。</p>
-
-<p>当你执行<code>add()</code>方法时，Volley触发执行一个缓存处理线程以及网络一系列的网络处理线程。当你添加一个请求到队列中，它将被缓存线程所捕获并触发：如果这个请求可以被缓存处理，那么会在缓存线程中执行响应数据的解析并返回到主线程。如果请求不能被缓存所处理，它会被放到网络队列中。网络线程池中的第一个可用的网络线程会从队列中获取到这个请求并执行HTTP操作，解析响应数据，把数据写到缓存中之后再把解析之后的数据返回到主线程。</p>
-
-<p>请注意那些比较耗时的操作，例如I/O与解析parsing/decoding都是执行在工作线程。<strong>你可以在任何线程中添加一个请求，但是响应结果都是返回到主线程的。</strong></p>
-
-<p>下图1，演示了一个请求的生命周期：</p>
-
-<p><img src="/images/articles/volley-request.png" alt="volley-request" /></p>
-
-<h2>Cancel a Request</h2>
-
-<p>为了取消一个请求，对你的请求对象执行<code>cancel()</code>方法。一旦取消，Volley会确保你的响应Handler不会被执行。这意味着在实际操作中你可以在activity的<code>onStop()</code>方法中取消所有pending在队列中的请求。你不需要通过检测<code>getActivity() == null</code>来丢弃你的响应handler，其他类似<code>onSaveInstanceState()</code>等保护性的方法里面也都不需要检测。</p>
-
-<p>为了利用这种优势，你应该跟踪所有已经发送的请求，以便在需要的时候，可以取消他们。<strong>有一个简便的方法</strong>：你可以为每一个请求对象都绑定一个tag对象。你可以使用这个tag来提供取消的范围。例如，你可以为你的所有请求都绑定到执行的Activity上，然后你可以在<code>onStop()</code>方法执行<code>requestQueue.cancelAll(this)</code> 。同样的，你可以为ViewPager中的所有请求缩略图Request对象分别打上对应Tab的tag。并在滑动时取消这些请求，用来确保新生成的tab不会被前面tab的请求任务所卡到。</p>
-
-<p>下面一个使用String来打Tag的例子：</p>
+<ol>
+<li>点击<strong>Tools</strong> > <strong>Android</strong> > <strong>AVD Manager</strong>.</li>
+<li>点击<strong>Create</strong>....</li>
+<li>填写下面几项详细的设置，其余选项保留默认：
 
 <ul>
-<li>定义你的tag并添加到你的请求任务中。</li>
+<li><strong>AVD Name</strong> - AVD的名字</li>
+<li><strong>Device</strong> - Android Wear圆形还是方形</li>
+<li><strong>Target</strong> - Android 4.4W - API Level 20</li>
+<li><strong>CPU/ABI</strong> - Android Wear ARM (armeabi-v7a)</li>
+<li><strong>Keyboard</strong> - 选择Hardware keyboard present</li>
+<li><strong>Skin</strong> - 圆形还是方形取决于选择的设备类型</li>
+<li><strong>Snapshot</strong> - 不勾选 selected</li>
+<li><strong>Use Host GPU</strong> - 勾选，为了支持自定义的activity能够显示可穿戴的notification。</li>
+</ul>
+</li>
+<li>点击<strong>OK.</strong></li>
+<li>启动模拟器:
+
+<ul>
+<li>选择你刚才创建的虚拟设备</li>
+<li>点击<strong>Start</strong>...，然后选择<strong>Launch.</strong></li>
+<li>等待模拟器初始化直到显示Android Wear的主界面。</li>
+</ul>
+</li>
+<li>匹配你的手持和模拟器:
+
+<ul>
+<li>在你的手持设备上，从Google Play安装<code>Android Wear</code>应用(这是一个由Google公司写的用来匹配的应用)</li>
+<li>通过USB连接你的手持设备到你的电脑。</li>
+<li>切换AVD的接口到手持设备(这个步骤需要每次连接都执行)
+<code>git
+adb -d forward tcp:5601 tcp:5601
+</code></li>
+<li>启动手持设备上的<code>Android Wear</code>应用，并连接到模拟器。</li>
+<li>点击右上角的菜单，选择Demo Cards。</li>
+<li>你选择的卡片呈现在模拟器上会类似一个Notification。</li>
+</ul>
+</li>
+</ol>
+
+
+<h3>搭建Android Wear真机</h3>
+
+<p>建立Android Wear真机，需要下面几个步骤：</p>
+
+<ul>
+<li>在你的手持设备的Google Play上安装<code>Android Wear</code>应用。</li>
+<li>按照应用的命令指示与你的可穿戴设备进行匹对。如果你有做建立notification的操作，这个步骤刚好可以测试这一功能。</li>
+<li>保持<code>Android Wear</code>应用在手机上的打开状态。</li>
+<li>通过USB连接可穿戴设备到电脑上，这样你能够直接安装应用到可穿戴设备上。在可穿戴设备与<code>Android Wear</code>应用上会显示一个消息提示，是否允许进行调试。</li>
+<li>在<code>Android Wear</code>应用上，总是选择允许连接。</li>
 </ul>
 
 
-<p>```java
-public static final String TAG = "MyTag";
-StringRequest stringRequest; // Assume this exists.
-RequestQueue mRequestQueue;  // Assume this exists.</p>
+<p>Android Studio上的Tool的窗口可以显示可穿戴设备的日志。当你执行<code>adb devices</code>命令的时候，也可以看到wearable的存在。</p>
 
-<p>// Set the tag on the request.
-stringRequest.setTag(TAG);</p>
+<h2>创建Wear项目</h2>
 
-<p>// Add the request to the RequestQueue.
-mRequestQueue.add(stringRequest);
-```</p>
+<p>在开始开发之前，需要创建一个项目包含可穿戴应用与手持应用这两个模块。在Android Studio中，点击<strong>File</strong> > <strong>New Project</strong> 然后按照<a href="http://developer.android.com/sdk/installing/create-project.html">创建项目</a>的指引进行操作。如果你按照安装向导操作，需要输入下面的信息：</p>
+
+<ol>
+<li>在确认项目的窗口，输入你的应用的名称与包名。</li>
+<li>在应用参数选择窗口:
 
 <ul>
-<li>在activity的onStop()方法里面，取消所有的包含这个tag的请求任务。</li>
+<li>勾选Phone 与 Tablet 并选择API 8: Android 2.2 (Froyo) 作为Minimum SDK.</li>
+<li>勾选可穿戴并选择API 20: Android 4.4 (KitKat Wear) 作为Minimum SDK.</li>
+</ul>
+</li>
+<li>在第一个添加activity的窗口，选择为Mobile模块添加一个空白的activity。</li>
+<li>在第二个添加activity的窗口，选择为Wear模块添加一个空白的activity。</li>
+</ol>
+
+
+<p>当安装向导完成后，Andorid Studio创建了一个包含Mobile与Wear两个模块的项目。你可以在这2个模块中各自创建activity，service，layout等等。在手持应用里面，需要承担大部分繁重的任务，例如网络请求，密集计算任务或者是需要大量用户交互的任务。待这些任务完成之后，再通常把任务结果通过notification发送给可穿戴设备上，或者是通过同步机制发送数据给可穿戴设备。</p>
+
+<blockquote><p><strong>Note:</strong> 可穿戴模块包含了一个"Hello World"的activity，它是使用<code>WatchViewStub</code>的布局。WatchViewStub是可穿戴support library中的一个UI组件。</p></blockquote>
+
+<h2>安装可穿戴应用</h2>
+
+<p>在开发过程中，你可以像安装手持应用一样直接安装可穿戴应用。可以使用<code>adb install</code>命令也可以使用Android Studio上面的Play按钮。</p>
+
+<p>当需要把应用发布给用户的时候，你需要把可穿戴应用打包到手持应用中。当用户从Google Play安装手持应用时，连接上得可穿戴设备会自动收到可穿戴应用。</p>
+
+<blockquote><p><strong>Note:</strong> 如果你给应用签名是Debug Key，是无法完成自动安装可穿戴应用的。请参考<a href="packaging.html">打包可穿戴应用</a>获取更多信息，学习如何正确的打包。</p></blockquote>
+
+<p>为了安装"Hello World"应用到可穿戴设备，在Android Studiod的Run/Debug的下拉选项中选中Wear模块，点击Play按钮即可。在可穿戴设备上会显示activity并打印"Hello world!"</p>
+
+<h2>include需要的libraries</h2>
+
+<p>项目安装向导会自动把合适的模块依赖添加到对应的build.gradle文件中。然而，这些依赖并不是必须得，请阅读下面描述判断你是否需要这些依赖。</p>
+
+<ul>
+<li><p><strong>Notifications</strong></p>
+
+<p><a href="http://developer.android.com/tools/support-library/features.html#v4">The Android v4 support library</a> (or v13)能够支持运行在手持应用的notification也能够在可穿戴设备上显示。</p></li>
 </ul>
 
 
-<p>```java
-@Override
-protected void onStop () {</p>
+<p> 对于只显示在可穿戴设备上得notification(这意味着，他们是由直接执行在可穿戴设备上得app进行处理的)，你可以在Wear模块仅仅使用标准APIs (API Level 20) 并且把Mobile模块的依赖support library移除。</p>
 
-<pre><code>super.onStop();
-if (mRequestQueue != null) {
-    mRequestQueue.cancelAll(TAG);
-}
-</code></pre>
+<ul>
+<li><p><strong>Wearable Data Layer</strong></p>
 
-<p>}
-```</p>
+<p>可穿戴与手持设备之间进行同步与发送数据需要使用Wearable Data Layer APIs, 你需要最新版本的<a href="http://developer.android.com/google/play-services/setup.html">Google Play Services</a>。如果你不需要这些APIs，可以从这两个模块中把这部分的依赖移除。</p></li>
+<li><p><strong>Wearable UI support library</strong></p>
 
-<p>当取消请求时请注意：如果你依赖你的响应handler来标记状态或者触发另外一个进程，你需要为此给出有力的解释。再说一次，response handler是不会被执行的。</p>
+<p>这是一个非官方正式的library，它包含了为可穿戴设备设计的UI组件。我们鼓励你在你的应用中使用他们。因为这些组件是最佳实践的例证。但是他们可能随时发生变化。然而，如果library有更新，你的应用并不会发送崩溃，因为那些代码已经编译到你的应用中了。为了获取更新包中新的功能，你只需要更新链接到新的版本并相应的更新你的应用就好了。这个library只是在你需要创建可穿戴应用时才会使用到。</p></li>
+</ul>
 
-<hr />
-
-<p><strong>学习自<a href="http://developer.android.com/training/volley/simple.html">http://developer.android.com/training/volley/simple.html</a>,欢迎交流讨论</strong></p>
 ]]></content>
   </entry>
   

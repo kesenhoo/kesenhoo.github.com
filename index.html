@@ -9,14 +9,9 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="偶然被人问到如何添加复制到剪切板的选项到分享列表，如下图所示： 一般情况下，分享一段文字或者图片，我们会使用如下Android默认的方式： 1
-2
-3
-4
-5
-6
-7
-public void shareText(Context context, String text) { Intent &hellip;">
+  <meta name="description" content="你可以通过蓝牙来调试你的可穿戴应用，通过蓝牙把调试数据输出到手持设备上，手持设备是有连接到开发电脑上的。 搭建好设备用来调试 开启手持设备的USB调试： 打开设置应用并滑动到底部。
+如果在设置里面没有开发者选项，点击关于手机，滑动到底部，点击build number 7次。
+返回并点击开发者选项 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,7 +72,7 @@ public void shareText(Context context, String text) { Intent &hellip;">
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-notes-add-copy-text-option-to-share-list/">Android Notes - 添加Copy to Clipboard的选项到分享列表中</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-training-wearable-app-bt-debug/">Android Training - 创建可穿戴应用(5 - 通过蓝牙进行调试)</a></h1>
     
     
       <p class="meta">
@@ -93,178 +88,106 @@ public void shareText(Context context, String text) { Intent &hellip;">
   
 
 
-<time datetime="2014-07-12T15:26:00+08:00" pubdate data-updated="true">Jul 12<span>th</span>, 2014</time>
+<time datetime="2014-07-15T00:23:00+08:00" pubdate data-updated="true">Jul 15<span>th</span>, 2014</time>
         
-         | <a href="/blog/android-notes-add-copy-text-option-to-share-list/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>偶然被人问到如何添加复制到剪切板的选项到分享列表，如下图所示：</p>
-
-<p><img src="/images/copy_link_option_at_share_list.png" alt="copy_link_option_at_share_list" /></p>
-
-<p>一般情况下，分享一段文字或者图片，我们会使用如下Android默认的方式：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">shareText</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="n">String</span> <span class="n">text</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>    <span class="n">Intent</span> <span class="n">sendIntent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">();</span>
-</span><span class='line'>    <span class="n">sendIntent</span><span class="o">.</span><span class="na">setAction</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_SEND</span><span class="o">);</span>
-</span><span class='line'>    <span class="n">sendIntent</span><span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">EXTRA_TEXT</span><span class="o">,</span> <span class="n">text</span><span class="o">);</span>
-</span><span class='line'>    <span class="n">sendIntent</span><span class="o">.</span><span class="na">setType</span><span class="o">(</span><span class="s">&quot;text/plain&quot;</span><span class="o">);</span>
-</span><span class='line'>    <span class="n">context</span><span class="o">.</span><span class="na">startActivity</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">createChooser</span><span class="o">(</span><span class="n">sendIntent</span><span class="o">,</span> <span class="s">&quot;Share via...&quot;</span><span class="o">));</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这样系统能够帮忙筛选出那些符合这个Intent的所有Activity，生成分享列表，呈现给用户。因为分享列表的信息是由系统过滤生成的，UI界面也是交给系统进行绘制的，我们的应用无法给这个分享列表设置点击监听器，那么如何才能实现添加一个<strong>&#8220;Copy to Clipboard&#8221;</strong>的选项到分享列表中，并在点击该选项之后执行对应的动作呢？当然，自己去实现这个分享列表的效果，UI完全交给自己的应用来控制，是可以轻松做到的，可是自己去过滤符合条件的应用，并绘制分享列表的代码量会大很多，实现起来更加复杂？下面介绍一个虽然写法有点奇怪却相对简便很多的方法。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/android-notes-add-copy-text-option-to-share-list/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/android-training-performance-anr/">Android Training - 避免程序无响应ANR</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-06T12:09:00+08:00" pubdate data-updated="true">Jul 6<span>th</span>, 2014</time>
-        
-         | <a href="/blog/android-training-performance-anr/#disqus_thread">Comments</a>
+         | <a href="/blog/android-training-wearable-app-bt-debug/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>可能你写的代码在性能测试上表现良好，但是你的应用仍然有时候会反应迟缓(sluggish)，停顿(hang)或者长时间卡死(frezze)，或者应用处理输入的数据花费时间过长。对于你的应用来说最槽糕的事情是出现&#8221;程序无响应(Application Not Responding)&#8221; (ANR)的警示框。</p>
+  <div class="entry-content"><p>你可以通过蓝牙来调试你的可穿戴应用，通过蓝牙把调试数据输出到手持设备上，手持设备是有连接到开发电脑上的。</p>
 
-<p>在Android中，系统通过显示ANR警示框来保护程序的长时间无响应。对话框如下：</p>
-
-<p><img src="/images/anr.png" alt="anr" /></p>
-
-<p>此时，你的应用已经经历过一段时间的无法响应了，因此系统提供用户可以退出应用的选择。为你的程序提供良好的响应性是至关重要的，这样才能够避免系统为用户显示ANR的警示框。</p>
-
-<p>这节课描述了Android系统是如何判断一个应用不可响应的。这节课还会提供程序编写的指导原则，确保你的程序保持响应性。</p>
-
-<h2>是什么导致了ANR?(What Triggers ANR?)</h2>
-
-<p>通常来说，系统会在程序无法响应用户的输入事件时显示ANR。例如，如果一个程序在UI线程执行I/O操作(通常是网络请求或者是文件读写)，这样系统就无法处理用户的输入事件。或者是应用在UI线程花费了太多的时间用来建立一个复杂的在内存中的数据结构，又或者是在一个游戏程序的UI线程中执行了一个复杂耗时的计算移动的操作。确保那些计算操作高效是很重要的，不过即使是最高效的代码也是需要花时间执行的。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/android-training-performance-anr/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/android-training-volley-custom-request/">Android Training - Volley(Lesson 4 - 实现自定义的请求)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-25T23:20:00+08:00" pubdate data-updated="true">Jun 25<span>th</span>, 2014</time>
-        
-         | <a href="/blog/android-training-volley-custom-request/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>这节课会介绍如何实现你自定义的请求类型，这些自定义的类型不属于Volley内置支持包里面。</p>
-
-<h2>编写一个自定义的请求Write a Custom Request</h2>
-
-<p>大多数的请求类型都已经包含在Volley的工具箱里面。如果你的请求返回数值是一个string，image或者JSON，那么你是不需要自己去实现请求类的。</p>
-
-<p>对于那些你需要自定义的请求类型，下面是你需要做得步骤：</p>
+<h2>搭建好设备用来调试</h2>
 
 <ul>
-<li>继承<code>Request&lt;T&gt;</code>类，<code>&lt;T&gt;</code>表示了请求返回的数据类型。因此如果你需要解析的响应类型是一个String，可以通过继承<code>Request&lt;String&gt;</code>来创建你自定义的请求。请参考Volley工具类中的StringRequest与 ImageRequest来学习如何继承Request<T>。</li>
-<li>实现抽象方法<code>parseNetworkResponse()</code>与<code>deliverResponse()</code>，下面会详细介绍。</li>
+<li>开启手持设备的USB调试：
+
+<ul>
+<li>打开设置应用并滑动到底部。</li>
+<li>如果在设置里面没有开发者选项，点击关于手机，滑动到底部，点击build number 7次。</li>
+<li>返回并点击开发者选项。</li>
+<li>开启USB调试。</li>
+</ul>
+</li>
+<li>开启可穿戴设备的蓝牙调试：
+
+<ul>
+<li>点击主界面2次，来到Wear菜单界面。</li>
+<li>滑动到底部，点击设置。</li>
+<li>滑动到底部，如果没有开发者选项，点击Build Number 7次。</li>
+<li>点击开发者选项。</li>
+<li>开启蓝牙调试。</li>
+</ul>
+</li>
 </ul>
 
 
-<h3>parseNetworkResponse</h3>
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/android-training-wearable-app-bt-debug/">Read on &rarr;</a>
+    </footer>
+  
 
-<p>为了能够提交一种指定类型的数据(例如，string，image，JSON等)，需要对解析后的结果进行封装。下面会演示如何实现<code>parseNetworkResponse()</code>。</p>
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/android-training-wearable-app-packaging/">Android Training - 创建可穿戴应用(4 - 打包可穿戴应用)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-14T23:32:00+08:00" pubdate data-updated="true">Jul 14<span>th</span>, 2014</time>
+        
+         | <a href="/blog/android-training-wearable-app-packaging/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>当发布应用给用户之前，你必须把可穿戴应用打包到手持应用内。因为不能直接在可穿戴设备上浏览并安装应用。如果打包正确，当用户下载手持应用时，系统会自动下发可穿戴应用到匹对的可穿戴设备上。</p>
+
+<blockquote><p><strong>Note:</strong> 如果开发时签名用的是debug key，这个特性是无法正常工作的。在开发时，需要使用<code>adb install</code>的命令或者Android Studio来安装可穿戴应用。</p></blockquote>
+
+<h2>使用Android Studio打包</h2>
+
+<p>在Android Studio中打包可穿戴应用有下面几个步骤：</p>
+
+<ol>
+<li>在手持应用的buidl.gradle文件中把可穿戴应用声明为依赖：</li>
+</ol>
+
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
-</span><span class='line'><span class="kd">protected</span> <span class="n">Response</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">parseNetworkResponse</span><span class="o">(</span>
-</span><span class='line'>        <span class="n">NetworkResponse</span> <span class="n">response</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>    <span class="k">try</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">String</span> <span class="n">json</span> <span class="o">=</span> <span class="k">new</span> <span class="n">String</span><span class="o">(</span><span class="n">response</span><span class="o">.</span><span class="na">data</span><span class="o">,</span>
-</span><span class='line'>        <span class="n">HttpHeaderParser</span><span class="o">.</span><span class="na">parseCharset</span><span class="o">(</span><span class="n">response</span><span class="o">.</span><span class="na">headers</span><span class="o">));</span>
-</span><span class='line'>    <span class="k">return</span> <span class="n">Response</span><span class="o">.</span><span class="na">success</span><span class="o">(</span><span class="n">gson</span><span class="o">.</span><span class="na">fromJson</span><span class="o">(</span><span class="n">json</span><span class="o">,</span> <span class="n">clazz</span><span class="o">),</span>
-</span><span class='line'>    <span class="n">HttpHeaderParser</span><span class="o">.</span><span class="na">parseCacheHeaders</span><span class="o">(</span><span class="n">response</span><span class="o">));</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>    <span class="c1">// handle errors</span>
-</span><span class='line'><span class="o">...</span>
-</span><span class='line'><span class="o">}</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'>dependencies {
+</span><span class='line'>   compile &#39;com.google.android.gms:play-services:5.0.+@aar&#39;
+</span><span class='line'>   compile &#39;com.android.support:support-v4:20.0.+&#39;&#39;
+</span><span class='line'>   wearApp project(&#39;:wearable&#39;)
+</span><span class='line'>}
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -274,7 +197,7 @@ public void shareText(Context context, String text) { Intent &hellip;">
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-training-volley-custom-request/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-training-wearable-app-packaging/">Read on &rarr;</a>
     </footer>
   
 
@@ -286,7 +209,7 @@ public void shareText(Context context, String text) { Intent &hellip;">
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-training-volley-standard-request/">Android Training - Volley(Lesson 3 - 创建标准的请求)</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-training-wearable-app-voice-input/">Android Training - 创建可穿戴应用(3 - 添加语音能力)</a></h1>
     
     
       <p class="meta">
@@ -302,42 +225,93 @@ public void shareText(Context context, String text) { Intent &hellip;">
   
 
 
-<time datetime="2014-06-24T22:10:00+08:00" pubdate data-updated="true">Jun 24<span>th</span>, 2014</time>
+<time datetime="2014-07-14T21:43:00+08:00" pubdate data-updated="true">Jul 14<span>th</span>, 2014</time>
         
-         | <a href="/blog/android-training-volley-standard-request/#disqus_thread">Comments</a>
+         | <a href="/blog/android-training-wearable-app-voice-input/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>这一课会介绍如何使用Volley支持的常用请求类型：</p>
+  <div class="entry-content"><p>语音指令是可穿戴体验的一个重要的部分。这使得用户可以释放双手，快速发出指令。穿戴提供了2种类型的语音操作：</p>
 
 <ul>
-<li><code>StringRequest</code>。指定一个URL并在相应回调中接受一个原始的raw string数据。请参考前一课的示例。</li>
-<li><code>ImageRequest</code>。指定一个URL并在相应回调中接受一个image。</li>
-<li><code>JsonObjectRequest</code>与<code>JsonArrayRequest</code> (均为<code>JsonRequest</code>的子类)。指定一个URL并在相应回调中获取到一个JSON对象或者JSON数组。</li>
+<li><p><strong>系统提供的</strong></p>
+
+<p>这些语音指令都是基于任务的，并且内置在Wear的平台内。你在activity中过滤你想要接收的指令。例如包含&#8221;Take a note&#8221; 或者 &#8220;Set an alarm&#8221;的指令。</p></li>
+<li><p><strong>应用提供的</strong></p>
+
+<p>这些语音指令都是基于应用的，你需要像声明一个Launcher Icon一样定义这些指令。用户通过说&#8221;Start XXX&#8221;来使用那些语音指令，然后会启动你指定启动的activity。</p></li>
 </ul>
 
 
-<p>如果你需要的是上面演示的请求类型，那么你应该不需要自己实现一个自定义的请求。这节课会演示如何使用那些标准的请求类型。关于如何实现自定义的请求，请看下一课：<a href="request-costom.html">实现自定义的请求</a>。</p>
+<h2>声明系统提供的语音指令</h2>
 
-<h2>1)Request an Image</h2>
+<p>Android Wear平台基于用户的操作提供了一些语音指令，例如&#8221;Take a note&#8221; 或者 &#8220;Set an alarm&#8221;。用户发出想要做的操作指令，让系统寻找应该启动最合适的activity。</p>
 
-<p>Volley为请求图片提供了如下的类。这些类依次有着依赖关系，用来支持在不同的层级进行图片处理：</p>
-
-<ul>
-<li><p><code>ImageRequest</code> - 一个封装好的，用来处理URL请求图片并且返回一张decode好的bitmap的类。它同样提供了一些简便的接口方法，例如指定一个大小进行重新裁剪。它的主要好处是Volley回确保类似decode，resize等耗时的操作执行在工作线程中。</p></li>
-<li><p><code>ImageLoader</code> - 一个用来处理加载与缓存从网络上获取到的图片的帮助类。ImageLoader是管理协调大量的ImageRequest的类。例如，在ListView中需要显示大量缩略图的时候。ImageLoader为通常的Volley cache提供了更加前瞻的内存缓存，这个缓存对于防止图片抖动非常有用。。这还使得能够在避免阻挡或者延迟主线程的前提下在缓存中能够被Hit到。ImageLoader还能够实现响应联合Coalescing，每一个响应回调里面都可以设置bitmap到view上面。联合Coalescing使得能够同时提交多个响应，这提升了性能。</p></li>
-<li><p><code>NetworkImageView</code> - 在ImageLoader的基础上建立，替换ImageView进行使用。对于需要对ImageView设置网络图片的情况下使用很有效。NetworkImageView同样可以在view被detached的时候取消pending的请求。</p></li>
-</ul>
-
+<p>当用户说出语音指令时，你的应用能够被过滤出来启动一个activity。如果你想要启动一个service在后台执行任务，需要显示一个activity呈现作为线索。当你想要废弃这个可见的线索时，需要确保执行了finish()。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-training-volley-standard-request/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-training-wearable-app-voice-input/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/android-training-wearable-app-layouts/">Android Training - 创建可穿戴应用(2 - 创建自定义的布局)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-14T20:16:00+08:00" pubdate data-updated="true">Jul 14<span>th</span>, 2014</time>
+        
+         | <a href="/blog/android-training-wearable-app-layouts/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>为可穿戴设备创建布局是和手持设备是一样的。但是 不要期望通过搬迁手持应用的功能与UI到可穿戴上会有一个好的用户体验。仅仅在有需要的时候，你才应该创建自定义的布局。请参考可穿戴设备的<a href="http://developer.android.com/design/wear/index.html">design guidelines</a>学习如何设计一个优秀的可穿戴应用。</p>
+
+<p><a name="CustomNotification"></a></p>
+
+<h2>创建自定义Notification</h2>
+
+<p>通常来说，你应该在手持应用上创建好notification，然后让它自动同步到可穿戴设备上。这使得你只需要创建一次notification，然后可以在不同类型的设备(不仅仅是可穿戴设备，也包含车载设备与电视)上进行显示，免去为不同设备进行重新设计。</p>
+
+<p>如果标准的notification风格无法满足你的需求(例如<a href="http://developer.android.com/reference/android/support/v4/app/NotificationCompat.BigTextStyle.html">NotificationCompat.BigTextStyle</a> 或者 <a href="http://developer.android.com/reference/android/support/v4/app/NotificationCompat.InboxStyle.html">NotificationCompat.InboxStyle</a>)，你可以使用activity，显示一个自定义的布局来达到目的。在可穿戴设备上你只可以创建并处理自定义的notification，同时系统无法为这些notification同步到手持设备上。</p>
+
+<p><strong>Note:</strong>当在可穿戴设备上创建自定义的notification时，你可以使用API Level 20上标准的APIs，不需要使用Support Library。</p>
+
+<p>为了创建自定义的notification，步骤如下：</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/android-training-wearable-app-layouts/">Read on &rarr;</a>
     </footer>
   
 
@@ -359,35 +333,35 @@ public void shareText(Context context, String text) { Intent &hellip;">
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/android-training-wearable-app-bt-debug/">Android Training - 创建可穿戴应用(5 - 通过蓝牙进行调试)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-packaging/">Android Training - 创建可穿戴应用(4 - 打包可穿戴应用)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-voice-input/">Android Training - 创建可穿戴应用(3 - 添加语音能力)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-layouts/">Android Training - 创建可穿戴应用(2 - 创建自定义的布局)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-creating/">Android Training - 创建可穿戴应用(1 - 创建并执行可穿戴应用)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-index/">Android Training - 创建可穿戴应用(0 - 序言)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/android-notes-add-copy-text-option-to-share-list/">Android Notes - 添加Copy to Clipboard的选项到分享列表中</a>
       </li>
     
       <li class="post">
         <a href="/blog/android-training-performance-anr/">Android Training - 避免程序无响应ANR</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-custom-request/">Android Training - Volley(Lesson 4 - 实现自定义的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-standard-request/">Android Training - Volley(Lesson 3 - 创建标准的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-request-queue/">Android Training - Volley(Lesson 2 - 建立请求队列)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-simple-request/">Android Training - Volley(Lesson 1 - 发送简单的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-index/">Android Training - Volley(Lesson 0 - 序言)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-deeper-graphics-architecture/">Android Deeper(01) - Graphic Architecture</a>
       </li>
     
   </ul>
@@ -396,10 +370,10 @@ public void shareText(Context context, String text) { Intent &hellip;">
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (79)</a></li>
+  <li><a href='/blog/categories/android'>Android (85)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (8)</a></li>
-  <li><a href='/blog/categories/android-training'>Android:training (69)</a></li>
+  <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
 </ul>

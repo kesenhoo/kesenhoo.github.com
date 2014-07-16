@@ -4,7 +4,7 @@
   <title><![CDATA[胡凯]]></title>
   <link href="http://hukai.me/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2014-07-12T16:25:57+08:00</updated>
+  <updated>2014-07-16T23:44:13+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -12,6 +12,696 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training - 创建可穿戴应用(5 - 通过蓝牙进行调试)]]></title>
+    <link href="http://hukai.me/blog/android-training-wearable-app-bt-debug/"/>
+    <updated>2014-07-15T00:23:00+08:00</updated>
+    <id>http://hukai.me/blog/android-training-wearable-app-bt-debug</id>
+    <content type="html"><![CDATA[<p>你可以通过蓝牙来调试你的可穿戴应用，通过蓝牙把调试数据输出到手持设备上，手持设备是有连接到开发电脑上的。</p>
+
+<h2>搭建好设备用来调试</h2>
+
+<ul>
+<li>开启手持设备的USB调试：
+
+<ul>
+<li>打开设置应用并滑动到底部。</li>
+<li>如果在设置里面没有开发者选项，点击关于手机，滑动到底部，点击build number 7次。</li>
+<li>返回并点击开发者选项。</li>
+<li>开启USB调试。</li>
+</ul>
+</li>
+<li>开启可穿戴设备的蓝牙调试：
+
+<ul>
+<li>点击主界面2次，来到Wear菜单界面。</li>
+<li>滑动到底部，点击设置。</li>
+<li>滑动到底部，如果没有开发者选项，点击Build Number 7次。</li>
+<li>点击开发者选项。</li>
+<li>开启蓝牙调试。</li>
+</ul>
+</li>
+</ul>
+
+
+<!-- More -->
+
+
+<h2>建立调试会话</h2>
+
+<ol>
+<li>在手持设备上，打开<code>Android Wear</code>这个伴侣应用。</li>
+<li>点击右上角的菜单，选择设置。</li>
+<li>开启蓝牙调试。你将会在选项下面看到一个小的状态信息：</li>
+</ol>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'>Host: disconnected
+</span><span class='line'>Target: connected
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>通过USB连接手持设备到你的电脑上，并执行下面的命令：</li>
+</ol>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'>adb forward tcp:4444 localabstract:/adb-hub; adb connect localhost:4444
+</span></code></pre></td></tr></table></div></figure>
+
+
+<blockquote><p><strong>Note:</strong> 你可以使用任何可用的端口。</p></blockquote>
+
+<p>在<code>Android Wear</code>伴侣应用上，你将会看到状态变为：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'>Host: connected
+</span><span class='line'>Target: connected
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>调试你的应用</h2>
+
+<p>当运行abd devices的命令时，你的可穿戴设备是作为localhost:4444的。执行任何的adb命令，需要使用下面的格式：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'>adb -s localhost:4444 <span class="nt">&lt;command&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果没有任何其他的设备通过TCP/IP连接到手持设备，你可以使用下面的简短命令：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'>adb -e <span class="nt">&lt;command&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>例如：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'>adb -e logcat
+</span><span class='line'>adb -e shell
+</span><span class='line'>adb -e bugreport
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training - 创建可穿戴应用(4 - 打包可穿戴应用)]]></title>
+    <link href="http://hukai.me/blog/android-training-wearable-app-packaging/"/>
+    <updated>2014-07-14T23:32:00+08:00</updated>
+    <id>http://hukai.me/blog/android-training-wearable-app-packaging</id>
+    <content type="html"><![CDATA[<p>当发布应用给用户之前，你必须把可穿戴应用打包到手持应用内。因为不能直接在可穿戴设备上浏览并安装应用。如果打包正确，当用户下载手持应用时，系统会自动下发可穿戴应用到匹对的可穿戴设备上。</p>
+
+<blockquote><p><strong>Note:</strong> 如果开发时签名用的是debug key，这个特性是无法正常工作的。在开发时，需要使用<code>adb install</code>的命令或者Android Studio来安装可穿戴应用。</p></blockquote>
+
+<h2>使用Android Studio打包</h2>
+
+<p>在Android Studio中打包可穿戴应用有下面几个步骤：</p>
+
+<ol>
+<li>在手持应用的buidl.gradle文件中把可穿戴应用声明为依赖：</li>
+</ol>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'>dependencies {
+</span><span class='line'>   compile &#39;com.google.android.gms:play-services:5.0.+@aar&#39;
+</span><span class='line'>   compile &#39;com.android.support:support-v4:20.0.+&#39;&#39;
+</span><span class='line'>   wearApp project(&#39;:wearable&#39;)
+</span><span class='line'>}
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<!-- More -->
+
+
+<ol>
+<li>点击<strong>Build</strong> > <strong>Generate Signed APK</strong>&#8230; 安装屏幕上的指示来制定你的release key并为你的app进行签名。Android Studio导出签名好的手持应用，他内置了可穿戴应用。
+或者，你可以在可穿戴应用与手持应用的build.gradle文件里面建立一个签名规则。为了能够正常自动推送可穿戴应用，这两个应用都必须签名。</li>
+</ol>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'>android {
+</span><span class='line'>  ...
+</span><span class='line'>  signingConfigs {
+</span><span class='line'>    release {
+</span><span class='line'>      keyAlias &#39;myAlias&#39;
+</span><span class='line'>      keyPassword &#39;myPw&#39;
+</span><span class='line'>      storeFile file(&#39;path/to/release.keystore&#39;)
+</span><span class='line'>      storePassword &#39;myPw&#39;
+</span><span class='line'>    }
+</span><span class='line'>  }
+</span><span class='line'>  buildTypes {
+</span><span class='line'>    release {
+</span><span class='line'>      ...
+</span><span class='line'>      signingConfig signingConfigs.release
+</span><span class='line'>    }d
+</span><span class='line'>  }
+</span><span class='line'>  ...
+</span><span class='line'>}
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>通过点击Android Studio右边的Gradle按钮来建立手持应用，并执行<strong>assembleRelease</strong>任务。这个任务放在<strong>Project name</strong> > <strong>Handheld module name</strong> > <strong>assembleRelease.</strong></p>
+
+<blockquote><p><strong>Note:</strong>这个例子中把密码写在了Gradle文件中，这应该不是期待的写法。请参考<a href="http://developer.android.com/sdk/installing/studio-build.html#configureSigning">Configure signing settings</a>学习如何为密码创建环境变量。</p></blockquote>
+
+<h3>分别为可穿戴应用与手持应用进行签名</h3>
+
+<p>如果你的Build任务需要为可穿戴应用与手持应用签不同的Key，你可以像下面一样在手持应用的build.gradle文件中声明规则。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'>dependencies {
+</span><span class='line'>  ...
+</span><span class='line'>  wearApp files(&#39;/path/to/wearable_app.apk&#39;)
+</span><span class='line'>}
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>你可以为手持应用手动进行签任何形式的Key (可以是Android Studio Build > Generate Signed APK&#8230;的方式，也可以是Gradle signingConfig规则的方式)</p>
+
+<h2>手动打包</h2>
+
+<p>如果你使用的是其他IDE，你仍然可以把可穿戴应用打包到手持应用中。</p>
+
+<ol>
+<li>把签好名的可穿戴应用放到手持应用的<code>res/raw</code>目录下。 我们把这个应用作为<code>wearable_app.apk</code>。</li>
+<li>创建<code>res/xml/wearable_app_desc.xml</code>文件，里面包含可穿戴设备的版本信息与路径。例如:</li>
+</ol>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;wearableApp</span> <span class="na">package=</span><span class="s">&quot;wearable.app.package.name&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;versionCode&gt;</span>1<span class="nt">&lt;/versionCode&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;versionName&gt;</span>1.0<span class="nt">&lt;/versionName&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;rawPathResId&gt;</span>wearable_app<span class="nt">&lt;/rawPathResId&gt;</span>
+</span><span class='line'><span class="nt">&lt;/wearableApp&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>package, versionCode, 与 versionName需要和可穿戴应用的AndroidManifest.xml里面的信息一致。<code>rawPathResId</code>是一个static的变量表示APK的名称。。
+3. 添加<code>meta-data</code>标签到你的手持应用的<code>&lt;application&gt;</code>标签下，指明引用wearable_app_desc.xml文件</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;meta-data</span> <span class="na">android:name=</span><span class="s">&quot;com.google.android.wearable.beta.app&quot;</span>
+</span><span class='line'>                 <span class="na">android:resource=</span><span class="s">&quot;@xml/wearable_app_desc&quot;</span><span class="nt">/&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>构建并签名手持应用。</li>
+</ol>
+
+
+<h2>关闭资源压缩</h2>
+
+<p>许多构建工具会自动压缩放在res/raw目录下的文件。因为可穿戴APK已经被压缩过了，那些压缩工作再次压缩会导致应用无法正常安装。</p>
+
+<p>这样的话，安装失败。在手持应用上，<code>PackageUpdateService</code>会输出如下的错误日志：&#8221;this file cannot be opened as a file descriptor; it is probably compressed.&#8221;</p>
+
+<p>Android Studio 默认不会压缩你的APK，如果你使用另外一个构建流程，需要确保不会发生重复压缩可穿戴应用的事情。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training - 创建可穿戴应用(3 - 添加语音能力)]]></title>
+    <link href="http://hukai.me/blog/android-training-wearable-app-voice-input/"/>
+    <updated>2014-07-14T21:43:00+08:00</updated>
+    <id>http://hukai.me/blog/android-training-wearable-app-voice-input</id>
+    <content type="html"><![CDATA[<p>语音指令是可穿戴体验的一个重要的部分。这使得用户可以释放双手，快速发出指令。穿戴提供了2种类型的语音操作：</p>
+
+<ul>
+<li><p><strong>系统提供的</strong></p>
+
+<p>这些语音指令都是基于任务的，并且内置在Wear的平台内。你在activity中过滤你想要接收的指令。例如包含&#8221;Take a note&#8221; 或者 &#8220;Set an alarm&#8221;的指令。</p></li>
+<li><p><strong>应用提供的</strong></p>
+
+<p>这些语音指令都是基于应用的，你需要像声明一个Launcher Icon一样定义这些指令。用户通过说&#8221;Start XXX&#8221;来使用那些语音指令，然后会启动你指定启动的activity。</p></li>
+</ul>
+
+
+<h2>声明系统提供的语音指令</h2>
+
+<p>Android Wear平台基于用户的操作提供了一些语音指令，例如&#8221;Take a note&#8221; 或者 &#8220;Set an alarm&#8221;。用户发出想要做的操作指令，让系统寻找应该启动最合适的activity。</p>
+
+<p>当用户说出语音指令时，你的应用能够被过滤出来启动一个activity。如果你想要启动一个service在后台执行任务，需要显示一个activity呈现作为线索。当你想要废弃这个可见的线索时，需要确保执行了finish()。</p>
+
+<!-- More -->
+
+
+<p>例如，对于&#8221;Take a note&#8221;的指令，定义一个MyNoteActivity来接收这个指令:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="o">&lt;</span><span class="n">activity</span> <span class="nl">android:</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;MyNoteActivity&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>      <span class="o">&lt;</span><span class="n">intent</span><span class="o">-</span><span class="n">filter</span><span class="o">&gt;</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="n">action</span> <span class="nl">android:</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;android.intent.action.SEND&quot;</span> <span class="o">/&gt;</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="n">category</span> <span class="nl">android:</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;com.google.android.voicesearch.SELF_NOTE&quot;</span> <span class="o">/&gt;</span>
+</span><span class='line'>      <span class="o">&lt;/</span><span class="n">intent</span><span class="o">-</span><span class="n">filter</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;/</span><span class="n">activity</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>下面列出了Wear平台支持的语音指令：</p>
+
+<p><img src="http://hukai.me/images/voice_intent_1.png" alt="voice_intent_1" />
+<img src="http://hukai.me/images/voice_intent_2.png" alt="voice_intent_2" />
+<img src="http://hukai.me/images/voice_intent_3.png" alt="voice_intent_3" /></p>
+
+<p>关于注册intent与获取intent extra的信息，请参考<a href="http://developer.android.com/guide/components/intents-common.html">Common intents</a>.</p>
+
+<h2>声明应用提供的语音指令</h2>
+
+<p>如果系统提供的语音指令无法满足你的需求，你可以使用&#8221;Start MyActivityName&#8221;的指令来直接启动你的应用。</p>
+
+<p>注册一个&#8221;Start&#8221;指令和注册手持应用上得Launcher是一样的。</p>
+
+<p>在&#8221;Start&#8221;指令的后面需要指定的文字, 这个文字需要注册在activity的label属性上。例如，下面的设置能够识别&#8221;Start MyRunningApp&#8221;的语音指令并启动StartRunActivity.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;application&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;activity</span> <span class="na">android:name=</span><span class="s">&quot;StartRunActivity&quot;</span> <span class="na">android:label=</span><span class="s">&quot;MyRunningApp&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;intent-filter&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;action</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.action.MAIN&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;category</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.category.LAUNCHER&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/intent-filter&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/activity&gt;</span>
+</span><span class='line'><span class="nt">&lt;/application&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>获取输入的自由语音</h2>
+
+<p>除了使用语音指令来启动activity之外，你也可以执行系统内置的语言识别activity来获取用户的语音输入。这对于获取用户的输入信息非常有帮助，例如执行搜索或者发送一个消息。</p>
+
+<p>在你的应用中，startActivityForResult()使用<code>ACTION_RECOGNIZE_SPEECH</code>启动系统语音识别应用。在onActivityResult()中处理返回的结果：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">SPEECH_REQUEST_CODE</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Create an intent that can start the Speech Recognizer activity</span>
+</span><span class='line'><span class="kd">private</span> <span class="kt">void</span> <span class="nf">displaySpeechRecognizer</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">RecognizerIntent</span><span class="o">.</span><span class="na">ACTION_RECOGNIZE_SPEECH</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">intent</span><span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="n">RecognizerIntent</span><span class="o">.</span><span class="na">EXTRA_LANGUAGE_MODEL</span><span class="o">,</span>
+</span><span class='line'>            <span class="n">RecognizerIntent</span><span class="o">.</span><span class="na">LANGUAGE_MODEL_FREE_FORM</span><span class="o">);</span>
+</span><span class='line'><span class="c1">// Start the activity, the intent will be populated with the speech text</span>
+</span><span class='line'>    <span class="n">startActivityForResult</span><span class="o">(</span><span class="n">intent</span><span class="o">,</span> <span class="n">SPEECH_REQUEST_CODE</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// This callback is invoked when the Speech Recognizer returns.</span>
+</span><span class='line'><span class="c1">// This is where you process the intent and extract the speech text from the intent.</span>
+</span><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onActivityResult</span><span class="o">(</span><span class="kt">int</span> <span class="n">requestCode</span><span class="o">,</span> <span class="kt">int</span> <span class="n">resultCode</span><span class="o">,</span>
+</span><span class='line'>        <span class="n">Intent</span> <span class="n">data</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">requestCode</span> <span class="o">==</span> <span class="n">SPEECH_REQUEST</span> <span class="o">&amp;&amp;</span> <span class="n">resultCode</span> <span class="o">==</span> <span class="n">RESULT_OK</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">results</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="na">getStringArrayListExtra</span><span class="o">(</span>
+</span><span class='line'>                <span class="n">RecognizerIntent</span><span class="o">.</span><span class="na">EXTRA_RESULTS</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">String</span> <span class="n">spokenText</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span>
+</span><span class='line'>        <span class="c1">// Do something with spokenText</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="kd">super</span><span class="o">.</span><span class="na">onActivityResult</span><span class="o">(</span><span class="n">requestCode</span><span class="o">,</span> <span class="n">resultCode</span><span class="o">,</span> <span class="n">data</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training - 创建可穿戴应用(2 - 创建自定义的布局)]]></title>
+    <link href="http://hukai.me/blog/android-training-wearable-app-layouts/"/>
+    <updated>2014-07-14T20:16:00+08:00</updated>
+    <id>http://hukai.me/blog/android-training-wearable-app-layouts</id>
+    <content type="html"><![CDATA[<p>为可穿戴设备创建布局是和手持设备是一样的。但是 不要期望通过搬迁手持应用的功能与UI到可穿戴上会有一个好的用户体验。仅仅在有需要的时候，你才应该创建自定义的布局。请参考可穿戴设备的<a href="http://developer.android.com/design/wear/index.html">design guidelines</a>学习如何设计一个优秀的可穿戴应用。</p>
+
+<p><a name="CustomNotification"></a></p>
+
+<h2>创建自定义Notification</h2>
+
+<p>通常来说，你应该在手持应用上创建好notification，然后让它自动同步到可穿戴设备上。这使得你只需要创建一次notification，然后可以在不同类型的设备(不仅仅是可穿戴设备，也包含车载设备与电视)上进行显示，免去为不同设备进行重新设计。</p>
+
+<p>如果标准的notification风格无法满足你的需求(例如<a href="http://developer.android.com/reference/android/support/v4/app/NotificationCompat.BigTextStyle.html">NotificationCompat.BigTextStyle</a> 或者 <a href="http://developer.android.com/reference/android/support/v4/app/NotificationCompat.InboxStyle.html">NotificationCompat.InboxStyle</a>)，你可以使用activity，显示一个自定义的布局来达到目的。在可穿戴设备上你只可以创建并处理自定义的notification，同时系统无法为这些notification同步到手持设备上。</p>
+
+<p><strong>Note:</strong>当在可穿戴设备上创建自定义的notification时，你可以使用API Level 20上标准的APIs，不需要使用Support Library。</p>
+
+<p>为了创建自定义的notification，步骤如下：</p>
+
+<!-- More -->
+
+
+<ol>
+<li>创建布局并设置这个布局为需要显示的activity的content view:</li>
+</ol>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">bundle</span><span class="o">){</span>
+</span><span class='line'>    <span class="o">...</span>
+</span><span class='line'>    <span class="n">setContentView</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">layout</span><span class="o">.</span><span class="na">notification_activity</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>为了使得activity能够显示在可穿戴设备上，需要在manifest文件中为activity定义必须的属性。你需要把activity声明为exportable，embeddable以及拥有一个空的task affinity。我们也推荐把activity的主题设置为<code>Theme.DeviceDefault.Light</code>。例如：</li>
+</ol>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;activity</span> <span class="na">android:name=</span><span class="s">&quot;com.example.MyDisplayActivity&quot;</span>
+</span><span class='line'>     <span class="na">android:exported=</span><span class="s">&quot;true&quot;</span>
+</span><span class='line'>     <span class="na">android:allowEmbedded=</span><span class="s">&quot;true&quot;</span>
+</span><span class='line'>     <span class="na">android:taskAffinity=</span><span class="s">&quot;&quot;</span>
+</span><span class='line'>     <span class="na">android:theme=</span><span class="s">&quot;@android:style/Theme.DeviceDefault.Light&quot;</span> <span class="nt">/&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>为activity创建<a href="http://developer.android.com/reference/android/app/PendingIntent.html">PendingIntent</a>，例如：：</li>
+</ol>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">Intent</span> <span class="n">notificationIntent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">NotificationActivity</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span><span class='line'><span class="n">PendingIntent</span> <span class="n">notificationPendingIntent</span> <span class="o">=</span> <span class="n">PendingIntent</span><span class="o">.</span><span class="na">getActivity</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">notificationIntent</span><span class="o">,</span>
+</span><span class='line'>        <span class="n">PendingIntent</span><span class="o">.</span><span class="na">FLAG_UPDATE_CURRENT</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>创建<a href="http://developer.android.com/reference/android/app/Notification.html">Notification</a>并执行<a href="http://developer.android.com/reference/android/app/Notification.WearableExtender.html#setDisplayIntent(android.app.PendingIntent">setDisplayIntent()</a>)方法，参数是前面创建的PendingIntent。当用户查看这个notification时，系统使用这个PendingIntent来启动activity。</li>
+<li>触发notification使用<a href="http://developer.android.com/reference/java/lang/Object.html#notify(">notify()</a>)的方法。</li>
+</ol>
+
+
+<blockquote><p><strong>Note:</strong> 当notification呈现在主页时，系统会根据notification的语义，使用一个标准的模板来呈现它。这个模板可以在所有的表盘上进行显示。当用户往上滑动notification时，将会看到为这个notification准备的自定义的activity。</p></blockquote>
+
+<h2>使用Wearable UI库创建布局</h2>
+
+<p>当你使用Android Studio的引导功能创建一个Wearable应用的时候，会自动包含一个非官方的UI库文件。你也可以通过给build.gradle文件添加下面的依赖声明把库文件添加到项目：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'>dependencies {
+</span><span class='line'>    compile fileTree(dir: &#39;libs&#39;, include: [&#39;*.jar&#39;])
+</span><span class='line'>    compile &#39;com.google.android.support:wearable:+&#39;
+</span><span class='line'>    compile &#39;com.google.android.gms:play-services-wearable:+&#39;
+</span><span class='line'>}
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这个库文件帮助你建立你设计的UI。下面是一些主要的类：
+* <strong>BoxInsetLayout</strong> - 一个能够感知屏幕的形状并把子控件居中摆放的FrameLayout，。
+* <strong>CardFragment</strong> - 一个能够可拉伸，垂直可滑动卡片的fragment。
+* <strong>CircledImageView</strong> - 一个圆形的image view。
+* <strong>ConfirmationActivity</strong> - 一个在用户完成一个操作之后用来显示确认动画的activity。* <strong>DismissOverlayView</strong> - 一个用来实现长按消失的View。
+* <strong>GridViewPager</strong> - 一个可以横向与纵向滑动的局部控制器。你需要提供一个GridPagerAdapter用来生成显示页面的数据。
+* <strong>GridPagerAdapter</strong> - 一个提供给GridViewPager显示页面的适配器。
+* <strong>FragmentGridPagerAdapter</strong> - 一个为每个页面提供单独的fragment的适配器。
+* <strong>WatchViewStub</strong> - 一个可以根据屏幕的形状生成特定布局的类。
+* <strong>WearableListView</strong> - 一个针对可穿戴设备优化过后的ListView。它会垂直的显示列表内容，并在用户停止滑动时自动显示最靠近的Item。</p>
+
+<blockquote><p><a href="http://developer.android.com/shareables/training/wearable-support-docs.zip">点击下载完整的API说明文档</a> 这个文档会详细的介绍每一个UI组件。</p></blockquote>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training - 创建可穿戴应用(1 - 创建并执行可穿戴应用)]]></title>
+    <link href="http://hukai.me/blog/android-training-wearable-app-creating/"/>
+    <updated>2014-07-14T19:26:00+08:00</updated>
+    <id>http://hukai.me/blog/android-training-wearable-app-creating</id>
+    <content type="html"><![CDATA[<p>可穿戴应用可以直接运行在可穿戴的设备上。拥有访问类似传感器的硬件权限，还有操作activity，services等权限。</p>
+
+<p>你无法直接发布可穿戴应用到Google Play商城，需要利用手持应用来达到目的。因为可穿戴的设备不支持Google Play商城，所以当用户下载手持设备应用的时候，，会自动安装可穿戴应用到可穿戴设备上。手持应用还可以用来处理一些复杂繁重的任务，网络指令，或者其他的任务，最好发送操作结果返回给可穿戴设备。</p>
+
+<p>这节课会介绍如何创建一个包含了手持应用与可穿戴应用的工程。</p>
+
+<h2>搭建Android Wear模拟器或者真机设备。</h2>
+
+<p>我们推荐在真机上进行开发，这样可以更好的评估用户体验。然而，模拟器可以使得你在不同类型的设备屏幕上进行模拟，这对测试来说更加有用。</p>
+
+<h3>搭建Android Wear虚拟设备</h3>
+
+<p>建立Android Wear虚拟设备需要下面几个步骤：</p>
+
+<!-- More -->
+
+
+<ol>
+<li>点击<strong>Tools</strong> > <strong>Android</strong> > <strong>AVD Manager</strong>.</li>
+<li>点击<strong>Create</strong>&#8230;.</li>
+<li>填写下面几项详细的设置，其余选项保留默认：
+
+<ul>
+<li><strong>AVD Name</strong> - AVD的名字</li>
+<li><strong>Device</strong> - Android Wear圆形还是方形</li>
+<li><strong>Target</strong> - Android 4.4W - API Level 20</li>
+<li><strong>CPU/ABI</strong> - Android Wear ARM (armeabi-v7a)</li>
+<li><strong>Keyboard</strong> - 选择Hardware keyboard present</li>
+<li><strong>Skin</strong> - 圆形还是方形取决于选择的设备类型</li>
+<li><strong>Snapshot</strong> - 不勾选 selected</li>
+<li><strong>Use Host GPU</strong> - 勾选，为了支持自定义的activity能够显示可穿戴的notification。</li>
+</ul>
+</li>
+<li>点击<strong>OK.</strong></li>
+<li>启动模拟器:
+
+<ul>
+<li>选择你刚才创建的虚拟设备</li>
+<li>点击<strong>Start</strong>&#8230;，然后选择<strong>Launch.</strong></li>
+<li>等待模拟器初始化直到显示Android Wear的主界面。</li>
+</ul>
+</li>
+<li>匹配你的手持和模拟器:
+
+<ul>
+<li>在你的手持设备上，从Google Play安装<code>Android Wear</code>应用(这是一个由Google公司写的用来匹配的应用)</li>
+<li>通过USB连接你的手持设备到你的电脑。</li>
+<li>切换AVD的接口到手持设备(这个步骤需要每次连接都执行)
+<code>git
+adb -d forward tcp:5601 tcp:5601
+</code></li>
+<li>启动手持设备上的<code>Android Wear</code>应用，并连接到模拟器。</li>
+<li>点击右上角的菜单，选择Demo Cards。</li>
+<li>你选择的卡片呈现在模拟器上会类似一个Notification。</li>
+</ul>
+</li>
+</ol>
+
+
+<h3>搭建Android Wear真机</h3>
+
+<p>建立Android Wear真机，需要下面几个步骤：</p>
+
+<ul>
+<li>在你的手持设备的Google Play上安装<code>Android Wear</code>应用。</li>
+<li>按照应用的命令指示与你的可穿戴设备进行匹对。如果你有做建立notification的操作，这个步骤刚好可以测试这一功能。</li>
+<li>保持<code>Android Wear</code>应用在手机上的打开状态。</li>
+<li>通过USB连接可穿戴设备到电脑上，这样你能够直接安装应用到可穿戴设备上。在可穿戴设备与<code>Android Wear</code>应用上会显示一个消息提示，是否允许进行调试。</li>
+<li>在<code>Android Wear</code>应用上，总是选择允许连接。</li>
+</ul>
+
+
+<p>Android Studio上的Tool的窗口可以显示可穿戴设备的日志。当你执行<code>adb devices</code>命令的时候，也可以看到wearable的存在。</p>
+
+<h2>创建Wear项目</h2>
+
+<p>在开始开发之前，需要创建一个项目包含可穿戴应用与手持应用这两个模块。在Android Studio中，点击<strong>File</strong> > <strong>New Project</strong> 然后按照<a href="http://developer.android.com/sdk/installing/create-project.html">创建项目</a>的指引进行操作。如果你按照安装向导操作，需要输入下面的信息：</p>
+
+<ol>
+<li>在确认项目的窗口，输入你的应用的名称与包名。</li>
+<li>在应用参数选择窗口:
+
+<ul>
+<li>勾选Phone 与 Tablet 并选择API 8: Android 2.2 (Froyo) 作为Minimum SDK.</li>
+<li>勾选可穿戴并选择API 20: Android 4.4 (KitKat Wear) 作为Minimum SDK.</li>
+</ul>
+</li>
+<li>在第一个添加activity的窗口，选择为Mobile模块添加一个空白的activity。</li>
+<li>在第二个添加activity的窗口，选择为Wear模块添加一个空白的activity。</li>
+</ol>
+
+
+<p>当安装向导完成后，Andorid Studio创建了一个包含Mobile与Wear两个模块的项目。你可以在这2个模块中各自创建activity，service，layout等等。在手持应用里面，需要承担大部分繁重的任务，例如网络请求，密集计算任务或者是需要大量用户交互的任务。待这些任务完成之后，再通常把任务结果通过notification发送给可穿戴设备上，或者是通过同步机制发送数据给可穿戴设备。</p>
+
+<blockquote><p><strong>Note:</strong> 可穿戴模块包含了一个&#8221;Hello World&#8221;的activity，它是使用<code>WatchViewStub</code>的布局。WatchViewStub是可穿戴support library中的一个UI组件。</p></blockquote>
+
+<h2>安装可穿戴应用</h2>
+
+<p>在开发过程中，你可以像安装手持应用一样直接安装可穿戴应用。可以使用<code>adb install</code>命令也可以使用Android Studio上面的Play按钮。</p>
+
+<p>当需要把应用发布给用户的时候，你需要把可穿戴应用打包到手持应用中。当用户从Google Play安装手持应用时，连接上得可穿戴设备会自动收到可穿戴应用。</p>
+
+<blockquote><p><strong>Note:</strong> 如果你给应用签名是Debug Key，是无法完成自动安装可穿戴应用的。请参考<a href="packaging.html">打包可穿戴应用</a>获取更多信息，学习如何正确的打包。</p></blockquote>
+
+<p>为了安装&#8221;Hello World&#8221;应用到可穿戴设备，在Android Studiod的Run/Debug的下拉选项中选中Wear模块，点击Play按钮即可。在可穿戴设备上会显示activity并打印&#8221;Hello world!&#8221;</p>
+
+<h2>include需要的libraries</h2>
+
+<p>项目安装向导会自动把合适的模块依赖添加到对应的build.gradle文件中。然而，这些依赖并不是必须得，请阅读下面描述判断你是否需要这些依赖。</p>
+
+<ul>
+<li><p><strong>Notifications</strong></p>
+
+<p><a href="http://developer.android.com/tools/support-library/features.html#v4">The Android v4 support library</a> (or v13)能够支持运行在手持应用的notification也能够在可穿戴设备上显示。</p></li>
+</ul>
+
+
+<p> 对于只显示在可穿戴设备上得notification(这意味着，他们是由直接执行在可穿戴设备上得app进行处理的)，你可以在Wear模块仅仅使用标准APIs (API Level 20) 并且把Mobile模块的依赖support library移除。</p>
+
+<ul>
+<li><p><strong>Wearable Data Layer</strong></p>
+
+<p>可穿戴与手持设备之间进行同步与发送数据需要使用Wearable Data Layer APIs, 你需要最新版本的<a href="http://developer.android.com/google/play-services/setup.html">Google Play Services</a>。如果你不需要这些APIs，可以从这两个模块中把这部分的依赖移除。</p></li>
+<li><p><strong>Wearable UI support library</strong></p>
+
+<p>这是一个非官方正式的library，它包含了为可穿戴设备设计的UI组件。我们鼓励你在你的应用中使用他们。因为这些组件是最佳实践的例证。但是他们可能随时发生变化。然而，如果library有更新，你的应用并不会发送崩溃，因为那些代码已经编译到你的应用中了。为了获取更新包中新的功能，你只需要更新链接到新的版本并相应的更新你的应用就好了。这个library只是在你需要创建可穿戴应用时才会使用到。</p></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Training - 创建可穿戴应用(0 - 序言)]]></title>
+    <link href="http://hukai.me/blog/android-training-wearable-app-index/"/>
+    <updated>2014-07-14T12:20:00+08:00</updated>
+    <id>http://hukai.me/blog/android-training-wearable-app-index</id>
+    <content type="html"><![CDATA[<h1>创建可穿戴的应用</h1>
+
+<p>可穿戴应用直接运行在穿戴设备上，应用可以直接访问例如传感器与GPU这样的硬件。这些应用和一般的Android应用的基础部分是一致的，只是在设计与可用性还有一些特殊功能上有比较大差异。手持设备与可穿戴设备上的应用主要有下面的一些差异：</p>
+
+<ul>
+<li>系统会强制执行超时机制。如果你显示了一个Activity，用户并没有进行操作，设备会进入睡眠状态。当设备唤醒时，穿戴设备会显示主界面而不是你刚才的activity。如果你想要持续的显示一些东西，请使用notification来替代。</li>
+<li>相比起手持设备的应用，可穿戴应用的界面相对更小，功能也相对更少。他仅仅包含了那些对于可穿戴有意义的功能，这些功能通常是手持设备的一个子集。通常来说，你应该尽可能的把运行操作搬到手持设备上，然后发送操作结果到可穿戴设备。</li>
+<li>用户不能直接给可穿戴设备安装应用。你需要给手持设备的应用绑定一个可穿戴设备的应用。当用户安装手持设备的应用时，系统会自动安装可穿戴应用。然而，为了开发便利，你还是可以直接安装应用到可穿戴设备。</li>
+<li>可穿戴应用可以使用大多数的标准Android APIs，除了下面的以外：
+
+<ul>
+<li><a href="http://developer.android.com/reference/android/webkit/package-summary.html">android.webkit</a></li>
+<li><a href="http://developer.android.com/reference/android/print/package-summary.html">android.print</a></li>
+<li><a href="http://developer.android.com/reference/android/app/backup/package-summary.html">android.app.backup</a></li>
+<li><a href="http://developer.android.com/reference/android/appwidget/package-summary.html">android.appwidget</a></li>
+<li><a href="http://developer.android.com/reference/android/hardware/usb/package-summary.html">android.hardware.usb</a></li>
+</ul>
+
+
+<p>在使用某个API之前，你可以通过执行<a href="http://developer.android.com/reference/android/content/pm/PackageManager.html#hasSystemFeature(java.lang.String">hasSystemFeature()</a>) 来判断功能是否可用。</p></li>
+</ul>
+
+
+<blockquote><p><strong>Note:</strong> 我们推荐使用Android Studio来开发Android Wear的应用，因为它提供了建立工程，添加库依赖，打包程序等等在ADT上没有的功能。下面的培训课程的前提是假设你已经在使用Android Studio了。</p></blockquote>
+
+<!-- More -->
+
+
+<h2>Lessons</h2>
+
+<ul>
+<li><p><a href="http://hukai.me/blog/android-training-wearable-app-creating.html">创建并执行可穿戴应用(Creating and Running a Wearable App)</a></p>
+
+<p>学习如何创建一个包含了可穿戴与手持应用的Android Studio工程。学习如何在设备或者模拟器上执行程序。</p></li>
+<li><p><a href="http://hukai.me/blog/android-training-wearable-app-layouts.html">创建自定义的布局(Creating Custom Layouts)</a></p>
+
+<p>学习如何为notification与activiyt，创建并显示一个自定义的布局</p></li>
+<li><p><a href="http://hukai.me/blog/android-training-wearable-app-voice-input.html">添加语言能力(Adding Voice Capabilities)</a></p>
+
+<p>学习如何使用语音指令启动一个activity，学习如何启动系统语音识别应用来获取用户的语音输入。</p></li>
+<li><p><a href="http://hukai.me/blog/android-training-wearable-app-packaging.html">打包可穿戴应用(Packaging Wearable Apps)</a></p>
+
+<p>学习如何把可穿戴应用打包到手持应用上。这使得系统能够在安装Google Play上的手持应用时自动安装可穿戴应用。</p></li>
+<li><p><a href="http://hukai.me/blog/android-training-wearable-bt-debug.html">通过蓝牙进行调试(Debugging over Bluetooth)</a></p>
+
+<p>学习如何通过蓝牙而不是USB来调试你的可穿戴应用。</p></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Android Notes - 添加Copy to Clipboard的选项到分享列表中]]></title>
@@ -1288,28 +1978,28 @@
 <h2>Lessons</h2>
 
 <ul>
-<li><a href="simple.html">发送一个简单的网络请求(Sending a Simple Request)</a></li>
+<li><a href="http://hukai.me/blog/android-training-volley-simple-request.html">发送一个简单的网络请求(Sending a Simple Request)</a></li>
 </ul>
 
 
 <p>学习如何通过Volley默认的行为发送一个简单的请求，以及如何取消一个请求。</p>
 
 <ul>
-<li><a href="request-queue.html">建立一个请求队列(Setting Up a RequestQueue)</a></li>
+<li><a href="http://hukai.me/blog/android-training-volley-request-queue.html">建立一个请求队列(Setting Up a RequestQueue)</a></li>
 </ul>
 
 
 <p>学习如何建立一个请求队列，以及如何实现一个单例模式来创建一个请求队列。</p>
 
 <ul>
-<li><a href="request.html">生成一个标准的请求(Making a Standard Request)</a></li>
+<li><a href="http://hukai.me/blog/android-training-volley-standard-request.html">生成一个标准的请求(Making a Standard Request)</a></li>
 </ul>
 
 
 <p>学习如何使用Volley的out-of-the-box的请求类型(raw strings, images, and JSON)来发送一个请求。</p>
 
 <ul>
-<li><a href="request-custom.html">实现自定义的请求(Implementing a Custom Request)</a></li>
+<li><a href="http://hukai.me/blog/android-training-volley-custom-request.html">实现自定义的请求(Implementing a Custom Request)</a></li>
 </ul>
 
 
@@ -3931,976 +4621,6 @@
 
 
 <p><strong>转载请注明出自<a href="http:://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢</strong></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Training(17) - 管理应用的内存]]></title>
-    <link href="http://hukai.me/blog/android-training-17-managing_your_app_memory/"/>
-    <updated>2013-10-19T15:18:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-17-managing_your_app_memory</id>
-    <content type="html"><![CDATA[<p>Random Access Memory(RAM)在任何软件开发环境中都是一个很宝贵的资源。这一点在物理内存通常很有限的移动操作系统上，显得尤为突出。尽管Android的Dalvik虚拟机扮演了常规的垃圾回收的角色，但这并不意味着你可以忽视app的内存分配与释放的时机与地点。</p>
-
-<p>为了GC能够从你的app中及时回收内存，你需要避免Memory Leaks(这通常由引用的不能释放而导致)并且在适当的时机(下面会讲到的lifecycle callbacks)来释放引用。对于大多数apps来说，Dalvik的GC会自动把离开活动线程的对象进行回收。</p>
-
-<p>这篇文章会解释Android如何管理app的进程与内存分配，并且你可以在开发Android应用的时候主动的减少内存的使用。关于Java的资源管理机制，请参加其它书籍或者线上材料。如果你正在寻找如何分析你的内存使用情况的文章，请参考这里<a href="http://developer.android.com/tools/debugging/debugging-memory.html">Investigating Your RAM Usage</a>。</p>
-
-<!-- More -->
-
-
-<h2>第1部分:Android是如何管理内存的</h2>
-
-<p>Android并没有提供内存的交换区(Swap space)，但是它有使用<a href="http://en.wikipedia.org/wiki/Paging">paging</a>与<a href="http://en.wikipedia.org/wiki/Memory-mapped_files">memory-mapping(mmapping)</a>的机制来管理内存。这意味着任何你修改的内存(无论是通过分配新的对象还是访问到mmaped pages的内容)都会贮存在RAM中，而且不能被paged out。因此唯一完整释放内存的方法是释放那些你可能hold住的对象的引用，这样使得它能够被GC回收。只有一种例外是：如果系统想要在其他地方进行reuse。</p>
-
-<h3>1)共享内存</h3>
-
-<p>Android通过下面几个方式在不同的Process中来共享RAM:</p>
-
-<ul>
-<li>每一个app的process都是从同一个被叫做Zygote的进程中fork出来的。Zygote进程在系统启动并且载入通用的framework的代码与资源之后开始启动。为了启动一个新的程序进程，系统会fork Zygote进程生成一个新的process，然后在新的process中加载并运行app的代码。这使得大多数的RAM pages被用来分配给framework的代码与资源，并在应用的所有进程中进行共享。</li>
-<li>大多数static的数据被mmapped到一个进程中。这不仅仅使得同样的数据能够在进程间进行共享，而且使得它能够在需要的时候被paged out。例如下面几种static的数据:
-
-<ul>
-<li>Dalvik code (by placing it in a pre-linked .odex file for direct mmapping</li>
-<li>App resources (by designing the resource table to be a structure that can be mmapped and by aligning the zip entries of the APK)</li>
-<li>Traditional project elements like native code in .so files.</li>
-</ul>
-</li>
-<li>在许多地方，Android通过显式的分配共享内存区域(例如ashmem或者gralloc)来实现一些动态RAM区域的能够在不同进程间的共享。例如，window surfaces在app与screen compositor之间使用共享的内存，cursor buffers在content provider与client之间使用共享的内存。</li>
-</ul>
-
-
-<p>关于如何查看app所使用的共享内存，请查看<a href="http://developer.android.com/tools/debugging/debugging-memory.html">Investigating Your RAM Usage</a></p>
-
-<h3>2)分配与回收内存</h3>
-
-<p>这里有下面几点关于Android如何分配与回收内存的事实：</p>
-
-<ul>
-<li>每一个进程的Dalvik heap都有一个限制的虚拟内存范围。这就是逻辑上讲的heap size，它可以随着需要进行增长，但是会有一个系统为它所定义的上限。</li>
-<li>逻辑上讲的heap size和实际物理上使用的内存数量是不等的，Android会计算一个叫做Proportional Set Size(PSS)的值，它记录了那些和其他进程进行共享的内存大小。（假设共享内存大小是10M，一共有20个Process在共享使用，根据权重，可能认为其中有0.3M才能真正算是你的进程所使用的）</li>
-<li>Dalvik heap与逻辑上的heap size不吻合，这意味着Android并不会去做heap中的碎片整理用来关闭空闲区域。Android仅仅会在heap的尾端出现不使用的空间时才会做收缩逻辑heap size大小的动作。但是这并不是意味着被heap所使用的物理内存大小不能被收缩。在垃圾回收之后，Dalvik会遍历heap并找出不使用的pages，然后使用madvise把那些pages返回给kernal。因此，成对的allocations与deallocations大块的数据可以使得物理内存能够被正常的回收。然而，回收碎片化的内存则会使得效率低下很多，因为那些碎片化的分配页面也许会被其他地方所共享到。</li>
-</ul>
-
-
-<h3>3)限制应用的内存</h3>
-
-<p>为了维持多任务的功能环境，Android为每一个app都设置了一个硬性的heap size限制。准确的heap size限制随着不同设备的不同RAM大小而各有差异。如果你的app已经到了heap的限制大小并且再尝试分配内存的话，会引起OutOfMemoryError的错误。</p>
-
-<p>在一些情况下，你也许想要查询当前设备的heap size限制大小是多少，然后决定cache的大小。可以通过getMemoryClass()来查询。这个方法会返回一个整数，表明你的app heap size限制是多少megabates。</p>
-
-<h3>4)切换应用</h3>
-
-<p>当用户在不同应用之间进行切换的时候，不是使用交换空间的办法。Android会把那些不包含foreground组件的进程放到LRU cache中。例如，当用户刚开始启动了一个应用，这个时候为它创建了一个进程，但是当用户离开这个应用，这个进程并没有离开。系统会把这个进程放到cache中，如果用户后来回到这个应用，这个进程能够被resued，从而实现app的快速切换。</p>
-
-<p>如果你的应用有一个被缓存的进程，它被保留在内存中，并且当前不再需要它了，这会对系统的整个性能有影响。因此当系统开始进入低内存状态时，它会由系统根据LRU的规则与其他因素选择杀掉某些进程，为了保持你的进程能够尽可能长久的被cached，请参考下面的章节学习何时释放你的引用。</p>
-
-<p>更对关于不在foreground的进程是Android是如何决定kill掉哪一类进程的问题，请参考<a href="http://developer.android.com/guide/components/processes-and-threads.html">Processes and Threads</a>.</p>
-
-<h2>第2部分:你的应用该如何管理内存</h2>
-
-<p>你应该在开发过程的每一个阶段都考虑到RAM的有限性，甚至包括在开发开始之前的设计阶段。有许多种设计与实现方式，他们有着不同的效率，尽管是对同样一种技术的不断组合与演变。</p>
-
-<p>为了使得你的应用效率更高，你应该在设计与实现代码时，遵循下面的技术要点。</p>
-
-<h3>1)珍惜Services资源</h3>
-
-<p>如果你的app需要在后台使用service，除非它被触发执行一个任务，否则其他时候都应该是非运行状态。同样需要注意当这个service已经完成任务后停止service失败引起的泄漏。</p>
-
-<p>当你启动一个service，系统会倾向为了这个Service而一直保留它的Process。这使得process的运行代价很高，因为系统没有办法把Service所占用的RAM让给其他组件或者被Paged out。这减少了系统能够存放到LRU缓存当中的process数量，它会影响app之间的切换效率。它甚至会导致系统内存使用不稳定，从而无法继续Hold住
-所有目前正在运行的Service。</p>
-
-<p>限制你的service的最好办法是使用<a href="http://developer.android.com/reference/android/app/IntentService.html">IntentService</a>, 它会在处理完扔给它的intent任务之后尽快结束自己。更多信息，请阅读<a href="http://developer.android.com/training/run-background-service/index.html">Running in a Background Service</a>.</p>
-
-<p>当一个service已经不需要的时候还继续保留它，这对Android应用的内存管理来说是<strong>最糟糕的错误之一</strong>。因此千万不要贪婪的使得一个Service持续保留。不仅仅是因为它会使得你的app因RAM的限制而性能糟糕，而且用户会发现那些行为奇怪的app并且卸载它。</p>
-
-<h3>2)当你的UI隐藏时释放内存</h3>
-
-<p>当用户切换到其它app并且你的app UI不再可见时，你应该释放你的UI上占用的任何资源。在这个时候释放UI资源可以显著的增加系统cached process的能力，它会对用户的质量体验有着直接的影响。</p>
-
-<p>为了能够接收到用户离开你的UI时的通知，你需要实现Activtiy类里面的<a href="http://developer.android.com/reference/android/content/ComponentCallbacks2.html#onTrimMemory(int">onTrimMemory()</a>)回调方法。你应该使用这个方法来监听到<a href="http://developer.android.com/reference/android/content/ComponentCallbacks2.html#TRIM_MEMORY_UI_HIDDEN">TRIM_MEMORY_UI_HIDDEN</a>级别, 它意味着你的UI已经隐藏，你应该释放那些仅仅被你的UI使用的资源。</p>
-
-<p>请注意：你的app仅仅会在所有UI组件的被隐藏的时候接收到onTrimMemory()的回调并带有参数TRIM_MEMORY_UI_HIDDEN。这与onStop()的回调是不同的，onStop会在activity的实例隐藏时会执行，例如当用户从你的app的某个activity跳转到另外一个activity时onStop会被执行。因此你应该实现onStop回调，并且在此回调里面释放activity的资源，例如网络连接，unregister广播接收者。除非接收到<a href="http://developer.android.com/reference/android/content/ComponentCallbacks2.html#onTrimMemory(int">onTrimMemory(TRIM_MEMORY_UI_HIDDEN)</a>)的回调，否者你不应该释放你的UI资源。这确保了用户从其他activity切回来时，你的UI资源仍然可用，并且可以迅速恢复activity。</p>
-
-<h3>3)当内存紧张时释放部分内存</h3>
-
-<p>在你的app生命周期的任何阶段，onTrimMemory回调方法同样可以告诉你整个设备的内存资源已经开始紧张。你应该根据onTrimMemory方法中的内存级别来进一步决定释放哪些资源。</p>
-
-<ul>
-<li><a href="http://developer.android.com/reference/android/content/ComponentCallbacks2.html#TRIM_MEMORY_RUNNING_MODERATE">TRIM_MEMORY_RUNNING_MODERATE</a>:你的app正在运行并且不会被列为可杀死的。但是设备正运行于低内存状态下，系统开始开始激活杀死LRU Cache中的Process的机制。</li>
-<li><a href="http://developer.android.com/reference/android/content/ComponentCallbacks2.html#TRIM_MEMORY_RUNNING_LOW">TRIM_MEMORY_RUNNING_LOW</a>:你的app正在运行且没有被列为可杀死的。但是设备正运行于更低内存的状态下，你应该释放不用的资源用来提升系统性能，这会直接影响了你的app的性能。</li>
-<li><a href="http://developer.android.com/reference/android/content/ComponentCallbacks2.html#TRIM_MEMORY_RUNNING_CRITICAL">TRIM_MEMORY_RUNNING_CRITICAL</a>:你的app仍在运行，但是系统已经把LRU Cache中的大多数进程都已经杀死，因此你应该立即释放所有非必须的资源。如果系统不能回收到足够的RAM数量，系统将会清除所有的LRU缓存中的进程，并且开始杀死那些之前被认为不应该杀死的进程，例如那个进程包含了一个运行中的Service。</li>
-</ul>
-
-
-<p>同样，当你的app进程正在被cached时，你可能会接受到从onTrimMemory()中返回的下面的值之一:</p>
-
-<ul>
-<li><a href="http://developer.android.com/reference/android/content/ComponentCallbacks2.html#TRIM_MEMORY_BACKGROUND">TRIM_MEMORY_BACKGROUND</a>: 系统正运行于低内存状态并且你的进程正处于LRU缓存名单中<strong>最不容易杀掉的位置</strong>。尽管你的app进程并不是处于被杀掉的高危险状态，系统可能已经开始杀掉LRU缓存中的其他进程了。你应该释放那些容易恢复的资源，以便于你的进程可以保留下来，这样当用户回退到你的app的时候才能够迅速恢复。</li>
-<li><a href="http://developer.android.com/reference/android/content/ComponentCallbacks2.html#TRIM_MEMORY_MODERATE">TRIM_MEMORY_MODERATE</a>: 系统正运行于低内存状态并且你的进程已经已经接近LRU名单的<strong>中部位置</strong>。如果系统开始变得更加内存紧张，你的进程是有可能被杀死的。</li>
-<li><a href="http://developer.android.com/reference/android/content/ComponentCallbacks2.html#TRIM_MEMORY_COMPLETE">TRIM_MEMORY_COMPLETE</a>: 系统正运行与低内存的状态并且你的进程正处于LRU名单中<strong>最容易被杀掉的位置</strong>。你应该释放任何不影响你的app恢复状态的资源。</li>
-</ul>
-
-
-<p>因为onTrimMemory()的回调是在<strong>API 14</strong>才被加进来的，对于老的版本，你可以使用<a href="http://developer.android.com/reference/android/content/ComponentCallbacks.html#onLowMemory(">onLowMemory</a>)回调来进行兼容。onLowMemory相当与TRIM_MEMORY_COMPLETE。</p>
-
-<p><strong>Note:</strong> 当系统开始清除LRU缓存中的进程时，尽管它首先按照LRU的顺序来操作，但是它同样会考虑进程的内存使用量。因此消耗越少的进程则越容易被留下来。</p>
-
-<h3>4)检查你应该使用多少的内存</h3>
-
-<p>正如前面提到的，每一个Android设备都会有不同的RAM总大小与可用空间，因此不同设备为app提供了不同大小的heap限制。你可以通过调用<a href="http://developer.android.com/reference/android/app/ActivityManager.html#getMemoryClass(">getMemoryClass()</a>)来获取你的app的可用heap大小。如果你的app尝试申请更多的内存，会出现OutOfMemory的错误。</p>
-
-<p>在一些特殊的情景下，你可以通过在manifest的application标签下添加largeHeap=true的属性来声明一个更大的heap空间。如果你这样做，你可以通过<a href="http://developer.android.com/reference/android/app/ActivityManager.html#getLargeMemoryClass(">getLargeMemoryClass()</a>)来获取到一个更大的heap size。</p>
-
-<p>然而，能够获取更大heap的设计本意是为了一小部分会消耗大量RAM的应用(例如一个大图片的编辑应用)。不要轻易的因为你需要使用大量的内存而去请求一个大的heap size。只有当你清楚的知道哪里会使用大量的内存并且为什么这些内存必须被保留时才去使用large heap. 因此请尽量少使用large heap。使用额外的内存会影响系统整体的用户体验，并且会使得GC的每次运行时间更长。在任务切换时，系统的性能会变得大打折扣。</p>
-
-<p>另外, large heap并不一定能够获取到更大的heap。在某些有严格限制的机器上，large heap的大小和通常的heap size是一样的。因此即使你申请了large heap，你还是应该通过执行getMemoryClass()来检查实际获取到的heap大小。</p>
-
-<h3>5)避免bitmaps的浪费</h3>
-
-<p>当你加载一个bitmap时，仅仅需要保留适配当前屏幕设备分辨率的数据即可，如果原图高于你的设备分辨率，需要做缩小的动作。请记住，增加bitmap的尺寸会对内存呈现出2次方的增加，因为X与Y都在增加。</p>
-
-<p><strong>Note:</strong>在Android 2.3.x (API level 10)及其以下, bitmap对象是的pixel data是存放在native内存中的，它不便于调试。然而，从Android 3.0(API level 11)开始，bitmap pixel data是分配在你的app的Dalvik heap中, 这提升了GC的工作并且更加容易Debug。因此如果你的app使用bitmap并在旧的机器上引发了一些内存问题，切换到3.0以上的机器上进行Debug。</p>
-
-<h3>6)使用优化的数据容器</h3>
-
-<p>利用Android Framework里面优化过的容器类，例如<a href="http://developer.android.com/reference/android/util/SparseArray.html">SparseArray</a>, SparseBooleanArray, 与 LongSparseArray. 通常的HashMap的实现方式更加消耗内存，因为它需要一个额外的实例对象来记录Mapping操作。另外，SparseArray更加高效在于他们避免了对key与value的autobox自动装箱，并且避免了装箱后的解箱。</p>
-
-<h3>7)请注意内存开销</h3>
-
-<p>对你所使用的语言与库的成本与开销有所了解，从开始到结束，在设计你的app时谨记这些信息。通常，表面上看起来无关痛痒(innocuous)的事情也许实际上会导致大量的开销。例如：</p>
-
-<ul>
-<li>Enums的内存消耗通常是static constants的2倍。你应该尽量避免在Android上使用enums。</li>
-<li>在Java中的每一个类(包括匿名内部类)都会使用大概500 bytes。</li>
-<li>每一个类的实例花销是12-16 bytes。</li>
-<li>往HashMap添加一个entry需要额一个额外占用的32 bytes的entry对象。</li>
-</ul>
-
-
-<h3>8)请注意代码“抽象”</h3>
-
-<p>通常, 开发者使用抽象简单的作为&#8221;好的编程实践&#8221;,因为抽象能够提升代码的灵活性与可维护性。然而，抽象会导致一个显著的开销:通常他们需要同等量的代码用于可执行。那些代码会被map到内存中。因此如果你的抽象没有显著的提升效率，应该尽量避免他们。</p>
-
-<h3>9)为序列化的数据使用nano protobufs</h3>
-
-<p><a href="https://developers.google.com/protocol-buffers/docs/overview">Protocol buffers</a>是由Google为序列化结构数据而设计的，一种语言无关，平台无关，具有良好扩展性的协议。类似XML，却比XML更加轻量，快速，简单。如果你需要为你的数据实现协议化，你应该在客户端的代码中总是使用nano protobufs。通常的协议化操作会生成大量繁琐的代码，这容易给你的app带来许多问题:增加RAM的使用量，显著增加APK的大小，更慢的执行速度，更容易达到DEX的字符限制。</p>
-
-<p>关于更多细节，请参考<a href="https://android.googlesource.com/platform/external/protobuf/+/master/java/README.txt">protobuf readme</a>的&#8221;Nano version&#8221;章节。</p>
-
-<h3>10)Avoid dependency injection frameworks</h3>
-
-<p>使用类似<a href="https://code.google.com/p/google-guice/">Guice</a>或者<a href="https://github.com/roboguice/roboguice">RoboGuice</a>等framework injection包是很有效的，因为他们能够简化你的代码。</p>
-
-<blockquote><p>RoboGuice 2 smoothes out some of the wrinkles in your Android development experience and makes things simple and fun. Do you always forget to check for null when you getIntent().getExtras()? RoboGuice 2 will help you. Think casting findViewById() to a TextView shouldn’t be necessary? RoboGuice 2 is on it. RoboGuice 2 takes the guesswork out of development. Inject your View, Resource, System Service, or any other object, and let RoboGuice 2 take care of the details.</p></blockquote>
-
-<p>然而，那些框架会通过扫描你的代码执行许多初始化的操作，这会导致你的代码需要大量的RAM来map代码。但是mapped pages会长时间的被保留在RAM中。</p>
-
-<h3>11)谨慎使用external libraries</h3>
-
-<p>很多External library的代码都不是为移动网络环境而编写的，在移动客户端则显示的效率不高。至少，当你决定使用一个external library的时候，你应该针对移动网络做繁琐的porting与maintenance的工作。</p>
-
-<p>即使是针对Android而设计的library，也可能是很危险的，因为每一个library所做的事情都是不一样的。例如，其中一个lib使用的是nano protobufs, 而另外一个使用的是micro protobufs。那么这样，在你的app里面就有2种protobuf的实现方式。这样的冲突同样可能发生在输出日志，加载图片，缓存等等模块里面。</p>
-
-<p>同样不要陷入为了1个或者2个功能而导入整个library的陷阱。如果没有一个合适的库与你的需求相吻合，你应该考虑自己去实现，而不是导入一个大而全的解决方案。</p>
-
-<h3>12)优化整体性能</h3>
-
-<p>官方有列出许多优化整个app性能的文章：<a href="http://developer.android.com/training/best-performance.html">Best Practices for Performance</a>. 这篇文章就是其中之一。有些文章是讲解如何优化app的CPU使用效率，有些是如何优化app的内存使用效率。</p>
-
-<p>你还应该阅读<a href="http://developer.android.com/tools/debugging/debugging-ui.html">optimizing your UI</a>来为layout进行优化。同样还应该关注lint工具所提出的建议，进行优化。</p>
-
-<h3>13)使用ProGuard来剔除不需要的代码</h3>
-
-<p><a href="http://developer.android.com/tools/help/proguard.html">ProGuard</a>能够通过移除不需要的代码，重命名类，域与方法等方对代码进行压缩,优化与混淆。使用ProGuard可以是的你的代码更加紧凑，这样能够使用更少mapped代码所需要的RAM。</p>
-
-<h3>14)对最终的APK使用zipalign</h3>
-
-<p>在编写完所有代码，并通过编译系统生成APK之后，你需要使用<a href="http://developer.android.com/tools/help/zipalign.html">zipalign</a>对APK进行重新校准。如果你不做这个步骤，会导致你的APK需要更多的RAM，因为一些类似图片资源的东西不能被mapped。</p>
-
-<p><strong>Notes::</strong>Google Play不接受没有经过zipalign的APK。</p>
-
-<h3>15)分析你的RAM使用情况</h3>
-
-<p>一旦你获取到一个相对稳定的版本后，需要分析你的app整个生命周期内使用的内存情况，并进行优化，更多细节请参考<a href="http://developer.android.com/tools/debugging/debugging-memory.html">Investigating Your RAM Usage</a>.</p>
-
-<h3>16)使用多进程</h3>
-
-<p>如果合适的话，有一个更高级的技术可以帮助你的app管理内存使用：通过把你的app组件切分成多个组件，运行在不同的进程中。这个技术必须谨慎使用，大多数app都不应该运行在多个进程中。因为如果使用不当，它会显著增加内存的使用，而不是减少。当你的app需要在后台运行与前台一样的大量的任务的时候，可以考虑使用这个技术。</p>
-
-<p>一个典型的例子是创建一个可以长时间后台播放的Music Player。如果整个app运行在一个进程中，当后台播放的时候，前台的那些UI资源也没有办法得到释放。类似这样的app可以切分成2个进程：一个用来操作UI，另外一个用来后台的Service.</p>
-
-<p>你可以通过在manifest文件中声明&#8217;android:process&#8217;属性来实现某个组件运行在另外一个进程的操作。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;service</span> <span class="na">android:name=</span><span class="s">&quot;.PlaybackService&quot;</span>
-</span><span class='line'>         <span class="na">android:process=</span><span class="s">&quot;:background&quot;</span> <span class="nt">/&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>更多关于使用这个技术的细节，请参考原文，链接如下。</p>
-
-<hr />
-
-<p><strong>文章学习自<a href="http://developer.android.com/training/articles/memory.html">http://developer.android.com/training/articles/memory.html</a></strong>
-<strong>转载请注明出自<a href="http:://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢</strong></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Training(16) - 创建自定义的Views(Lesson 4 - 优化Views)]]></title>
-    <link href="http://hukai.me/blog/android-training-16-creating-custom-views-lesson-4/"/>
-    <updated>2013-08-18T17:30:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-16-creating-custom-views-lesson-4</id>
-    <content type="html"><![CDATA[<p>前面的课程学习到了如何创建设计良好的View，并且能够使之在手势与状态切换时得到正确的反馈。下面要介绍的是如何使得view能够执行更快。为了避免UI显得卡顿，你必须确保动画能够保持在60fps以上。</p>
-
-<!-- more -->
-
-
-<h2>Do Less, Less Frequently</h2>
-
-<p>为了加速你的view，对于频繁调用的方法，需要尽量减少不必要的代码。先从onDraw开始，需要特别注意不应该在这里做内存分配的事情，因为它会导致GC，从而导致卡顿。在初始化或者动画间隙期间做分配内存的动作。不要在动画正在执行的时候做内存分配的事情。</p>
-
-<p>你还需要尽可能的减少onDraw被调用的次数，大多数时候导致onDraw都是因为调用了invalidate().因此请尽量减少调用invaildate()的次数。如果可能的话，尽量调用含有4个参数的invalidate()方法而不是没有参数的invalidate()。没有参数的invalidate会强制重绘整个view。</p>
-
-<p>另外一个非常耗时的操作是请求layout。任何时候执行requestLayout()，会使得Android UI系统去遍历整个View的层级来计算出每一个view的大小。如果找到有冲突的值，它会需要重新计算好几次。另外需要尽量保持View的层级是扁平化的，这样对提高效率很有帮助。</p>
-
-<p>如果你有一个复杂的UI，你应该考虑写一个自定义的ViewGroup来执行他的layout操作。与内置的view不同，自定义的view可以使得程序仅仅测量这一部分，这避免了遍历整个view的层级结构来计算大小。</p>
-
-<h2>Use Hardware Acceleration</h2>
-
-<p>从Android 3.0开始，Android的2D图像系统可以通过GPU来加速。GPU硬件加速可以提高许多程序的性能。但是这并不是说它适合所有的程序。</p>
-
-<p>参考<a href="http://developer.android.com/guide/topics/graphics/hardware-accel.html">Hardware Acceleration</a> 来学习如何在程序中启用加速。</p>
-
-<p>一旦你开启了硬件加速，性能的提示并不一定可以明显察觉到。移动GPU在某些例如scaling,rotating与translating的操作中表现良好。但是对其他一些任务则表现不佳。</p>
-
-<p>在下面的例子中，绘制pie是相对来说比较费时的。解决方案是把pie放到一个子view中，并设置View使用LAYER_TYPE_HARDWARE来进行加速,。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'>   <span class="kd">private</span> <span class="kd">class</span> <span class="nc">PieView</span> <span class="kd">extends</span> <span class="n">View</span> <span class="o">{</span>
-</span><span class='line'>
-</span><span class='line'>       <span class="kd">public</span> <span class="nf">PieView</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>           <span class="kd">super</span><span class="o">(</span><span class="n">context</span><span class="o">);</span>
-</span><span class='line'>           <span class="k">if</span> <span class="o">(!</span><span class="n">isInEditMode</span><span class="o">())</span> <span class="o">{</span>
-</span><span class='line'>               <span class="n">setLayerType</span><span class="o">(</span><span class="n">View</span><span class="o">.</span><span class="na">LAYER_TYPE_HARDWARE</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
-</span><span class='line'>           <span class="o">}</span>
-</span><span class='line'>       <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>       <span class="nd">@Override</span>
-</span><span class='line'>       <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onDraw</span><span class="o">(</span><span class="n">Canvas</span> <span class="n">canvas</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>           <span class="kd">super</span><span class="o">.</span><span class="na">onDraw</span><span class="o">(</span><span class="n">canvas</span><span class="o">);</span>
-</span><span class='line'>
-</span><span class='line'>           <span class="k">for</span> <span class="o">(</span><span class="n">Item</span> <span class="n">it</span> <span class="o">:</span> <span class="n">mData</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>               <span class="n">mPiePaint</span><span class="o">.</span><span class="na">setShader</span><span class="o">(</span><span class="n">it</span><span class="o">.</span><span class="na">mShader</span><span class="o">);</span>
-</span><span class='line'>               <span class="n">canvas</span><span class="o">.</span><span class="na">drawArc</span><span class="o">(</span><span class="n">mBounds</span><span class="o">,</span>
-</span><span class='line'>                       <span class="mi">360</span> <span class="o">-</span> <span class="n">it</span><span class="o">.</span><span class="na">mEndAngle</span><span class="o">,</span>
-</span><span class='line'>                       <span class="n">it</span><span class="o">.</span><span class="na">mEndAngle</span> <span class="o">-</span> <span class="n">it</span><span class="o">.</span><span class="na">mStartAngle</span><span class="o">,</span>
-</span><span class='line'>                       <span class="kc">true</span><span class="o">,</span> <span class="n">mPiePaint</span><span class="o">);</span>
-</span><span class='line'>           <span class="o">}</span>
-</span><span class='line'>       <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>       <span class="nd">@Override</span>
-</span><span class='line'>       <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onSizeChanged</span><span class="o">(</span><span class="kt">int</span> <span class="n">w</span><span class="o">,</span> <span class="kt">int</span> <span class="n">h</span><span class="o">,</span> <span class="kt">int</span> <span class="n">oldw</span><span class="o">,</span> <span class="kt">int</span> <span class="n">oldh</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>           <span class="n">mBounds</span> <span class="o">=</span> <span class="k">new</span> <span class="n">RectF</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">w</span><span class="o">,</span> <span class="n">h</span><span class="o">);</span>
-</span><span class='line'>       <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>       <span class="n">RectF</span> <span class="n">mBounds</span><span class="o">;</span>
-</span><span class='line'>   <span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>通过这样的修改以后，PieChart.PieView.onDraw()只会在第一次现实的时候被调用。之后，pie chart会被缓存为一张图片，并通过GPU来进行重画不同的角度。</p>
-
-<p>缓存图片到hardware layer会消耗video memory，而video memory又是有限的。基于这样的考虑，仅仅在用户触发scrolling的时候使用LAYER_TYPE_HARDWARE，在其他时候，使用LAYER_TYPE_NONE。</p>
-
-<hr />
-
-<p><strong>学习自：<a href="http://developer.android.com/training/custom-views/optimizing-view.html">http://developer.android.com/training/custom-views/optimizing-view.html</a>，请多指教，谢谢！</strong><br/>
-<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Training(16) - 创建自定义的Views(Lesson 3 - 处理View的交互性)]]></title>
-    <link href="http://hukai.me/blog/android-training-16-creating-custom-views-lesson-3/"/>
-    <updated>2013-08-18T15:01:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-16-creating-custom-views-lesson-3</id>
-    <content type="html"><![CDATA[<p>绘制UI仅仅是创建自定义View的一部分。你还需要使得你的View能够以模拟现实世界的方式来进行反馈。Objects应该总是与现实情景能够保持一致。例如，图片不应该突然消失又从另外一个地方出现，因为在现实世界里面不会发生那样的事情。正确的应该是，图片从一个地方移动到另外一个地方。</p>
-
-<p>用户应该可以感受到UI上的微小变化，并对这些变化反馈到现实世界中。例如，当用户做fling(迅速滑动)的动作，应该再滑动开始与结束的时候给用户一定的反馈。</p>
-
-<p>这节课会演示如何使用Android framework的功能来为自定义的View添加那些现实世界中的行为。</p>
-
-<!-- more -->
-
-
-<h2>Handle Input Gestures</h2>
-
-<p>像许多其他UI框架一样，Android提供一个输入事件模型。用户的动作会转换成触发一些回调函数的事件，你可以重写这些回调方法来定制你的程序应该如何响应用户的输入事件。在Android中最常用的输入事件是touch，它会触发<a href="http://developer.android.com/reference/android/view/View.html#onTouchEvent(android.view.MotionEvent">onTouchEvent(android.view.MotionEvent)</a>)的回调。重写这个方法来处理touch事件：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
-</span><span class='line'><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">onTouchEvent</span><span class="o">(</span><span class="n">MotionEvent</span> <span class="n">event</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>  <span class="k">return</span> <span class="kd">super</span><span class="o">.</span><span class="na">onTouchEvent</span><span class="o">(</span><span class="n">event</span><span class="o">);</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Touch事件本身并不是特别有用。如今的touch UI定义了touch事件之间的相互作用，叫做gentures。例如tapping,pulling,flinging与zooming。为了把那些touch的源事件转换成gestures, Android提供了<a href="http://developer.android.com/reference/android/view/GestureDetector.html">GestureDetector</a>。</p>
-
-<p>下面演示了如何构造一个GestureDetector。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">class</span> <span class="nc">mListener</span> <span class="kd">extends</span> <span class="n">GestureDetector</span><span class="o">.</span><span class="na">SimpleOnGestureListener</span> <span class="o">{</span>
-</span><span class='line'>   <span class="nd">@Override</span>
-</span><span class='line'>   <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">onDown</span><span class="o">(</span><span class="n">MotionEvent</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>       <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
-</span><span class='line'>   <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'><span class="n">mDetector</span> <span class="o">=</span> <span class="k">new</span> <span class="n">GestureDetector</span><span class="o">(</span><span class="n">PieChart</span><span class="o">.</span><span class="na">this</span><span class="o">.</span><span class="na">getContext</span><span class="o">(),</span> <span class="k">new</span> <span class="n">mListener</span><span class="o">());</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>不管你是否使用GestureDetector.SimpleOnGestureListener, 你必须总是实现onDown()方法，并返回true。这一步是必须的，因为所有的gestures都是从onDown()开始的。如果你再onDown()里面返回false，系统会认为你想要忽略后续的gesture,那么GestureDetector.OnGestureListener的其他回调方法就不会被执行到了。一旦你实现了GestureDetector.OnGestureListener并且创建了GestureDetector的实例, 你可以使用你的GestureDetector来中止你在onTouchEvent里面收到的touch事件。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
-</span><span class='line'><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">onTouchEvent</span><span class="o">(</span><span class="n">MotionEvent</span> <span class="n">event</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>   <span class="kt">boolean</span> <span class="n">result</span> <span class="o">=</span> <span class="n">mDetector</span><span class="o">.</span><span class="na">onTouchEvent</span><span class="o">(</span><span class="n">event</span><span class="o">);</span>
-</span><span class='line'>   <span class="k">if</span> <span class="o">(!</span><span class="n">result</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>       <span class="k">if</span> <span class="o">(</span><span class="n">event</span><span class="o">.</span><span class="na">getAction</span><span class="o">()</span> <span class="o">==</span> <span class="n">MotionEvent</span><span class="o">.</span><span class="na">ACTION_UP</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>           <span class="n">stopScrolling</span><span class="o">();</span>
-</span><span class='line'>           <span class="n">result</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
-</span><span class='line'>       <span class="o">}</span>
-</span><span class='line'>   <span class="o">}</span>
-</span><span class='line'>   <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>当你传递一个touch事件到onTouchEvent()时，若这个个事件没有被认为是gesture中的一部分，它会返回false。你可以执行自定义的gesture-decection代码。</p>
-
-<h2>Create Physically Plausible(貌似可信的) Motion</h2>
-
-<p>Gestures是控制触摸设备的一种强有力的方式，但是除非你能够产出一个合理的触摸反馈，否则将是违反用户直觉的。一个很好的例子是fling手势，用户迅速的在屏幕上移动手指然后抬手离开屏幕。这个手势应该使得UI迅速的按照fling的方向进行滑动，然后慢慢停下来，就像是用户旋转一个飞轮一样。</p>
-
-<p>幸运的是，Android有提供帮助类来模拟这些物理行为。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
-</span><span class='line'><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">onFling</span><span class="o">(</span><span class="n">MotionEvent</span> <span class="n">e1</span><span class="o">,</span> <span class="n">MotionEvent</span> <span class="n">e2</span><span class="o">,</span> <span class="kt">float</span> <span class="n">velocityX</span><span class="o">,</span> <span class="kt">float</span> <span class="n">velocityY</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>   <span class="n">mScroller</span><span class="o">.</span><span class="na">fling</span><span class="o">(</span><span class="n">currentX</span><span class="o">,</span> <span class="n">currentY</span><span class="o">,</span> <span class="n">velocityX</span> <span class="o">/</span> <span class="n">SCALE</span><span class="o">,</span> <span class="n">velocityY</span> <span class="o">/</span> <span class="n">SCALE</span><span class="o">,</span> <span class="n">minX</span><span class="o">,</span> <span class="n">minY</span><span class="o">,</span> <span class="n">maxX</span><span class="o">,</span> <span class="n">maxY</span><span class="o">);</span>
-</span><span class='line'>   <span class="n">postInvalidate</span><span class="o">();</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><strong>Note:</strong> 尽管速率是通过GestureDetector来计算的，许多开发者感觉使用这个值使得fling动画太快。通常把x与y设置为4到8倍的关系。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="k">if</span> <span class="o">(!</span><span class="n">mScroller</span><span class="o">.</span><span class="na">isFinished</span><span class="o">())</span> <span class="o">{</span>
-</span><span class='line'>    <span class="n">mScroller</span><span class="o">.</span><span class="na">computeScrollOffset</span><span class="o">();</span>
-</span><span class='line'>    <span class="n">setPieRotation</span><span class="o">(</span><span class="n">mScroller</span><span class="o">.</span><span class="na">getCurrY</span><span class="o">());</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><a href="http://developer.android.com/reference/android/widget/Scroller.html">Scroller</a> 类会为你计算滚动位置，但是他不会自动把哪些位置运用到你的view上面。你有责任确保View获取并运用到新的坐标。你有两种方法来实现这件事情：</p>
-
-<ul>
-<li>在调用fling()之后执行postInvalidate(), 这是为了确保能强制进行重画。这个技术需要每次在onDraw里面计算过scroll offsets(滚动偏移量)之后调用postInvalidate()。</li>
-<li>使用<a href="http://developer.android.com/reference/android/animation/ValueAnimator.html">ValueAnimator</a></li>
-</ul>
-
-
-<p>第二个方法使用起来会稍微复杂一点，但是它更有效率并且避免了不必要的重画的view进行重绘。缺点是ValueAnimator是从API Level 11才有的。因此他不能运用到3.0的系统之前的版本上。</p>
-
-<p><strong> Note: </strong> ValueAnimator虽然是API 11才有的，但是你还是可以在最低版本低于3.0的系统上使用它，做法是在运行时判断当前的API Level，如果低于11则跳过。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'> <span class="n">mScroller</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Scroller</span><span class="o">(</span><span class="n">getContext</span><span class="o">(),</span> <span class="kc">null</span><span class="o">,</span> <span class="kc">true</span><span class="o">);</span>
-</span><span class='line'> <span class="n">mScrollAnimator</span> <span class="o">=</span> <span class="n">ValueAnimator</span><span class="o">.</span><span class="na">ofFloat</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span><span class="mi">1</span><span class="o">);</span>
-</span><span class='line'> <span class="n">mScrollAnimator</span><span class="o">.</span><span class="na">addUpdateListener</span><span class="o">(</span><span class="k">new</span> <span class="n">ValueAnimator</span><span class="o">.</span><span class="na">AnimatorUpdateListener</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>     <span class="nd">@Override</span>
-</span><span class='line'>     <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onAnimationUpdate</span><span class="o">(</span><span class="n">ValueAnimator</span> <span class="n">valueAnimator</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>         <span class="k">if</span> <span class="o">(!</span><span class="n">mScroller</span><span class="o">.</span><span class="na">isFinished</span><span class="o">())</span> <span class="o">{</span>
-</span><span class='line'>             <span class="n">mScroller</span><span class="o">.</span><span class="na">computeScrollOffset</span><span class="o">();</span>
-</span><span class='line'>             <span class="n">setPieRotation</span><span class="o">(</span><span class="n">mScroller</span><span class="o">.</span><span class="na">getCurrY</span><span class="o">());</span>
-</span><span class='line'>         <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
-</span><span class='line'>             <span class="n">mScrollAnimator</span><span class="o">.</span><span class="na">cancel</span><span class="o">();</span>
-</span><span class='line'>             <span class="n">onScrollFinished</span><span class="o">();</span>
-</span><span class='line'>         <span class="o">}</span>
-</span><span class='line'>     <span class="o">}</span>
-</span><span class='line'> <span class="o">});</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Make Your Transitions Smooth</h2>
-
-<p>用户期待一个UI之间的切换是能够平滑过渡的。UI元素需要做到渐入淡出来取代突然出现与消失。Android从3.0开始有提供<a href="http://developer.android.com/guide/topics/graphics/prop-animation.html">property animation framework</a>,用来使得平滑过渡变得更加容易。</p>
-
-<p>如果你不想改变View的属性，只是做一些动画的话，你可以使用ObjectAnimator.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">mAutoCenterAnimator</span> <span class="o">=</span> <span class="n">ObjectAnimator</span><span class="o">.</span><span class="na">ofInt</span><span class="o">(</span><span class="n">PieChart</span><span class="o">.</span><span class="na">this</span><span class="o">,</span> <span class="s">&quot;PieRotation&quot;</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
-</span><span class='line'><span class="n">mAutoCenterAnimator</span><span class="o">.</span><span class="na">setIntValues</span><span class="o">(</span><span class="n">targetAngle</span><span class="o">);</span>
-</span><span class='line'><span class="n">mAutoCenterAnimator</span><span class="o">.</span><span class="na">setDuration</span><span class="o">(</span><span class="n">AUTOCENTER_ANIM_DURATION</span><span class="o">);</span>
-</span><span class='line'><span class="n">mAutoCenterAnimator</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>如果你想改变的是view的某些基础属性，你可以使用<a href="http://developer.android.com/reference/android/view/ViewPropertyAnimator.html">ViewPropertyAnimator</a> ,它能够同时执行多个属性的动画。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">animate</span><span class="o">().</span><span class="na">rotation</span><span class="o">(</span><span class="n">targetAngle</span><span class="o">).</span><span class="na">setDuration</span><span class="o">(</span><span class="n">ANIM_DURATION</span><span class="o">).</span><span class="na">start</span><span class="o">();</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<hr />
-
-<p><strong>学习自：<a href="http://developer.android.com/training/custom-views/making-interactive.html">http://developer.android.com/training/custom-views/making-interactive.html</a>，请多指教，谢谢！</strong><br/>
-<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Training(16) - 创建自定义的Views(Lesson 2 - 自定义Drawing)]]></title>
-    <link href="http://hukai.me/blog/android-training-16-creating-custom-views-lesson-2/"/>
-    <updated>2013-06-30T20:15:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-16-creating-custom-views-lesson-2</id>
-    <content type="html"><![CDATA[<p>自定义view的最重要的一个部分是自定义它的外观。根据你的程序的需求，自定义绘制动作可能简单也可能很复杂。这节课会演示一些最常见的操作。</p>
-
-<h2>Override onDraw()</h2>
-
-<p>重绘一个自定义的view的最重要的步骤是重写onDraw()方法。onDraw()的参数是一个Canvas对象。Canvas类定义了绘制文本，线条，图像与许多其他图形的方法。你可以在onDraw方法里面使用那些方法来创建你的UI。</p>
-
-<p>在你调用任何绘制方法之前，你需要创建一个Paint对象。</p>
-
-<!-- more -->
-
-
-<h2>Create Drawing Objects</h2>
-
-<p>android.graphics framework把绘制定义为下面两类:</p>
-
-<ul>
-<li>绘制什么，由Canvas控制</li>
-<li>如何绘制，由Paint控制</li>
-</ul>
-
-
-<p>例如Canvas提供绘制一条直线的方法，Paint提供直线颜色。所以在绘制之前，你需要创建一个或者多个Paint对象。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="kt">void</span> <span class="nf">init</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>   <span class="n">mTextPaint</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Paint</span><span class="o">(</span><span class="n">Paint</span><span class="o">.</span><span class="na">ANTI_ALIAS_FLAG</span><span class="o">);</span>
-</span><span class='line'>   <span class="n">mTextPaint</span><span class="o">.</span><span class="na">setColor</span><span class="o">(</span><span class="n">mTextColor</span><span class="o">);</span>
-</span><span class='line'>   <span class="k">if</span> <span class="o">(</span><span class="n">mTextHeight</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>       <span class="n">mTextHeight</span> <span class="o">=</span> <span class="n">mTextPaint</span><span class="o">.</span><span class="na">getTextSize</span><span class="o">();</span>
-</span><span class='line'>   <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
-</span><span class='line'>       <span class="n">mTextPaint</span><span class="o">.</span><span class="na">setTextSize</span><span class="o">(</span><span class="n">mTextHeight</span><span class="o">);</span>
-</span><span class='line'>   <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>   <span class="n">mPiePaint</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Paint</span><span class="o">(</span><span class="n">Paint</span><span class="o">.</span><span class="na">ANTI_ALIAS_FLAG</span><span class="o">);</span>
-</span><span class='line'>   <span class="n">mPiePaint</span><span class="o">.</span><span class="na">setStyle</span><span class="o">(</span><span class="n">Paint</span><span class="o">.</span><span class="na">Style</span><span class="o">.</span><span class="na">FILL</span><span class="o">);</span>
-</span><span class='line'>   <span class="n">mPiePaint</span><span class="o">.</span><span class="na">setTextSize</span><span class="o">(</span><span class="n">mTextHeight</span><span class="o">);</span>
-</span><span class='line'>
-</span><span class='line'>   <span class="n">mShadowPaint</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Paint</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span>
-</span><span class='line'>   <span class="n">mShadowPaint</span><span class="o">.</span><span class="na">setColor</span><span class="o">(</span><span class="mh">0xff101010</span><span class="o">);</span>
-</span><span class='line'>   <span class="n">mShadowPaint</span><span class="o">.</span><span class="na">setMaskFilter</span><span class="o">(</span><span class="k">new</span> <span class="n">BlurMaskFilter</span><span class="o">(</span><span class="mi">8</span><span class="o">,</span> <span class="n">BlurMaskFilter</span><span class="o">.</span><span class="na">Blur</span><span class="o">.</span><span class="na">NORMAL</span><span class="o">));</span>
-</span><span class='line'>
-</span><span class='line'>   <span class="o">...</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>刚开始就创建对象是一个重要的优化技巧。Views会被频繁的重新绘制，初始化许多绘制对象需要花费昂贵的代价。在onDraw方法里面创建绘制对象会严重影响到性能并使得你的UI显得卡顿。</p>
-
-<h2>Handle Layout Events</h2>
-
-<p>为了正确的绘制你的view，你需要知道view的大小。复杂的自定义view通常需要根据在屏幕上的大小与形状执行多次layout计算。你不应该去估算这个view在屏幕上的显示大小。即使只有一个程序会使用你的view，仍然是需要处理屏幕大小不同，密度不同，方向不同所带来的影响。</p>
-
-<p>尽管view有许多方法是用来计算大小的，但是大多数是不需要重写的。如果你的view不需要特别的控制它的大小，唯一需要重写的方法是<a href="http://developer.android.com/reference/android/view/View.html#onSizeChanged(int,%20int,%20int,%20int">onSizeChanged()</a>).</p>
-
-<p>onSizeChanged()，当你的view第一次被赋予一个大小时，或者你的view大小被更改时会被执行。在onSizeChanged方法里面计算位置，间距等其他与你的view大小值。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'>   <span class="c1">// Account for padding</span>
-</span><span class='line'>   <span class="kt">float</span> <span class="n">xpad</span> <span class="o">=</span> <span class="o">(</span><span class="kt">float</span><span class="o">)(</span><span class="n">getPaddingLeft</span><span class="o">()</span> <span class="o">+</span> <span class="n">getPaddingRight</span><span class="o">());</span>
-</span><span class='line'>   <span class="kt">float</span> <span class="n">ypad</span> <span class="o">=</span> <span class="o">(</span><span class="kt">float</span><span class="o">)(</span><span class="n">getPaddingTop</span><span class="o">()</span> <span class="o">+</span> <span class="n">getPaddingBottom</span><span class="o">());</span>
-</span><span class='line'>
-</span><span class='line'>   <span class="c1">// Account for the label</span>
-</span><span class='line'>   <span class="k">if</span> <span class="o">(</span><span class="n">mShowText</span><span class="o">)</span> <span class="n">xpad</span> <span class="o">+=</span> <span class="n">mTextWidth</span><span class="o">;</span>
-</span><span class='line'>
-</span><span class='line'>   <span class="kt">float</span> <span class="n">ww</span> <span class="o">=</span> <span class="o">(</span><span class="kt">float</span><span class="o">)</span><span class="n">w</span> <span class="o">-</span> <span class="n">xpad</span><span class="o">;</span>
-</span><span class='line'>   <span class="kt">float</span> <span class="n">hh</span> <span class="o">=</span> <span class="o">(</span><span class="kt">float</span><span class="o">)</span><span class="n">h</span> <span class="o">-</span> <span class="n">ypad</span><span class="o">;</span>
-</span><span class='line'>
-</span><span class='line'>   <span class="c1">// Figure out how big we can make the pie.</span>
-</span><span class='line'>   <span class="kt">float</span> <span class="n">diameter</span> <span class="o">=</span> <span class="n">Math</span><span class="o">.</span><span class="na">min</span><span class="o">(</span><span class="n">ww</span><span class="o">,</span> <span class="n">hh</span><span class="o">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>如果你想更加精确的控制你的view的大小，需要重写<a href="http://developer.android.com/reference/android/view/View.html#onMeasure(int,%20int">onMeasure()</a>)方法。这个方法的参数是View.MeasureSpec，它会告诉你的view的夫控件的大小。那些值被包装成int类型，你可以使用静态方法来获取其中的信息。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
-</span><span class='line'><span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onMeasure</span><span class="o">(</span><span class="kt">int</span> <span class="n">widthMeasureSpec</span><span class="o">,</span> <span class="kt">int</span> <span class="n">heightMeasureSpec</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>   <span class="c1">// Try for a width based on our minimum</span>
-</span><span class='line'>   <span class="kt">int</span> <span class="n">minw</span> <span class="o">=</span> <span class="n">getPaddingLeft</span><span class="o">()</span> <span class="o">+</span> <span class="n">getPaddingRight</span><span class="o">()</span> <span class="o">+</span> <span class="n">getSuggestedMinimumWidth</span><span class="o">();</span>
-</span><span class='line'>   <span class="kt">int</span> <span class="n">w</span> <span class="o">=</span> <span class="n">resolveSizeAndState</span><span class="o">(</span><span class="n">minw</span><span class="o">,</span> <span class="n">widthMeasureSpec</span><span class="o">,</span> <span class="mi">1</span><span class="o">);</span>
-</span><span class='line'>
-</span><span class='line'>   <span class="c1">// Whatever the width ends up being, ask for a height that would let the pie</span>
-</span><span class='line'>   <span class="c1">// get as big as it can</span>
-</span><span class='line'>   <span class="kt">int</span> <span class="n">minh</span> <span class="o">=</span> <span class="n">MeasureSpec</span><span class="o">.</span><span class="na">getSize</span><span class="o">(</span><span class="n">w</span><span class="o">)</span> <span class="o">-</span> <span class="o">(</span><span class="kt">int</span><span class="o">)</span><span class="n">mTextWidth</span> <span class="o">+</span> <span class="n">getPaddingBottom</span><span class="o">()</span> <span class="o">+</span> <span class="n">getPaddingTop</span><span class="o">();</span>
-</span><span class='line'>   <span class="kt">int</span> <span class="n">h</span> <span class="o">=</span> <span class="n">resolveSizeAndState</span><span class="o">(</span><span class="n">MeasureSpec</span><span class="o">.</span><span class="na">getSize</span><span class="o">(</span><span class="n">w</span><span class="o">)</span> <span class="o">-</span> <span class="o">(</span><span class="kt">int</span><span class="o">)</span><span class="n">mTextWidth</span><span class="o">,</span> <span class="n">heightMeasureSpec</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
-</span><span class='line'>
-</span><span class='line'>   <span class="n">setMeasuredDimension</span><span class="o">(</span><span class="n">w</span><span class="o">,</span> <span class="n">h</span><span class="o">);</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>上面的代码有三个重要的事情需要注意:</p>
-
-<ul>
-<li>计算的过程有把view的padding考虑进去。这个在后面会提到，这部分是view所控制的。</li>
-<li>帮助方法resolveSizeAndState()是用来创建最终的宽高值的。这个方法会通过比较view的需求大小与spec值返回一个合适的View.MeasureSpec值，并传递到onMeasure方法中。</li>
-<li>onMeasure()没有返回值。它通过调用setMeasuredDimension()来获取结果。调用这个方法是强制执行的，如果你遗漏了这个方法，会出现运行时异常。</li>
-</ul>
-
-
-<h2>Draw!</h2>
-
-<p>每个view的onDraw都是不同的，但是有下面一些常见的操作：</p>
-
-<ul>
-<li>绘制文字使用drawText()。指定字体通过调用setTypeface(), 通过setColor()来设置文字颜色.</li>
-<li>绘制基本图形使用drawRect(), drawOval(), drawArc(). 通过setStyle()来指定形状是否需要filled, outlined.</li>
-<li>绘制一些复杂的图形，使用Path类. 通过给Path对象添加直线与曲线, 然后使用drawPath()来绘制图形. 和基本图形一样，paths也可以通过setStyle来设置是outlined, filled, both.</li>
-<li>通过创建LinearGradient对象来定义渐变。调用setShader()来使用LinearGradient。</li>
-<li>通过使用drawBitmap来绘制图片.</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onDraw</span><span class="o">(</span><span class="n">Canvas</span> <span class="n">canvas</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>   <span class="kd">super</span><span class="o">.</span><span class="na">onDraw</span><span class="o">(</span><span class="n">canvas</span><span class="o">);</span>
-</span><span class='line'>
-</span><span class='line'>   <span class="c1">// Draw the shadow</span>
-</span><span class='line'>   <span class="n">canvas</span><span class="o">.</span><span class="na">drawOval</span><span class="o">(</span>
-</span><span class='line'>           <span class="n">mShadowBounds</span><span class="o">,</span>
-</span><span class='line'>           <span class="n">mShadowPaint</span>
-</span><span class='line'>   <span class="o">);</span>
-</span><span class='line'>
-</span><span class='line'>   <span class="c1">// Draw the label text</span>
-</span><span class='line'>   <span class="n">canvas</span><span class="o">.</span><span class="na">drawText</span><span class="o">(</span><span class="n">mData</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">mCurrentItem</span><span class="o">).</span><span class="na">mLabel</span><span class="o">,</span> <span class="n">mTextX</span><span class="o">,</span> <span class="n">mTextY</span><span class="o">,</span> <span class="n">mTextPaint</span><span class="o">);</span>
-</span><span class='line'>
-</span><span class='line'>   <span class="c1">// Draw the pie slices</span>
-</span><span class='line'>   <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">mData</span><span class="o">.</span><span class="na">size</span><span class="o">();</span> <span class="o">++</span><span class="n">i</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>       <span class="n">Item</span> <span class="n">it</span> <span class="o">=</span> <span class="n">mData</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
-</span><span class='line'>       <span class="n">mPiePaint</span><span class="o">.</span><span class="na">setShader</span><span class="o">(</span><span class="n">it</span><span class="o">.</span><span class="na">mShader</span><span class="o">);</span>
-</span><span class='line'>       <span class="n">canvas</span><span class="o">.</span><span class="na">drawArc</span><span class="o">(</span><span class="n">mBounds</span><span class="o">,</span>
-</span><span class='line'>               <span class="mi">360</span> <span class="o">-</span> <span class="n">it</span><span class="o">.</span><span class="na">mEndAngle</span><span class="o">,</span>
-</span><span class='line'>               <span class="n">it</span><span class="o">.</span><span class="na">mEndAngle</span> <span class="o">-</span> <span class="n">it</span><span class="o">.</span><span class="na">mStartAngle</span><span class="o">,</span>
-</span><span class='line'>               <span class="kc">true</span><span class="o">,</span> <span class="n">mPiePaint</span><span class="o">);</span>
-</span><span class='line'>   <span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'>   <span class="c1">// Draw the pointer</span>
-</span><span class='line'>   <span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">mTextX</span><span class="o">,</span> <span class="n">mPointerY</span><span class="o">,</span> <span class="n">mPointerX</span><span class="o">,</span> <span class="n">mPointerY</span><span class="o">,</span> <span class="n">mTextPaint</span><span class="o">);</span>
-</span><span class='line'>   <span class="n">canvas</span><span class="o">.</span><span class="na">drawCircle</span><span class="o">(</span><span class="n">mPointerX</span><span class="o">,</span> <span class="n">mPointerY</span><span class="o">,</span> <span class="n">mPointerSize</span><span class="o">,</span> <span class="n">mTextPaint</span><span class="o">);</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<hr />
-
-<p><strong>学习自：<a href="http://developer.android.com/training/custom-views/custom-drawing.html">http://developer.android.com/training/custom-views/custom-drawing.html</a>，请多指教，谢谢！</strong><br/>
-<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Training(16) - 创建自定义的Views(Lesson 1 - 创建一个View类)]]></title>
-    <link href="http://hukai.me/blog/android-training-16-creating-custom-views-lesson-1/"/>
-    <updated>2013-06-30T18:47:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-16-creating-custom-views-lesson-1</id>
-    <content type="html"><![CDATA[<p>设计良好的类总是相似的。它使用一个好用的接口来封装一个特定的功能，它有效的使用CPU与内存，等等。为了成为一个设计良好的类，自定义的view应该:</p>
-
-<ul>
-<li>遵守Android标准规则。</li>
-<li>提供自定义的风格属性值并能够被Android XML Layout所识别。</li>
-<li>发出可访问的事件。</li>
-<li>能够兼容Android的不同平台。</li>
-</ul>
-
-
-<p>Android的framework提供了许多基类与XML标签用来帮助你创建一个符合上面要求的View。这节课会介绍如何使用Android framework来创建一个view的核心功能。</p>
-
-<!-- more -->
-
-
-<h2>Subclass a View</h2>
-
-<p>Android framework里面定义的view类都继承自View。你自定义的view也可以直接继承View，或者你可以通过继承既有的一个子类(例如Button)来节约一点时间。</p>
-
-<p>为了允许Android Developer Tools能够识别你的view，你必须至少提供一个constructor，它包含一个Contenx与一个AttributeSet对象作为参数。这个constructor允许layout editor创建并编辑你的view的实例。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">class</span> <span class="nc">PieChart</span> <span class="kd">extends</span> <span class="n">View</span> <span class="o">{</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="nf">PieChart</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="n">AttributeSet</span> <span class="n">attrs</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>        <span class="kd">super</span><span class="o">(</span><span class="n">context</span><span class="o">,</span> <span class="n">attrs</span><span class="o">);</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Define Custom Attributes</h2>
-
-<p>为了添加一个内置的View到你的UI上，你需要通过XML属性来指定它的样式与行为。为了实现自定义的view的行为，你应该:</p>
-
-<ul>
-<li>为你的view在<declare-styleable>资源标签下定义自设的属性</li>
-<li>在你的XML layout中指定属性值</li>
-<li>在运行时获取属性值</li>
-<li>把获取到的属性值应用在你的view上</li>
-</ul>
-
-
-<p>为了定义自设的属性，添加 <declare-styleable> 资源到你的项目中。放置于res/values/attrs.xml文件中。下面是一个attrs.xml文件的示例:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;resources&gt;</span>
-</span><span class='line'>   <span class="nt">&lt;declare-styleable</span> <span class="na">name=</span><span class="s">&quot;PieChart&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>       <span class="nt">&lt;attr</span> <span class="na">name=</span><span class="s">&quot;showText&quot;</span> <span class="na">format=</span><span class="s">&quot;boolean&quot;</span> <span class="nt">/&gt;</span>
-</span><span class='line'>       <span class="nt">&lt;attr</span> <span class="na">name=</span><span class="s">&quot;labelPosition&quot;</span> <span class="na">format=</span><span class="s">&quot;enum&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>           <span class="nt">&lt;enum</span> <span class="na">name=</span><span class="s">&quot;left&quot;</span> <span class="na">value=</span><span class="s">&quot;0&quot;</span><span class="nt">/&gt;</span>
-</span><span class='line'>           <span class="nt">&lt;enum</span> <span class="na">name=</span><span class="s">&quot;right&quot;</span> <span class="na">value=</span><span class="s">&quot;1&quot;</span><span class="nt">/&gt;</span>
-</span><span class='line'>       <span class="nt">&lt;/attr&gt;</span>
-</span><span class='line'>   <span class="nt">&lt;/declare-styleable&gt;</span>
-</span><span class='line'><span class="nt">&lt;/resources&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>上面的代码声明了2个自设的属性，<strong>showText</strong>与<strong>labelPosition</strong>，它们都归属于PieChart的项目下的styleable实例。styleable实例的名字，通常与自定义的view名字一致。尽管这并没有严格规定要遵守这个convention，但是许多流行的代码编辑器都依靠这个命名规则来提供statement completion。</p>
-
-<p>一旦你定义了自设的属性，你可以在layout XML文件中使用它们。唯一不同的是你自设的属性是归属于不同的命名空间。不是属于http://schemas.android.com/apk/res/android的命名空间，它们归属于http://schemas.android.com/apk/res/[your package name]。例如，下面演示了如何为PieChart使用上面定义的属性：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
-</span><span class='line'><span class="nt">&lt;LinearLayout</span> <span class="na">xmlns:android=</span><span class="s">&quot;http://schemas.android.com/apk/res/android&quot;</span>
-</span><span class='line'>   <span class="na">xmlns:custom=</span><span class="s">&quot;http://schemas.android.com/apk/res/com.example.customviews&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'> <span class="nt">&lt;com.example.customviews.charting.PieChart</span>
-</span><span class='line'>     <span class="na">custom:showText=</span><span class="s">&quot;true&quot;</span>
-</span><span class='line'>     <span class="na">custom:labelPosition=</span><span class="s">&quot;left&quot;</span> <span class="nt">/&gt;</span>
-</span><span class='line'><span class="nt">&lt;/LinearLayout&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>为了避免输入长串的namespace名字，示例上面使用了:custom作为别名，你也可以选择其他的名称所为你的namespace。</p>
-
-<p>请注意，如果你的view是一个inner class，你必须指定这个view的outer class。同样的，如果PieChart有一个inner class叫做PieView。为了使用这个类中自设的属性，你应该使用com.example.customviews.charting.PieChart$PieView.</p>
-
-<h2>Apply Custom Attributes</h2>
-
-<p>当view从XML layout被创建的时候，在xml标签下的属性值都是从resource下读取出来并传递到view的constructor作为一个AttributeSet参数。尽管可以从AttributeSet中直接读取数值，可是这样做有些弊端（<em>没有看懂下面的两个原因</em>）：</p>
-
-<ul>
-<li>拥有属性的资源并没有经过分解</li>
-<li>Styles并没有运用上</li>
-</ul>
-
-
-<p>取而代之的是，通过obtainStyledAttributes()来获取属性值。这个方法会传递一个<a href="http://developer.android.com/reference/android/content/res/TypedArray.html">TypedArray</a>对象，它是间接referenced并且styled的。</p>
-
-<p>请看下面的示例：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="nf">PieChart</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="n">AttributeSet</span> <span class="n">attrs</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>   <span class="kd">super</span><span class="o">(</span><span class="n">context</span><span class="o">,</span> <span class="n">attrs</span><span class="o">);</span>
-</span><span class='line'>   <span class="n">TypedArray</span> <span class="n">a</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="na">getTheme</span><span class="o">().</span><span class="na">obtainStyledAttributes</span><span class="o">(</span>
-</span><span class='line'>        <span class="n">attrs</span><span class="o">,</span>
-</span><span class='line'>        <span class="n">R</span><span class="o">.</span><span class="na">styleable</span><span class="o">.</span><span class="na">PieChart</span><span class="o">,</span>
-</span><span class='line'>        <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
-</span><span class='line'>
-</span><span class='line'>   <span class="k">try</span> <span class="o">{</span>
-</span><span class='line'>       <span class="n">mShowText</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="na">getBoolean</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">styleable</span><span class="o">.</span><span class="na">PieChart_showText</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
-</span><span class='line'>       <span class="n">mTextPos</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="na">getInteger</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">styleable</span><span class="o">.</span><span class="na">PieChart_labelPosition</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
-</span><span class='line'>   <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
-</span><span class='line'>       <span class="n">a</span><span class="o">.</span><span class="na">recycle</span><span class="o">();</span>
-</span><span class='line'>   <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>清注意TypedArray对象是一个shared资源，必须被在使用后进行回收。</p>
-
-<h2>Add Properties and Events</h2>
-
-<p>Attributes是一个强大的控制view的行为与外观的方法，但是他们仅仅能够在view被初始化的时候被读取到。为了提供一个动态的行为，需要暴露出一些合适的getter 与setter方法。下面的代码演示了如何使用这个技巧:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isShowText</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>   <span class="k">return</span> <span class="n">mShowText</span><span class="o">;</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">setShowText</span><span class="o">(</span><span class="kt">boolean</span> <span class="n">showText</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>   <span class="n">mShowText</span> <span class="o">=</span> <span class="n">showText</span><span class="o">;</span>
-</span><span class='line'>   <span class="n">invalidate</span><span class="o">();</span>
-</span><span class='line'>   <span class="n">requestLayout</span><span class="o">();</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>请注意，在setShowText方法里面有调用<a href="http://developer.android.com/reference/android/view/View.html#invalidate(">invalidate()</a>) and <a href="http://developer.android.com/reference/android/view/View.html#requestLayout(">requestLayout()</a>). 当view的某些内容发生变化的时候，需要调用invalidate来通知系统对这个view进行redraw，当某些元素变化会引起组件大小变化时，需要调用requestLayout方法。</p>
-
-<p>自定义的view也需要能够支持响应事件的监听器。例如，PieChart暴露了一个自设的事件OnCurrentItemChanged来通知监听器，用户已经切换了焦点到一个新的组件上。</p>
-
-<p>我们很容易忘记了暴露属性与事件，特别是当你是这个view的唯一用户时。请花费一些时间来仔细定义你的view的交互。一个好的规则是总是暴露任何属性与事件。</p>
-
-<h2>Design For Accessibility</h2>
-
-<p>Your custom view should support the widest range of users. This includes users with disabilities that prevent them from seeing or using a touchscreen. To support users with disabilities, you should:</p>
-
-<ul>
-<li>Label your input fields using the android:contentDescription attribute</li>
-<li>Send accessibility events by calling sendAccessibilityEvent() when appropriate.</li>
-<li>Support alternate controllers, such as D-pad and trackball</li>
-</ul>
-
-
-<p>For more information on creating accessible views, see <a href="http://developer.android.com/guide/topics/ui/accessibility/apps.html#custom-views">Making Applications Accessible</a> in the Android Developers Guide.</p>
-
-<hr />
-
-<p><strong>学习自：<a href="http://developer.android.com/training/custom-views/create-view.html">http://developer.android.com/training/custom-views/create-view.html</a>，请多指教，谢谢！</strong><br/>
-<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Training(16) - 创建自定义的Views(Lesson 0 - 章节概览)]]></title>
-    <link href="http://hukai.me/blog/android-training-16-creating-custom-views-lesson-0/"/>
-    <updated>2013-06-30T18:23:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-16-creating-custom-views-lesson-0</id>
-    <content type="html"><![CDATA[<p>Android的framework有大量的Views用来与用户进行交互并显示不同种类的数据。但是有时候你的程序有个特殊的需求，而Android内置的views组件并不能实现。这一章节会演示如何创建你自己的views，并使得它们是robust与reusable的。</p>
-
-<p><strong>Dependencies and Prerequisites</strong></p>
-
-<p>Android 2.1 (API level 7) or higher</p>
-
-<p><strong>YOU should also read</strong></p>
-
-<ul>
-<li><a href="http://developer.android.com/guide/topics/ui/custom-components.html">Custom Components</a></li>
-<li><a href="http://developer.android.com/guide/topics/ui/ui-events.html">Input Events</a></li>
-<li><a href="http://developer.android.com/guide/topics/graphics/prop-animation.html">Property Animation</a></li>
-<li><a href="http://developer.android.com/guide/topics/graphics/hardware-accel.html">Hardware Acceleration</a></li>
-<li><a href="http://developer.android.com/guide/topics/ui/accessibility/index.html">Accessibility</a> developer guide</li>
-</ul>
-
-
-<p><strong>Try it out</strong></p>
-
-<p>Download the sample<br/>
-<a href="http://developer.android.com/shareables/training/CustomView.zip">CustomView.zip</a></p>
-
-<!-- more -->
-
-
-<h2>Lesson</h2>
-
-<p><strong>(1)创建一个View类</strong></p>
-
-<p>Create a class that acts like a built-in view, with custom attributes and support from the ADT layout editor.</p>
-
-<p><strong>(2)自定义Drawing</strong></p>
-
-<p>Make your view visually distinctive using the Android graphics system.</p>
-
-<p><strong>(3)使得View是可交互的</strong></p>
-
-<p>Users expect a view to react smoothly and naturally to input gestures. This lesson discusses how to use gesture detection, physics, and animation to give your user interface a professional feel.</p>
-
-<p><strong>(4)优化View</strong></p>
-
-<p>No matter how beautiful your UI is, users won&#8217;t love it if it doesn&#8217;t run at a consistently high frame rate. Learn how to avoid common performance problems, and how to use hardware acceleration to make your custom drawings run faster.</p>
-
-<p><strong>学习自：<a href="http://developer.android.com/training/custom-views/index.html">http://developer.android.com/training/custom-views/index.html</a>，请多指教，谢谢！</strong><br/>
-<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
 ]]></content>
   </entry>
   

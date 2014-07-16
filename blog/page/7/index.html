@@ -9,7 +9,9 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="当程序的第一个组件开始启动时，Android系统会为这个程序启动一个新的Linux进程。默认的，程序中的后续其他组件都是运行在这个进程的线程中(这个线程被成为&#8221;主&#8221;线程:main thread)。如果程序的组件在启动时发现已经存在这个程序的进程了(因为其他组件正在运行 &hellip;">
+  <meta name="description" content="设计良好的类总是相似的。它使用一个好用的接口来封装一个特定的功能，它有效的使用CPU与内存，等等。为了成为一个设计良好的类，自定义的view应该: 遵守Android标准规则。
+提供自定义的风格属性值并能够被Android XML Layout所识别。
+发出可访问的事件。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -70,7 +72,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-notes-process-and-thread/">Android Notes(03) - Process and Thread</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-training-16-creating-custom-views-lesson-1/">Android Training(16) - 创建自定义的Views(Lesson 1 - 创建一个View类)</a></h1>
     
     
       <p class="meta">
@@ -86,28 +88,32 @@
   
 
 
-<time datetime="2013-03-31T16:27:00+08:00" pubdate data-updated="true">Mar 31<span>st</span>, 2013</time>
+<time datetime="2013-06-30T18:47:00+08:00" pubdate data-updated="true">Jun 30<span>th</span>, 2013</time>
         
-         | <a href="/blog/android-notes-process-and-thread/#disqus_thread">Comments</a>
+         | <a href="/blog/android-training-16-creating-custom-views-lesson-1/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p><img src="/images/articles/process_and_thread.jpg"></p>
+  <div class="entry-content"><p>设计良好的类总是相似的。它使用一个好用的接口来封装一个特定的功能，它有效的使用CPU与内存，等等。为了成为一个设计良好的类，自定义的view应该:</p>
 
-<p>当程序的第一个组件开始启动时，Android系统会为这个程序启动一个新的Linux进程。默认的，程序中的后续其他组件都是运行在这个进程的线程中(这个线程被成为&#8221;主&#8221;线程:main thread)。如果程序的组件在启动时发现已经存在这个程序的进程了(因为其他组件正在运行)， 那么这个组件将启动在该进程中，并使用同一线程。然而，你可以安排程序中的不同组件运行在另外一个进程中，而且你可以为任何进程创建其它的线程。</p>
+<ul>
+<li>遵守Android标准规则。</li>
+<li>提供自定义的风格属性值并能够被Android XML Layout所识别。</li>
+<li>发出可访问的事件。</li>
+<li>能够兼容Android的不同平台。</li>
+</ul>
 
-<h1>Process：进程</h1>
 
-<p>默认的，同一程序的所有组件都是运行在一个Proces里面的，并且大多数程序都不应该去改变这一规则。然而，如果你需要控制某一确定的组件的Proces，你可以在manifest文件中做特殊设置。<em>Music播放器的Playback Service就可以这样做</em></p>
+<p>Android的framework提供了许多基类与XML标签用来帮助你创建一个符合上面要求的View。这节课会介绍如何使用Android framework来创建一个view的核心功能。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-notes-process-and-thread/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-training-16-creating-custom-views-lesson-1/">Read on &rarr;</a>
     </footer>
   
 
@@ -119,7 +125,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-notes-aidl/">Android Notes(02) - AIDL</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-training-16-creating-custom-views-lesson-0/">Android Training(16) - 创建自定义的Views(Lesson 0 - 章节概览)</a></h1>
     
     
       <p class="meta">
@@ -135,9 +141,125 @@
   
 
 
-<time datetime="2013-02-19T21:18:00+08:00" pubdate data-updated="true">Feb 19<span>th</span>, 2013</time>
+<time datetime="2013-06-30T18:23:00+08:00" pubdate data-updated="true">Jun 30<span>th</span>, 2013</time>
         
-         | <a href="/blog/android-notes-aidl/#disqus_thread">Comments</a>
+         | <a href="/blog/android-training-16-creating-custom-views-lesson-0/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Android的framework有大量的Views用来与用户进行交互并显示不同种类的数据。但是有时候你的程序有个特殊的需求，而Android内置的views组件并不能实现。这一章节会演示如何创建你自己的views，并使得它们是robust与reusable的。</p>
+
+<p><strong>Dependencies and Prerequisites</strong></p>
+
+<p>Android 2.1 (API level 7) or higher</p>
+
+<p><strong>YOU should also read</strong></p>
+
+<ul>
+<li><a href="http://developer.android.com/guide/topics/ui/custom-components.html">Custom Components</a></li>
+<li><a href="http://developer.android.com/guide/topics/ui/ui-events.html">Input Events</a></li>
+<li><a href="http://developer.android.com/guide/topics/graphics/prop-animation.html">Property Animation</a></li>
+<li><a href="http://developer.android.com/guide/topics/graphics/hardware-accel.html">Hardware Acceleration</a></li>
+<li><a href="http://developer.android.com/guide/topics/ui/accessibility/index.html">Accessibility</a> developer guide</li>
+</ul>
+
+
+<p><strong>Try it out</strong></p>
+
+<p>Download the sample<br/>
+<a href="http://developer.android.com/shareables/training/CustomView.zip">CustomView.zip</a></p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/android-training-16-creating-custom-views-lesson-0/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/android-training-09-displaying-bitmaps-efficiently-lesson-4/">Android Training(09) - 高效地显示Bitmap(Lesson 4 - 优化Bitmap的内存使用)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-19T14:43:00+08:00" pubdate data-updated="true">May 19<span>th</span>, 2013</time>
+        
+         | <a href="/blog/android-training-09-displaying-bitmaps-efficiently-lesson-4/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>作为缓存Bitmaps的进一步延伸, 为了促进GC与bitmap的重用，你还有一些特定的事情可以做. 推荐的策略会根据Android的版本不同而有所差异. <a href="http://developer.android.com/shareables/training/BitmapFun.zip">BitmapFun</a>的示例程序会演示如何设计你的程序使得能够在不同的Android平台上高效的运行.</p>
+
+<p>我们首先要知道Android管理bitmap memory的演变进程:</p>
+
+<ul>
+<li>在Android 2.2 (API level 8)以及之前, 当GC发生时, 你的应用的线程是会stopped的. 这导致了一个滞后，它会降低效率. <strong>在Android 2.3上，添加了并发GC的机制, 这意味着在一个bitmap不再被引用到之后，内存会被立即reclaimed.</strong></li>
+<li>在Android 2.3.3 (API level 10)已经之后, 一个bitmap的像素级数据是存放在native内存中的. 这些数据与bitmap本身是隔离的, bitmap本身是被存放在Dalvik heap中. 在native内存中的pixel数据不是以可以预测的方式去释放的, 这意味着有可能导致一个程序容易超过它的内存限制并Crash. <strong>在Android 3.0 (API Level 11), pixel数据则是与bitmap本身一起存放在dalvik heap中.</strong></li>
+</ul>
+
+
+<p>下面会介绍如何在不同的Android版本上优化bitmap内存使用.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/android-training-09-displaying-bitmaps-efficiently-lesson-4/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/android-notes-task-and-back-stack/">Android Notes(05) - Tasks and Back Stack</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-04-20T20:42:00+08:00" pubdate data-updated="true">Apr 20<span>th</span>, 2013</time>
+        
+         | <a href="/blog/android-notes-task-and-back-stack/#disqus_thread">Comments</a>
         
       </p>
     
@@ -145,134 +267,21 @@
 
 
   <div class="entry-content"><ul>
-<li>在Android process之间不能用通常的方式去访问彼此的内存数据。 他们把需要传递的数据解析成基础对象，使得系统能够识别并处理这些对象。因为这个处理过程很难写，所以Android使用AIDL来解决这个问题。</li>
-<li>在定义AIDL接口之前，请意识到call这些接口是direct function call。 请不要认为这些call 接口的行为是发生在另外一个线程里面的。具体的不同因这个调用是发生在local process还是remote process而异。
-
-<ul>
-<li>发生在local process里面的调用会跑在这个local process的thread里面。如果这是你的主UI线程，那么AIDL接口的调用也会发生在这个UI thread里面。如果这是发生在另外一个thread，那么调用会发生在service里面。因此，如果仅仅是发生在local process的调用，则你可以完全控制这些调用，当然这样的话，也就不需要用AIDL了。因为你完全可以使用Bound Service的第一种方式去实现。</li>
-<li>发生在remote process里面的调用是会跑在你自己的process所维护的一个thread pool里面。那么你需要注意可能会在同一时刻接受到多个请求。所以AIDL的操作需要做到thread-safe。(<em>每次请求，都会交给Service，在线程池里面启动一个thread去执行那些请求，所以那些方法需要是线程安全的</em>)</li>
-<li>oneway关键字改变了remote call的行为。当使用这个关键字时，remote call不会被阻塞住，它仅仅是发送交互数据后再立即返回。IBinder thread pool 之后会把它当作一个通常的remote call呼叫。</li>
-</ul>
-</li>
+<li>所有的activities都归属于一个task。</li>
+<li>一个task包含了一些activities，这些activities以用户与他们的交互前后为顺序存放在task中。</li>
+<li>Tasks可以把activies放置在background并且保存每一个activites的状态，以便于用户可以切换到其他task而不至于丢失之前的活动状态。</li>
 </ul>
 
+
+<h1>要点概述</h1>
+
+<p>一个程序通常包含了多个actvities。每一个activity都应该围绕用户需要执行的一个特定功能而进行设计，并且可以启动其他的activites。例如:一个邮件程序应该拥有一个显示新邮件的列表。当用户选择其中一封邮件，一个新的activity将打开用来显示邮件内容。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-notes-aidl/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/android-notes-bound-services/">Android Notes(01) - Bound Services</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-02-18T22:30:00+08:00" pubdate data-updated="true">Feb 18<span>th</span>, 2013</time>
-        
-         | <a href="/blog/android-notes-bound-services/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><ul>
-<li>一个bound的service是C/S的接口。它允许其他组件绑定到service,发送请求，接收回应并执行IPC。通常是需要给其他程序组件提供服务。
-
-<ul>
-<li>A bound service allows other components to bind to it, in order to interact with it and perform interprocess communication。</li>
-<li>A bound service is destroyed once all clients unbind, unless the service was also started。</li>
-</ul>
-</li>
-<li>客户端通过执行 bindService()绑定到service。这样的话，客户端需要实现一个ServiceConnection, 它可以监视与service的连接状态。bindService() 并不会有返回值，但是Android系统会在client与service连接上时，执行onServiceConnected() 的callback。在这个回调方法里面传递IBinder给client用来与service进行交互。</li>
-<li>前面提到可以有多个Client同时bind到service。然而，系统只会在第一个client做绑定时才会执行service的onBind() 方法。对于随后需要绑定的客户端，系统会直接传递同一个 IBinder 对象给Client，而不是去再次执行onBind方法。(<em>那么也就是onBind方法只会被执行一次</em>)</li>
-<li>通常来说，Music程序需要实现service的两种方式，这样既可以在activity被销毁之后(<em>假设只实现bound的方式的话，这个时候，unbind了，Music会停止</em>)音乐可以继续播放，当重新进入activity时又会重新bind上。这刚好验证了下面的说法：</li>
-<li>如果一个service既可以started与bound。当一个service是started的，系统并不会在所有的Client都unbind之后去杀死这个service，我们需要显示的去停止这个service，通过stopSelf或者stopService的方式。</li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/android-notes-bound-services/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/android-notes-services/">Android Notes(00) - Services</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-02-04T18:37:00+08:00" pubdate data-updated="true">Feb 4<span>th</span>, 2013</time>
-        
-         | <a href="/blog/android-notes-services/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>概要</h2>
-
-<ul>
-<li>Service是一个可以在后台长时间进行工作的一个程序组件。这个组件并没有提供UI。其他的程序组件可以Start一个Service，并且可以在用户切换到另外一个程序的时候继续工作。另外，某个组件可以Bind到一个Service上，并与他进行交互，甚至是进行IPC操作。例如，一个Service可以处理网络交互，播放音乐，执行I/O操作，或者与Content Provider进行交互，他们都是在后台的。
-
-<ul>
-<li>Service可以跑在后台进行工作，即使用户在切换到另外一个程序。</li>
-<li>Service可以允许其他组件与它进行Bind，从而进行IPC操作。</li>
-<li>Service默认是跑在host程序的main thread。</li>
-</ul>
-</li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/android-notes-services/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-notes-task-and-back-stack/">Read on &rarr;</a>
     </footer>
   
 
@@ -296,35 +305,35 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/android-training-wearable-app-bt-debug/">Android Training - 创建可穿戴应用(5 - 通过蓝牙进行调试)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-packaging/">Android Training - 创建可穿戴应用(4 - 打包可穿戴应用)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-voice-input/">Android Training - 创建可穿戴应用(3 - 添加语音能力)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-layouts/">Android Training - 创建可穿戴应用(2 - 创建自定义的布局)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-creating/">Android Training - 创建可穿戴应用(1 - 创建并执行可穿戴应用)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-index/">Android Training - 创建可穿戴应用(0 - 序言)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/android-notes-add-copy-text-option-to-share-list/">Android Notes - 添加Copy to Clipboard的选项到分享列表中</a>
       </li>
     
       <li class="post">
         <a href="/blog/android-training-performance-anr/">Android Training - 避免程序无响应ANR</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-custom-request/">Android Training - Volley(Lesson 4 - 实现自定义的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-standard-request/">Android Training - Volley(Lesson 3 - 创建标准的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-request-queue/">Android Training - Volley(Lesson 2 - 建立请求队列)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-simple-request/">Android Training - Volley(Lesson 1 - 发送简单的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-index/">Android Training - Volley(Lesson 0 - 序言)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-deeper-graphics-architecture/">Android Deeper(01) - Graphic Architecture</a>
       </li>
     
   </ul>
@@ -333,10 +342,10 @@
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (79)</a></li>
+  <li><a href='/blog/categories/android'>Android (85)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (8)</a></li>
-  <li><a href='/blog/categories/android-training'>Android:training (69)</a></li>
+  <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
 </ul>

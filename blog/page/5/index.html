@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="绘制UI仅仅是创建自定义View的一部分。你还需要使得你的View能够以模拟现实世界的方式来进行反馈。Objects应该总是与现实情景能够保持一致。例如，图片不应该突然消失又从另外一个地方出现，因为在现实世界里面不会发生那样的事情。正确的应该是，图片从一个地方移动到另外一个地方。 &hellip;">
+  <meta name="description" content="前一篇文章演示了如何创建一个IntentService类。这次会演示如何通过发送一个Intent来触发IntentService执行任务。这个Intent可以传递一些数据给IntentService。可以在Activity或者Fragment的任何时间点发送这个Intent。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -70,7 +70,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-training-16-creating-custom-views-lesson-3/">Android Training(16) - 创建自定义的Views(Lesson 3 - 处理View的交互性)</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-training-18-running-background-service-lesson-2/">Android Training(18) - 使用IntentService执行任务(Lesson 2 - 发送任务给IntentService)</a></h1>
     
     
       <p class="meta">
@@ -86,128 +86,50 @@
   
 
 
-<time datetime="2013-08-18T15:01:00+08:00" pubdate data-updated="true">Aug 18<span>th</span>, 2013</time>
+<time datetime="2014-04-20T20:46:00+08:00" pubdate data-updated="true">Apr 20<span>th</span>, 2014</time>
         
-         | <a href="/blog/android-training-16-creating-custom-views-lesson-3/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>绘制UI仅仅是创建自定义View的一部分。你还需要使得你的View能够以模拟现实世界的方式来进行反馈。Objects应该总是与现实情景能够保持一致。例如，图片不应该突然消失又从另外一个地方出现，因为在现实世界里面不会发生那样的事情。正确的应该是，图片从一个地方移动到另外一个地方。</p>
-
-<p>用户应该可以感受到UI上的微小变化，并对这些变化反馈到现实世界中。例如，当用户做fling(迅速滑动)的动作，应该再滑动开始与结束的时候给用户一定的反馈。</p>
-
-<p>这节课会演示如何使用Android framework的功能来为自定义的View添加那些现实世界中的行为。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/android-training-16-creating-custom-views-lesson-3/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/android-training-16-creating-custom-views-lesson-2/">Android Training(16) - 创建自定义的Views(Lesson 2 - 自定义Drawing)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-06-30T20:15:00+08:00" pubdate data-updated="true">Jun 30<span>th</span>, 2013</time>
-        
-         | <a href="/blog/android-training-16-creating-custom-views-lesson-2/#disqus_thread">Comments</a>
+         | <a href="/blog/android-training-18-running-background-service-lesson-2/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>自定义view的最重要的一个部分是自定义它的外观。根据你的程序的需求，自定义绘制动作可能简单也可能很复杂。这节课会演示一些最常见的操作。</p>
+  <div class="entry-content"><p>前一篇文章演示了如何创建一个IntentService类。这次会演示如何通过发送一个Intent来触发IntentService执行任务。这个Intent可以传递一些数据给IntentService。可以在Activity或者Fragment的任何时间点发送这个Intent。</p>
 
-<h2>Override onDraw()</h2>
+<p>为了创建一个工作请求并发送到IntentService。需要先创建一个explicit Intent，添加数据到intent，然后通过执行<a href="http://developer.android.com/reference/android/content/Context.html#startService(android.content.Intent">startService()</a>) 把它发送到IntentService。</p>
 
-<p>重绘一个自定义的view的最重要的步骤是重写onDraw()方法。onDraw()的参数是一个Canvas对象。Canvas类定义了绘制文本，线条，图像与许多其他图形的方法。你可以在onDraw方法里面使用那些方法来创建你的UI。</p>
-
-<p>在你调用任何绘制方法之前，你需要创建一个Paint对象。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/android-training-16-creating-custom-views-lesson-2/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/android-training-16-creating-custom-views-lesson-1/">Android Training(16) - 创建自定义的Views(Lesson 1 - 创建一个View类)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-06-30T18:47:00+08:00" pubdate data-updated="true">Jun 30<span>th</span>, 2013</time>
-        
-         | <a href="/blog/android-training-16-creating-custom-views-lesson-1/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>设计良好的类总是相似的。它使用一个好用的接口来封装一个特定的功能，它有效的使用CPU与内存，等等。为了成为一个设计良好的类，自定义的view应该:</p>
+<p>下面的是代码示例：</p>
 
 <ul>
-<li>遵守Android标准规则。</li>
-<li>提供自定义的风格属性值并能够被Android XML Layout所识别。</li>
-<li>发出可访问的事件。</li>
-<li>能够兼容Android的不同平台。</li>
+<li>创建一个新的显式的Intent用来启动IntentService。</li>
 </ul>
 
 
-<p>Android的framework提供了许多基类与XML标签用来帮助你创建一个符合上面要求的View。这节课会介绍如何使用Android framework来创建一个view的核心功能。</p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="cm">/*</span>
+</span><span class='line'><span class="cm"> * Creates a new Intent to start the RSSPullService</span>
+</span><span class='line'><span class="cm"> * IntentService. Passes a URI in the</span>
+</span><span class='line'><span class="cm"> * Intent&#39;s &quot;data&quot; field.</span>
+</span><span class='line'><span class="cm"> */</span>
+</span><span class='line'><span class="n">mServiceIntent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">getActivity</span><span class="o">(),</span> <span class="n">RSSPullService</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span><span class='line'><span class="n">mServiceIntent</span><span class="o">.</span><span class="na">setData</span><span class="o">(</span><span class="n">Uri</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="n">dataUrl</span><span class="o">));</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-training-16-creating-custom-views-lesson-1/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-training-18-running-background-service-lesson-2/">Read on &rarr;</a>
     </footer>
   
 
@@ -219,7 +141,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-training-16-creating-custom-views-lesson-0/">Android Training(16) - 创建自定义的Views(Lesson 0 - 章节概览)</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-training-18-running-background-service-lesson-1/">Android Training(18) - 使用IntentService执行任务(Lesson 1 - 创建IntentService)</a></h1>
     
     
       <p class="meta">
@@ -235,42 +157,175 @@
   
 
 
-<time datetime="2013-06-30T18:23:00+08:00" pubdate data-updated="true">Jun 30<span>th</span>, 2013</time>
+<time datetime="2014-04-14T18:30:00+08:00" pubdate data-updated="true">Apr 14<span>th</span>, 2014</time>
         
-         | <a href="/blog/android-training-16-creating-custom-views-lesson-0/#disqus_thread">Comments</a>
+         | <a href="/blog/android-training-18-running-background-service-lesson-1/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>Android的framework有大量的Views用来与用户进行交互并显示不同种类的数据。但是有时候你的程序有个特殊的需求，而Android内置的views组件并不能实现。这一章节会演示如何创建你自己的views，并使得它们是robust与reusable的。</p>
+  <div class="entry-content"><p><strong>写在开始：</strong>接下去的一段时间会学习专题《Background Jobs》的几篇文章，演示如何在后台执行任务，以此加速程序的性能并降低能耗的使用。第一章节会学习如何通过发送任务到后台的Service中执行，从而提示UI的表现性能。</p>
 
-<p><strong>Dependencies and Prerequisites</strong></p>
+<p>除非你特意指定，否则大部分在前台的操作都执行在一个叫做UI Thread的特殊线程中。这可能会导致某些问题，因为耗时操作可能会干扰界面的响应性能。为了避免这样的问题，Android Framework提供了几个类，用来帮助你把那些耗时操作移动到后台线程中执行。那些类中最常用的就是<a href="http://developer.android.com/reference/android/app/IntentService.html">IntentService</a>.</p>
 
-<p>Android 2.1 (API level 7) or higher</p>
+<p>这一章节会讲到如何实现一个IntentService，向它发送任务并反馈它的结果给其他模块。</p>
 
-<p><strong>YOU should also read</strong></p>
+<h2>0)概述</h2>
+
+<p>IntentService为执行一个操作在单个后台线程，提供了一种直接的实现方式。它可以处理一个长时间操作的任务并确保不影响到UI的响应性。而且IntentService的执行并不受UI的生命周期的影响。</p>
+
+<p>IntentService有下面几个局限性：</p>
 
 <ul>
-<li><a href="http://developer.android.com/guide/topics/ui/custom-components.html">Custom Components</a></li>
-<li><a href="http://developer.android.com/guide/topics/ui/ui-events.html">Input Events</a></li>
-<li><a href="http://developer.android.com/guide/topics/graphics/prop-animation.html">Property Animation</a></li>
-<li><a href="http://developer.android.com/guide/topics/graphics/hardware-accel.html">Hardware Acceleration</a></li>
-<li><a href="http://developer.android.com/guide/topics/ui/accessibility/index.html">Accessibility</a> developer guide</li>
+<li>不可以直接和UI做交互。为了把他执行的结果体现在UI上，需要发送给Activity。</li>
+<li>工作任务队列是顺序执行的，如果一个任务正在IntentService中执行，此时你再发送一个任务请求，这个任务会一直等待直到前面一个任务执行完毕。</li>
+<li>正在执行的任务无法打断。</li>
 </ul>
 
 
-<p><strong>Try it out</strong></p>
+<p>然而，在大多数情况下，IntentService都是简单后台任务操作的理想选择。</p>
 
-<p>Download the sample<br/>
-<a href="http://developer.android.com/shareables/training/CustomView.zip">CustomView.zip</a></p>
+<p>这节课会演示如何创建继承的IntentService。同样也会演示如何创建必须实现的回调<a href="http://developer.android.com/reference/android/app/IntentService.html#onHandleIntent(android.content.Intent">onHandleIntent()</a>)。最后，还会解释如何在manifest文件中定义这个IntentService。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-training-16-creating-custom-views-lesson-0/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-training-18-running-background-service-lesson-1/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/android-deeper-touch-event-dispatch-process/">Android Deeper(00) - Touch事件分发响应机制</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-05T13:13:00+08:00" pubdate data-updated="true">Apr 5<span>th</span>, 2014</time>
+        
+         | <a href="/blog/android-deeper-touch-event-dispatch-process/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>1)概述</h2>
+
+<p>Android的TouchEvent通常包含三个动作,ACTION_DOWN,ACTION_MOVE与ACTION_UP。发出的顺序是DOWN->MOVE->MOVE->&#8230;->UP(注意MOVE事件是否能够被触发取决于操作手势里面是否包含了移动的动作)。</p>
+
+<p>消息分发流程，从上到下，从父到子：Activity->ViewGroup1->ViewGroup1的子ViewGroup2->&#8230;->Target View<br/>
+消息响应流程，从下到上，从子到父：Target View->&#8230;->ViewGroup1的子ViewGroup2->ViewGroup1->Activity</p>
+
+<ul>
+<li><p><strong>public boolean dispatchTouchEvent(MotionEvent ev);</strong><br/>
+事件分发处理函数，通常会在Activity层根据UI的显示情况，把事件传递给相应的ViewGroup。下面的演示代码中，为了方便模拟，会直接return true，解说中称之为“丢弃”。(因为事件实际上没有传递给任何组件，没有被消费，而且是主动的行为，故称之为丢弃)</p></li>
+<li><p><strong>public boolean onInterceptTouchEvent(MotionEvent ev);</strong><br/>
+对分发的事件进行拦截，注意拦截ACION_DOWN与其他ACTION的差异。<br/>
+第1种情况：如果ACTION_DOWN的事件没有被拦截，顺利找到了TargetView，那么后续的MOVE与UP都能够下发。如果后续的MOVE与UP下发时还有继续拦截的话，事件只能传递到拦截层，并且发出ACTION_CANCEL。<br/>
+第2种情况：如果ACITON_DOWN的事件下发时被拦截，导致没有找到TargetView，那么后续的MOVE与UP都无法向下派发了，在Activity层就终止了传递。</p></li>
+<li><p><strong>public boolean onTouchEvent(MotionEvent ev);</strong><br/>
+响应处理函数,如果有设置对应listener的话,这里还会与onTouch,onClick,onLongClick有关联。具体执行顺序是onTouch()->onTouchEvent()->onClick()->onLongClick()。是否能够顺序执行，取决于每个方法的返回值是true还是false。具体这里不展开说。</p></li>
+</ul>
+
+
+<p><strong>强关注点：dispatch与intercept的差异，ACTION_DOWN与其他ACITON会对寻找target组件带来差异，而是否寻找到Target组件对整个流程有着重大的的影响。</strong></p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/android-deeper-touch-event-dispatch-process/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/java-notes-singleton-pattern/">Java Notes 00 - Singleton Pattern(单例总结)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-17T14:21:00+08:00" pubdate data-updated="true">Nov 17<span>th</span>, 2013</time>
+        
+         | <a href="/blog/java-notes-singleton-pattern/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>这里不赘述单例模式的概念了，直接演示几种不同的实现方式。</p>
+
+<h2>0)Eager initialization</h2>
+
+<p>如果程序一开始就需要某个单例，并且创建这个单例并不那么费时，我们可以考虑用这种方式：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Singleton</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">Singleton</span> <span class="n">INSTANCE</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Singleton</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">private</span> <span class="nf">Singleton</span><span class="o">()</span> <span class="o">{}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="n">Singleton</span> <span class="nf">getInstance</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">INSTANCE</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这种实现方式有几个特点：</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/java-notes-singleton-pattern/">Read on &rarr;</a>
     </footer>
   
 
@@ -294,35 +349,35 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/android-training-wearable-app-bt-debug/">Android Training - 创建可穿戴应用(5 - 通过蓝牙进行调试)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-packaging/">Android Training - 创建可穿戴应用(4 - 打包可穿戴应用)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-voice-input/">Android Training - 创建可穿戴应用(3 - 添加语音能力)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-layouts/">Android Training - 创建可穿戴应用(2 - 创建自定义的布局)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-creating/">Android Training - 创建可穿戴应用(1 - 创建并执行可穿戴应用)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-index/">Android Training - 创建可穿戴应用(0 - 序言)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/android-notes-add-copy-text-option-to-share-list/">Android Notes - 添加Copy to Clipboard的选项到分享列表中</a>
       </li>
     
       <li class="post">
         <a href="/blog/android-training-performance-anr/">Android Training - 避免程序无响应ANR</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-custom-request/">Android Training - Volley(Lesson 4 - 实现自定义的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-standard-request/">Android Training - Volley(Lesson 3 - 创建标准的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-request-queue/">Android Training - Volley(Lesson 2 - 建立请求队列)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-simple-request/">Android Training - Volley(Lesson 1 - 发送简单的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-index/">Android Training - Volley(Lesson 0 - 序言)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-deeper-graphics-architecture/">Android Deeper(01) - Graphic Architecture</a>
       </li>
     
   </ul>
@@ -331,10 +386,10 @@
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (79)</a></li>
+  <li><a href='/blog/categories/android'>Android (85)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (8)</a></li>
-  <li><a href='/blog/categories/android-training'>Android:training (69)</a></li>
+  <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
 </ul>

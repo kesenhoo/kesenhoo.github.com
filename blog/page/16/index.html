@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="Modifying your Download Patterns Based on the Connectivity Type 并不是所有的网络类型(Wi-Fi,3G,2G,etc)对电量的消耗是同等的。不仅仅Wi-Fi电波比无线电波消耗的电量要少很多，而且不同的无线电波(3G,2G,LTE……) &hellip;">
+  <meta name="description" content="章节序言 Android程序中很炫的一个功能是程序之间可以互相通信。为什么要重新发明一个已经存在于另外一个程序中的功能呢，而且这个功能并非自己程序的核心部分。 这一章节会讲述一些通常使用的方法来在不同程序之间通过使用Intent APIs与ActionProvider对象来发送与接受content &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -70,7 +70,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-training-05-transferring-data-without-draining-the-battery-lesson-4/">Android Training(05) - 优化下载效率(Lesson 4 - 根据网络类型来切换下载模式)</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-training-07-share-simple-data-lesson-1/">Android Training(07) - 分享简单数据(Lesson 1 - 发送简单数据到其他Apps)</a></h1>
     
     
       <p class="meta">
@@ -86,29 +86,26 @@
   
 
 
-<time datetime="2012-03-26T00:00:00+08:00" pubdate data-updated="true">Mar 26<span>th</span>, 2012</time>
+<time datetime="2012-03-31T14:00:00+08:00" pubdate data-updated="true">Mar 31<span>st</span>, 2012</time>
         
-         | <a href="/blog/android-training-05-transferring-data-without-draining-the-battery-lesson-4/#disqus_thread">Comments</a>
+         | <a href="/blog/android-training-07-share-simple-data-lesson-1/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h2>Modifying your Download Patterns Based on the Connectivity Type</h2>
+  <div class="entry-content"><p><strong>章节序言</strong></p>
 
-<p>并不是所有的网络类型(Wi-Fi,3G,2G,etc)对电量的消耗是同等的。不仅仅Wi-Fi电波比无线电波消耗的电量要少很多，而且不同的无线电波(3G,2G,LTE……)也存在使用不同电量的区别。</p>
+<p>Android程序中很炫的一个功能是程序之间可以互相通信。为什么要重新发明一个已经存在于另外一个程序中的功能呢，而且这个功能并非自己程序的核心部分。</p>
 
-<h2>1.Use Wi-Fi[使用Wi-Fi]</h2>
-
-<p>在大多数情况下，Wi-Fi电波会在使用相对较低的电量的情况下提供一个相对较大的带宽。因此，我们需要努力争取尽量使用Wi-Fi来传递数据。
-我们可以使用Broadcast Receiver来监听当网络连接切换为Wi-Fi，这个时候我们可以进行大量的数据传递操作，例如下载，执行定时的更新操作，甚至是在这个时候加大更新的频率。这些内容都可以在前面的课程中找到。</p>
+<p>这一章节会讲述一些通常使用的方法来在不同程序之间通过使用<a href="https://developer.android.com/reference/android/content/Intent.html">Intent</a> APIs与<a href="https://developer.android.com/reference/android/view/ActionProvider.html">ActionProvider</a>对象来发送与接受content。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-training-05-transferring-data-without-draining-the-battery-lesson-4/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-training-07-share-simple-data-lesson-1/">Read on &rarr;</a>
     </footer>
   
 
@@ -120,7 +117,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-training-05-transferring-data-without-draining-the-battery-lesson-1/">Android Training(05) - 优化下载效率(Lesson 1 - 用有效率的网络访问方式来优化下载)</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-training-06-remembering-users-lesson-3/">Android Training(06) - 记住用户的信息(Lesson 3 - 创建自定义的账户类型)</a></h1>
     
     
       <p class="meta">
@@ -136,31 +133,76 @@
   
 
 
-<time datetime="2012-03-25T16:54:00+08:00" pubdate data-updated="true">Mar 25<span>th</span>, 2012</time>
+<time datetime="2012-03-29T12:37:00+08:00" pubdate data-updated="true">Mar 29<span>th</span>, 2012</time>
         
-         | <a href="/blog/android-training-05-transferring-data-without-draining-the-battery-lesson-1/#disqus_thread">Comments</a>
+         | <a href="/blog/android-training-06-remembering-users-lesson-3/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>在这一章，我们将学习为了最小化某些操作对电量的影响是如何处理下载，网络连接，尤其是无线电连接的。
-下面几节课会演示了如何使用缓存caching，轮询polling，预取prefetching等技术来计划与执行下载操作。
-我们还会学习无线电波的power-use属性配置是如何影响我们对于在何时，用什么，以何种方式来传输数据的选择。
-当然这些选择是为了最小化对电池寿命的影响。</p>
+  <div class="entry-content"><h2>Creating a Custom Account Type</h2>
 
-<p><strong>Dependencies and prerequisites</strong><br/>
-Android 2.0 (API Level 5) or higher</p>
+<p>到目前为止，我们讨论了如何使用Google APIs。但是我们应该不仅仅是只需要Google的服务而已，比如增加QQ账户，Sina账户等。那么这一课会讲述如何创建一个自定义的账户，并且像内置的账户那样进行工作。</p>
 
-<p><strong>You should also read</strong><br/>
-<a href="http://developer.android.com/training/monitoring-device-state/index.html">Optimizing Battery Life</a></p>
+<h2>(1)Implement Your Custom Account Code</h2>
 
-<h2>Lessons</h2>
+<p>首先需要做的是从用户那获取证书[输入账户与密码后进行验证],这个过程也许只是简单的显示一个对话框来输入用户名与密码，或者是比较复杂的操作来获取证书，比如一次性的密码口令或者精密的扫描。不管怎么样，你需要实现下面的操作:</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/android-training-06-remembering-users-lesson-3/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/android-training-06-remembering-users-lesson-2/">Android Training(06) - 记住用户的信息(Lesson 2 - 使用OAuth2来进行身份鉴定)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-28T18:53:00+08:00" pubdate data-updated="true">Mar 28<span>th</span>, 2012</time>
+        
+         | <a href="/blog/android-training-06-remembering-users-lesson-2/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Authenticating to OAuth2 Services[使用OAuth2来进行鉴权]</h2>
+
+<p>为了安全的访问线上服务，用户需要在service上进行鉴定，他们需要提供身份的证明。对于一个程序来说，如果是访问第三方的服务，那么这个安全问题就更加复杂。
+【比如，你有个资料在A服务器上，但是你需要在B上面对A里面的数据进行操作，这个时候如果把登入A的帐号与密码给B去直接操作就不够安全，简单的方法是先把A上的资料拿下来，再弄到B上面去，然后B再做操作，这又显得很不方便，就是为了解决这样类似的问题，才诞生了OAuth。关于OAuth2的详情，请参考：<a href="http://oauth.net/2/">http://oauth.net/2/</a>，谢谢！】
+目前行业内解决这种第三方服务身份鉴定的方法是使用OAuth2协议。OAuth2提供了auth token，它代表用户身份与用户对于程序的授权。这一课演示了如何使用OAuth2连接到Google Server。同样在其他支持OAuth2协议的服务上都可以使用类似的方法。</p>
+
+<p>使用OAuth2有利于:</p>
 
 <ul>
-<li><strong>Optimizing Downloads for Efficient Network Access[使用有效的网络连接方式来最优化下载]</strong><br/>
-This lesson introduces the wireless radio state machine, explains how your app’s connectivity model interacts with it, and how you can minimize your data connection and use prefetching and bundling to minimize the battery drain associated with your data transfers.</li>
+<li>从用户那得到授权，使用账户信息来访问online service。</li>
+<li>对online service进行鉴定，保护用户利益。</li>
+<li>处理认证错误。</li>
 </ul>
 
 
@@ -168,7 +210,7 @@ This lesson introduces the wireless radio state machine, explains how your app�
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-training-05-transferring-data-without-draining-the-battery-lesson-1/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-training-06-remembering-users-lesson-2/">Read on &rarr;</a>
     </footer>
   
 
@@ -180,7 +222,7 @@ This lesson introduces the wireless radio state machine, explains how your app�
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-training-04-optimiizing-battery-life-lesson-4/">Android Training(04) - 优化电池续航能力(Lesson 4 - 判断并监测网络连接状态)</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-training-06-remembering-users-lesson-1/">Android Training(06) - 记住用户的信息(Lesson 1 - 使用AccountManager来记录用户)</a></h1>
     
     
       <p class="meta">
@@ -196,77 +238,34 @@ This lesson introduces the wireless radio state machine, explains how your app�
   
 
 
-<time datetime="2012-03-24T16:37:00+08:00" pubdate data-updated="true">Mar 24<span>th</span>, 2012</time>
+<time datetime="2012-03-27T11:12:00+08:00" pubdate data-updated="true">Mar 27<span>th</span>, 2012</time>
         
-         | <a href="/blog/android-training-04-optimiizing-battery-life-lesson-4/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Manipulating Broadcast Receivers On Demand[按需操控广播接收者]</h2>
-
-<p>简单的方法是为我们监测的状态创建一个BroadcastReceiver，并在manifest中为每一个状态进行注册监听。然后，每一个Receiver根据当前设备的状态来简单重新安排下一步执行的任务。[这句话感觉理解有点问题]</p>
-
-<p>上面那个方法的副作用是，设备会在每次收到广播都被唤醒，这有点超出期望，因为有些广播是不希望唤醒设备的。</p>
-
-<p>更好的方法是根据程序运行情况开启或者关闭广播接收者。这样的话，那些在manifest中注册的receivers仅仅会在需要的时候才被激活。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/android-training-04-optimiizing-battery-life-lesson-4/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/android-training-04-optimiizing-battery-life-lesson-3/">Android Training(04) - 优化电池续航能力(Lesson 3 - 判断并监测网络连接状态)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-23T21:09:00+08:00" pubdate data-updated="true">Mar 23<span>rd</span>, 2012</time>
-        
-         | <a href="/blog/android-training-04-optimiizing-battery-life-lesson-3/#disqus_thread">Comments</a>
+         | <a href="/blog/android-training-06-remembering-users-lesson-1/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h2>Determining and Monitoring the Connectivity Status[判断并监测网络连接状态]</h2>
+  <div class="entry-content"><p><strong>章节概览:Remembering Users</strong></p>
 
-<p>通常我们会有一些计划的任务，比如重复闹钟，后台定时启动的任务等。但是如果我们的网络没有连接上，那么就没有必要启动那些需要连接网络的任务。我们可以使用ConnectivityManager来检查是否连接上网络，是何种网络。[通过网络的连接状况改变，相应的改变app的行为，减少无谓的操作，从而延长设备的续航能力]</p>
+<p>Android用户希望把自己的信息绑定到喜欢的app与设备上，那么使得你的程序更加令人喜爱的一个方法是使得它更加的人性化。Android设备知道你的使用者是谁，他们都使用过哪些服务，在哪里存储了你的数据。在得到你的用户授权的前提下，你可以使用那些信息来使得你的app更加丰富，更加人性化。</p>
 
-<h2>1)Determine if You Have an Internet Connection[判断当前是否有网络连接]</h2>
+<p>在这一章节，你将学习到鉴定用户信息的多种技术，你可以:</p>
 
-<p>显然如果没有网络连接，那么就没有必要做那些需要联网的事情。下面是一个检查是否有网络连接的例子：</p>
+<ul>
+<li>通过记住用户账户名来人性化你的appd。</li>
+<li>鉴定用户以确保是否是那个人。</li>
+<li>通过service来获取访问用户线上数据的权限，例如Google APIs。</li>
+<li>增加一个自定义的账户来鉴定自己后台的服务。</li>
+</ul>
+
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-training-04-optimiizing-battery-life-lesson-3/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-training-06-remembering-users-lesson-1/">Read on &rarr;</a>
     </footer>
   
 
@@ -290,35 +289,35 @@ This lesson introduces the wireless radio state machine, explains how your app�
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/android-training-wearable-app-bt-debug/">Android Training - 创建可穿戴应用(5 - 通过蓝牙进行调试)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-packaging/">Android Training - 创建可穿戴应用(4 - 打包可穿戴应用)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-voice-input/">Android Training - 创建可穿戴应用(3 - 添加语音能力)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-layouts/">Android Training - 创建可穿戴应用(2 - 创建自定义的布局)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-creating/">Android Training - 创建可穿戴应用(1 - 创建并执行可穿戴应用)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-index/">Android Training - 创建可穿戴应用(0 - 序言)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/android-notes-add-copy-text-option-to-share-list/">Android Notes - 添加Copy to Clipboard的选项到分享列表中</a>
       </li>
     
       <li class="post">
         <a href="/blog/android-training-performance-anr/">Android Training - 避免程序无响应ANR</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-custom-request/">Android Training - Volley(Lesson 4 - 实现自定义的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-standard-request/">Android Training - Volley(Lesson 3 - 创建标准的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-request-queue/">Android Training - Volley(Lesson 2 - 建立请求队列)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-simple-request/">Android Training - Volley(Lesson 1 - 发送简单的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-index/">Android Training - Volley(Lesson 0 - 序言)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-deeper-graphics-architecture/">Android Deeper(01) - Graphic Architecture</a>
       </li>
     
   </ul>
@@ -327,10 +326,10 @@ This lesson introduces the wireless radio state machine, explains how your app�
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (79)</a></li>
+  <li><a href='/blog/categories/android'>Android (85)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (8)</a></li>
-  <li><a href='/blog/categories/android-training'>Android:training (69)</a></li>
+  <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
 </ul>

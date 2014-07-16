@@ -9,8 +9,8 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content=" Hi.This is my first post. By markdown.
-">
+  <meta name="description" content="Intent与Intent Filter Android其中的三大组件，Activity,Service与broadcast receivers是通过Intent来触发彼此的。Intent本身会携带一些信息，它是一种组件内部或者组件间进行交互的中介。
+对于不同的组件之间有着不同的机制： &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -71,7 +71,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/hi/">Hello, World</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-notes-intent-and-intentFilter/">Android Notes(04) - Intents and Intent Filters</a></h1>
     
     
       <p class="meta">
@@ -87,66 +87,32 @@
   
 
 
-<time datetime="2012-12-20T00:57:00+08:00" pubdate data-updated="true">Dec 20<span>th</span>, 2012</time>
+<time datetime="2013-04-12T18:27:00+08:00" pubdate data-updated="true">Apr 12<span>th</span>, 2013</time>
         
-         | <a href="/blog/hi/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><img src="/images/articles/hello_world.jpg"></p>
-
-<p>Hi.This is my first post. <strong>By markdown.</strong></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/android-training-14-capturing-photos-lesson-3/">Android Training(14) - 捕获照片(Lesson 3 - 直接操控相机)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-12-18T23:59:00+08:00" pubdate data-updated="true">Dec 18<span>th</span>, 2012</time>
-        
-         | <a href="/blog/android-training-14-capturing-photos-lesson-3/#disqus_thread">Comments</a>
+         | <a href="/blog/android-notes-intent-and-intentFilter/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>在这一节课，我们会讨论如何通过使用framework的APIs来直接控制相机的硬件。直接控制设备的相机，相比起拍照与录像来说，要复杂一些。然而，如果你想要创建一个专业的特殊的相机程序，这节课会演示这部分内容。</p>
+  <div class="entry-content"><h2>Intent与Intent Filter</h2>
 
-<h2>Open the Camera Object(打开相机对象)</h2>
+<p>Android其中的三大组件，Activity,Service与broadcast receivers是通过Intent来触发彼此的。Intent本身会携带一些信息，它是一种组件内部或者组件间进行交互的中介。<br/>
+对于不同的组件之间有着不同的机制：</p>
 
-<p>获取到 Camera 对象是直接控制Camera的第一步。正如Android自带的相机程序一样，推荐访问Camera的方式是在onCreate方法里面另起一个Thread来打开Camera。这个方法可以避免因为打开工作比较费时而引起ANR。在一个更加基础的实现方法里面，打开Camera的动作被延迟到onResume()方法里面去执行，这样使得代码能够更好的重用，并且保持控制流程不会复杂化。(原文是：In a more basic implementation, opening the camera can be deferred to the onResume() method to facilitate code reuse and keep the flow of control simple.)</p>
+<ul>
+<li>一个Intent对象通过Context.startActivity()或者Activity.startActivityForResult()来启动一个activity或者让已经存在的activity做一些更新的操作。</li>
+<li>一个Intent对象通过Context.startService()来初始化一个Service或者给已经在运行的Service传递新的指令。同样的，对于Context.bindService()是一样的道理。</li>
+<li>Intent对象通过broadcast的方法（例如Context.sendBroadcast(), Context.sendOrderedBroadcast()或者Context.sendStickyBroadcast())传递给那些感兴趣的broadcast receivers.</li>
+</ul>
+
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-training-14-capturing-photos-lesson-3/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-notes-intent-and-intentFilter/">Read on &rarr;</a>
     </footer>
   
 
@@ -158,7 +124,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-training-14-capturing-photos-lesson-2/">Android Training(14) - 捕获照片(Lesson 2 - 简单的录像动作)</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-training-15-performance-tips/">Android Training(15) - 代码性能优化小技巧</a></h1>
     
     
       <p class="meta">
@@ -174,37 +140,26 @@
   
 
 
-<time datetime="2012-12-18T23:21:00+08:00" pubdate data-updated="true">Dec 18<span>th</span>, 2012</time>
+<time datetime="2013-04-06T18:27:00+08:00" pubdate data-updated="true">Apr 6<span>th</span>, 2013</time>
         
-         | <a href="/blog/android-training-14-capturing-photos-lesson-2/#disqus_thread">Comments</a>
+         | <a href="/blog/android-training-15-performance-tips/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>这节课会介绍如何使用现有的Camera程序来录制一个视频。和拍照一样，我们没有必要去重新发明录像程序。大多数的Android程序都有自带Camera来进行录像。(<em>这一课的内容大多数与前面一课类似，简要带过，一些细节不赘述了</em>)</p>
+  <div class="entry-content"><h2>Performance Tips</h2>
 
-<h2>Request Camera Permission [请求权限]</h2>
+<p><img src="/images/articles/performance_improve.jpg"></p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;manifest</span> <span class="err">...</span> <span class="nt">&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;uses-feature</span> <span class="na">android:name=</span><span class="s">&quot;android.hardware.camera&quot;</span> <span class="nt">/&gt;</span>
-</span><span class='line'>    ...
-</span><span class='line'><span class="err">&lt;</span>/manifest ... &gt;
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>与上一课的拍照一样，你可以在启动Camera之前，使用hasSystemFeature(PackageManager.FEATURE_CAMERA).来检查是否存在Camera。</p>
+<p>这篇文章主要是介绍了一些小细节的优化技巧，当这些小技巧综合使用起来的时候，对于整个App的性能提升还是有作用的，只是不能较大幅度的提升性能而已。选择合适的算法与数据结构才应该是你首要考虑的因素，在这篇文章中不会涉及这方面。你应该使用这篇文章中的小技巧作为平时写代码的习惯，这样能够提升代码的效率。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-training-14-capturing-photos-lesson-2/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-training-15-performance-tips/">Read on &rarr;</a>
     </footer>
   
 
@@ -216,7 +171,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/android-training-14-capturing-photos-lesson-1/">Android Training(14) - 捕获照片(Lesson 1 - 简单的拍照动作)</a></h1>
+      <h1 class="entry-title"><a href="/blog/android-notes-process-and-thread/">Android Notes(03) - Process and Thread</a></h1>
     
     
       <p class="meta">
@@ -232,31 +187,82 @@
   
 
 
-<time datetime="2012-12-18T22:21:00+08:00" pubdate data-updated="true">Dec 18<span>th</span>, 2012</time>
+<time datetime="2013-03-31T16:27:00+08:00" pubdate data-updated="true">Mar 31<span>st</span>, 2013</time>
         
-         | <a href="/blog/android-training-14-capturing-photos-lesson-1/#disqus_thread">Comments</a>
+         | <a href="/blog/android-notes-process-and-thread/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>在多媒体流行之前，世界是沉闷(dismal)并且特色稀少(featureless)的。还记得Gopher? (<em>Gopher是计算机上的一个工具软件，是Internet提供的一种由菜单式驱动的信息查询工具，采用客户机/服务器模式</em>)。因为你的app将要成为你的用户的生活的一部分，请赋予你的app能够把用户生活装进去的功能。使用内置的Camera，你的程序可以使得用户扩展（augment）他们所看的事物，生成唯一的头像，查找角落的人偶（zombies）,或者仅仅是分享他们的经验。</p>
+  <div class="entry-content"><p><img src="/images/articles/process_and_thread.jpg"></p>
 
-<p>这一章节，会教你如何简单的使用已经存在的Camera程序。在后面的课程中，你会更加深入的（ dive deeper ）学习如何直接控制Camera的硬件。</p>
+<p>当程序的第一个组件开始启动时，Android系统会为这个程序启动一个新的Linux进程。默认的，程序中的后续其他组件都是运行在这个进程的线程中(这个线程被成为&#8221;主&#8221;线程:main thread)。如果程序的组件在启动时发现已经存在这个程序的进程了(因为其他组件正在运行)， 那么这个组件将启动在该进程中，并使用同一线程。然而，你可以安排程序中的不同组件运行在另外一个进程中，而且你可以为任何进程创建其它的线程。</p>
 
-<p><strong>试试下面的例子程序</strong>
-<a href="http://developer.android.com/shareables/training/PhotoIntentActivity.zip">PhotoIntentActivity.zip</a></p>
+<h1>Process：进程</h1>
 
-<hr />
-
-<p>假设你想通过你的客户端程序实现一个聚合全球天气的地图，上面会有各地的当前天气图片。那么集合图片只是你程序的一部分。你想要最简单的动作来获取图片，而不是重新发明（reinvent）一个camera。幸运的是，大多数Android设备都已经至少安装了一款相机程序。在这节课中，你会学习，如何拍照。</p>
+<p>默认的，同一程序的所有组件都是运行在一个Proces里面的，并且大多数程序都不应该去改变这一规则。然而，如果你需要控制某一确定的组件的Proces，你可以在manifest文件中做特殊设置。<em>Music播放器的Playback Service就可以这样做</em></p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/android-training-14-capturing-photos-lesson-1/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/android-notes-process-and-thread/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/android-notes-aidl/">Android Notes(02) - AIDL</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-19T21:18:00+08:00" pubdate data-updated="true">Feb 19<span>th</span>, 2013</time>
+        
+         | <a href="/blog/android-notes-aidl/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><ul>
+<li>在Android process之间不能用通常的方式去访问彼此的内存数据。 他们把需要传递的数据解析成基础对象，使得系统能够识别并处理这些对象。因为这个处理过程很难写，所以Android使用AIDL来解决这个问题。</li>
+<li>在定义AIDL接口之前，请意识到call这些接口是direct function call。 请不要认为这些call 接口的行为是发生在另外一个线程里面的。具体的不同因这个调用是发生在local process还是remote process而异。
+
+<ul>
+<li>发生在local process里面的调用会跑在这个local process的thread里面。如果这是你的主UI线程，那么AIDL接口的调用也会发生在这个UI thread里面。如果这是发生在另外一个thread，那么调用会发生在service里面。因此，如果仅仅是发生在local process的调用，则你可以完全控制这些调用，当然这样的话，也就不需要用AIDL了。因为你完全可以使用Bound Service的第一种方式去实现。</li>
+<li>发生在remote process里面的调用是会跑在你自己的process所维护的一个thread pool里面。那么你需要注意可能会在同一时刻接受到多个请求。所以AIDL的操作需要做到thread-safe。(<em>每次请求，都会交给Service，在线程池里面启动一个thread去执行那些请求，所以那些方法需要是线程安全的</em>)</li>
+<li>oneway关键字改变了remote call的行为。当使用这个关键字时，remote call不会被阻塞住，它仅仅是发送交互数据后再立即返回。IBinder thread pool 之后会把它当作一个通常的remote call呼叫。</li>
+</ul>
+</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/android-notes-aidl/">Read on &rarr;</a>
     </footer>
   
 
@@ -280,35 +286,35 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/android-training-wearable-app-bt-debug/">Android Training - 创建可穿戴应用(5 - 通过蓝牙进行调试)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-packaging/">Android Training - 创建可穿戴应用(4 - 打包可穿戴应用)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-voice-input/">Android Training - 创建可穿戴应用(3 - 添加语音能力)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-layouts/">Android Training - 创建可穿戴应用(2 - 创建自定义的布局)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-creating/">Android Training - 创建可穿戴应用(1 - 创建并执行可穿戴应用)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/android-training-wearable-app-index/">Android Training - 创建可穿戴应用(0 - 序言)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/android-notes-add-copy-text-option-to-share-list/">Android Notes - 添加Copy to Clipboard的选项到分享列表中</a>
       </li>
     
       <li class="post">
         <a href="/blog/android-training-performance-anr/">Android Training - 避免程序无响应ANR</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-custom-request/">Android Training - Volley(Lesson 4 - 实现自定义的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-standard-request/">Android Training - Volley(Lesson 3 - 创建标准的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-request-queue/">Android Training - Volley(Lesson 2 - 建立请求队列)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-simple-request/">Android Training - Volley(Lesson 1 - 发送简单的请求)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-training-volley-index/">Android Training - Volley(Lesson 0 - 序言)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/android-deeper-graphics-architecture/">Android Deeper(01) - Graphic Architecture</a>
       </li>
     
   </ul>
@@ -317,10 +323,10 @@
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (79)</a></li>
+  <li><a href='/blog/categories/android'>Android (85)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (8)</a></li>
-  <li><a href='/blog/categories/android-training'>Android:training (69)</a></li>
+  <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
 </ul>
