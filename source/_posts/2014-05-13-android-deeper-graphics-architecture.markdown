@@ -1,0 +1,219 @@
+---
+layout: post
+title: "Android Deeper(01) - Graphic Architecture"
+date: 2014-05-15 14:25
+comments: true
+sidebar: false
+categories: Android Android:Deeper
+---
+
+Android中有几个很重要的概念Surface, SurfaceHolder, EGLSurface, SurfaceView, GLSurfaceView, SurfaceTexture, TextureView与SurfaceFlinger。
+
+这篇文章会介绍Android图形架构的基本构成以及它们是如何在程序framework与多媒体系统中运作的。核心关注点是，图形数据的buffer是如何在系统中传递的。如果你曾经好奇过SurfaceView与TextureView的工作方式，或者是想知道Surface与EGLSurface是如何交互的，那么这篇文章将给你解答这些疑问。**You've come to the right place.**
+
+大多数时候，我们都不需要了解这些类的使用原理，但是学习这些它们的工作原理可以为我们提供一种Sense，用来更加高效的工作。所以这里我们学习它们是如何工作的，而不仅仅是它们是如何使用的。
+
+## BufferQueue and gralloc
+BufferQueue and grallocGraphiccal的核心是BufferQueue,它的角色是连接产生图形数据的生产者与显示数据的消费者。生产者与消费者可以再两个不同的进程，那么数据在系统中进行传递就依赖于BufferQueue。
+
+基础的用法是很直接简单的。生产者获取到一个buffer，制定了宽，高，pixel format与usage flags之后，再放到queue中。消费者获取到buffer，消费数据后，把buffer返回到queue中。
+
+* 生产者：dequeueBuffer() -> queueBuffer()
+* 消费者：acquireBuffer() -> releaseBuffer()
+
+<!-- More -->
+
+目前很多Android设备已经开始支持“Sync framework”。这使得系统可以结合hardware组件对graphic data做异步的操作。例如，生产者再rendering完成之前就开始提交一系列的OpenGL ES的绘制命令并参与到输出排队buffer中。Buffer队列中设置有多道栅栏，用来同步生产者与消费者的工作。这样的一个方法可以减少buffer数据在系统中传递的延迟并提升吞吐量。
+
+队列的一些特性，例如最大支持Hold住的数据量，取决于生产者与消费者的共同作用。
+
+BufferQueue的责任是分配Buffer,而Buffer则用来Hold Data的部分。
+
+### gralloc HAL
+真正实行buffer allocation的操作是通过gralloc来实现的，里面的alloc()方法会根据buffer的参数：宽高，pixel format与usage flags等，进行操作。
+
+gralloc不仅仅是native heap上分配内存的另外一个方式。通常alloc取决于usage flags,例如
+
+   * how often the memory will be accessed from software (CPU)
+   * how often the memory will be accessed from hardware (GPU)
+   * whether the memory will be used as an OpenGL ES ("GLES") texture(质地)
+   * whether the memory will be used by a video encoder
+
+例如，如果你指定format RGBA8888，并且这个buffer可以从software层进行访问，那么alloc会使用R-G-B-A的顺序创建每一个pixel.如果你指定buffer只会被hardware访问并且会作为GLES texture的组成部分，那么alloc可以使用BGRA的顺序，这样效率更高。
+
+
+## SurfaceFlinger and Hardware Composer
+如何把那些数据绘制到屏幕上，需要使用到SurfaceFlinger与Hardware Composer HAL。
+
+SurfaceFlinger的作用是接收来自各处的数据，进行混合编制之后，然后进行显示。
+
+当app作为foreground时，WindowManager Service会请求SurfaceFlinger绘制一个surface。SurfaceFlinger会创建一个”layer” - 它的主要组成部分是BufferQueue。此时SurfaceFlinger扮演了消费者的角色。生产者的数据是通过WindowManager传递到app，WindowManager可以直接发送frames给SurfaceFlinger。其实可以把SurfaceFlinger理解为LayerFlinger。
+
+对于大多数apps来说，在任何时刻，屏幕上会有三个layer。“Status Bar”是在屏幕的最上层，“navigation bar”在屏幕的底部或者侧边，另外一层是app UI layer。一些app可能拥有更多或者更少的layer。例如默认的home app，对于wallpaper有单独设置一层layer，全屏游戏的应用会隐藏status bar的layer。Each layer都可以单独进行更新。Status与Navigation Bar是由系统process进行绘制的。app layer是由app进行绘制的。它们之间是相互独立的。
+
+设备显示屏以固定的频率刷新屏幕，对于手机与平板来说，通常是60fps。刷新的频率有时是不固定的。
+
+当SurfaceFlinger接收到VSYNC刷新信号时，会遍历所有的layers，寻找可以使用的新的buffers。如果找到新的buffer，那么就获取它，否则继续使用前面获取到得buffer。SurfaceFlinger总是需要有内容可以显示，所以它会持续hold住buffer。如果没有新的buffer提交到layer上，这个layer就会被SurfaceFlinger所忽略。
+
+一旦SurfaceFlinger收集到了可见layer的所有buffers，它会请求Hardware composer如何进行composition的操作。
+
+### Hardware Composer
+Hardware Composer HAL(HWC)是从3.0开始才被引入的。它首要的目的是结合可用的硬件，判断选择最有效的方式用来composite buffers。这部分的功能通常是硬件OEM厂商实现的。
+
+举例说明2种compossite的方式：
+
+* 先画好App的UI,然后把StatusBar与BottomBar的部分绘制到UI之上，最后把这些组合好的buffer送给硬件进行显示。
+* 分别传递三部分的Buffer，告诉硬件从不同的屏幕区域读取不同的buffer。
+显然第2种方式会更有效率。
+
+因为不同的设备处理能力不一样，每一个layer是否需要旋转，是否有限制的显示位置等等问题。所以HWC的工作方式是这样的：
+
+* SurfaceFlinger提供给HWC一个完整的layer list,并且询问系统:该如何处理这些layers?
+* HWC通过把每一个layer标记为”overlay”或者“GLES Composition”来作为应答。
+* SurfaceFlinger对那些标记为GLES Composition的layer，传递buffer给HWC，并且让HWC来处理。
+
+Overlay的方式比GLES composition的方式效率要低很多，特别是Overlay的内容为transparent时。
+
+### The Need for Triple-Buffering
+* **Double-buffering**
+
+为了避免在显示上出现断层，系统需要是double-buffered: front buffer显示的同时，back buffer正在准备。
+假设frame N正在显示，那么为了在下一个VSYNC信号中显示frame N+1，此时frame N+1将被SurfaceFlinger提前获取到。当VSYNC信号到达时，HWC会flip buffer。当app需要绘制frame N+2到buffer时，SurfaceFlinger会遍历每个layer寻找是否有新的buffer，此时没有找到任何新的buffer，因此再下一个VSYNC中再次准备显示frame N+1，过了一点时间之后，app结束了rendering frame N+2并且进入了SurfaceFlinger的队列，可是此时已经太晚了，这种双重buffer的方式效率并不够高。
+
+* **Triple-buffering**
+
+在VSYNC之前，frame N正在显示，frame N+1已经composited并且准备被显示，frame N+2已经在队列中并且准备好了被SurfaceFlinger获取。当屏幕flip时，buffers可以进行rotate，并且不产生bubble。
+
+
+## Surface and SurfaceHolder
+Surface通常作为buffer queue的生产者，同时SurfaceFlinger作为消费者。
+用来显示Surface的BufferQueue通常是triple-buffering的，但是buffers却是按需分配的。
+
+### Canvas Rendering
+曾经一段时间，所有的rendering渲染操作都是在软件层进行的。在今天，你也是可以这样做。在低版本的系统中，在软件层的渲染是通过使用Skia的图像库来实现的。如果你想要绘制一个矩形，调用一个库函数，在buffer中设置恰当的bytes数据。为了确保buffer不会在同一个时刻被两个Clients所更新，或者在显示时被写入，你必须对buffer进行加锁操作。`lockCanvas()`方法可以锁住buffer并且返回一个Canvas用来进行绘制。`unlockCanvasAndPost()`方法可以解锁buffer并且发送buffer数据给compositor进行组合。
+
+随着时间的推移，带有3D引擎的设备出现了，Android围绕OpenGL ES做了修改与适应。然而，为了兼容旧的API，增加了硬件加速Canvas API。
+
+当你为了访问Canvas而锁住Surface时，CPU渲染器会于BufferQueue的生产者建立连接，指导Surface被销毁时才回断开。大多数其他的生产者(例如GLES)可以与Surface进行断开连接与重新连接，但是Canvas-based的CPU渲染器不可以。这意味着如果你不针对一个Canvas进行加锁的话，是不可以在Surface上使用GLES进行绘制，也不可以给Surface发送来自视频解码器中的数据帧。
+
+生产者从BufferQueue中第一次请求一个buffer时，这个buffer是初始化分配为0的。初始化是非常有必要的，避免在不同进程中出现共享数据的意外错误。当你重用一个buffer时，之前的内容还是处于显示中。如果你重复的调用`lockCanvas()`与`unlockCanvasAndPost()`却没有绘制任何内容，你将会在前一个frame与渲染的frame中进行循环。
+
+Surface的lock/unlock代码保持了前一个渲染buffer的reference。如果你在锁定Surface的时候指定了一块dirty的区域，它会从之前的buffer中copy一份non-dirty的pixel数据过来。此时buffer将会机会对等的被SurfaceFlinger或者HWC进行处理，但是因为我们仅仅是需要进行读取的操作，所以没有必要进行互斥的访问。
+
+不通过Canvas(non-Canvas)的方式对一个Surface直接进行绘制的主要方式是通过OpenGL ES.这部分的内容会在下面被讲解。
+
+### SurfaceHolder
+连接Surface与SurfaceView的是SurfaceHolder。最开始的想法是Surface代表了原始的数据buffer，那么SurfaceHolder是app用来追踪Surface的一些上层的信息，例如dimensions与format。Java语言定义好了潜在可能的native的实现接口。虽然有争议部分API是不会再可能被使用到的，可是却一直遗留在Public API中没有移除。
+
+通常来说，对于一个View的任何操作都回触发SurfaceHolder。一些其他的APIs，例如MediaCodec，可以直接操作Surface本身。你也可以从SurfaceHolder中获取到Surface。
+
+获取与设置Surface参数的APIs，例如size和format，都是通过SurfaceHolder来实现的。
+
+## EGLSurface and OpenGL ES
+OpenGL ES定义了一个API用来渲染图形。为了是得GLES可以在各种平台上工作，它设计成可以和一个库进行结合的方式来工作。这个库知道如何通过操作系统创建与访问窗口。在Android中使用的库叫做EGL。如果你想要绘制textured polygons(多边形，模块)，你可以使用GLES的方法。如果你想要把渲染绘制到屏幕上，你可以使用EGL的方法。
+
+在开始使用GLES之前，你需要创建一个GL context。在EGL中，这意味着创建一个EGLContext与一个EGLSurface。GLES的操作是作用在当前的context上的，当前的context保存在当前thread中，这个context是不能传递的。这意味着你必需注意渲染的动作执行在哪个线程，并且在那个线程中的context是哪个。
+
+EGLSurface可以通过EGL(执行pbuffer)来分配一个buffer,或者通过操作系统来做一个窗口的分配。EGL window surface是通过`eglCreateWindowSurface()`方法来创建的。这个方法会使用一个window object作为参数，这个window object在android上可以是一个SurfaceView，一个SurfaceTexture，一个surfaceHolder或者是一个Surface，这些对象的内部都拥有一个BufferQuueue。当你执行了那个方法调用之后，EGL创建一个新的EGLSurface对象，并把这个对象与生产者的BufferQuueue的接口建立连接。
+
+EGL并没有提供lock/unlock的方法。你需要列出绘制的命令然后执行`eglSwapBuffer()`来提交当前frame。这个方法名本意是描述传统的front-back buffer的swap操作，但是实际上再后续的实现中又可能会有差异。
+
+在同一时刻，只能有一个EGLSurface与Surface进行结合，你只能有一个生产者连接到BufferQueue，但是如果你销毁了EGLSurface，那么就与BufferQueue连接断开，此时可以允许其他组件进行连接。
+
+一个EGLSurface在同一时刻必须只能存在于一个Thread中。但是一个Thread可以切换多个不同的EGLSurface。
+
+讨论到EGLSurface时最通常的误解是认为这只是Surface的某个方面(例如SurfaceHolder).它们实际上是有关联却相互独立的。你可以在ELGSurface上绘制没有被Surface hold住得部分，你也可以使用Surface的时候不要用EGL。EGLSurface只为GLES提供了一个绘制的地方。
+
+## SurfaceView and GLSurfaceView
+从现在起，我们可以探讨下一些更上层的组件，以及它们是如何与底层的组件进行适配的。
+
+Android app Framework UI是基于hierarchy中的View进行搭建的。大多数的文章都没有涉及到细节的讨论，但是了解UI组件是如何经过一系列复杂的measurement与layout然后适配到一个矩形区域是非常有意义的。当app来到forground的时候，所有可见的view对象都将被SurfaceFlinger渲染到由WindowManager创建的Surface中。Layout与rendering是执行在app的UI Thread的。
+
+无论你又多少的layouts与Views，所有的对象都是被绘制到同一个Buffer中。无论Views是否开启了hardware-accelerated都是一样的。
+
+SurfaceView的参数和其他的View一样，你可以设置position与size。但是讨论到render的时候，SurfaceView的contents是透明的。SurfaceView在View中只是一个透明的占位区域。
+
+当SurfaceView可见时，WindowManager会请求SurfaceFlinger创建一个新的Surface。(这个过程不是同步的，所以需要实现Surface被创建的回调用来获取到信息)。默认情况下，新创建的Surface是在app UI Surface的下层(后面)，但是这个默认的Z-ordering可以被override，设置为在app UI的上面(Top表面)。
+
+渲染到Surface上的任何数据都是由SurfaceFlinger进行组合的，而不是由app完成。这就是SurfaceView真正牛B的地方：绘制到SurfaceView上的内容可以由单独的Thread或者Proces进行操作。你可以忽略UI Thread，但是你还是需要保持SurfaceView与Activity的生命周期一致，整个SurfaceView是和app UI还有其他被硬件加速的layer是共同协作的。
+
+请注意，相对于BufferQueue来说，Surface是生产者，而SurfaceFlinger layer是消费者。你可以使用任何合适的方法来更新Surface，只要使得Surface可以作为BufferQueue的生产者。你可以使用Surface提供的Canvas的功能，添加一个EGLSurface并使用GLES进行绘制并且使用MeidaCodec的Video decoder对Surface进行写操作。
+
+## GLSurfaceView
+GLSurfaceView提供了一些帮助类用来协助管理EGL contexts，线程间的交互，与Activity生命周期的互动。
+
+GLSurfaceView创建一个线程用来渲染与配置EGL context。当Activity暂停时，状态会被自动清除。
+
+在大多数情况下，GLSurfaceView是非常有用的并且可以和GLES进行协作。在某些情形下，使用它是个好的选择。
+
+## SurfaceTexture
+SurfaceTexture是在Android 3.0才被引入的。和SurfaceView的概念类似(Surface与View的结合体)，SurfaceTexture是Surface与GLES texture的结合体。
+
+当你创建一个SurfaceTexture时，你会创建一个BufferQueue，app此时扮演了消费者的角色。当新的buffer被生产者加入队列时，你的app会通过`onFrameAvailable()`的回调得到通知。`updateTextureImage()`方法会释放前面hold住得buffer，从队列中请求一个新的buffer，并执行一些EGL的方法使得buffer对于GLES来说可以作为一个external texture。
+
+External texture(`GL_TEXTURE_EXTERNAL_OES`)与GLES(`GL_TEXTURE_2D`)创建的texture并不相同。你必须对你的渲染器做一些不同的配置，同时有些东西是不能修改的。但是最主要的是：你可以把从BufferQueue中获取到的数据直接渲染为textured模型。
+
+你可能好奇我们如何能够确保在buffer中的数据格式是能够被GLES可以识别的。当SurfaceTexture创建了BufferQueue，它会设置消费者的usge flag为`GRALLOC_USAGE_HW_TEXTURE`，确保被gralloc创建的任何buffer可以被GLES所使用。
+
+因为SurfaceTexture是需要和EGL context进行交互的，你需要注意从正确的线程中调用SurfaceTexture的方法。
+
+每一个传递的Buffer都不仅仅是buffer本身，还包含了一个timestamp与transformation的信息。
+
+提供transformation的信息是为了提供效率。在某些情况下，对于消费者来说，source data可能是错误的orientation，我们没有在发送数据之前就做方向矫正，而是把数据与它的角度信息一起进行传递。transformation matrix的信息可以在数据被使用的时候与其他transformation信息进行整合，这样能够最大化的减少额外的开销。
+
+timestamp也是很有帮助的。例如，假设你连接到了一个生产者的接口上(通过`setPreviewTexture()`连接到Camera的输出接口)，如果你想要创建一个Video，你需要为每一帧数据设置当前的timestamp，这个timestamp应该是基于frame被captured来计算的，而不是buffer被接收到得时间。这个timestamp是被camera的代码进行设置的，这样确保了timestamp更加具有连续性。
+
+## SurfaceTexture and Surface
+如果你仔细查看API文档，你将会发现：对于程序来说，创建一个空白Surface的唯一方式是通过它的构造函数来实现，这个构造函数使用SufaceTexture作为唯一的参数。（在API 11之前，还没有public的surface构造器）。如果你把SurfaceTexture作为Surface与Texture的结合体，只有唯一的构造方法就会成为一个缺点。
+
+其实SurfaceTexture可以称为GLConsumer，这能够更加准确的描述它扮演的角色：作为BufferQueue的owner与comsumer。当你从SurfaceTexture中创建一个Surface时，从SurfaceTexture的BufferQueue的角度来看，你是在创建一个对象用来作为生产者。
+
+## TextureView
+TextureView是Android 4.0才开始被引入的。它是很复杂的一个View对象，它会组合View与SurfaceTexture。
+
+SurfaceTexture被称为一个GL comsumer，它会消费图形数据的buffer并使得他们作为texture的形式存在。TextureView对SurfaceTexture做了包装，取代了响应回调的职责并负责请求新的buffer。新的buffer会导致TextureView进行invalidate的操作。当请求绘制时，TextureView使用最近接收到得buffer作为它的source data，渲染时不用考虑View的任何状态值。
+
+你可以使用GLES对TextureView进行渲染，就像SurfaceView一样。仅仅是把SurfaceTexture传递到EGL的window创建的方法里面。然而这样做，暴露了一个隐藏的问题。
+
+在前面我们有提到，BufferQueues可以在不同的进程中传递buffers。当使用GLES渲染TextureView的时候，producer与consumer是在同一个进程，并且他们可能会执行在同一个thread。假设我们从UI Thread快速的提交了一连串的buffers。EGL buffer swap的方法会需要从BufferQueue中执行dequeue的操作，他会一直停留直到有一个buffer可用。可是直到consumer请求一个buffer进行渲染之前，不会有任何的buffer可用，而且这件事情也发生在UI Thread。所以这就出现问题了。
+
+解决方案是使得BufferQueue确保总是有一个可用的buffer用来进行dequeue，这样避免buffer swap会被卡住。其中一个方法是当新的buffer进行queued操作时，BufferQueue能够discard前一个queued的buffer，并且确保queue中存在的最少buffer数同时限制加入队列中得最多的buffer个数。(**如果你的队列中，有三个buffers，消费者一次请求了所有的三个buffer，那么就没有buffer用来出队了，buffer swap的调用会被卡住或者失败，隐藏我们需要阻止消费者一次请求超过2个buffer。**)错失Buffer通常是不希望发生的事情，因此只有在特殊情况下才允许发生，例如生产者与消费者在同一个Process。
+
+## SurfaceView or TextureView
+SurfaceView与TextureView扮演了相似的角色，但在实现原理上却有着非常大的差异。选择哪个才是最好的需要知道如何进行权衡利弊。
+
+TextureView是View hierarchy中一个普通的成员，它的行为和其他View类似，可以叠加到其他View上也可以被其他View进行重叠覆盖。你可以对它执行任意的transformation，也可以通过简单的API调用获取其中的数据内容。
+
+TextureView的主要缺陷是composition步骤的效率。对于SurfaceView来说，数据内容是由SurfaceFlinger绘制到单独的一个layer上的，完美的实现了层叠。对于TextureView，View的composition是由GLES执行的，同时更新TextureView的数据内容可能会导致其他View组件也出现redraw(如果view是放在TextureView的上面的话)。在View渲染成功之后，app UI layer必须通过SurfaceFlinger与其他layer(StatusBar layer,NavigationBar layer)进行composition。对于一个全屏的视频播放应用，还有那些UI元素全部在video layer上面的应用，SurfaceView提供了更好的性能。
+
+前面有提到过，对于RDM保护的Video只能在上层的layer上呈现。能够播放DRM的Video Player必须使用SurfaceView。
+
+## SurfaceView and Activity Lifecycle
+当使用SurfaceView的时候，渲染Surface应该使用单独的Thread而不是Main UI Thread。这会带来一些thread与activity生命周期的交互问题。
+
+首先，对于一个拥有SurfaceView的Activity，他们有两个互相依赖的生命周期：
+
+* App onCreate/onResume/onPause
+* Surface created/changed/destoryed
+
+当Activity启动时，你会按下面的顺序接收到callback:
+
+* onCreate
+* onResume
+* surfaceCreated
+* surfaceChanged
+
+如果你点击back按钮，你将会收到下面的callback:
+
+* onPause
+* surfaceDestoryed(在Surface消失之前就会执行)
+
+如果你点击电源按钮来关闭屏幕，你只会收到`onPause()`，没有`surfaceDestroyed()`。此时Surface仍然是存活的，渲染操作还可以继续进行。如果你有需要，还可以持续请求获取到Choreographyer的信号。如果你在锁屏的情况下旋转屏幕，然后对设备进行解锁，此时Activity会被重新启动。但是如果没有进行旋转，解锁之后还是能够获取到之前的Surface。
+
+当在SurfaceView里面使用一个单独的渲染线程时有一个问题：这个Thread的生命周期是不是应该和Surface或者Activity进行绑定？答案取决于在屏幕关闭时你想要做的操作。有两个方法：(1)在Activity的start/stop时对Thread做start/stop的操作。(2)在Surface的create/destory时对thread做start/stop的操作。
+
+* 方法(1)是和app的生命周期进行绑定。在onResume()的时候开启渲染线程，在onPause时停止它。这会遇到一点麻烦是：不知道何时创建于配置thread，因为Surface有时存在有时又不在。我们必须等待Surface被创建时候才能做一些线程中的初始化的操作。但是我们还不能简单的把这些操作放到`surfaceCreated()`的回调里面执行，因为如果surface不被重新创建的话，就没有办法触发那些初始化的操作。因此我们不要查询与保存Surface的状态，并且把这些信息传递给渲染thread。请注意，在多核的系统中，线程间传递数据需要小心谨慎，最好的方式是通过Handler message来传递Surface或者SurfaceHolder，而不仅仅是把他们放到thread里面。
+* 方法(2)呼声更高，因为Surface与渲染的逻辑是相关联的。在Surface创建之后开启渲染Thread，这样避免了一些线程间通信的问题。Surface created/changed的消息都是先于Thread收到的。我们需要确保屏幕关闭之后，渲染操作会停止，在屏幕点亮之后操作能够恢复。可以通过简单的通知Choreographer来停止触发frame绘制的回调。仅仅只有在渲染thread正在运行，我们的`onReusme`方法才需要恢复那些callback。如果我们基于frame之间的时间做动画的操作，中间省略掉得一些数据是不要紧的。给出明确的pause/resume的消息是个不错的写法。
+
+=====
+学习自：<http://source.android.com/devices/graphics/architecture.html>
