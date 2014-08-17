@@ -120,7 +120,7 @@ disqus_short_name: kesenhoo
 disqus_show_comment_count: true
 
 # Google Analytics
-# google_analytics_tracking_id: UA-37679268-1
+google_analytics_tracking_id: UA-37679268-1
 
 # Facebook Like
 facebook_like: false
