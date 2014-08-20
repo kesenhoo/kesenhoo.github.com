@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android:Deeper | 胡凯]]></title>
   <link href="http://hukai.me/blog/categories/android-deeper/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2014-08-17T17:06:04+08:00</updated>
+  <updated>2014-08-20T21:45:45+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Deeper(01) - Graphic Architecture]]></title>
-    <link href="http://hukai.me/blog/android-deeper-graphics-architecture/"/>
+    <link href="http://hukai.me/android-deeper-graphics-architecture/"/>
     <updated>2014-05-15T14:25:00+08:00</updated>
-    <id>http://hukai.me/blog/android-deeper-graphics-architecture</id>
+    <id>http://hukai.me/android-deeper-graphics-architecture</id>
     <content type="html"><![CDATA[<p>Android中有几个很重要的概念Surface, SurfaceHolder, EGLSurface, SurfaceView, GLSurfaceView, SurfaceTexture, TextureView与SurfaceFlinger。</p>
 
 <p>这篇文章会介绍Android图形架构的基本构成以及它们是如何在程序framework与多媒体系统中运作的。核心关注点是，图形数据的buffer是如何在系统中传递的。如果你曾经好奇过SurfaceView与TextureView的工作方式，或者是想知道Surface与EGLSurface是如何交互的，那么这篇文章将给你解答这些疑问。<strong>You've come to the right place.</strong></p>
@@ -278,9 +278,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Deeper(00) - Touch事件分发响应机制]]></title>
-    <link href="http://hukai.me/blog/android-deeper-touch-event-dispatch-process/"/>
+    <link href="http://hukai.me/android-deeper-touch-event-dispatch-process/"/>
     <updated>2014-04-05T13:13:00+08:00</updated>
-    <id>http://hukai.me/blog/android-deeper-touch-event-dispatch-process</id>
+    <id>http://hukai.me/android-deeper-touch-event-dispatch-process</id>
     <content type="html"><![CDATA[<h2>1)概述</h2>
 
 <p>Android的TouchEvent通常包含三个动作,ACTION_DOWN,ACTION_MOVE与ACTION_UP。发出的顺序是DOWN->MOVE->MOVE->...->UP(注意MOVE事件是否能够被触发取决于操作手势里面是否包含了移动的动作)。</p>

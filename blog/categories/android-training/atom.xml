@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android:Training | 胡凯]]></title>
   <link href="http://hukai.me/blog/categories/android-training/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2014-08-17T17:06:04+08:00</updated>
+  <updated>2014-08-20T21:45:45+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Training - 创建可穿戴应用(5 - 通过蓝牙进行调试)]]></title>
-    <link href="http://hukai.me/blog/android-training-wearable-app-bt-debug/"/>
+    <link href="http://hukai.me/android-training-wearable-app-bt-debug/"/>
     <updated>2014-07-15T00:23:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-wearable-app-bt-debug</id>
+    <id>http://hukai.me/android-training-wearable-app-bt-debug</id>
     <content type="html"><![CDATA[<p>你可以通过蓝牙来调试你的可穿戴应用，通过蓝牙把调试数据输出到手持设备上，手持设备是有连接到开发电脑上的。</p>
 
 <h2>搭建好设备用来调试</h2>
@@ -94,9 +94,9 @@ adb -e bugreport
   
   <entry>
     <title type="html"><![CDATA[Android Training - 创建可穿戴应用(4 - 打包可穿戴应用)]]></title>
-    <link href="http://hukai.me/blog/android-training-wearable-app-packaging/"/>
+    <link href="http://hukai.me/android-training-wearable-app-packaging/"/>
     <updated>2014-07-14T23:32:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-wearable-app-packaging</id>
+    <id>http://hukai.me/android-training-wearable-app-packaging</id>
     <content type="html"><![CDATA[<p>当发布应用给用户之前，你必须把可穿戴应用打包到手持应用内。因为不能直接在可穿戴设备上浏览并安装应用。如果打包正确，当用户下载手持应用时，系统会自动下发可穿戴应用到匹对的可穿戴设备上。</p>
 
 <blockquote><p><strong>Note:</strong> 如果开发时签名用的是debug key，这个特性是无法正常工作的。在开发时，需要使用<code>adb install</code>的命令或者Android Studio来安装可穿戴应用。</p></blockquote>
@@ -199,9 +199,9 @@ package, versionCode, 与 versionName需要和可穿戴应用的AndroidManifest.
   
   <entry>
     <title type="html"><![CDATA[Android Training - 创建可穿戴应用(3 - 添加语音能力)]]></title>
-    <link href="http://hukai.me/blog/android-training-wearable-app-voice-input/"/>
+    <link href="http://hukai.me/android-training-wearable-app-voice-input/"/>
     <updated>2014-07-14T21:43:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-wearable-app-voice-input</id>
+    <id>http://hukai.me/android-training-wearable-app-voice-input</id>
     <content type="html"><![CDATA[<p>语音指令是可穿戴体验的一个重要的部分。这使得用户可以释放双手，快速发出指令。穿戴提供了2种类型的语音操作：</p>
 
 <ul>
@@ -313,9 +313,9 @@ super.onActivityResult(requestCode, resultCode, data);
   
   <entry>
     <title type="html"><![CDATA[Android Training - 创建可穿戴应用(2 - 创建自定义的布局)]]></title>
-    <link href="http://hukai.me/blog/android-training-wearable-app-layouts/"/>
+    <link href="http://hukai.me/android-training-wearable-app-layouts/"/>
     <updated>2014-07-14T20:16:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-wearable-app-layouts</id>
+    <id>http://hukai.me/android-training-wearable-app-layouts</id>
     <content type="html"><![CDATA[<p>为可穿戴设备创建布局是和手持设备是一样的。但是 不要期望通过搬迁手持应用的功能与UI到可穿戴上会有一个好的用户体验。仅仅在有需要的时候，你才应该创建自定义的布局。请参考可穿戴设备的<a href="http://developer.android.com/design/wear/index.html">design guidelines</a>学习如何设计一个优秀的可穿戴应用。</p>
 
 <p><a name="CustomNotification"></a></p>
@@ -395,9 +395,9 @@ compile 'com.google.android.gms:play-services-wearable:+'
   
   <entry>
     <title type="html"><![CDATA[Android Training - 创建可穿戴应用(1 - 创建并执行可穿戴应用)]]></title>
-    <link href="http://hukai.me/blog/android-training-wearable-app-creating/"/>
+    <link href="http://hukai.me/android-training-wearable-app-creating/"/>
     <updated>2014-07-14T19:26:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-wearable-app-creating</id>
+    <id>http://hukai.me/android-training-wearable-app-creating</id>
     <content type="html"><![CDATA[<p>可穿戴应用可以直接运行在可穿戴的设备上。拥有访问类似传感器的硬件权限，还有操作activity，services等权限。</p>
 
 <p>你无法直接发布可穿戴应用到Google Play商城，需要利用手持应用来达到目的。因为可穿戴的设备不支持Google Play商城，所以当用户下载手持设备应用的时候，，会自动安装可穿戴应用到可穿戴设备上。手持应用还可以用来处理一些复杂繁重的任务，网络指令，或者其他的任务，最好发送操作结果返回给可穿戴设备。</p>

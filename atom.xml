@@ -4,7 +4,7 @@
   <title><![CDATA[胡凯]]></title>
   <link href="http://hukai.me/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2014-08-17T17:06:04+08:00</updated>
+  <updated>2014-08-20T21:45:45+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Training - 创建可穿戴应用(5 - 通过蓝牙进行调试)]]></title>
-    <link href="http://hukai.me/blog/android-training-wearable-app-bt-debug/"/>
+    <link href="http://hukai.me/android-training-wearable-app-bt-debug/"/>
     <updated>2014-07-15T00:23:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-wearable-app-bt-debug</id>
+    <id>http://hukai.me/android-training-wearable-app-bt-debug</id>
     <content type="html"><![CDATA[<p>你可以通过蓝牙来调试你的可穿戴应用，通过蓝牙把调试数据输出到手持设备上，手持设备是有连接到开发电脑上的。</p>
 
 <h2>搭建好设备用来调试</h2>
@@ -116,9 +116,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Training - 创建可穿戴应用(4 - 打包可穿戴应用)]]></title>
-    <link href="http://hukai.me/blog/android-training-wearable-app-packaging/"/>
+    <link href="http://hukai.me/android-training-wearable-app-packaging/"/>
     <updated>2014-07-14T23:32:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-wearable-app-packaging</id>
+    <id>http://hukai.me/android-training-wearable-app-packaging</id>
     <content type="html"><![CDATA[<p>当发布应用给用户之前，你必须把可穿戴应用打包到手持应用内。因为不能直接在可穿戴设备上浏览并安装应用。如果打包正确，当用户下载手持应用时，系统会自动下发可穿戴应用到匹对的可穿戴设备上。</p>
 
 <blockquote><p><strong>Note:</strong> 如果开发时签名用的是debug key，这个特性是无法正常工作的。在开发时，需要使用<code>adb install</code>的命令或者Android Studio来安装可穿戴应用。</p></blockquote>
@@ -266,9 +266,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Training - 创建可穿戴应用(3 - 添加语音能力)]]></title>
-    <link href="http://hukai.me/blog/android-training-wearable-app-voice-input/"/>
+    <link href="http://hukai.me/android-training-wearable-app-voice-input/"/>
     <updated>2014-07-14T21:43:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-wearable-app-voice-input</id>
+    <id>http://hukai.me/android-training-wearable-app-voice-input</id>
     <content type="html"><![CDATA[<p>语音指令是可穿戴体验的一个重要的部分。这使得用户可以释放双手，快速发出指令。穿戴提供了2种类型的语音操作：</p>
 
 <ul>
@@ -403,9 +403,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Training - 创建可穿戴应用(2 - 创建自定义的布局)]]></title>
-    <link href="http://hukai.me/blog/android-training-wearable-app-layouts/"/>
+    <link href="http://hukai.me/android-training-wearable-app-layouts/"/>
     <updated>2014-07-14T20:16:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-wearable-app-layouts</id>
+    <id>http://hukai.me/android-training-wearable-app-layouts</id>
     <content type="html"><![CDATA[<p>为可穿戴设备创建布局是和手持设备是一样的。但是 不要期望通过搬迁手持应用的功能与UI到可穿戴上会有一个好的用户体验。仅仅在有需要的时候，你才应该创建自定义的布局。请参考可穿戴设备的<a href="http://developer.android.com/design/wear/index.html">design guidelines</a>学习如何设计一个优秀的可穿戴应用。</p>
 
 <p><a name="CustomNotification"></a></p>
@@ -513,9 +513,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Training - 创建可穿戴应用(1 - 创建并执行可穿戴应用)]]></title>
-    <link href="http://hukai.me/blog/android-training-wearable-app-creating/"/>
+    <link href="http://hukai.me/android-training-wearable-app-creating/"/>
     <updated>2014-07-14T19:26:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-wearable-app-creating</id>
+    <id>http://hukai.me/android-training-wearable-app-creating</id>
     <content type="html"><![CDATA[<p>可穿戴应用可以直接运行在可穿戴的设备上。拥有访问类似传感器的硬件权限，还有操作activity，services等权限。</p>
 
 <p>你无法直接发布可穿戴应用到Google Play商城，需要利用手持应用来达到目的。因为可穿戴的设备不支持Google Play商城，所以当用户下载手持设备应用的时候，，会自动安装可穿戴应用到可穿戴设备上。手持应用还可以用来处理一些复杂繁重的任务，网络指令，或者其他的任务，最好发送操作结果返回给可穿戴设备。</p>
@@ -649,9 +649,9 @@ adb -d forward tcp:5601 tcp:5601
   
   <entry>
     <title type="html"><![CDATA[Android Training - 创建可穿戴应用(0 - 序言)]]></title>
-    <link href="http://hukai.me/blog/android-training-wearable-app-index/"/>
+    <link href="http://hukai.me/android-training-wearable-app-index/"/>
     <updated>2014-07-14T12:20:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-wearable-app-index</id>
+    <id>http://hukai.me/android-training-wearable-app-index</id>
     <content type="html"><![CDATA[<h1>创建可穿戴的应用</h1>
 
 <p>可穿戴应用直接运行在穿戴设备上，应用可以直接访问例如传感器与GPU这样的硬件。这些应用和一般的Android应用的基础部分是一致的，只是在设计与可用性还有一些特殊功能上有比较大差异。手持设备与可穿戴设备上的应用主要有下面的一些差异：</p>
@@ -705,9 +705,9 @@ adb -d forward tcp:5601 tcp:5601
   
   <entry>
     <title type="html"><![CDATA[Android Notes - 添加Copy to Clipboard的选项到分享列表中]]></title>
-    <link href="http://hukai.me/blog/android-notes-add-copy-text-option-to-share-list/"/>
+    <link href="http://hukai.me/android-notes-add-copy-text-option-to-share-list/"/>
     <updated>2014-07-12T15:26:00+08:00</updated>
-    <id>http://hukai.me/blog/android-notes-add-copy-text-option-to-share-list</id>
+    <id>http://hukai.me/android-notes-add-copy-text-option-to-share-list</id>
     <content type="html"><![CDATA[<p>偶然被人问到如何添加复制到剪切板的选项到分享列表，如下图所示：</p>
 
 <p><img src="http://hukai.me/images/copy_link_option_at_share_list.png" alt="copy_link_option_at_share_list" /></p>
@@ -857,9 +857,9 @@ adb -d forward tcp:5601 tcp:5601
   
   <entry>
     <title type="html"><![CDATA[Android Training - 避免程序无响应ANR]]></title>
-    <link href="http://hukai.me/blog/android-training-performance-anr/"/>
+    <link href="http://hukai.me/android-training-performance-anr/"/>
     <updated>2014-07-06T12:09:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-performance-anr</id>
+    <id>http://hukai.me/android-training-performance-anr</id>
     <content type="html"><![CDATA[<p>可能你写的代码在性能测试上表现良好，但是你的应用仍然有时候会反应迟缓(sluggish)，停顿(hang)或者长时间卡死(frezze)，或者应用处理输入的数据花费时间过长。对于你的应用来说最槽糕的事情是出现&#8221;程序无响应(Application Not Responding)&#8221; (ANR)的警示框。</p>
 
 <p>在Android中，系统通过显示ANR警示框来保护程序的长时间无响应。对话框如下：</p>
@@ -981,9 +981,9 @@ adb -d forward tcp:5601 tcp:5601
   
   <entry>
     <title type="html"><![CDATA[Android Training - Volley(Lesson 4 - 实现自定义的请求)]]></title>
-    <link href="http://hukai.me/blog/android-training-volley-custom-request/"/>
+    <link href="http://hukai.me/android-training-volley-custom-request/"/>
     <updated>2014-06-25T23:20:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-volley-custom-request</id>
+    <id>http://hukai.me/android-training-volley-custom-request</id>
     <content type="html"><![CDATA[<p>这节课会介绍如何实现你自定义的请求类型，这些自定义的类型不属于Volley内置支持包里面。</p>
 
 <h2>编写一个自定义的请求Write a Custom Request</h2>
@@ -1175,9 +1175,9 @@ adb -d forward tcp:5601 tcp:5601
   
   <entry>
     <title type="html"><![CDATA[Android Training - Volley(Lesson 3 - 创建标准的请求)]]></title>
-    <link href="http://hukai.me/blog/android-training-volley-standard-request/"/>
+    <link href="http://hukai.me/android-training-volley-standard-request/"/>
     <updated>2014-06-24T22:10:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-volley-standard-request</id>
+    <id>http://hukai.me/android-training-volley-standard-request</id>
     <content type="html"><![CDATA[<p>这一课会介绍如何使用Volley支持的常用请求类型：</p>
 
 <ul>
@@ -1508,9 +1508,9 @@ adb -d forward tcp:5601 tcp:5601
   
   <entry>
     <title type="html"><![CDATA[Android Training - Volley(Lesson 2 - 建立请求队列)]]></title>
-    <link href="http://hukai.me/blog/android-training-volley-request-queue/"/>
+    <link href="http://hukai.me/android-training-volley-request-queue/"/>
     <updated>2014-06-24T21:03:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-volley-request-queue</id>
+    <id>http://hukai.me/android-training-volley-request-queue</id>
     <content type="html"><![CDATA[<p>前一节课演示了如何使用<code>Volley.newRequestQueue</code>这一简便的方法来建立一个<code>RequestQueue</code>，这是利用了Volley默认的优势。这节课会介绍如何显式的建立一个RequestQueue，以便满足你自定义的需求。</p>
 
 <p>这节课同样会介绍一种推荐的实现方式：创建一个单例的RequestQueue，这使得RequestQueue能够持续保持在你的app的生命周期中。</p>
@@ -1766,9 +1766,9 @@ adb -d forward tcp:5601 tcp:5601
   
   <entry>
     <title type="html"><![CDATA[Android Training - Volley(Lesson 1 - 发送简单的请求)]]></title>
-    <link href="http://hukai.me/blog/android-training-volley-simple-request/"/>
+    <link href="http://hukai.me/android-training-volley-simple-request/"/>
     <updated>2014-06-24T09:00:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-volley-simple-request</id>
+    <id>http://hukai.me/android-training-volley-simple-request</id>
     <content type="html"><![CDATA[<p>使用Volley的方式是，你通过创建一个<code>RequestQueue</code>并传递<code>Request</code>对象给它。RequestQueue管理工作线程用来执行网络操作，从Cache中读取与写入数据，以及解析Http的响应内容。<code>Requests</code>执行raw responses的解析，Volley会把响应的数据分发给主线程。</p>
 
 <p>这节课会介绍如何使用<code>Volley.newRequestQueue</code>这个建立请求队列的方法来发送一个请求，在下一节课<a href="request-queue.html">建立一个请求队列Setting Up a RequestQueue</a>中会介绍你自己如何建立一个请求队列。</p>
@@ -1919,9 +1919,9 @@ adb -d forward tcp:5601 tcp:5601
   
   <entry>
     <title type="html"><![CDATA[Android Training - Volley(Lesson 0 - 序言)]]></title>
-    <link href="http://hukai.me/blog/android-training-volley-index/"/>
+    <link href="http://hukai.me/android-training-volley-index/"/>
     <updated>2014-06-24T08:30:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-volley-index</id>
+    <id>http://hukai.me/android-training-volley-index</id>
     <content type="html"><![CDATA[<p><code>Volley</code> 是一个HTTP库，它能够帮助Android apps更方便的执行网络操作，最重要的是，它更快速高效。可以通过开源的 <a href="https://android.googlesource.com/platform/frameworks/volley">AOSP</a> 仓库获取到Volley 。</p>
 
 <hr />
@@ -2013,9 +2013,9 @@ adb -d forward tcp:5601 tcp:5601
   
   <entry>
     <title type="html"><![CDATA[Android Deeper(01) - Graphic Architecture]]></title>
-    <link href="http://hukai.me/blog/android-deeper-graphics-architecture/"/>
+    <link href="http://hukai.me/android-deeper-graphics-architecture/"/>
     <updated>2014-05-15T14:25:00+08:00</updated>
-    <id>http://hukai.me/blog/android-deeper-graphics-architecture</id>
+    <id>http://hukai.me/android-deeper-graphics-architecture</id>
     <content type="html"><![CDATA[<p>Android中有几个很重要的概念Surface, SurfaceHolder, EGLSurface, SurfaceView, GLSurfaceView, SurfaceTexture, TextureView与SurfaceFlinger。</p>
 
 <p>这篇文章会介绍Android图形架构的基本构成以及它们是如何在程序framework与多媒体系统中运作的。核心关注点是，图形数据的buffer是如何在系统中传递的。如果你曾经好奇过SurfaceView与TextureView的工作方式，或者是想知道Surface与EGLSurface是如何交互的，那么这篇文章将给你解答这些疑问。<strong>You&#8217;ve come to the right place.</strong></p>
@@ -2276,9 +2276,9 @@ adb -d forward tcp:5601 tcp:5601
   
   <entry>
     <title type="html"><![CDATA[Android Notes(06) - Camera]]></title>
-    <link href="http://hukai.me/blog/android-notes-camera/"/>
+    <link href="http://hukai.me/android-notes-camera/"/>
     <updated>2014-04-21T21:24:00+08:00</updated>
-    <id>http://hukai.me/blog/android-notes-camera</id>
+    <id>http://hukai.me/android-notes-camera</id>
     <content type="html"><![CDATA[<p>Android framework为各种不同的Camera与Camera的特色功能提供了支持，使得可以在应用中进行拍照与录像。这篇文章会讨论一种简便，快速的拍照录像方式，为了给用户创建定制的相机体验，文章也会概述相机的高级功能。</p>
 
 <h2>0)开始之前</h2>
@@ -3464,9 +3464,9 @@ adb -d forward tcp:5601 tcp:5601
   
   <entry>
     <title type="html"><![CDATA[Android Training(18) - 使用IntentService执行任务(Lesson 3 - 回传任务状态给发送方)]]></title>
-    <link href="http://hukai.me/blog/android-training-18-running-background-service-lesson-3/"/>
+    <link href="http://hukai.me/android-training-18-running-background-service-lesson-3/"/>
     <updated>2014-04-20T22:01:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-18-running-background-service-lesson-3</id>
+    <id>http://hukai.me/android-training-18-running-background-service-lesson-3</id>
     <content type="html"><![CDATA[<p>这章节会演示如何回传IntentService中执行的任务状态与结果给发送方。 例如，回传任务的状态给Activity并进行更新UI。推荐的方式是使用<a href="http://developer.android.com/reference/android/support/v4/content/LocalBroadcastManager.html">LocalBroadcastManager</a>，这个组件可以限制broadcast只在自己的App中进行传递。</p>
 
 <h2>Report Status From an IntentService</h2>
@@ -3667,9 +3667,9 @@ adb -d forward tcp:5601 tcp:5601
   
   <entry>
     <title type="html"><![CDATA[Android Training(18) - 使用IntentService执行任务(Lesson 2 - 发送任务给IntentService)]]></title>
-    <link href="http://hukai.me/blog/android-training-18-running-background-service-lesson-2/"/>
+    <link href="http://hukai.me/android-training-18-running-background-service-lesson-2/"/>
     <updated>2014-04-20T20:46:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-18-running-background-service-lesson-2</id>
+    <id>http://hukai.me/android-training-18-running-background-service-lesson-2</id>
     <content type="html"><![CDATA[<p>前一篇文章演示了如何创建一个IntentService类。这次会演示如何通过发送一个Intent来触发IntentService执行任务。这个Intent可以传递一些数据给IntentService。可以在Activity或者Fragment的任何时间点发送这个Intent。</p>
 
 <p>为了创建一个工作请求并发送到IntentService。需要先创建一个explicit Intent，添加数据到intent，然后通过执行<a href="http://developer.android.com/reference/android/content/Context.html#startService(android.content.Intent">startService()</a>) 把它发送到IntentService。</p>
@@ -3729,9 +3729,9 @@ adb -d forward tcp:5601 tcp:5601
   
   <entry>
     <title type="html"><![CDATA[Android Training(18) - 使用IntentService执行任务(Lesson 1 - 创建IntentService)]]></title>
-    <link href="http://hukai.me/blog/android-training-18-running-background-service-lesson-1/"/>
+    <link href="http://hukai.me/android-training-18-running-background-service-lesson-1/"/>
     <updated>2014-04-14T18:30:00+08:00</updated>
-    <id>http://hukai.me/blog/android-training-18-running-background-service-lesson-1</id>
+    <id>http://hukai.me/android-training-18-running-background-service-lesson-1</id>
     <content type="html"><![CDATA[<p><strong>写在开始：</strong>接下去的一段时间会学习专题《Background Jobs》的几篇文章，演示如何在后台执行任务，以此加速程序的性能并降低能耗的使用。第一章节会学习如何通过发送任务到后台的Service中执行，从而提示UI的表现性能。</p>
 
 <p>除非你特意指定，否则大部分在前台的操作都执行在一个叫做UI Thread的特殊线程中。这可能会导致某些问题，因为耗时操作可能会干扰界面的响应性能。为了避免这样的问题，Android Framework提供了几个类，用来帮助你把那些耗时操作移动到后台线程中执行。那些类中最常用的就是<a href="http://developer.android.com/reference/android/app/IntentService.html">IntentService</a>.</p>
@@ -3834,9 +3834,9 @@ adb -d forward tcp:5601 tcp:5601
   
   <entry>
     <title type="html"><![CDATA[Android Deeper(00) - Touch事件分发响应机制]]></title>
-    <link href="http://hukai.me/blog/android-deeper-touch-event-dispatch-process/"/>
+    <link href="http://hukai.me/android-deeper-touch-event-dispatch-process/"/>
     <updated>2014-04-05T13:13:00+08:00</updated>
-    <id>http://hukai.me/blog/android-deeper-touch-event-dispatch-process</id>
+    <id>http://hukai.me/android-deeper-touch-event-dispatch-process</id>
     <content type="html"><![CDATA[<h2>1)概述</h2>
 
 <p>Android的TouchEvent通常包含三个动作,ACTION_DOWN,ACTION_MOVE与ACTION_UP。发出的顺序是DOWN->MOVE->MOVE->&#8230;->UP(注意MOVE事件是否能够被触发取决于操作手势里面是否包含了移动的动作)。</p>
@@ -4231,9 +4231,9 @@ adb -d forward tcp:5601 tcp:5601
   
   <entry>
     <title type="html"><![CDATA[Java Notes 00 - Singleton Pattern(单例总结)]]></title>
-    <link href="http://hukai.me/blog/java-notes-singleton-pattern/"/>
+    <link href="http://hukai.me/java-notes-singleton-pattern/"/>
     <updated>2013-11-17T14:21:00+08:00</updated>
-    <id>http://hukai.me/blog/java-notes-singleton-pattern</id>
+    <id>http://hukai.me/java-notes-singleton-pattern</id>
     <content type="html"><![CDATA[<p>这里不赘述单例模式的概念了，直接演示几种不同的实现方式。</p>
 
 <h2>0)Eager initialization</h2>

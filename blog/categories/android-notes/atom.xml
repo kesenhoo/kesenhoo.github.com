@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android:Notes | 胡凯]]></title>
   <link href="http://hukai.me/blog/categories/android-notes/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2014-08-17T17:06:04+08:00</updated>
+  <updated>2014-08-20T21:45:45+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Android Notes - 添加Copy to Clipboard的选项到分享列表中]]></title>
-    <link href="http://hukai.me/blog/android-notes-add-copy-text-option-to-share-list/"/>
+    <link href="http://hukai.me/android-notes-add-copy-text-option-to-share-list/"/>
     <updated>2014-07-12T15:26:00+08:00</updated>
-    <id>http://hukai.me/blog/android-notes-add-copy-text-option-to-share-list</id>
+    <id>http://hukai.me/android-notes-add-copy-text-option-to-share-list</id>
     <content type="html"><![CDATA[<p>偶然被人问到如何添加复制到剪切板的选项到分享列表，如下图所示：</p>
 
 <p><img src="/images/copy_link_option_at_share_list.png" alt="copy_link_option_at_share_list" /></p>
@@ -129,9 +129,9 @@ if (intent != null &amp;&amp; intent.getAction().equalsIgnoreCase("ACTION_COPY_T
   
   <entry>
     <title type="html"><![CDATA[Android Notes(06) - Camera]]></title>
-    <link href="http://hukai.me/blog/android-notes-camera/"/>
+    <link href="http://hukai.me/android-notes-camera/"/>
     <updated>2014-04-21T21:24:00+08:00</updated>
-    <id>http://hukai.me/blog/android-notes-camera</id>
+    <id>http://hukai.me/android-notes-camera</id>
     <content type="html"><![CDATA[<p>Android framework为各种不同的Camera与Camera的特色功能提供了支持，使得可以在应用中进行拍照与录像。这篇文章会讨论一种简便，快速的拍照录像方式，为了给用户创建定制的相机体验，文章也会概述相机的高级功能。</p>
 
 <h2>0)开始之前</h2>
@@ -932,9 +932,9 @@ mMediaRecorder.setCaptureRate(0.1); // capture a frame every 10 seconds
   
   <entry>
     <title type="html"><![CDATA[Android Notes(05) - Tasks and Back Stack]]></title>
-    <link href="http://hukai.me/blog/android-notes-task-and-back-stack/"/>
+    <link href="http://hukai.me/android-notes-task-and-back-stack/"/>
     <updated>2013-04-20T20:42:00+08:00</updated>
-    <id>http://hukai.me/blog/android-notes-task-and-back-stack</id>
+    <id>http://hukai.me/android-notes-task-and-back-stack</id>
     <content type="html"><![CDATA[<ul>
 <li>所有的activities都归属于一个task。</li>
 <li>一个task包含了一些activities，这些activities以用户与他们的交互前后为顺序存放在task中。</li>
@@ -1165,9 +1165,9 @@ For example, suppose that an activity that reports weather conditions in selecte
   
   <entry>
     <title type="html"><![CDATA[Android Notes(04) - Intents and Intent Filters]]></title>
-    <link href="http://hukai.me/blog/android-notes-intent-and-intentFilter/"/>
+    <link href="http://hukai.me/android-notes-intent-and-intentFilter/"/>
     <updated>2013-04-12T18:27:00+08:00</updated>
-    <id>http://hukai.me/blog/android-notes-intent-and-intentFilter</id>
+    <id>http://hukai.me/android-notes-intent-and-intentFilter</id>
     <content type="html"><![CDATA[<h2>Intent与Intent Filter</h2>
 
 <p>Android其中的三大组件，Activity,Service与broadcast receivers是通过Intent来触发彼此的。Intent本身会携带一些信息，它是一种组件内部或者组件间进行交互的中介。<br/>
@@ -1406,9 +1406,9 @@ scheme://host:port/path
   
   <entry>
     <title type="html"><![CDATA[Android Notes(03) - Process and Thread]]></title>
-    <link href="http://hukai.me/blog/android-notes-process-and-thread/"/>
+    <link href="http://hukai.me/android-notes-process-and-thread/"/>
     <updated>2013-03-31T16:27:00+08:00</updated>
-    <id>http://hukai.me/blog/android-notes-process-and-thread</id>
+    <id>http://hukai.me/android-notes-process-and-thread</id>
     <content type="html"><![CDATA[<p><img src="/images/articles/process_and_thread.jpg"></p>
 
 <p>当程序的第一个组件开始启动时，Android系统会为这个程序启动一个新的Linux进程。默认的，程序中的后续其他组件都是运行在这个进程的线程中(这个线程被成为"主"线程:main thread)。如果程序的组件在启动时发现已经存在这个程序的进程了(因为其他组件正在运行)， 那么这个组件将启动在该进程中，并使用同一线程。然而，你可以安排程序中的不同组件运行在另外一个进程中，而且你可以为任何进程创建其它的线程。</p>
