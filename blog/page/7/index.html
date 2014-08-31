@@ -9,9 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="设计良好的类总是相似的。它使用一个好用的接口来封装一个特定的功能，它有效的使用CPU与内存，等等。为了成为一个设计良好的类，自定义的view应该: 遵守Android标准规则。
-提供自定义的风格属性值并能够被Android XML Layout所识别。
-发出可访问的事件。 &hellip;">
+  <meta name="description" content="自定义view的最重要的一个部分是自定义它的外观。根据你的程序的需求，自定义绘制动作可能简单也可能很复杂。这节课会演示一些最常见的操作。 Override onDraw() 重绘一个自定义的view的最重要的步骤是重写onDraw()方法。onDraw()的参数是一个Canvas对象。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +75,55 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-training-16-creating-custom-views-lesson-2/">Android Training(16) - 创建自定义的Views(Lesson 2 - 自定义Drawing)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-06-30T20:15:00+08:00" pubdate data-updated="true">Jun 30<span>th</span>, 2013</time>
+        
+         | <a href="/android-training-16-creating-custom-views-lesson-2/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>自定义view的最重要的一个部分是自定义它的外观。根据你的程序的需求，自定义绘制动作可能简单也可能很复杂。这节课会演示一些最常见的操作。</p>
+
+<h2>Override onDraw()</h2>
+
+<p>重绘一个自定义的view的最重要的步骤是重写onDraw()方法。onDraw()的参数是一个Canvas对象。Canvas类定义了绘制文本，线条，图像与许多其他图形的方法。你可以在onDraw方法里面使用那些方法来创建你的UI。</p>
+
+<p>在你调用任何绘制方法之前，你需要创建一个Paint对象。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-training-16-creating-custom-views-lesson-2/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -247,58 +294,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-notes-task-and-back-stack/">Android Notes(05) - Tasks and Back Stack</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-04-20T20:42:00+08:00" pubdate data-updated="true">Apr 20<span>th</span>, 2013</time>
-        
-         | <a href="/android-notes-task-and-back-stack/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><ul>
-<li>所有的activities都归属于一个task。</li>
-<li>一个task包含了一些activities，这些activities以用户与他们的交互前后为顺序存放在task中。</li>
-<li>Tasks可以把activies放置在background并且保存每一个activites的状态，以便于用户可以切换到其他task而不至于丢失之前的活动状态。</li>
-</ul>
-
-
-<h1>要点概述</h1>
-
-<p>一个程序通常包含了多个actvities。每一个activity都应该围绕用户需要执行的一个特定功能而进行设计，并且可以启动其他的activites。例如:一个邮件程序应该拥有一个显示新邮件的列表。当用户选择其中一封邮件，一个新的activity将打开用来显示邮件内容。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-notes-task-and-back-stack/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/8/">&larr; Older</a>
@@ -314,6 +309,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-activitylifecycle-onsaveinstancestate/">Android Notes - Activity生命周期中的onSaveInstanceState</a>
+      </li>
     
       <li class="post">
         <a href="/android-training-wearable-app-bt-debug/">Android Training - 创建可穿戴应用(5 - 通过蓝牙进行调试)</a>
@@ -343,19 +342,15 @@
         <a href="/android-notes-add-copy-text-option-to-share-list/">Android Notes - 添加Copy to Clipboard的选项到分享列表中</a>
       </li>
     
-      <li class="post">
-        <a href="/android-training-performance-anr/">Android Training - 避免程序无响应ANR</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (85)</a></li>
+  <li><a href='/blog/categories/android'>Android (86)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
-  <li><a href='/blog/categories/android-notes'>Android:notes (8)</a></li>
+  <li><a href='/blog/categories/android-notes'>Android:notes (9)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>

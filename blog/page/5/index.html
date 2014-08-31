@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="前一篇文章演示了如何创建一个IntentService类。这次会演示如何通过发送一个Intent来触发IntentService执行任务。这个Intent可以传递一些数据给IntentService。可以在Activity或者Fragment的任何时间点发送这个Intent。 &hellip;">
+  <meta name="description" content="这章节会演示如何回传IntentService中执行的任务状态与结果给发送方。 例如，回传任务的状态给Activity并进行更新UI。推荐的方式是使用LocalBroadcastManager，这个组件可以限制broadcast只在自己的App中进行传递。 Report Status From &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,110 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-training-18-running-background-service-lesson-3/">Android Training(18) - 使用IntentService执行任务(Lesson 3 - 回传任务状态给发送方)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-20T22:01:00+08:00" pubdate data-updated="true">Apr 20<span>th</span>, 2014</time>
+        
+         | <a href="/android-training-18-running-background-service-lesson-3/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>这章节会演示如何回传IntentService中执行的任务状态与结果给发送方。 例如，回传任务的状态给Activity并进行更新UI。推荐的方式是使用<a href="http://developer.android.com/reference/android/support/v4/content/LocalBroadcastManager.html">LocalBroadcastManager</a>，这个组件可以限制broadcast只在自己的App中进行传递。</p>
+
+<h2>Report Status From an IntentService</h2>
+
+<p>为了在IntentService中向其他组件发送任务状态，首先创建一个Intent并在data字段中包含需要传递的信息。作为一个可选项，还可以给这个Intent添加一个action与data URI。</p>
+
+<p>下一步，通过执行<a href="http://developer.android.com/reference/android/support/v4/content/LocalBroadcastManager.html#sendBroadcast(android.content.Intent">LocalBroadcastManager.sendBroadcast()</a>))来发送Intent。Intent被发送到任何有注册接受它的组件中。为了获取到LocalBroadcastManager的实例，可以执行getInstance().代码示例如下：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">Constants</span> <span class="o">{</span>
+</span><span class='line'>    <span class="o">...</span>
+</span><span class='line'>    <span class="c1">// Defines a custom Intent action</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">BROADCAST_ACTION</span> <span class="o">=</span>
+</span><span class='line'>        <span class="s">&quot;com.example.android.threadsample.BROADCAST&quot;</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">...</span>
+</span><span class='line'>    <span class="c1">// Defines the key for the status &quot;extra&quot; in an Intent</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">EXTENDED_DATA_STATUS</span> <span class="o">=</span>
+</span><span class='line'>        <span class="s">&quot;com.example.android.threadsample.STATUS&quot;</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">...</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">RSSPullService</span> <span class="kd">extends</span> <span class="n">IntentService</span> <span class="o">{</span>
+</span><span class='line'><span class="o">...</span>
+</span><span class='line'>    <span class="cm">/*</span>
+</span><span class='line'><span class="cm">     * Creates a new Intent containing a Uri object</span>
+</span><span class='line'><span class="cm">     * BROADCAST_ACTION is a custom Intent action</span>
+</span><span class='line'><span class="cm">     */</span>
+</span><span class='line'>    <span class="n">Intent</span> <span class="n">localIntent</span> <span class="o">=</span>
+</span><span class='line'>            <span class="k">new</span> <span class="nf">Intent</span><span class="o">(</span><span class="n">Constants</span><span class="o">.</span><span class="na">BROADCAST_ACTION</span><span class="o">)</span>
+</span><span class='line'>            <span class="c1">// Puts the status into the Intent</span>
+</span><span class='line'>            <span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="n">Constants</span><span class="o">.</span><span class="na">EXTENDED_DATA_STATUS</span><span class="o">,</span> <span class="n">status</span><span class="o">);</span>
+</span><span class='line'>    <span class="c1">// Broadcasts the Intent to receivers in this app.</span>
+</span><span class='line'>    <span class="n">LocalBroadcastManager</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="k">this</span><span class="o">).</span><span class="na">sendBroadcast</span><span class="o">(</span><span class="n">localIntent</span><span class="o">);</span>
+</span><span class='line'><span class="o">...</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-training-18-running-background-service-lesson-3/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -273,76 +377,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/java-notes-singleton-pattern/">Java Notes 00 - Singleton Pattern(单例总结)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-11-17T14:21:00+08:00" pubdate data-updated="true">Nov 17<span>th</span>, 2013</time>
-        
-         | <a href="/java-notes-singleton-pattern/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>这里不赘述单例模式的概念了，直接演示几种不同的实现方式。</p>
-
-<h2>0)Eager initialization</h2>
-
-<p>如果程序一开始就需要某个单例，并且创建这个单例并不那么费时，我们可以考虑用这种方式：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Singleton</span> <span class="o">{</span>
-</span><span class='line'>    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">Singleton</span> <span class="n">INSTANCE</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Singleton</span><span class="o">();</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kd">private</span> <span class="nf">Singleton</span><span class="o">()</span> <span class="o">{}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="n">Singleton</span> <span class="nf">getInstance</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>        <span class="k">return</span> <span class="n">INSTANCE</span><span class="o">;</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这种实现方式有几个特点：</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/java-notes-singleton-pattern/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/6/">&larr; Older</a>
@@ -358,6 +392,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-activitylifecycle-onsaveinstancestate/">Android Notes - Activity生命周期中的onSaveInstanceState</a>
+      </li>
     
       <li class="post">
         <a href="/android-training-wearable-app-bt-debug/">Android Training - 创建可穿戴应用(5 - 通过蓝牙进行调试)</a>
@@ -387,19 +425,15 @@
         <a href="/android-notes-add-copy-text-option-to-share-list/">Android Notes - 添加Copy to Clipboard的选项到分享列表中</a>
       </li>
     
-      <li class="post">
-        <a href="/android-training-performance-anr/">Android Training - 避免程序无响应ANR</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (85)</a></li>
+  <li><a href='/blog/categories/android'>Android (86)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
-  <li><a href='/blog/categories/android-notes'>Android:notes (8)</a></li>
+  <li><a href='/blog/categories/android-notes'>Android:notes (9)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
