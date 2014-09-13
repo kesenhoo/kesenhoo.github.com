@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="Using the Support Library Android Support Library 提供了一个包含了API库的JAR 文件，它可以允许你在你的app在更老的Android平台上使用一些比较新的API。例如，它提供了一些fragment的API，这样你可以在1. &hellip;">
+  <meta name="description" content="你可以把fragment当作activity的一部分，它有自己的lifecycle,它会接受自己的输入事件。你可以在activity运行的时候增加或者拿掉fragment。（类似子activity，你可以在不同的activity中重用fragment）。这节课演示如何使用support &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -75,6 +75,53 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-training-11-building-a-dynamic-ui-with-fragments-lesson-2/">Android Training(11) - 使用Fragments建立动态的UI(Lesson 2 - 新建一个Fragment)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-11-27T16:48:00+08:00" pubdate data-updated="true">Nov 27<span>th</span>, 2012</time>
+        
+         | <a href="/android-training-11-building-a-dynamic-ui-with-fragments-lesson-2/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><ul>
+<li>你可以把fragment当作activity的一部分，它有自己的lifecycle,它会接受自己的输入事件。你可以在activity运行的时候增加或者拿掉fragment。（类似子activity，你可以在不同的activity中重用fragment）。这节课演示如何使用support library来创建一个继承自 Fragment 的类。</li>
+<li>Note: 如果你的app决定跑在Level 11或者更高的系统上，你不需要添加这个support library,你可以使用那个版本的系统自带的API来实现。请注意这节课是专注于使用support library里面的API，这里面的API名称与那些本身就包含这些功能的平台上的名称有可能不一样。</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-training-11-building-a-dynamic-ui-with-fragments-lesson-2/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -256,56 +303,6 @@ Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来�
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-10-network-operations-lesson-2/">Android Training(10) - 执行网络操作(Lesson 2 - 管理网络使用方法)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-05-07T13:43:00+08:00" pubdate data-updated="true">May 7<span>th</span>, 2012</time>
-        
-         | <a href="/android-training-10-network-operations-lesson-2/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><strong>第2课:Managing Network Usage</strong></p>
-
-<p>这一课会介绍如何细化管理使用的网络资源。如果你的程序需要执行很多网络操作，你应该提供用户设置选项来允许用户控制程序的数据偏好。例如，同步数据的频率，是否只在连接到WiFi才进行下载与上传操作，是否在漫游时使用套餐数据流量等等。这样用户才能在快到达流量上限时关闭你的程序获取数据功能。</p>
-
-<p>关于如何编写一个最小化下载与网络操作对电量影响的程序，请参考：</p>
-
-<p><a href="http://developer.android.com/training/monitoring-device-state/index.html">Optimizing Battery Life</a>:
-<a href="http://developer.android.com/training/efficient-downloads/index.html">Transferring Data Without Draining the Battery</a>:</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-10-network-operations-lesson-2/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/14/">&larr; Older</a>
@@ -321,6 +318,10 @@ Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来�
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-tips-for-reduce-apk-size/">Android APK安装包瘦身</a>
+      </li>
     
       <li class="post">
         <a href="/android-activitylifecycle-onsaveinstancestate/">Android Notes - Activity生命周期中的onSaveInstanceState</a>
@@ -350,19 +351,15 @@ Extensible Markup Language (XML) .很多网站或博客上都提供XML feed来�
         <a href="/android-training-wearable-app-index/">Android Training - 创建可穿戴应用(0 - 序言)</a>
       </li>
     
-      <li class="post">
-        <a href="/android-notes-add-copy-text-option-to-share-list/">Android Notes - 添加Copy to Clipboard的选项到分享列表中</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (86)</a></li>
+  <li><a href='/blog/categories/android'>Android (87)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
-  <li><a href='/blog/categories/android-notes'>Android:notes (9)</a></li>
+  <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
