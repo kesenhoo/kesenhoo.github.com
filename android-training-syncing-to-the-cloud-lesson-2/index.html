@@ -1,0 +1,430 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Android Training - 云同步(Lesson 2 - 使用Backup API) - 胡凯</title>
+  <meta name="author" content="Kesen Hoo">
+
+  
+  <meta name="description" content="Using the Backup API[使用Backup API] 当一个用户购买了新的设备或者是把当前的设备做了的恢复出厂设置的操作，用户希望在进行初始化设置的时候，Google Play能够把之前安装过的应用恢复到设备上。默认情况是，那些操作不会发生，用户之前的设置与数据都会丢失. &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://hukai.me/android-training-syncing-to-the-cloud-lesson-2/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+
+  <!--
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  -->
+  <link href="/atom.xml" rel="alternate" title="胡凯" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<!--Mark by @Kesen-->
+<!-- <link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css"> -->
+
+  
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-37679268-1', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+
+
+
+</head>
+
+<body   class="no-sidebar"  >
+  <header role="banner"><hgroup>
+  <h1><a href="/">胡凯</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:hukai.me" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/android-training-course-in-chinese/index.html">Android Training in Chinese</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Android Training - 云同步(Lesson 2 - 使用Backup API)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-22T18:27:00+08:00" pubdate data-updated="true">Apr 22<span>nd</span>, 2012</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h2>Using the Backup API[使用Backup API]</h2>
+
+<p>当一个用户购买了新的设备或者是把当前的设备做了的恢复出厂设置的操作，用户希望在进行初始化设置的时候，Google Play能够把之前安装过的应用恢复到设备上。默认情况是，那些操作不会发生，用户之前的设置与数据都会丢失.</p>
+
+<p>对于一些数据量相对较少的情况下(通常少于1MB)，例如用户偏好设置，笔记，游戏分数或者是其他的一些状态数据，可以使用Backup API来提供一个轻量级的解决方案。这一课会介绍如何使用Backup API.</p>
+
+<h2>(1)Register for the Android Backup Service[为Android备份服务进行注册]</h2>
+
+<p>这一课会使用Android Backup Service, 它需要进行注册. 点击这个链接进行注册:<a href="http://code.google.com/android/backup/signup.html">register here</a>. 注册成功后，服务器会提供一段类似下面的代码用来添加到程序的Manifest文件中:</p>
+
+<!-- More -->
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;meta-data</span> <span class="na">android:name=</span><span class="s">&quot;com.google.android.backup.api_key&quot;</span>
+</span><span class='line'><span class="na">android:value=</span><span class="s">&quot;ABcDe1FGHij2KlmN3oPQRs4TUvW5xYZ&quot;</span> <span class="nt">/&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>请注意，每一个备份key都只能在特定的包名下工作，如果你有不同的程序需要使用这个方法进行备份，那么需要为他们分别进行注册。</p>
+
+<h2>(2)Configure Your Manifest[确认你的Manifest]</h2>
+
+<p>使用Android的备份服务需要添加2个内容到你的程序Manifest中，首先，声明作为你的备份代理的类名，然后添加一段类似上面的代码作为Application标签的根标签。假设你的备份代理是TheBackupAgent, 下面演示里如何在Manifest中添加上面这些信息:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;application</span> <span class="na">android:label=</span><span class="s">&quot;MyApp&quot;</span>
+</span><span class='line'>             <span class="na">android:backupAgent=</span><span class="s">&quot;TheBackupAgent&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    ...
+</span><span class='line'>    <span class="nt">&lt;meta-data</span> <span class="na">android:name=</span><span class="s">&quot;com.google.android.backup.api_key&quot;</span>
+</span><span class='line'>    <span class="na">android:value=</span><span class="s">&quot;ABcDe1FGHij2KlmN3oPQRs4TUvW5xYZ&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>    ...
+</span><span class='line'><span class="nt">&lt;/application&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>(3)Write Your Backup Agent[编写你的备份代理]</h2>
+
+<p>最简单的创建你的备份代理的方法是继承<a href="http://developer.android.com/reference/android/app/backup/BackupAgentHelper.html">BackupAgentHelper</a>. 创建这个帮助类实际上是非常简单。仅仅是创建一个你上面Manifest文件中声明的类去继承BackupAgentHelper.然后重写onCreate().
+在onCreate() 创建一个<a href="http://developer.android.com/reference/android/app/backup/BackupHelper.html">BackupHelper</a>. 目前Android framework包含了两种那样的帮助类: <a href="http://developer.android.com/reference/android/app/backup/FileBackupHelper.html">FileBackupHelper</a> 与 <a href="http://developer.android.com/reference/android/app/backup/SharedPreferencesBackupHelper.html">SharedPreferencesBackupHelper</a>. 在你创建一个帮助类并且指向需要备份的数据的时候，仅仅需要使用 addHelper() 方法来添加到BackupAgentHelper， 在后面再增加一个key用来retrieve数据. 大多数情况下，完整的实现差不多只需要10行代码.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">import</span> <span class="nn">android.app.backup.BackupAgentHelper</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">android.app.backup.FileBackupHelper</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">TheBackupAgent</span> <span class="kd">extends</span> <span class="n">BackupAgentHelper</span> <span class="o">{</span>
+</span><span class='line'>    <span class="c1">// The name of the SharedPreferences file  </span>
+</span><span class='line'>    <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">HIGH_SCORES_FILENAME</span> <span class="o">=</span> <span class="s">&quot;scores&quot;</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// A key to uniquely identify the set of backup data  </span>
+</span><span class='line'>    <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">FILES_BACKUP_KEY</span> <span class="o">=</span> <span class="s">&quot;myfiles&quot;</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Allocate a helper and add it to the backup agent  </span>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">FileBackupHelper</span> <span class="n">helper</span> <span class="o">=</span> <span class="k">new</span> <span class="n">FileBackupHelper</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">HIGH_SCORES_FILENAME</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">addHelper</span><span class="o">(</span><span class="n">FILES_BACKUP_KEY</span><span class="o">,</span> <span class="n">helper</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>为了使得程序更加灵活，FileBackupHelper的constructor可以带有一些文件名，你可以简单的通过增加一个额外的参数实现备份最高分文件与游戏程序文件，像下面一样:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kt">void</span> <span class="nf">onCreate</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">FileBackupHelper</span> <span class="n">helper</span> <span class="o">=</span> <span class="k">new</span> <span class="n">FileBackupHelper</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">HIGH_SCORES_FILENAME</span><span class="o">,</span> <span class="n">PROGRESS_FILENAME</span><span class="o">);</span>
+</span><span class='line'>  <span class="n">addHelper</span><span class="o">(</span><span class="n">FILES_BACKUP_KEY</span><span class="o">,</span> <span class="n">helper</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>备份用户偏好同样比较简单. 像创建FileBackupHelper一样来创建一个SharedPreferencesBackupHelper。在这种情况下, 不是添加文件名到constructor,而是添加被你的程序所用的shared preference groups的名称.请看示例:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">import</span> <span class="nn">android.app.backup.BackupAgentHelper</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">android.app.backup.SharedPreferencesBackupHelper</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">TheBackupAgent</span> <span class="kd">extends</span> <span class="n">BackupAgentHelper</span> <span class="o">{</span>
+</span><span class='line'>    <span class="c1">// The names of the SharedPreferences groups that the application maintains.  These  </span>
+</span><span class='line'>    <span class="c1">// are the same strings that are passed to getSharedPreferences(String, int).  </span>
+</span><span class='line'>    <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">PREFS_DISPLAY</span> <span class="o">=</span> <span class="s">&quot;displayprefs&quot;</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">PREFS_SCORES</span> <span class="o">=</span> <span class="s">&quot;highscores&quot;</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// An arbitrary string used within the BackupAgentHelper implementation to  </span>
+</span><span class='line'>    <span class="c1">// identify the SharedPreferencesBackupHelper&#39;s data.  </span>
+</span><span class='line'>    <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">MY_PREFS_BACKUP_KEY</span> <span class="o">=</span> <span class="s">&quot;myprefs&quot;</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Simply allocate a helper and install it  </span>
+</span><span class='line'>    <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">SharedPreferencesBackupHelper</span> <span class="n">helper</span> <span class="o">=</span>
+</span><span class='line'>                <span class="k">new</span> <span class="nf">SharedPreferencesBackupHelper</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">PREFS_DISPLAY</span><span class="o">,</span> <span class="n">PREFS_SCORES</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">addHelper</span><span class="o">(</span><span class="n">MY_PREFS_BACKUP_KEY</span><span class="o">,</span> <span class="n">helper</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>你可以根据你的喜好增加许多备份帮助类, 但是请记住你仅仅需要为每一类添加一个既可。一个FileBackupHelper 处理了所有的你想要备份的文件, 一个SharedPreferencesBackupHelper 则处理了所有的你想要备份的shared preference groups.</p>
+
+<h2>(4)Request a Backup[请求一个备份]</h2>
+
+<p>为了请求一个备份，仅仅需要创建一个BackupManager的实例，然后调用它的dataChanged() 方法既可。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">import</span> <span class="nn">android.app.backup.BackupManager</span><span class="o">;</span>
+</span><span class='line'> <span class="o">...</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">requestBackup</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>   <span class="n">BackupManager</span> <span class="n">bm</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BackupManager</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+</span><span class='line'>   <span class="n">bm</span><span class="o">.</span><span class="na">dataChanged</span><span class="o">();</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>执行这个调用通知了backup manager 即将有数据会被备份到云端。在之后的某个时间点，backup manager会执行备份代理的 onBackup() 方法。无论任何时候，只要你的数据有发生改变的都可以去调用它，不用担心会导致过度的网络活动。如果你在上一个备份还没有发生之前再次请求了备份，那么这个备份操作仅仅会出现一次。</p>
+
+<h2>(5)Restore from a Backup[从备份中恢复]</h2>
+
+<p>通常是，你不应该手动去请求一个恢复，而是应该在你的程序安装到设备上的时候自动进行恢复。然而，如果那确实有必要手动去触发恢复，只需要调 requestRestore() 方法.</p>
+
+<hr />
+
+<p><strong>学习自：<a href="http://developer.android.com/training/cloudsync/backupapi.html">http://developer.android.com/training/cloudsync/backupapi.html</a>，请多指教，谢谢！</strong><br/>
+<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
+</div>
+
+
+  <footer>
+    <p>
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Text" property="dct:title" rel="dct:type">本站作品</span> 由 <a xmlns:cc="http://creativecommons.org/ns#" href="hukai.me" property="cc:attributionName" rel="cc:attributionURL">Kesen Hoo</a> 创作，采用 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a>进行许可。
+    </p>
+
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Kesen Hoo</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-22T18:27:00+08:00" pubdate data-updated="true">Apr 22<span>nd</span>, 2012</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/android/'>Android</a>, <a class='category' href='/blog/categories/android-training/'>Android:Training</a>
+  
+</span>
+
+
+    </p>
+    
+    
+      <div class="sharing">
+  
+  
+  
+  
+	<!-- JiaThis Button BEGIN -->
+<div class="jiathis_style_32x32">
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_renren"></a>
+	<a class="jiathis_button_linkedin"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share?uid=1723296" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript">
+var jiathis_config = {data_track_clickback:'true'};
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1342501457879302" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+  
+  
+</div>
+
+    
+    <br></br>
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/android-training-syncing-to-the-cloud-lesson-1/" title="Previous Post: Android Training - 云同步(Lesson 1 - 使用App Engine进行同步)">&laquo; Android Training - 云同步(Lesson 1 - 使用App Engine进行同步)</a>
+      
+      
+        <a class="basic-alignment right" href="/android-training-displaying-bitmaps-efficiently-lesson-1/" title="Next Post: Android Training - 高效地显示Bitmap(Lesson 1 - 有效地加载大尺寸图片)">Android Training - 高效地显示Bitmap(Lesson 1 - 有效地加载大尺寸图片) &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Kesen Hoo -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> - 本站作品采用 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a>进行许可.</span> 
+  
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'kesenhoo';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://hukai.me/android-training-syncing-to-the-cloud-lesson-2/';
+        var disqus_url = 'http://hukai.me/android-training-syncing-to-the-cloud-lesson-2/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

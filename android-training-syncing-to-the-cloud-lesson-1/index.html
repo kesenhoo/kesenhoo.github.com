@@ -1,0 +1,661 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Android Training - 云同步(Lesson 1 - 使用App Engine进行同步) - 胡凯</title>
+  <meta name="author" content="Kesen Hoo">
+
+  
+  <meta name="description" content="Syncing with App Engine[使用App Engine进行同步] 写一个能够同步到云端的app是具有挑战性的。那存在许多细节需要处理，例如服务端身份验证，客户端身份验证，分享数据的模块，还有API。简化这些操作的一个方法是使用Google Plugin for Eclipse， &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://hukai.me/android-training-syncing-to-the-cloud-lesson-1/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+
+  <!--
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  -->
+  <link href="/atom.xml" rel="alternate" title="胡凯" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<!--Mark by @Kesen-->
+<!-- <link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css"> -->
+
+  
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-37679268-1', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+
+
+
+</head>
+
+<body   class="no-sidebar"  >
+  <header role="banner"><hgroup>
+  <h1><a href="/">胡凯</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:hukai.me" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/android-training-course-in-chinese/index.html">Android Training in Chinese</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Android Training - 云同步(Lesson 1 - 使用App Engine进行同步)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-22T13:56:00+08:00" pubdate data-updated="true">Apr 22<span>nd</span>, 2012</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h2>Syncing with App Engine[使用App Engine进行同步]</h2>
+
+<p>写一个能够同步到云端的app是具有挑战性的。那存在许多细节需要处理，例如服务端身份验证，客户端身份验证，分享数据的模块，还有API。简化这些操作的一个方法是使用<strong>Google Plugin for Eclipse</strong>，这个插件帮你垂直整合处理了那些Android系统与App Engine程序交互的操作。这一课会介绍如何创建那样一个项目。</p>
+
+<p>关于App Engine，请参考：https://developers.google.com/appengine/docs/whatisgoogleappengine?hl=zh-CN</p>
+
+<p>下面会介绍:  <br/>
+* 建立Android与App engine apps能够交互的程序。<br/>
+* 利用Cloud to Device Messaging(C2DM)的优势，这样app就不需要使用轮询机制去更新。[关于C2DM的详情请参考前面课程与http://code.google.com/intl/zh-CN/android/c2dm/)]</p>
+
+<!-- More -->
+
+
+<p>这一课仅仅专注于本地开发测试使用，并不涉及程序发布(例如，发布你的App Engine，发布你的Android程序到Market)，程序发布等知识点会在其他课程里涉及到。</p>
+
+<h2>(1)Prepare Your Environment[准备你的开发环境]</h2>
+
+<p>如果你想继续下面的课程步骤，你必须依据下面所述搭建好你的开发环境:  <br/>
+* 安装<a href="http://code.google.com/eclipse/">Google Plugin for Eclipse</a><br/>
+* 安装<a href="http://code.google.com/webtoolkit/download.html">GWT SDK</a> 与 <a href="http://code.google.com/appengine/">Java App Engine SDK</a>. The <a href="http://code.google.com/eclipse/docs/getting_started.html">Quick Start Guide</a>会演示如何安装那些组件.<br/>
+* 注册<a href="http://code.google.com/android/c2dm/signup.html">C2DM access</a>账户. 我们强烈推荐<a href="https://accounts.google.com/SignUp">creating a new Google account</a>来专门用来连接到C2DM. 在这一课Google服务器会重复使用这个账户来进行身份鉴定。</p>
+
+<h2>(2)Create Your Projects[创建你的项目]</h2>
+
+<p>在你安装完Google Plugin for Eclipse之后，请注意在创建一个新的Eclipse项目的时候会存在一种新的Android项目选项：<code>App Engine Connected Android Project</code>(在Google项目分类下)。安装向导会提示你输入账户验证信息，这个账户就是之前提到的你在C2DM上注册的时候使用的。(请注意不要输错了账户类型)</p>
+
+<p>一旦你创建好之后，你会在workspace看见两个有2个项目：一个Android程序与一个App Engine程序。好吧！那两个程序具备了需要实现的所有功能，安装向导创建了sample程序，它可以允许你使用AccountManager来验证Android设备与App Engine的交互。为了便于后续测试，请做下面的操作：</p>
+
+<p>请确保你存在2.2以上的AVD,右击Eclipse中的Android项目，选择<code>Debug As</code>><code>Local App Engine Connected Android Application</code>。这样程序就能够测试C2DM的功能(Google Play是这一类程序的典型代表).它也启动了一个App Engine的local instance，里面包含了你的程序。</p>
+
+<h2>(3)Create the Data Layer[创建数据层]</h2>
+
+<p>因为上面已经创建了一个完整功能的sample程序。下面应该学习开始修改那些代码来创建你自己的程序。
+首先，创建数据模块，它定义了在App Engine与Android app之间共享的数据。打开App Engine项目的文件夹，定位到 <code>(yourApp)</code>-<code>AppEngine</code> > <code>src</code> > <code>(yourapp)</code> > <code>server</code>。创建一个新的类，它包含了那些你想要存储到云端的数据。下面是一段sample code:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">cloudtasks</span><span class="o">.</span><span class="na">server</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.persistence.*</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nd">@Entity</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Task</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">String</span> <span class="n">emailAddress</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">String</span> <span class="n">name</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">String</span> <span class="n">userId</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">String</span> <span class="n">note</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Id</span>
+</span><span class='line'>    <span class="nd">@GeneratedValue</span><span class="o">(</span><span class="n">strategy</span> <span class="o">=</span> <span class="n">GenerationType</span><span class="o">.</span><span class="na">IDENTITY</span><span class="o">)</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">Long</span> <span class="n">id</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">Task</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">String</span> <span class="nf">getEmailAddress</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="k">this</span><span class="o">.</span><span class="na">emailAddress</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">Long</span> <span class="nf">getId</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="k">this</span><span class="o">.</span><span class="na">id</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="o">...</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>
+请注意注释的使用：Entity, Id 与GeneratedValue 都是来自<a href="http://www.oracle.com/technetwork/articles/javaee/jpa-137156.html">Java Persistence API</a>. 这些注释都是必备的， Entity需要注释在类声明的上面， 这表明这个类在你的数据层代表了一个<code>Entity.Id</code> 与<code>GeneratedValue</code>分别表明了寻找这个类的id与这个id是如何形成的(在上面的示例中，<code>GenerationType.IDENTITY</code>意味这是由DB生成的). 你可以参考<a href="http://code.google.com/appengine/docs/java/datastore/jpa/overview.html">Using JPA with App Engine</a>来查看更多关于资料。</p>
+
+<p>一旦你完成了所有的数据实体类的创建, 你需要创建Android与App Engine程序之间交互的方法. 这种交互的方法可以通过创建一个<code>Remote Procedure Call (RPC)</code>服务来开启。通常的是，这包含了许多一成不变的单调的代码. 幸运的是, 有一种简单的办法来完成这个操作! 在你的App Engine源代码文件夹下右击，选择<code>New</code> > <code>Other</code> ，再选择<code>Google</code> > <code>RPC Service</code>. 这个时候会出现向导, 陈列出所有你在上一步骤创建的实例,它是通过在源代码文件夹中去查找具有<code>@Entity</code>的方法来实现的. 这样出来的代码非常整洁，之后点击Finish,向导会创建一个Service类，它包含了<code>Create</code>, <code>Retrieve</code>, <code>Update</code> and <code>Delete</code> (CRUD)实例的操作.</p>
+
+<h2>(4)Create the Persistence Layer [创建持久层]</h2>
+
+<p>持久层是一个你的程序数据能够存放long-term的地方。为了编写你的持久层，你有一些选择，这取决于你想存储哪些类型的数据. 一些由Google管理的选择包含在<a href="http://code.google.com/apis/storage/">Google Storage for Developers</a>与App Engine&#8217;s built-in Datastore. 下面是一个sample code，使用DataStore的代码.</p>
+
+<p>在你的com.cloudtasks.server下创建一个类用来处理持久层的输入与输出. 为了访问这些数据，使用<a href="http://db.apache.org/jdo/api20/apidocs/javax/jdo/PersistenceManager.html">PersistenceManager</a>. 你可以使用在com.google.android.c2dm.server.PMF下的PMF类生成这个类的的一个实例，然后使用它来执行基本的CRUD操作:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="cm">/** </span>
+</span><span class='line'><span class="cm">* Remove this object from the data store. </span>
+</span><span class='line'><span class="cm">*/</span>
+</span><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">delete</span><span class="o">(</span><span class="n">Long</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">PersistenceManager</span> <span class="n">pm</span> <span class="o">=</span> <span class="n">PMF</span><span class="o">.</span><span class="na">get</span><span class="o">().</span><span class="na">getPersistenceManager</span><span class="o">();</span>
+</span><span class='line'>    <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">Task</span> <span class="n">item</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="na">getObjectById</span><span class="o">(</span><span class="n">Task</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">id</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">pm</span><span class="o">.</span><span class="na">deletePersistent</span><span class="o">(</span><span class="n">item</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">pm</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>
+你也可以使用Query对象从你的Datastore来retrieve数据。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="n">Task</span> <span class="nf">find</span><span class="o">(</span><span class="n">Long</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">id</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">PersistenceManager</span> <span class="n">pm</span> <span class="o">=</span> <span class="n">PMF</span><span class="o">.</span><span class="na">get</span><span class="o">().</span><span class="na">getPersistenceManager</span><span class="o">();</span>
+</span><span class='line'>    <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">Query</span> <span class="n">query</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="na">newQuery</span><span class="o">(</span><span class="s">&quot;select from &quot;</span> <span class="o">+</span> <span class="n">Task</span><span class="o">.</span><span class="na">class</span><span class="o">.</span><span class="na">getName</span><span class="o">()</span>
+</span><span class='line'>        <span class="o">+</span> <span class="s">&quot; where id==&quot;</span> <span class="o">+</span> <span class="n">id</span><span class="o">.</span><span class="na">toString</span><span class="o">()</span> <span class="o">+</span> <span class="s">&quot; &amp;&amp; emailAddress==&#39;&quot;</span> <span class="o">+</span> <span class="n">getUserEmail</span><span class="o">()</span> <span class="o">+</span> <span class="s">&quot;&#39;&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">List</span> <span class="n">list</span> <span class="o">=</span> <span class="o">(</span><span class="n">List</span><span class="o">)</span> <span class="n">query</span><span class="o">.</span><span class="na">execute</span><span class="o">();</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">list</span><span class="o">.</span><span class="na">size</span><span class="o">()</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">?</span> <span class="kc">null</span> <span class="o">:</span> <span class="n">list</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">RuntimeException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">e</span><span class="o">);</span>
+</span><span class='line'>        <span class="k">throw</span> <span class="n">e</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">pm</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>
+一个好的例子，帮你encapsulate了持久层，请参考Cloud Tasks app里面的DataStore类.</p>
+
+<h2>(5)Query and Update from the Android App [从Android App查询与更新]</h2>
+
+<p>为了保持与App Engine程序的同步，你的Android程序需要知道下面两件事情：从云端拉取数据与发送数据到云端。大部分这类操作已经由上面提到的插件生成了，但是你需要自己编写UI来呈现那些操作.</p>
+
+<p>插件生成的sample code显示了一些重要的特征：<br/>
+* 首先，我们需要删除样本里面的Activity.java中的setHelloWorldScreenContent()的方法，替换的是与实际程序有关的代码。<br/>
+* 其次，所有交互的操作都是包在AsyncTask中来完成的，这样不会因为网络操作而卡到UI thread.<br/>
+* 最后，它给出了一个简单的模板演示如何访问云端的数据, 使用RequestFactory 来操作，它由Eclipse plugin提供支持。</p>
+
+<p>关于实例，如果你的云端数据模型包含了一个叫做Task的对象，这个对象会在你生成RPC layer的时候自动为你创建的一个TaskRequest的类, 还有一个TaskProxy来代表单独的Task. 在下面的代码中演示了请求一个所有task的列表:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">fetchTasks</span> <span class="o">(</span><span class="n">Long</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>  <span class="c1">// Request is wrapped in an AsyncTask to avoid making a network request  </span>
+</span><span class='line'>  <span class="c1">// on the UI thread.  </span>
+</span><span class='line'>    <span class="k">new</span> <span class="n">AsyncTask</span><span class="o">&gt;()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="nd">@Override</span>
+</span><span class='line'>        <span class="kd">protected</span> <span class="n">List</span> <span class="nf">doInBackground</span><span class="o">(</span><span class="n">Long</span><span class="o">...</span> <span class="n">arguments</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="kd">final</span> <span class="n">List</span> <span class="n">list</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">();</span>
+</span><span class='line'>            <span class="n">MyRequestFactory</span> <span class="n">factory</span> <span class="o">=</span> <span class="n">Util</span><span class="o">.</span><span class="na">getRequestFactory</span><span class="o">(</span><span class="n">mContext</span><span class="o">,</span>
+</span><span class='line'>            <span class="n">MyRequestFactory</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">TaskRequest</span> <span class="n">taskRequest</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="na">taskNinjaRequest</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">arguments</span><span class="o">.</span><span class="na">length</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">||</span> <span class="n">arguments</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">factory</span><span class="o">.</span><span class="na">taskRequest</span><span class="o">().</span><span class="na">queryTasks</span><span class="o">().</span><span class="na">fire</span><span class="o">(</span><span class="k">new</span> <span class="n">Receiver</span><span class="o">&gt;()</span> <span class="o">{</span>
+</span><span class='line'>                    <span class="nd">@Override</span>
+</span><span class='line'>                    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onSuccess</span><span class="o">(</span><span class="n">List</span> <span class="n">arg0</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                      <span class="n">list</span><span class="o">.</span><span class="na">addAll</span><span class="o">(</span><span class="n">arg0</span><span class="o">);</span>
+</span><span class='line'>                    <span class="o">}</span>
+</span><span class='line'>                <span class="o">});</span>
+</span><span class='line'>            <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">newTask</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>                <span class="n">factory</span><span class="o">.</span><span class="na">taskRequest</span><span class="o">().</span><span class="na">readTask</span><span class="o">(</span><span class="n">arguments</span><span class="o">[</span><span class="mi">0</span><span class="o">]).</span><span class="na">fire</span><span class="o">(</span><span class="k">new</span> <span class="n">Receiver</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>                    <span class="nd">@Override</span>
+</span><span class='line'>                    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onSuccess</span><span class="o">(</span><span class="n">TaskProxy</span> <span class="n">arg0</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                      <span class="n">list</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">arg0</span><span class="o">);</span>
+</span><span class='line'>                    <span class="o">}</span>
+</span><span class='line'>                <span class="o">});</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">list</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onPostExecute</span><span class="o">(</span><span class="n">List</span> <span class="n">result</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">TaskNinjaActivity</span><span class="o">.</span><span class="na">this</span><span class="o">.</span><span class="na">dump</span><span class="o">(</span><span class="n">result</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="o">}.</span><span class="na">execute</span><span class="o">(</span><span class="n">id</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="o">...</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">dump</span> <span class="o">(</span><span class="n">List</span> <span class="n">tasks</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">for</span> <span class="o">(</span><span class="n">TaskProxy</span> <span class="n">task</span> <span class="o">:</span> <span class="n">tasks</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">Log</span><span class="o">.</span><span class="na">i</span><span class="o">(</span><span class="s">&quot;Task output&quot;</span><span class="o">,</span> <span class="n">task</span><span class="o">.</span><span class="na">getName</span><span class="o">()</span> <span class="o">+</span> <span class="s">&quot;\n&quot;</span> <span class="o">+</span> <span class="n">task</span><span class="o">.</span><span class="na">getNote</span><span class="o">());</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>
+为了创建一个新的任务并发送到云端，需要创建一个新的请求对象并使用它来创建一个proxy对象。然后proxy对象执行它的更新方法。重申，这些操作应该放在AsyncTask里面去执行，避免网络操作卡到UI Thread。下面是sample code:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="k">new</span> <span class="nf">AsyncTask</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">protected</span> <span class="n">Void</span> <span class="nf">doInBackground</span><span class="o">(</span><span class="n">Void</span><span class="o">...</span> <span class="n">arg0</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">MyRequestFactory</span> <span class="n">factory</span> <span class="o">=</span> <span class="o">(</span><span class="n">MyRequestFactory</span><span class="o">)</span>
+</span><span class='line'>                <span class="n">Util</span><span class="o">.</span><span class="na">getRequestFactory</span><span class="o">(</span><span class="n">TasksActivity</span><span class="o">.</span><span class="na">this</span><span class="o">,</span>
+</span><span class='line'>                <span class="n">MyRequestFactory</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">TaskRequest</span> <span class="n">request</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="na">taskRequest</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c1">// Create your local proxy object, populate it  </span>
+</span><span class='line'>        <span class="n">TaskProxy</span> <span class="n">task</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">TaskProxy</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">task</span><span class="o">.</span><span class="na">setName</span><span class="o">(</span><span class="n">taskName</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">task</span><span class="o">.</span><span class="na">setNote</span><span class="o">(</span><span class="n">taskDetails</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">task</span><span class="o">.</span><span class="na">setDueDate</span><span class="o">(</span><span class="n">dueDate</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c1">// To the cloud!  </span>
+</span><span class='line'>        <span class="n">request</span><span class="o">.</span><span class="na">updateTask</span><span class="o">(</span><span class="n">task</span><span class="o">).</span><span class="na">fire</span><span class="o">();</span>
+</span><span class='line'>        <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}.</span><span class="na">execute</span><span class="o">();</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<h2>(6)Configure the C2DM Server-Side[确认C2DM服务器端]</h2>
+
+<p>为了设置C2DM的消息能够被发送到你的Android设备，回到你的App Engine代码处，打开生成RPC层的时候创建的Service类. 如果你的项目名是Foo, 这个类的名字就叫做FooService. 为每一个方法都添加一些代码，允许做adding, deleting, or updating数据的操作，这样C2DM message才能发送到用户的设备上. 下面是一段sample code:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">static</span> <span class="n">Task</span> <span class="nf">updateTask</span><span class="o">(</span><span class="n">Task</span> <span class="n">task</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">task</span><span class="o">.</span><span class="na">setEmailAddress</span><span class="o">(</span><span class="n">DataStore</span><span class="o">.</span><span class="na">getUserEmail</span><span class="o">());</span>
+</span><span class='line'>    <span class="n">task</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="na">update</span><span class="o">(</span><span class="n">task</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">DataStore</span><span class="o">.</span><span class="na">sendC2DMUpdate</span><span class="o">(</span><span class="n">TaskChange</span><span class="o">.</span><span class="na">UPDATE</span> <span class="o">+</span> <span class="n">TaskChange</span><span class="o">.</span><span class="na">SEPARATOR</span> <span class="o">+</span> <span class="n">task</span><span class="o">.</span><span class="na">getId</span><span class="o">());</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">task</span><span class="o">;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Helper method.  Given a String, send it to the current user&#39;s device via C2DM.  </span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">sendC2DMUpdate</span><span class="o">(</span><span class="n">String</span> <span class="n">message</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">UserService</span> <span class="n">userService</span> <span class="o">=</span> <span class="n">UserServiceFactory</span><span class="o">.</span><span class="na">getUserService</span><span class="o">();</span>
+</span><span class='line'>    <span class="n">User</span> <span class="n">user</span> <span class="o">=</span> <span class="n">userService</span><span class="o">.</span><span class="na">getCurrentUser</span><span class="o">();</span>
+</span><span class='line'>    <span class="n">ServletContext</span> <span class="n">context</span> <span class="o">=</span> <span class="n">RequestFactoryServlet</span><span class="o">.</span><span class="na">getThreadLocalRequest</span><span class="o">().</span><span class="na">getSession</span><span class="o">().</span><span class="na">getServletContext</span><span class="o">();</span>
+</span><span class='line'>    <span class="n">SendMessage</span><span class="o">.</span><span class="na">sendMessage</span><span class="o">(</span><span class="n">context</span><span class="o">,</span> <span class="n">user</span><span class="o">.</span><span class="na">getEmail</span><span class="o">(),</span> <span class="n">message</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>
+在下面的示例中，一个帮助类TaskChange，创建了一些常量. 这样一个帮助类能够使得App Engine与Android App直接的交互更简单。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">TaskChange</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="n">String</span> <span class="n">UPDATE</span> <span class="o">=</span> <span class="s">&quot;Update&quot;</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="n">String</span> <span class="n">DELETE</span> <span class="o">=</span> <span class="s">&quot;Delete&quot;</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="n">String</span> <span class="n">SEPARATOR</span> <span class="o">=</span> <span class="s">&quot;:&quot;</span><span class="o">;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="err">##</span> <span class="o">(</span><span class="mi">7</span><span class="o">)</span><span class="n">Configure</span> <span class="n">the</span> <span class="n">C2DM</span> <span class="n">Client</span><span class="o">-</span><span class="n">Side</span> <span class="o">[</span><span class="err">确认</span><span class="n">C2DM</span><span class="err">的客户端</span><span class="o">]</span>
+</span><span class='line'><span class="err">为了定义</span><span class="n">Android</span><span class="err">程序在接受到</span><span class="n">C2DM</span><span class="err">的消息的行为，打开</span><span class="n">C2DMReceiver</span><span class="err">类</span><span class="o">,</span> <span class="err">找到</span><span class="n">onMessage</span><span class="o">()</span> <span class="err">方法</span><span class="o">.</span> <span class="err">根据接受到的消息类型进行修改这个方法</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>java
+//In your C2DMReceiver class</p>
+
+<p>public void notifyListener(Intent intent) {</p>
+
+<pre><code>if (listener != null) {  
+    Bundle extras = intent.getExtras();  
+    if (extras != null) {  
+        String message = (String) extras.get("message");  
+        String[] messages = message.split(Pattern.quote(TaskChange.SEPARATOR));  
+        listener.onTaskUpdated(messages[0], Long.parseLong(messages[1]));  
+    }  
+}  
+</code></pre>
+
+<p>}<br/>
+// Elsewhere in your code, wherever it makes sense to perform local updates<br/>
+public void onTasksUpdated(String messageType, Long id) {</p>
+
+<pre><code>if (messageType.equals(TaskChange.DELETE)) {  
+    // Delete this task from your local data store  
+    ...  
+} else {  
+    // Call that monstrous Asynctask defined earlier.  
+    fetchTasks(id);  
+}  
+</code></pre>
+
+<p>}
+&#8220;`<br/>
+一旦C2DM消息触发了本地进行更新，那么说明已经设置成功。</p>
+
+<p><strong>Ps:不知何故，官方后来移除了这篇文章，原有的<a href="http://developer.android.com/training/cloudsync/aesync.html">链接</a>)已经失效,云备份我也一直没有接触过，上面的例子也没有自己实践过，当作是知识储备了，大家也可以参考学习下。</strong></p>
+
+<hr />
+
+<p><strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
+</div>
+
+
+  <footer>
+    <p>
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Text" property="dct:title" rel="dct:type">本站作品</span> 由 <a xmlns:cc="http://creativecommons.org/ns#" href="hukai.me" property="cc:attributionName" rel="cc:attributionURL">Kesen Hoo</a> 创作，采用 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a>进行许可。
+    </p>
+
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Kesen Hoo</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-22T13:56:00+08:00" pubdate data-updated="true">Apr 22<span>nd</span>, 2012</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/android/'>Android</a>, <a class='category' href='/blog/categories/android-training/'>Android:Training</a>
+  
+</span>
+
+
+    </p>
+    
+    
+      <div class="sharing">
+  
+  
+  
+  
+	<!-- JiaThis Button BEGIN -->
+<div class="jiathis_style_32x32">
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_renren"></a>
+	<a class="jiathis_button_linkedin"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share?uid=1723296" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript">
+var jiathis_config = {data_track_clickback:'true'};
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1342501457879302" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+  
+  
+</div>
+
+    
+    <br></br>
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/android-training-share-simple-data-lesson-3/" title="Previous Post: Android Training - 分享简单数据(Lesson 3 - 在Actionbar上添加分享功能)">&laquo; Android Training - 分享简单数据(Lesson 3 - 在Actionbar上添加分享功能)</a>
+      
+      
+        <a class="basic-alignment right" href="/android-training-syncing-to-the-cloud-lesson-2/" title="Next Post: Android Training - 云同步(Lesson 2 - 使用Backup API)">Android Training - 云同步(Lesson 2 - 使用Backup API) &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Kesen Hoo -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> - 本站作品采用 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a>进行许可.</span> 
+  
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'kesenhoo';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://hukai.me/android-training-syncing-to-the-cloud-lesson-1/';
+        var disqus_url = 'http://hukai.me/android-training-syncing-to-the-cloud-lesson-1/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

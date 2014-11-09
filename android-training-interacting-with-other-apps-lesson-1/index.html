@@ -1,0 +1,452 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Android Training - 与其他Apps进行交互(Lesson 1 - 启动到另外一个app) - 胡凯</title>
+  <meta name="author" content="Kesen Hoo">
+
+  
+  <meta name="description" content="章节概要： 一个Android app通常都会有好几个activities. 每一个activity的界面都可能允许用户执行一些特殊任务（例如查看地图或者是开始拍照等）。为了让用户从一个activity跳到另外一个activity，你的app必须使用Intent来定义你的app想做的事情。 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://hukai.me/android-training-interacting-with-other-apps-lesson-1/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+
+  <!--
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  -->
+  <link href="/atom.xml" rel="alternate" title="胡凯" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<!--Mark by @Kesen-->
+<!-- <link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css"> -->
+
+  
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-37679268-1', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+
+
+
+</head>
+
+<body   class="no-sidebar"  >
+  <header role="banner"><hgroup>
+  <h1><a href="/">胡凯</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:hukai.me" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/android-training-course-in-chinese/index.html">Android Training in Chinese</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Android Training - 与其他Apps进行交互(Lesson 1 - 启动到另外一个app)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-03T20:55:00+08:00" pubdate data-updated="true">Dec 3<span>rd</span>, 2012</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p><strong>章节概要：</strong></p>
+
+<ul>
+<li>一个Android app通常都会有好几个activities. 每一个activity的界面都可能允许用户执行一些特殊任务（例如查看地图或者是开始拍照等）。为了让用户从一个activity跳到另外一个activity，你的app必须使用Intent来定义你的app想做的事情。当你使用startActivity()的方法，而且参数是intent时，系统会使用这个 Intent 来定义并启动合适的app组件。使用intents还可以让你的app来启动另外一个app里面的activity。</li>
+<li>一个 Intent 可以显式的指明需要启动的模块，也可以隐式的指明自己可以处理哪种类型的动作。<em>(一个主动叫起别人，一个被特定类型的别人叫起)</em></li>
+<li>这一章节会演示如何使用Intent 来做一些与其他app之间的简单交互。类似，启动另外一个app,从其他app接受数据，并且使得你的app能够响应从其他发出的intent。</li>
+</ul>
+
+
+<!-- more -->
+
+
+<p><strong>Sending the User to Another App切换用户到其他App</strong>
+Android中最重要的功能之一就是可以利用一个带有action的&#8221;intent&#8221;使得当前app能够跳转到其他的app。例如：如果你的app拥有一个地址想要显示在地图上，你并不需要在你的app里面创建一个activity用来显示地图。你只需要使用Intent来发出查看地址的请求。Android系统则会启动能够显示地图的程序来呈现那个地址。</p>
+
+<p>正如在第0章:<a href="https://developer.android.com/training/basics/firstapp/index.html">Building Your First App</a>中所说的，你必须使用intent来在同一个app的两个activity之间进行切换。在那种情况下通常是定义一个显示（explicit）的intent，它指定了需要叫起组件。然而，当你想要叫起不同的app来执行那个动作，则必须使用隐式（implicit）的intent。</p>
+
+<p>这节课会介绍如何为特殊的动作创建一个implicit intent，并使用它来启动另外一个app去执行intent中的action。</p>
+
+<h2>Build an Implicit Intent[建立一个隐式的Intent]</h2>
+
+<p>Implicit intents并不会声明需要启动的组件的类名，它使用的是声明一个需要执行的动作。这个action指定了你想做的事情，例如查看，编辑，发送或者是获取什么。Intents通常会在发送action的同时附带一些数据，例如你想要查看的地址或者是你想要发送的邮件信息。依赖于你想要创建的Intent，这些数据需要是Uri, 或者是其他规定的数据类型。如果你的数据是一个Uri, 会有一个简单的 Intent() constructor 用来定义action与data。</p>
+
+<p>例如，下面是一个带有指定电话号码的intent。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">Uri</span> <span class="n">number</span> <span class="o">=</span> <span class="n">Uri</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="s">&quot;tel:5551234&quot;</span><span class="o">);</span>
+</span><span class='line'><span class="n">Intent</span> <span class="n">callIntent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_DIAL</span><span class="o">,</span> <span class="n">number</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>当你的app通过执行startActivity()来启动这个intent时，Phone app会使用之前的电话号码来拨出这个电话。</p>
+
+<p>下面是一些其他intent的例子：
+* View a map:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="c1">// Map point based on address</span>
+</span><span class='line'><span class="n">Uri</span> <span class="n">location</span> <span class="o">=</span> <span class="n">Uri</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="s">&quot;geo:0,0?q=1600+Amphitheatre+Parkway,+Mountain+View,+California&quot;</span><span class="o">);</span>
+</span><span class='line'><span class="c1">// Or map point based on latitude/longitude</span>
+</span><span class='line'><span class="c1">// Uri location = Uri.parse(&quot;geo:37.422219,-122.08364?z=14&quot;); // z param is zoom level</span>
+</span><span class='line'><span class="n">Intent</span> <span class="n">mapIntent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_VIEW</span><span class="o">,</span> <span class="n">location</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>View a web page:</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">Uri</span> <span class="n">webpage</span> <span class="o">=</span> <span class="n">Uri</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="s">&quot;http://www.android.com&quot;</span><span class="o">);</span>
+</span><span class='line'><span class="n">Intent</span> <span class="n">webIntent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_VIEW</span><span class="o">,</span> <span class="n">webpage</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>另外一些需要&#8221;extra&#8221;数据的implicit intent。你可以使用 putExtra() 方法来添加那些数据。
+默认的，系统会根据Uri数据类型来决定需要哪些合适的MIME type。如果你没有在intent中包含一个Uri, 则通常需要使用 setType() 方法来指定intent附带的数据类型。设置MIME type 是为了指定哪些activity可以应该接受这个intent。例如：</p>
+
+<ul>
+<li>Send an email with an attachment:</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">Intent</span> <span class="n">emailIntent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_SEND</span><span class="o">);</span>
+</span><span class='line'><span class="c1">// The intent does not have a URI, so declare the &quot;text/plain&quot; MIME type</span>
+</span><span class='line'><span class="n">emailIntent</span><span class="o">.</span><span class="na">setType</span><span class="o">(</span><span class="n">HTTP</span><span class="o">.</span><span class="na">PLAIN_TEXT_TYPE</span><span class="o">);</span>
+</span><span class='line'><span class="n">emailIntent</span><span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">EXTRA_EMAIL</span><span class="o">,</span> <span class="k">new</span> <span class="n">String</span><span class="o">[]</span> <span class="o">{</span><span class="s">&quot;jon@example.com&quot;</span><span class="o">});</span> <span class="c1">// recipients</span>
+</span><span class='line'><span class="n">emailIntent</span><span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">EXTRA_SUBJECT</span><span class="o">,</span> <span class="s">&quot;Email subject&quot;</span><span class="o">);</span>
+</span><span class='line'><span class="n">emailIntent</span><span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">EXTRA_TEXT</span><span class="o">,</span> <span class="s">&quot;Email message text&quot;</span><span class="o">);</span>
+</span><span class='line'><span class="n">emailIntent</span><span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">EXTRA_STREAM</span><span class="o">,</span> <span class="n">Uri</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="s">&quot;content://path/to/email/attachment&quot;</span><span class="o">));</span>
+</span><span class='line'><span class="c1">// You can also attach multiple items by passing an ArrayList of Uris</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>Create a calendar event:</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">Intent</span> <span class="n">calendarIntent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_INSERT</span><span class="o">,</span> <span class="n">Events</span><span class="o">.</span><span class="na">CONTENT_URI</span><span class="o">);</span>
+</span><span class='line'><span class="n">Calendar</span> <span class="n">beginTime</span> <span class="o">=</span> <span class="n">Calendar</span><span class="o">.</span><span class="na">getInstance</span><span class="o">().</span><span class="na">set</span><span class="o">(</span><span class="mi">2012</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">19</span><span class="o">,</span> <span class="mi">7</span><span class="o">,</span> <span class="mi">30</span><span class="o">);</span>
+</span><span class='line'><span class="n">Calendar</span> <span class="n">endTime</span> <span class="o">=</span> <span class="n">Calendar</span><span class="o">.</span><span class="na">getInstance</span><span class="o">().</span><span class="na">set</span><span class="o">(</span><span class="mi">2012</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">19</span><span class="o">,</span> <span class="mi">10</span><span class="o">,</span> <span class="mi">30</span><span class="o">);</span>
+</span><span class='line'><span class="n">calendarIntent</span><span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="n">CalendarContract</span><span class="o">.</span><span class="na">EXTRA_EVENT_BEGIN_TIME</span><span class="o">,</span> <span class="n">beginTime</span><span class="o">.</span><span class="na">getTimeInMillis</span><span class="o">());</span>
+</span><span class='line'><span class="n">calendarIntent</span><span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="n">CalendarContract</span><span class="o">.</span><span class="na">EXTRA_EVENT_END_TIME</span><span class="o">,</span> <span class="n">endTime</span><span class="o">.</span><span class="na">getTimeInMillis</span><span class="o">());</span>
+</span><span class='line'><span class="n">calendarIntent</span><span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="n">Events</span><span class="o">.</span><span class="na">TITLE</span><span class="o">,</span> <span class="s">&quot;Ninja class&quot;</span><span class="o">);</span>
+</span><span class='line'><span class="n">calendarIntent</span><span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="n">Events</span><span class="o">.</span><span class="na">EVENT_LOCATION</span><span class="o">,</span> <span class="s">&quot;Secret dojo&quot;</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>Note:</strong> 这个intent for Calendar的例子只使用于>=API Level 14。
+<strong>Note:</strong> 请尽可能的定义你的intent更加确切。例如，如果你想要使用ACTION_VIEW 的intent来显示一张图片，你还应该指定 MIME type 为 image/*.这样能够阻止其他能够 &#8220;查看&#8221; 其他数据类型的app（like a map app) 被这个intent叫起。</p>
+
+<h2>Verify There is an App to Receive the Intent[验证是否有App去接收这个Intent]</h2>
+
+<p>尽管Android系统会确保每一个确定的intent会被系统内置的app(such as the Phone, Email, or Calendar app)之一接收，但是你还是应该在触发一个intent之前做验证是否有App接受这个intent的步骤。</p>
+
+<p><strong>Caution: 如果你触发了一个intent，而且没有任何一个app会去接收这个intent，那么你的app会crash。</strong></p>
+
+<p>为了验证是否有合适的activity会响应这个intent,需要执行 queryIntentActivities() 来获取到能够接收这个intent的所有activity的list。如果返回的List非空，那么你才可以安全的使用这个intent。例如：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">PackageManager</span> <span class="n">packageManager</span> <span class="o">=</span> <span class="n">getPackageManager</span><span class="o">();</span>
+</span><span class='line'><span class="n">List</span><span class="o">&lt;</span><span class="n">ResolveInfo</span><span class="o">&gt;</span> <span class="n">activities</span> <span class="o">=</span> <span class="n">packageManager</span><span class="o">.</span><span class="na">queryIntentActivities</span><span class="o">(</span><span class="n">intent</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
+</span><span class='line'><span class="kt">boolean</span> <span class="n">isIntentSafe</span> <span class="o">=</span> <span class="n">activities</span><span class="o">.</span><span class="na">size</span><span class="o">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果 isIntentSafe 是 true, 那么至少有一个app可以响应这个intent。如果是 false则说明没有app可以handle这个intent。</p>
+
+<p><strong>Note:</strong>你必须在第一次使用之前做这个检查，若是不可行，则应该关闭这个功能。如果你知道某个确切的app能够handle这个intent，你也应该提供给用户去下载这个app的链接。（<a href="http://developer.android.com/distribute/googleplay/promote/linking.html">see how to link to your product on Google Play</a>).</p>
+
+<h2>Start an Activity with the Intent [使用Intent来启动Activity]</h2>
+
+<p>当你创建好了intent并且设置好了extra数据，通过执行startActivity() 来发送到系统。如果系统确定有多个activity可以handle这个intent,它会显示出一个dialog，让用户选择启动哪个app。如果系统发现只有一个app可以handle这个intent，那么就会直接启动这个app。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">startActivity</span><span class="o">(</span><span class="n">intent</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="/images/articles/intents-choice.png" title="Figure 1. Example of the selection dialog that appears when more than one app can handle an intent" alt="intents-choice.png" /></p>
+
+<p>下面是一个完整的例子，演示了如何创建一个intent来查看地图，验证有app可以handle这个intent,然后启动它。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="c1">// Build the intent</span>
+</span><span class='line'><span class="n">Uri</span> <span class="n">location</span> <span class="o">=</span> <span class="n">Uri</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="s">&quot;geo:0,0?q=1600+Amphitheatre+Parkway,+Mountain+View,+California&quot;</span><span class="o">);</span>
+</span><span class='line'><span class="n">Intent</span> <span class="n">mapIntent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_VIEW</span><span class="o">,</span> <span class="n">location</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Verify it resolves</span>
+</span><span class='line'><span class="n">PackageManager</span> <span class="n">packageManager</span> <span class="o">=</span> <span class="n">getPackageManager</span><span class="o">();</span>
+</span><span class='line'><span class="n">List</span><span class="o">&lt;</span><span class="n">ResolveInfo</span><span class="o">&gt;</span> <span class="n">activities</span> <span class="o">=</span> <span class="n">packageManager</span><span class="o">.</span><span class="na">queryIntentActivities</span><span class="o">(</span><span class="n">mapIntent</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
+</span><span class='line'><span class="kt">boolean</span> <span class="n">isIntentSafe</span> <span class="o">=</span> <span class="n">activities</span><span class="o">.</span><span class="na">size</span><span class="o">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Start an activity if it&#39;s safe</span>
+</span><span class='line'><span class="k">if</span> <span class="o">(</span><span class="n">isIntentSafe</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">startActivity</span><span class="o">(</span><span class="n">mapIntent</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Show an App Chooser[显示一个App选择界面]</h2>
+
+<p>请注意，当你发送一个intent，有多个app可以handle的情况，用户可以在弹出dialog的时候，选择默认启动的app（通过勾选dialog下面的选择框，如上图所示）。这个功能对于用户有特殊偏好的时候非常有用（例如用户总是喜欢启动某个app来查看网页，总是喜欢启动某个camera来拍照）。</p>
+
+<p>然而，如果用户希望每次都弹出选择界面，而且每次都不确定会选择哪个app启动，例如分享功能，用户选择分享到哪个app都是不确定的，这个时候，需要强制弹出选择的对话框。（这种情况下用户不能选择默认启动的app）。</p>
+
+<p><img src="/images/articles/intent-chooser.png" title="Example of the chooser dialog that appears when you use createChooser() to ensure that the user is always shown a list of apps that respond to your intent." alt="intent-chooser.png" /></p>
+
+<p>为了显示chooser, 需要使用createChooser()来创建Intent</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_SEND</span><span class="o">);</span>
+</span><span class='line'><span class="o">...</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Always use string resources for UI text. This says something like &quot;Share this photo with&quot;</span>
+</span><span class='line'><span class="n">String</span> <span class="n">title</span> <span class="o">=</span> <span class="n">getResources</span><span class="o">().</span><span class="na">getText</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">string</span><span class="o">.</span><span class="na">chooser_title</span><span class="o">);</span>
+</span><span class='line'><span class="c1">// Create and start the chooser</span>
+</span><span class='line'><span class="n">Intent</span> <span class="n">chooser</span> <span class="o">=</span> <span class="n">Intent</span><span class="o">.</span><span class="na">createChooser</span><span class="o">(</span><span class="n">intent</span><span class="o">,</span> <span class="n">title</span><span class="o">);</span>
+</span><span class='line'><span class="n">startActivity</span><span class="o">(</span><span class="n">chooser</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<hr />
+
+<p><strong>学习自：<a href="http://developer.android.com/training/basics/intents/sending.html">http://developer.android.com/training/basics/intents/sending.html</a>，请多指教，谢谢！</strong><br/>
+<strong>转载请注明出自<a href="http://kesenhoo.github.com">http://kesenhoo.github.com</a>，谢谢配合！</strong></p>
+</div>
+
+
+  <footer>
+    <p>
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="知识共享许可协议" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Text" property="dct:title" rel="dct:type">本站作品</span> 由 <a xmlns:cc="http://creativecommons.org/ns#" href="hukai.me" property="cc:attributionName" rel="cc:attributionURL">Kesen Hoo</a> 创作，采用 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a>进行许可。
+    </p>
+
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Kesen Hoo</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-03T20:55:00+08:00" pubdate data-updated="true">Dec 3<span>rd</span>, 2012</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/android/'>Android</a>, <a class='category' href='/blog/categories/android-training/'>Android:Training</a>
+  
+</span>
+
+
+    </p>
+    
+    
+      <div class="sharing">
+  
+  
+  
+  
+	<!-- JiaThis Button BEGIN -->
+<div class="jiathis_style_32x32">
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_googleplus"></a>
+	<a class="jiathis_button_renren"></a>
+	<a class="jiathis_button_linkedin"></a>
+	<a class="jiathis_button_douban"></a>
+	<a href="http://www.jiathis.com/share?uid=1723296" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript">
+var jiathis_config = {data_track_clickback:'true'};
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1342501457879302" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+  
+  
+</div>
+
+    
+    <br></br>
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/android-training-saving-data-lesson-3/" title="Previous Post: Android Training - 保存数据(Lesson 3 - 保存到SQLite)">&laquo; Android Training - 保存数据(Lesson 3 - 保存到SQLite)</a>
+      
+      
+        <a class="basic-alignment right" href="/android-training-interacting-with-other-apps-lesson-2/" title="Next Post: Android Training - 与其他Apps进行交互(Lesson 2 - 从activity获取Result)">Android Training - 与其他Apps进行交互(Lesson 2 - 从activity获取Result) &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Kesen Hoo -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> - 本站作品采用 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a>进行许可.</span> 
+  
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'kesenhoo';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://hukai.me/android-training-interacting-with-other-apps-lesson-1/';
+        var disqus_url = 'http://hukai.me/android-training-interacting-with-other-apps-lesson-1/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
