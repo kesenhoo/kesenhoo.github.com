@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android Training(00) - 详解Activity生命周期(Lesson 1 - 启动与销毁Activity)"
+title: "Android Training - 详解Activity生命周期(Lesson 1 - 启动与销毁Activity)"
 date: 2012-03-08 21:53
 comments: true
 sidebar: false
