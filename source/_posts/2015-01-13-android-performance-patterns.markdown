@@ -72,9 +72,48 @@ GPU会获取图形数据进行渲染，然后硬件负责把渲染后的内容�
 
 ![](/images/tools_gpu_profile_rendering.png)
 
-选择了这样以后，我们可以在手机画面上看到丰富的GPU绘制图形信息，分别关于StatusBar，NavBar，Activity区域的信息。
+选择了这样以后，我们可以在手机画面上看到丰富的GPU绘制图形信息，分别关于StatusBar，NavBar，激活的程序Activity区域的信息。
 
 ![](/images/tools_gpu_profile_rendering_graphic_activity.png)
+
+随着界面的刷新，界面上会滚动显示垂直的柱状图来表示每帧画面所需要渲染的时间，柱状图越高表示花费的渲染时间越长。
+
+![](/images/tools_gpu_rendering_bar.png)
+
+中间有一根绿色的横线，代表16ms，我们需要确保每一帧花费的总时间都低于这条横线，这样才能够避免出现卡顿的问题。
+
+![](/images/tools_gpu_profile_three_color.png)
+
+每一条柱状线都包含三部分，蓝色代表测量绘制Display List的时间，红色代表OpenGL渲染Display List所需要的时间，黄色代表CPU等待GPU处理的时间。
+
+## 4)Why 60fps?
+我们通常都会提到60fps与16ms，可是知道为何会是以程序是否达到60fps来作为App性能的衡量标准吗？这是因为人眼与大脑之间的协作无法感知超过60fps的画面更新。
+
+12fps大概类似手动快速翻动书籍的帧率，这明显是可以感知到不够顺滑的。24fps会使得人眼感到的是流体运动，这其实是归功于运动模糊的效果。24fps是电影胶圈通常使用的帧率，因为这个帧率已经足够支撑大部分电影画面需要表达的内容，同时能够最大的减少费用支出。但是低于30fps是无法顺畅表现绚丽的画面内容的，此时就需要用到60fps来达到想要的效果，当然超过60fps是没有必要的。
+
+开发app的性能目标就是保持60fps，这意味着每一帧你只有16ms=1000/60的时间来处理所有的任务。
+
+## 5)Android, UI and the GPU
+了解Android是如何利用GPU运作有助于我们更好的理解性能问题。那么一个最实际的问题是：activity的画面是如何绘制到屏幕上的？那些复杂的XML布局文件又是如何能够被识别并绘制出来的？
+
+![gpu_rasterization.png](/images/gpu_rasterization.png)
+
+栅格化是绘制那些Button，Shape，Path，String，Bitmap等组件最基础的操作。它把那些组件拆分到不同的像素上进行显示。栅格化是一个很费时的操作，GPU的引入就是为了加快栅格化的操作。
+
+CPU负责把界面组件计算成Texture纹理，然后交给GPU进行栅格化渲染。
+
+![](/images/gpu_cpu_rasterization.png)
+
+然而每次从CPU转移到GPU是一件很麻烦的事情，所幸的是OpenGL ES可以把那些需要渲染的纹理Hold在GPU Memory里面，在下次需要渲染的时候直接进行操作。所以如果你更新了GPU所hold住的纹理内容，那么之前保存的状态就丢失了。
+
+在Android里面那些由主题所提供的资源，例如Bitmaps，Drawables都是一起打包成统一的Texture纹理当中，然后再传递到GPU里面，这意味着每次你需要使用这些资源的时候，都是直接从纹理里面进行获取渲染的。当然随着UI组件的越来越丰富，有了更多演变的形态。例如显示图片的时候，需要先经过CPU的计算加载到内存中，然后传递给GPU进行渲染。文字的显示更加复杂，需要先经过CPU换算成纹理，然后再交给GPU进行渲染，回到CPU绘制单个字符的时候，再重新引用经过GPU渲染的内容。动画则是一个更加复杂的操作流程。
+
+为了能够使得App流畅，我们需要在每一帧16ms以内处理完所有的CPU与GPU计算，绘制，渲染等等操作。
+
+## 6)Invalidations, Layouts, and Performance
+
+
+
 
 
 
