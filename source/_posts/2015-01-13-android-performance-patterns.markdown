@@ -25,21 +25,21 @@ Google近期发布了关于[Android性能问题的专题](https://www.youtube.co
 我们可以通过一些工具来定位问题，比如可以使用HierarchyViewer来查找Activity中的布局是否过于复杂，也可以使用手机设置里面的开发者选项，打开Show GPU Overdraw等选项进行观察。你还可以使用TraceView来观察CPU的执行情况，更加快捷的找到性能瓶颈。
 
 ## 1)Understanding Overdraw
-如果我们曾经粉刷过家里的墙壁，可能会遇到之前刷过的区域再重刷一遍的情况，这就是重绘。同样的，在App里面也会有这样的问题。
+如果我们曾经粉刷过家里的墙壁，可能会遇到之前刷过的区域再重刷一遍的情况，这就是Overdraw。同样的，在App里面也会有这样的问题。
 
-Overdraw(重绘)描述的是屏幕上的某个像素在同一帧的时间内被绘制了多次。在多层次的UI结构里面，如果不可见的UI也在做绘制的操作，这就会导致某些像素区域被重绘了多次。这也浪费大量的CPU/GPU资源。
+Overdraw(过度绘制)描述的是屏幕上的某个像素在同一帧的时间内被绘制了多次。在多层次的UI结构里面，如果不可见的UI也在做绘制的操作，这就会导致某些像素区域被绘制了多次。这也浪费大量的CPU/GPU资源。
 
 ![](/images/overdraw_hidden_view.png)
 
-当设计上追求更华丽的视觉效果的时候，我们就容易陷入采用越来越多的层叠组件来实现效果的怪圈。这很容易导致大量的性能问题，为了获得最佳的性能，我们必须尽量减少重绘的情况发生。
+当设计上追求更华丽的视觉效果的时候，我们就容易陷入采用越来越多的层叠组件来实现效果的怪圈。这很容易导致大量的性能问题，为了获得最佳的性能，我们必须尽量减少Overdraw的情况发生。
 
-幸运的是，我们可以通过手机设置的开发者选项，打开显示GPU重绘的选项，可以观察UI上的重绘情况。
+幸运的是，我们可以通过手机设置的开发者选项，打开Show GPU Overdraw的选项，可以观察UI上的Overdraw情况。
 
 ![](/images/overdraw_options_view.png)
 
-蓝色，淡绿，淡红，深红代表了4种不同程度的重绘情况，我们的目标就是尽量减少红色重绘，看到更多的蓝色区域。
+蓝色，淡绿，淡红，深红代表了4种不同程度的Overdraw情况，我们的目标就是尽量减少红色Overdraw，看到更多的蓝色区域。
 
-重绘有时候是因为你的UI布局存在大量重叠的部分，还有的时候是因为非必须的重叠背景。例如某个Activity有一个背景，然后里面的Layout又有自己的背景，同时子View又分别有自己的背景。仅仅是通过移除非必须的背景图片，这能够减少大量的红色重绘区域，增加蓝色区域的占比。这能够提示不少的程序性能。
+Overdraw有时候是因为你的UI布局存在大量重叠的部分，还有的时候是因为非必须的重叠背景。例如某个Activity有一个背景，然后里面的Layout又有自己的背景，同时子View又分别有自己的背景。仅仅是通过移除非必须的背景图片，这能够减少大量的红色Overdraw区域，增加蓝色区域的占比。这能够提示不少的程序性能。
 
 ## 2)Understanding VSYNC
 为了理解App是如何进行渲染的，我们必须了解手机硬件是如何工作，这样的话，我们就必须理解什么是*VSYNC*。
@@ -115,14 +115,34 @@ CPU负责把界面组件计算成Texture纹理，然后交给GPU进行栅格化�
 
 通常来说，Android需要把XML布局文件转换成GPU能够识别并绘制的对象。这个操作是在**DisplayList**的帮助下完成的。DisplayList持有所有将要交给GPU绘制到屏幕上的数据信息。
 
-在某个View第一次需要被渲染时，DisplayList会因此而被创建，当这个View要显示到屏幕上时，我们会执行GPU的绘制指令来进行渲染。如果你在后续有执行类似移动这个View的位置等操作而需要再次渲染这个View时，我们就仅仅需要额外操作一次渲染指令就够了。然而如果你修改了View中的某些可见组件，那么之前的DisplayList就无法继续使用了，我们需要回头重新创建一个DisplayList并且重新执行渲染指令并更新到屏幕上。需要注意的是：任何时候View中的绘制内容发生变化时，都会重新执行创建DisplayList，渲染DisplayList，更新到屏幕上的一系列操作。这个流程的表现性能取决于你的View的复杂程度，View的状态变化以及渲染管道的执行性能。举个例子，假设某个Button的大小需要增大到目前的两倍，在增大Button大小之前，需要通过父View重新计算并摆放其他子View的位置。修改View的大小会触发整个HierarcyView的重新计算大小的操作。如果是修改View的位置则会触发HierarchView重新计算其他View的位置。如果布局很复杂，这就会很容易导致严重的性能问题。我们需要尽量减少不必要的重绘。
+在某个View第一次需要被渲染时，DisplayList会因此而被创建，当这个View要显示到屏幕上时，我们会执行GPU的绘制指令来进行渲染。如果你在后续有执行类似移动这个View的位置等操作而需要再次渲染这个View时，我们就仅仅需要额外操作一次渲染指令就够了。然而如果你修改了View中的某些可见组件，那么之前的DisplayList就无法继续使用了，我们需要回头重新创建一个DisplayList并且重新执行渲染指令并更新到屏幕上。需要注意的是：任何时候View中的绘制内容发生变化时，都会重新执行创建DisplayList，渲染DisplayList，更新到屏幕上的一系列操作。这个流程的表现性能取决于你的View的复杂程度，View的状态变化以及渲染管道的执行性能。举个例子，假设某个Button的大小需要增大到目前的两倍，在增大Button大小之前，需要通过父View重新计算并摆放其他子View的位置。修改View的大小会触发整个HierarcyView的重新计算大小的操作。如果是修改View的位置则会触发HierarchView重新计算其他View的位置。如果布局很复杂，这就会很容易导致严重的性能问题。我们需要尽量减少不必要的Overdraw。
 
 ![](/images/layout_three_steps.png)
 
 我们可以通过前面介绍的Monitor GPU Rendering来查看渲染的表现性能如何，另外也可以通过开发者选项里面的Show GPU view updates来查看视图更新的操作，最后我们还可以通过HierarchyViewer这个工具来查看布局，使得布局尽量扁平化，移除非必需的UI组件，这些操作能够减少Measure，Layout的计算时间。
 
 ## 7)Overdraw, Cliprect, QuickReject
-引起性能问题的一个很重要的方面是因为过多的重绘操作。
+引起性能问题的一个很重要的方面是因为过多复杂的绘制操作。我们可以通过工具来检测并修复标准UI组件的Overdraw问题，但是针对高度自定义的UI组件则显得有些力不从心。
+
+有一个窍门是我们可以通过执行几个APIs方法来显著提升绘制操作的性能。前面有提到过，非可见的UI组件进行绘制更新会导致Overdraw。例如Nav Drawer从前置可见的Activity滑出之后，如果还继续绘制那些在Nav Drawer里面不可见的UI组件，这就导致了Overdraw。为了解决这个问题，Android系统会通过避免绘制那些完全不可见的组件来尽量减少Overdraw。那些Nav Drawer里面不可见的View就不会被执行浪费资源。
+
+![](/images/overdraw_invisible.png)
+
+但是不幸的是，对于那些过于复杂的自定义的View(重写了onDraw方法)，Android系统无法检测具体在onDraw里面会操作的事情，这样就无法监控，也就无法避免Overdraw了。但是我们可以通过[canvas.clipRect()](http://developer.android.com/reference/android/graphics/Canvas.html)来帮助系统识别那些可见的区域。这个方法可以指定一块矩形区域，只有在这个区域内才会被绘制，其他的区域会被忽视。这个API可以很好的帮助那些有多组重叠组件的自定义View来控制显示的区域。同时clipRect方法还可以帮助节约CPU与GPU资源，在clipRect区域之外的绘制指令都不会被执行，那些部分内容在矩形区域内的组件，仍然会得到绘制。
+
+![](/images/overdraw_reduce_cpu_gpu.png)
+
+除了clipRect方法之外，我们还可以使用[canvas.quickreject()](http://developer.android.com/reference/android/graphics/Canvas.html)来判断是否没和某个矩形相交，从而跳过那些非矩形区域内的绘制操作。做了那些优化之后，我们可以通过上面介绍的Show GPU Overdraw来查看效果。
+
+## 8)Memory Churn and performance
+
+
+
+
+
+
+
+
 
 
 
