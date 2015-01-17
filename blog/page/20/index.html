@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="如果你的App在播放音频，显然用户能够以预期的方式来控制音频是很重要的。为了保证好的用户体验，同样App能够获取音频焦点是很重要的，这样才能确保不会在同一时刻出现多个App的声音。在学习这个课程后，你将能够创建对硬件音量按钮进行响应的App，当按下音量按钮的时候需要获取到当前音频的焦点， &hellip;">
+  <meta name="description" content="很多App都可以播放音频，因此在播放前如何获取到音频焦点就显得很重要了，这样可以避免同时出现多个声音，Android使用audio focus来节制音频的播放，仅仅是获取到audio focus的App才能够播放音频。 在App开始播放音频之前，它需要经过发出请求[request]->接受请求[ &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +80,51 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-training-managing-audio-playback-lesson-2/">Android Training - 音频播放(Lesson 2 - 管理音频焦点Audio Focus)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-22T20:16:00+08:00" pubdate data-updated="true">Mar 22<span>nd</span>, 2012</time>
+        
+         | <a href="/android-training-managing-audio-playback-lesson-2/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>很多App都可以播放音频，因此在播放前如何获取到音频焦点就显得很重要了，这样可以避免同时出现多个声音，Android使用audio focus来节制音频的播放，仅仅是获取到audio focus的App才能够播放音频。</p>
+
+<p>在App开始播放音频之前，它需要经过发出请求[request]->接受请求[receive]->音频焦点锁定[Audio Focus]的过程。同样，它需要知道如何监听失去音频焦点[lose of audio focus]的事件并进行合适的响应。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-training-managing-audio-playback-lesson-2/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -226,53 +271,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-improve-layouts-lesson-2/">Android Training - 提升布局文件的性能(Lesson 2 - 使用include标签重用Layout)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-21T18:06:00+08:00" pubdate data-updated="true">Mar 21<span>st</span>, 2012</time>
-        
-         | <a href="/android-training-improve-layouts-lesson-2/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Re-using Layouts with <include/></h2>
-
-<p>尽管Android提供了很多种小的组件可以重用，我们还需要自定义一些稍微复杂一点的小组件进行重用。我们可以使用<code>&lt;include/&gt;</code> 与 <code>&lt;merge/&gt;</code> 标签来对当前的layout嵌入一些其他的layout.</p>
-
-<p>在创建一个稍微复杂一点的layout时，重用layout是个很给力的方法。比如我们需要一个YES/NO的控制栏，包含文字提示的Progress bar。像这种的布局会在很多地方需要重用到.</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-improve-layouts-lesson-2/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/21/">&larr; Older</a>
@@ -288,6 +286,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-performance-patterns/">Android性能优化典范</a>
+      </li>
     
       <li class="post">
         <a href="/android-tips-for-reduce-apk-size/">Android APK安装包瘦身</a>
@@ -317,18 +319,14 @@
         <a href="/android-training-wearable-app-creating/">Android Training - 创建可穿戴应用(1 - 创建并执行可穿戴应用)</a>
       </li>
     
-      <li class="post">
-        <a href="/android-training-wearable-app-index/">Android Training - 创建可穿戴应用(0 - 序言)</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (87)</a></li>
-  <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
+  <li><a href='/blog/categories/android'>Android (88)</a></li>
+  <li><a href='/blog/categories/android-deeper'>Android:deeper (3)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
@@ -373,7 +371,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2014 - Kesen Hoo -
+  Copyright &copy; 2015 - Kesen Hoo -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> - 本站作品采用 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a>进行许可.</span> 
   
   <script src="/javascripts/modernizr-2.0.js"></script>
