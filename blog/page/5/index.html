@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="Android中有几个很重要的概念Surface, SurfaceHolder, EGLSurface, SurfaceView, GLSurfaceView, SurfaceTexture, TextureView与SurfaceFlinger。 &hellip;">
+  <meta name="description" content="Volley 是一个HTTP库，它能够帮助Android apps更方便的执行网络操作，最重要的是，它更快速高效。可以通过开源的 AOSP 仓库获取到Volley 。 DEPENDENCIES AND PREREQUISITES Android 1.6 (API Level 4) or &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +80,67 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-training-volley-index/">Android Training - Volley(Lesson 0 - 序言)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-24T08:30:00+08:00" pubdate data-updated="true">Jun 24<span>th</span>, 2014</time>
+        
+         | <a href="/android-training-volley-index/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><code>Volley</code> 是一个HTTP库，它能够帮助Android apps更方便的执行网络操作，最重要的是，它更快速高效。可以通过开源的 <a href="https://android.googlesource.com/platform/frameworks/volley">AOSP</a> 仓库获取到Volley 。</p>
+
+<hr />
+
+<p><strong>DEPENDENCIES AND PREREQUISITES</strong></p>
+
+<p>Android 1.6 (API Level 4) or higher</p>
+
+<p><strong>YOU SHOULD ALSO SEE</strong></p>
+
+<p>使用Volley来编写一个app，请参考<a href="https://github.com/google/iosched">2013 Google I/O schedule app</a>. 另外需要特别关注下面2个部分：
+* <a href="https://github.com/google/iosched/blob/master/android/src/main/java/com/google/android/apps/iosched/util/ImageLoader.java">ImageLoader</a>
+* <a href="https://github.com/google/iosched/blob/master/android/src/main/java/com/google/android/apps/iosched/util/BitmapCache.java">BitmapCache</a></p>
+
+<p><strong> <a href="https://developers.google.com/events/io/sessions/325304728">VIDEO - Volley:Easy,Fast Networking for Android</a> </strong></p>
+
+<hr />
+
+<p>Volley 有如下的优点：</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-training-volley-index/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -314,77 +375,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-running-background-service-lesson-2/">Android Training - 使用IntentService执行任务(Lesson 2 - 发送任务给IntentService)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-04-20T20:46:00+08:00" pubdate data-updated="true">Apr 20<span>th</span>, 2014</time>
-        
-         | <a href="/android-training-running-background-service-lesson-2/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>前一篇文章演示了如何创建一个IntentService类。这次会演示如何通过发送一个Intent来触发IntentService执行任务。这个Intent可以传递一些数据给IntentService。可以在Activity或者Fragment的任何时间点发送这个Intent。</p>
-
-<p>为了创建一个工作请求并发送到IntentService。需要先创建一个explicit Intent，添加数据到intent，然后通过执行<a href="http://developer.android.com/reference/android/content/Context.html#startService(android.content.Intent">startService()</a>) 把它发送到IntentService。</p>
-
-<p>下面的是代码示例：</p>
-
-<ul>
-<li>创建一个新的显式的Intent用来启动IntentService。</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="cm">/*</span>
-</span><span class='line'><span class="cm"> * Creates a new Intent to start the RSSPullService</span>
-</span><span class='line'><span class="cm"> * IntentService. Passes a URI in the</span>
-</span><span class='line'><span class="cm"> * Intent&#39;s &quot;data&quot; field.</span>
-</span><span class='line'><span class="cm"> */</span>
-</span><span class='line'><span class="n">mServiceIntent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">getActivity</span><span class="o">(),</span> <span class="n">RSSPullService</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
-</span><span class='line'><span class="n">mServiceIntent</span><span class="o">.</span><span class="na">setData</span><span class="o">(</span><span class="n">Uri</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="n">dataUrl</span><span class="o">));</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-running-background-service-lesson-2/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/6/">&larr; Older</a>
@@ -400,6 +390,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-performance-render/">Android性能优化之渲染篇</a>
+      </li>
     
       <li class="post">
         <a href="/android-performance-patterns/">Android性能优化典范</a>
@@ -429,18 +423,14 @@
         <a href="/android-training-wearable-app-layouts/">Android Training - 创建可穿戴应用(2 - 创建自定义的布局)</a>
       </li>
     
-      <li class="post">
-        <a href="/android-training-wearable-app-creating/">Android Training - 创建可穿戴应用(1 - 创建并执行可穿戴应用)</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (88)</a></li>
-  <li><a href='/blog/categories/android-deeper'>Android:deeper (3)</a></li>
+  <li><a href='/blog/categories/android'>Android (89)</a></li>
+  <li><a href='/blog/categories/android-deeper'>Android:deeper (4)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>

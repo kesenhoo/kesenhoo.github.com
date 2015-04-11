@@ -9,8 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="Building a Flexible UI 当把你的程序设计成可以适配一系列大小各异的屏幕时，你可以基于可使用的屏幕空间来为你的fragments设置不同的参数，从而达到重用的目的。
-例如：在手持设备上，一次显示一个fragment会比较合适。对应的，在平板这样屏幕比较大的设备上， &hellip;">
+  <meta name="description" content="为了重用fragment的UI组件，你必须为每个fragment建立自己的container，模块化自己的layout与行为。一旦你定义了那些可重用的fragment，你可以使用activity与他们建立联系，对那些UI组件做组合动作等。 通常，你也会想要fragment-s之间能够交流。例如， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +80,55 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-training-building-a-dynamic-ui-with-fragments-lesson-3/">Android Training - 使用Fragments建立动态的UI(Lesson 4 - Fragment之间的通信)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-11-28T18:33:00+08:00" pubdate data-updated="true">Nov 28<span>th</span>, 2012</time>
+        
+         | <a href="/android-training-building-a-dynamic-ui-with-fragments-lesson-3/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>为了重用fragment的UI组件，你必须为每个fragment建立自己的container，模块化自己的layout与行为。一旦你定义了那些可重用的fragment，你可以使用activity与他们建立联系，对那些UI组件做组合动作等。</p>
+
+<p>通常，你也会想要fragment-s之间能够交流。例如，基于用户事件来改变内容。所有的Fragment-to-Fragment之间的交互都是基于activity进行操作的。两个fragment之间没有办法直接交互。</p>
+
+<h2>Define an Interface[定义接口]</h2>
+
+<p>为了允许fragment与activity进行交互，你可以在fragment中定义一个interface，然后在activity中去implement它。Fragment在它的onAttach()方法里面捕获接口的实现，然后call接口的方法来与activity进行交互。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-training-building-a-dynamic-ui-with-fragments-lesson-3/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -234,69 +282,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-building-a-dynamic-ui-with-fragments-lesson-0/">Android Training - 使用Fragments建立动态的UI(Lesson 0 - 章节概览)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-11-27T14:38:00+08:00" pubdate data-updated="true">Nov 27<span>th</span>, 2012</time>
-        
-         | <a href="/android-training-building-a-dynamic-ui-with-fragments-lesson-0/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>Building a Dynamic UI with Fragments</h1>
-
-<ul>
-<li>学习这章节的先决条件:
-
-<ul>
-<li>了解Activity的基本概念 (see <a href="http://developer.android.com/training/basics/activity-lifecycle/index.html">Managing the Activity Lifecycle</a>)</li>
-<li>有使用 XML layouts 的经验</li>
-</ul>
-</li>
-<li>你还需要看的有:
-
-<ul>
-<li><a href="http://developer.android.com/guide/components/fragments.html">Fragments</a></li>
-<li><a href="http://developer.android.com/guide/practices/tablets-and-handsets.html">Supporting Tablets and Handsets</a></li>
-</ul>
-</li>
-<li>DEMO:
-<a href="http://developer.android.com/shareables/training/FragmentBasics.zip">FragmentBasics.zip</a></li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-building-a-dynamic-ui-with-fragments-lesson-0/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/14/">&larr; Older</a>
@@ -312,6 +297,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-performance-render/">Android性能优化之渲染篇</a>
+      </li>
     
       <li class="post">
         <a href="/android-performance-patterns/">Android性能优化典范</a>
@@ -341,18 +330,14 @@
         <a href="/android-training-wearable-app-layouts/">Android Training - 创建可穿戴应用(2 - 创建自定义的布局)</a>
       </li>
     
-      <li class="post">
-        <a href="/android-training-wearable-app-creating/">Android Training - 创建可穿戴应用(1 - 创建并执行可穿戴应用)</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (88)</a></li>
-  <li><a href='/blog/categories/android-deeper'>Android:deeper (3)</a></li>
+  <li><a href='/blog/categories/android'>Android (89)</a></li>
+  <li><a href='/blog/categories/android-deeper'>Android:deeper (4)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>

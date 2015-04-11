@@ -9,7 +9,8 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="Performance Tips 这篇文章主要是介绍了一些小细节的优化技巧，当这些小技巧综合使用起来的时候，对于整个App的性能提升还是有作用的，只是不能较大幅度的提升性能而已。选择合适的算法与数据结构才应该是你首要考虑的因素，在这篇文章中不会涉及这方面。 &hellip;">
+  <meta name="description" content="Intent与Intent Filter Android其中的三大组件，Activity,Service与broadcast receivers是通过Intent来触发彼此的。Intent本身会携带一些信息，它是一种组件内部或者组件间进行交互的中介。
+对于不同的组件之间有着不同的机制： &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +81,59 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-notes-intent-and-intentFilter/">Android Notes(04) - Intents and Intent Filters</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-04-12T18:27:00+08:00" pubdate data-updated="true">Apr 12<span>th</span>, 2013</time>
+        
+         | <a href="/android-notes-intent-and-intentFilter/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Intent与Intent Filter</h2>
+
+<p>Android其中的三大组件，Activity,Service与broadcast receivers是通过Intent来触发彼此的。Intent本身会携带一些信息，它是一种组件内部或者组件间进行交互的中介。<br/>
+对于不同的组件之间有着不同的机制：</p>
+
+<ul>
+<li>一个Intent对象通过Context.startActivity()或者Activity.startActivityForResult()来启动一个activity或者让已经存在的activity做一些更新的操作。</li>
+<li>一个Intent对象通过Context.startService()来初始化一个Service或者给已经在运行的Service传递新的指令。同样的，对于Context.bindService()是一样的道理。</li>
+<li>Intent对象通过broadcast的方法（例如Context.sendBroadcast(), Context.sendOrderedBroadcast()或者Context.sendStickyBroadcast())传递给那些感兴趣的broadcast receivers.</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-notes-intent-and-intentFilter/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -231,62 +285,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-notes-bound-services/">Android Notes(01) - Bound Services</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-02-18T22:30:00+08:00" pubdate data-updated="true">Feb 18<span>th</span>, 2013</time>
-        
-         | <a href="/android-notes-bound-services/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><ul>
-<li>一个bound的service是C/S的接口。它允许其他组件绑定到service,发送请求，接收回应并执行IPC。通常是需要给其他程序组件提供服务。
-
-<ul>
-<li>A bound service allows other components to bind to it, in order to interact with it and perform interprocess communication。</li>
-<li>A bound service is destroyed once all clients unbind, unless the service was also started。</li>
-</ul>
-</li>
-<li>客户端通过执行 bindService()绑定到service。这样的话，客户端需要实现一个ServiceConnection, 它可以监视与service的连接状态。bindService() 并不会有返回值，但是Android系统会在client与service连接上时，执行onServiceConnected() 的callback。在这个回调方法里面传递IBinder给client用来与service进行交互。</li>
-<li>前面提到可以有多个Client同时bind到service。然而，系统只会在第一个client做绑定时才会执行service的onBind() 方法。对于随后需要绑定的客户端，系统会直接传递同一个 IBinder 对象给Client，而不是去再次执行onBind方法。(<em>那么也就是onBind方法只会被执行一次</em>)</li>
-<li>通常来说，Music程序需要实现service的两种方式，这样既可以在activity被销毁之后(<em>假设只实现bound的方式的话，这个时候，unbind了，Music会停止</em>)音乐可以继续播放，当重新进入activity时又会重新bind上。这刚好验证了下面的说法：</li>
-<li>如果一个service既可以started与bound。当一个service是started的，系统并不会在所有的Client都unbind之后去杀死这个service，我们需要显示的去停止这个service，通过stopSelf或者stopService的方式。</li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-notes-bound-services/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/10/">&larr; Older</a>
@@ -302,6 +300,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-performance-render/">Android性能优化之渲染篇</a>
+      </li>
     
       <li class="post">
         <a href="/android-performance-patterns/">Android性能优化典范</a>
@@ -331,18 +333,14 @@
         <a href="/android-training-wearable-app-layouts/">Android Training - 创建可穿戴应用(2 - 创建自定义的布局)</a>
       </li>
     
-      <li class="post">
-        <a href="/android-training-wearable-app-creating/">Android Training - 创建可穿戴应用(1 - 创建并执行可穿戴应用)</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (88)</a></li>
-  <li><a href='/blog/categories/android-deeper'>Android:deeper (3)</a></li>
+  <li><a href='/blog/categories/android'>Android (89)</a></li>
+  <li><a href='/blog/categories/android-deeper'>Android:deeper (4)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
