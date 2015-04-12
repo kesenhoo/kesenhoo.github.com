@@ -4,7 +4,7 @@
   <title><![CDATA[胡凯]]></title>
   <link href="http://hukai.me/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2015-04-12T01:20:17+08:00</updated>
+  <updated>2015-04-12T13:54:02+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -14,12 +14,91 @@
 
   
   <entry>
+    <title type="html"><![CDATA[Android性能优化之运算篇]]></title>
+    <link href="http://hukai.me/android-performance-compute/"/>
+    <updated>2015-04-12T13:50:00+08:00</updated>
+    <id>http://hukai.me/android-performance-compute</id>
+    <content type="html"><![CDATA[<p><img src="http://hukai.me/images/android_performance_course_udacity.png" alt="" />
+Google近期在Udacity上发布了<a href="https://www.udacity.com/course/ud825">Android性能优化的在线课程</a>，分别从渲染，运算与内存，电量几个方面介绍了如何去优化性能，这些课程是Google之前在Youtube上发布的<a href="http://hukai.me/android-performance-patterns/">Android性能优化典范</a>专题课程的细化与补充。</p>
+
+<p>下面是运算篇章的学习笔记，部分内容与前面的性能优化典范有重合，欢迎大家一起学习交流！</p>
+
+<h3>1)Intro to Compute and Memory Problems</h3>
+
+<p>Android中的Java代码会需要经过编译优化再执行的过程。代码的不同写法会影响到Java编译器的优化效率。例如for循环的不同写法就会对编译器优化这段代码产生不同的效率，当程序中包含大量这种可优化的代码的时候，运算性能就会出现问题。想要知道如何优化代码的运算性能就需要知道代码在硬件层的执行差异。</p>
+
+<h3>2)Slow Function Performance</h3>
+
+<p>如果你写了一段代码，它的执行效率比想象中的要差很多。我们需要知道有哪些因素有可能影响到这段代码的执行效率。例如：比较两个float数值大小的执行时间是int数值的4倍左右。这是因为CPU的运算架构导致的，如下图所示：</p>
+
+<p><img src="http://hukai.me/images/android_perf_compute_float_int.png" alt="" /></p>
+
+<p>虽然现代的CPU架构得到了很大的提升，也许并不存在上面所示的那么大的差异，但是这个例子说明了代码写法上的差异会对运算性能产生很大的影响。</p>
+
+<!-- More -->
+
+
+<p>通常来说有两类运行效率差的情况：第1种是相对执行时间长的方法，我们可以很轻松的找到这些方法并做一定的优化。第2种是执行时间短，但是执行频次很高的方法，因为执行次数多，累积效应下就会对性能产生很大的影响。</p>
+
+<p>修复这些细节效率问题，需要使用Android SDK提供的工具，进行仔细的测量，然后再进行微调修复。</p>
+
+<h3>3)Traceview Walkthrough</h3>
+
+<p>通过Android Studio打开里面的Android Device Monitor，切换到DDMS窗口，点击左边栏上面想要跟踪的进程，再点击上面的Start Method Tracing的按钮，如下图所示：</p>
+
+<p><img src="http://hukai.me/images/android_perf_compute_traceview.png" alt="" /></p>
+
+<p>启动跟踪之后，再操控app，做一些你想要跟踪的事件，例如滑动listview，点击某些视图进入另外一个页面等等。操作完之后，回到Android Device Monitor，再次点击Method Tracing的按钮停止跟踪。此时工具会为刚才的操作生成TraceView的详细视图。</p>
+
+<p><img src="http://hukai.me/images/android_perf_compute_traceview_2.png" alt="" /></p>
+
+<p>关于TraceView中详细数据如何查看，这里不展开了，有很多文章介绍过。</p>
+
+<h3>4)Batching and Caching</h3>
+
+<p>为了提升运算性能，这里介绍2个非常重要的技术，Batching与Caching。</p>
+
+<p><strong>Batching</strong>是在真正执行运算操作之前对数据进行批量预处理，例如你需要有这样一个方法，它的作用是查找某个值是否存在与于一堆数据中。假设一个前提，我们会先对数据做排序，然后使用二分查找法来判断值是否存在。我们先看第一种情况，下图中存在着多次重复的排序操作。</p>
+
+<p><img src="http://hukai.me/images/android_perf_compute_batching_1.png" alt="" /></p>
+
+<p>在上面的那种写法下，如果数据的量级并不大的话，应该还可以接受，可是如果数据集非常大，就会有严重的效率问题。那么我们看下改进的写法，把排序的操作打包绑定只执行一次：</p>
+
+<p><img src="http://hukai.me/images/android_perf_compute_batching_2.png" alt="" /></p>
+
+<p>上面就是Batching的一种示例：把重复的操作拎出来，打包只执行一次。</p>
+
+<p><strong>Caching</strong>的理念很容易理解，在很多方面都有体现，下面举一个for循环的例子：</p>
+
+<p><img src="http://hukai.me/images/android_perf_compute_caching.png" alt="" /></p>
+
+<p>上面这2种基础技巧非常实用，积极恰当的使用能够显著提升运算性能。</p>
+
+<h3>5)Blocking the UI Thread</h3>
+
+<p>提升代码的运算效率是改善性能的一方面，让代码执行在哪个线程也同样很重要。我们都知道Android的Main Thread也是UI Thread，它需要承担用户的触摸事件的反馈，界面视图的渲染等操作。这就意味着，我们不能在Main Thread里面做任何非轻量级的操作，类似I/O操作会花费大量时间，这很有可能会导致界面渲染发生丢帧的现象，甚至有可能导致ANR。防止这些问题的解决办法就是把那些可能有性能问题的代码移到非UI线程进行操作。</p>
+
+<h3>6)Container Performance</h3>
+
+<p>另外一个我们需要注意的运算性能问题是基础算法的合理选择，例如冒泡排序与快速排序的性能差异：</p>
+
+<p><img src="http://hukai.me/images/android_perf_compute_container.png" alt="" /></p>
+
+<p>避免我们重复造轮子，Java提供了很多现成的容器，例如Vector，ArrayList，LinkedList，HashMap等等，在Android里面还有新增加的SparseArray等，我们需要了解这些基础容器的性能差异以及适用场景。这样才能够选择合适的容器，达到最佳的性能。</p>
+
+<p><img src="http://hukai.me/images/android_perf_compute_container_2.png" alt="" /></p>
+
+<p><strong>Notes:</strong>关于更多代码优化的小技巧，请点击<a href="http://hukai.me/android-training-performance-tips/">这里</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Android性能优化之渲染篇]]></title>
     <link href="http://hukai.me/android-performance-render/"/>
     <updated>2015-04-11T22:16:00+08:00</updated>
     <id>http://hukai.me/android-performance-render</id>
     <content type="html"><![CDATA[<p><img src="http://hukai.me/images/android_performance_course_udacity.png" alt="" />
-Google近期在Udacity上发布了<a href="https://www.udacity.com/course/ud825">Android性能优化的在线课程</a>，目前有三个篇章，分别从渲染，计算与内存，电量三个方面介绍了如何去优化性能，这些课程是Google之前在Youtube上发布的<a href="http://hukai.me/android-performance-patterns/">Android性能优化典范</a>专题课程的细化与补充。</p>
+Google近期在Udacity上发布了<a href="https://www.udacity.com/course/ud825">Android性能优化的在线课程</a>，目前有三个篇章，分别从渲染，运算与内存，电量三个方面介绍了如何去优化性能，这些课程是Google之前在Youtube上发布的<a href="http://hukai.me/android-performance-patterns/">Android性能优化典范</a>专题课程的细化与补充。</p>
 
 <p>下面是渲染篇章的学习笔记，部分内容和前面的性能优化典范有重合，欢迎大家一起学习交流！</p>
 
@@ -3974,209 +4053,6 @@ adb -d forward tcp:5601 tcp:5601
 <p>===</p>
 
 <p>学习自<a href="http://developer.android.com/guide/topics/media/camera.html">http://developer.android.com/guide/topics/media/camera.html</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Training - 使用IntentService执行任务(Lesson 3 - 回传任务状态给发送方)]]></title>
-    <link href="http://hukai.me/android-training-running-background-service-lesson-3/"/>
-    <updated>2014-04-20T22:01:00+08:00</updated>
-    <id>http://hukai.me/android-training-running-background-service-lesson-3</id>
-    <content type="html"><![CDATA[<p>这章节会演示如何回传IntentService中执行的任务状态与结果给发送方。 例如，回传任务的状态给Activity并进行更新UI。推荐的方式是使用<a href="http://developer.android.com/reference/android/support/v4/content/LocalBroadcastManager.html">LocalBroadcastManager</a>，这个组件可以限制broadcast只在自己的App中进行传递。</p>
-
-<h2>Report Status From an IntentService</h2>
-
-<p>为了在IntentService中向其他组件发送任务状态，首先创建一个Intent并在data字段中包含需要传递的信息。作为一个可选项，还可以给这个Intent添加一个action与data URI。</p>
-
-<p>下一步，通过执行<a href="http://developer.android.com/reference/android/support/v4/content/LocalBroadcastManager.html#sendBroadcast(android.content.Intent">LocalBroadcastManager.sendBroadcast()</a>))来发送Intent。Intent被发送到任何有注册接受它的组件中。为了获取到LocalBroadcastManager的实例，可以执行getInstance().代码示例如下：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">Constants</span> <span class="o">{</span>
-</span><span class='line'>    <span class="o">...</span>
-</span><span class='line'>    <span class="c1">// Defines a custom Intent action</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">BROADCAST_ACTION</span> <span class="o">=</span>
-</span><span class='line'>        <span class="s">&quot;com.example.android.threadsample.BROADCAST&quot;</span><span class="o">;</span>
-</span><span class='line'>    <span class="o">...</span>
-</span><span class='line'>    <span class="c1">// Defines the key for the status &quot;extra&quot; in an Intent</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">EXTENDED_DATA_STATUS</span> <span class="o">=</span>
-</span><span class='line'>        <span class="s">&quot;com.example.android.threadsample.STATUS&quot;</span><span class="o">;</span>
-</span><span class='line'>    <span class="o">...</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">RSSPullService</span> <span class="kd">extends</span> <span class="n">IntentService</span> <span class="o">{</span>
-</span><span class='line'><span class="o">...</span>
-</span><span class='line'>    <span class="cm">/*</span>
-</span><span class='line'><span class="cm">     * Creates a new Intent containing a Uri object</span>
-</span><span class='line'><span class="cm">     * BROADCAST_ACTION is a custom Intent action</span>
-</span><span class='line'><span class="cm">     */</span>
-</span><span class='line'>    <span class="n">Intent</span> <span class="n">localIntent</span> <span class="o">=</span>
-</span><span class='line'>            <span class="k">new</span> <span class="nf">Intent</span><span class="o">(</span><span class="n">Constants</span><span class="o">.</span><span class="na">BROADCAST_ACTION</span><span class="o">)</span>
-</span><span class='line'>            <span class="c1">// Puts the status into the Intent</span>
-</span><span class='line'>            <span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="n">Constants</span><span class="o">.</span><span class="na">EXTENDED_DATA_STATUS</span><span class="o">,</span> <span class="n">status</span><span class="o">);</span>
-</span><span class='line'>    <span class="c1">// Broadcasts the Intent to receivers in this app.</span>
-</span><span class='line'>    <span class="n">LocalBroadcastManager</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="k">this</span><span class="o">).</span><span class="na">sendBroadcast</span><span class="o">(</span><span class="n">localIntent</span><span class="o">);</span>
-</span><span class='line'><span class="o">...</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<!-- More -->
-
-
-<p>下一步是在发送任务的组件中接收发送出来的broadcast数据。</p>
-
-<h2>Receive Status Broadcasts from an IntentService</h2>
-
-<p>为了接受广播的数据对象，需要使用BroadcastReceiver的子类并实现<a href="http://developer.android.com/reference/android/content/BroadcastReceiver.html#onReceive(android.content.Context,%20android.content.Intent">BroadcastReceiver.onReceive()</a>)的方法，这里可以接收LocalBroadcastManager发出的广播数据。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="c1">// Broadcast receiver for receiving status updates from the IntentService</span>
-</span><span class='line'><span class="kd">private</span> <span class="kd">class</span> <span class="nc">ResponseReceiver</span> <span class="kd">extends</span> <span class="n">BroadcastReceiver</span>
-</span><span class='line'><span class="o">{</span>
-</span><span class='line'>    <span class="c1">// Prevents instantiation</span>
-</span><span class='line'>    <span class="kd">private</span> <span class="nf">DownloadStateReceiver</span><span class="o">()</span> <span class="o">{</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>    <span class="c1">// Called when the BroadcastReceiver gets an Intent it&#39;s registered to receive</span>
-</span><span class='line'>    <span class="err">@</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onReceive</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="n">Intent</span> <span class="n">intent</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'><span class="o">...</span>
-</span><span class='line'>        <span class="cm">/*</span>
-</span><span class='line'><span class="cm">         * Handle Intents here.</span>
-</span><span class='line'><span class="cm">         */</span>
-</span><span class='line'><span class="o">...</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>一旦定义了BroadcastReceiver，也应该定义actions，categories与data用来做广播过滤。为了实现这些，需要使用<a href="http://developer.android.com/reference/android/content/IntentFilter.html">IntentFilter</a>.如下所示：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="c1">// Class that displays photos</span>
-</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">DisplayActivity</span> <span class="kd">extends</span> <span class="n">FragmentActivity</span> <span class="o">{</span>
-</span><span class='line'>    <span class="o">...</span>
-</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">stateBundle</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>        <span class="o">...</span>
-</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">onCreate</span><span class="o">(</span><span class="n">stateBundle</span><span class="o">);</span>
-</span><span class='line'>        <span class="o">...</span>
-</span><span class='line'>        <span class="c1">// The filter&#39;s action is BROADCAST_ACTION</span>
-</span><span class='line'>        <span class="n">IntentFilter</span> <span class="n">mStatusIntentFilter</span> <span class="o">=</span> <span class="k">new</span> <span class="n">IntentFilter</span><span class="o">(</span>
-</span><span class='line'>                <span class="n">Constants</span><span class="o">.</span><span class="na">BROADCAST_ACTION</span><span class="o">);</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="c1">// Adds a data filter for the HTTP scheme</span>
-</span><span class='line'>        <span class="n">mStatusIntentFilter</span><span class="o">.</span><span class="na">addDataScheme</span><span class="o">(</span><span class="s">&quot;http&quot;</span><span class="o">);</span>
-</span><span class='line'>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>为了给系统注册这个BroadcastReceiver，需要通过LocalBroadcastManager执行registerReceiver()的方法。如下所示：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="c1">// Instantiates a new DownloadStateReceiver</span>
-</span><span class='line'>        <span class="n">DownloadStateReceiver</span> <span class="n">mDownloadStateReceiver</span> <span class="o">=</span>
-</span><span class='line'>                <span class="k">new</span> <span class="nf">DownloadStateReceiver</span><span class="o">();</span>
-</span><span class='line'>        <span class="c1">// Registers the DownloadStateReceiver and its intent filters</span>
-</span><span class='line'>        <span class="n">LocalBroadcastManager</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="k">this</span><span class="o">).</span><span class="na">registerReceiver</span><span class="o">(</span>
-</span><span class='line'>                <span class="n">mDownloadStateReceiver</span><span class="o">,</span>
-</span><span class='line'>                <span class="n">mStatusIntentFilter</span><span class="o">);</span>
-</span><span class='line'>        <span class="o">...</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>一个BroadcastReceiver可以处理多种类型的广播数据。每个广播数据都有自己的ACTION。这个功能使得不用定义多个不同的BroadcastReceiver来分别处理不同的ACTION数据。为BroadcastReceiver定义另外一个IntentFilter，只需要创建一个新的IntentFilter并重复执行registerReceiver()即可。例如:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="cm">/*</span>
-</span><span class='line'><span class="cm">         * Instantiates a new action filter.</span>
-</span><span class='line'><span class="cm">         * No data filter is needed.</span>
-</span><span class='line'><span class="cm">         */</span>
-</span><span class='line'>        <span class="n">statusIntentFilter</span> <span class="o">=</span> <span class="k">new</span> <span class="n">IntentFilter</span><span class="o">(</span><span class="n">Constants</span><span class="o">.</span><span class="na">ACTION_ZOOM_IMAGE</span><span class="o">);</span>
-</span><span class='line'>        <span class="o">...</span>
-</span><span class='line'>        <span class="c1">// Registers the receiver with the new filter</span>
-</span><span class='line'>        <span class="n">LocalBroadcastManager</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="n">getActivity</span><span class="o">()).</span><span class="na">registerReceiver</span><span class="o">(</span>
-</span><span class='line'>                <span class="n">mDownloadStateReceiver</span><span class="o">,</span>
-</span><span class='line'>                <span class="n">mIntentFilter</span><span class="o">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>发送一个广播并不会start或者resume一个Activity。BroadcastReceiver可以接收广播数据，即使是你的app是在后台运行中。但是这不会强迫使得你的app变成foreground的。如果想在app不可见的时候通知用户一个后台的事件，建议使用<a href="http://developer.android.com/reference/android/app/Notification.html">Notification</a>。永远不要为了响应一个广播而去启动Activity。</p>
-
-<hr />
-
-<p><strong>后记：</strong>使用LocalBroadcastManager结合IntentService其实是一种很典型高效的做法，同时也更符合OO的思想，通过广播注册与反注册的方式，对两个组件进行解耦。如果使用Handler传递到后台线程作为回调，容易带来的内存泄漏。原因是：匿名内部类对外面的Actvitiy持有引用，如果在Acitivity被销毁的时候，没有对Handler进行显式的解绑，会导致Activity无法正常销毁，这样自然就有了内存泄漏。当然，如果用文章中的方案，通常也要记得在Activity的onPause的时候进行unRegisterReceiver，除非你有充足的理由为解释这里为何要继续保留。</p>
-
-<hr />
-
-<p><strong>学习自<a href="http://developer.android.com/training/run-background-service/report-status.html">http://developer.android.com/training/run-background-service/report-status.html</a>,欢迎交流讨论</strong></p>
 ]]></content>
   </entry>
   

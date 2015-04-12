@@ -9,9 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="你可以通过蓝牙来调试你的可穿戴应用，通过蓝牙把调试数据输出到手持设备上，手持设备是有连接到开发电脑上的。 搭建好设备用来调试 开启手持设备的USB调试： 打开设置应用并滑动到底部。
-如果在设置里面没有开发者选项，点击关于手机，滑动到底部，点击build number 7次。
-返回并点击开发者选项 &hellip;">
+  <meta name="description" content="记录下Activity生命周期中的onSaveInstanceState(Bundle outState) onSaveInstanceState与onRestoreInstanceState的作用： 在资源紧张的情况下，系统会选择杀死一些处于非栈顶的Activity来回收资源。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -82,6 +80,70 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-activitylifecycle-onsaveinstancestate/">Android Notes - Activity生命周期中的onSaveInstanceState</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-08-31T17:01:00+08:00" pubdate data-updated="true">Aug 31<span>st</span>, 2014</time>
+        
+         | <a href="/android-activitylifecycle-onsaveinstancestate/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>记录下Activity生命周期中的<a href="http://developer.android.com/reference/android/app/Activity.html">onSaveInstanceState(Bundle outState)</a></p>
+
+<h2>onSaveInstanceState与onRestoreInstanceState的作用：</h2>
+
+<p>在资源紧张的情况下，系统会选择杀死一些处于非栈顶的Activity来回收资源。
+为了能够让这些可能被杀死的Activity能够在恢复显示的时候状态不丢失，所以需要在Activity从栈顶往下压的时候提供onSaveInstanceState的回调用来提前保存状态信息。</p>
+
+<p>而onRestoreInstanceState则是在这个Activity真的回收掉之后的恢复显示阶段用来恢复之前保存的数据。</p>
+
+<h2>onSaveInstanceState与onRestoreInstanceState的调用时机：</h2>
+
+<p>只要某个Activity是做入栈并且非栈顶时（启动跳转其他Activity或者点击Home按钮），此Activity是需要调用onSaveInstanceState的，
+如果Activity是做出栈的动作（点击back或者执行finish），是不会调用onSaveInstanceState的。</p>
+
+<p>只有在Activity真的被系统非正常杀死过，恢复显示Activity的时候，就会调用onRestoreInstanceState。</p>
+
+<h2><a href="https://github.com/kesenhoo/ActivityLifeCycle">Sample Code</a></h2>
+
+<ul>
+<li>从ActivityA启动ActivityB执行顺序是：A：onCreate -> A：onStart -> A：onResume -> B：onCreate -> B：onStart -> B：onResume -> A：onSaveInstanceState –> A：onStop。</li>
+<li>正常流程从ActivityB点击Back按钮或者是触发finish方法回退到ActivityA，执行顺序是：B：finish –> B：onPause –> A： onRestart –> A：onStart  -> A：onResume -> B： onStop –> B：onDestroy。</li>
+<li>若启动ActivityB之后，选择点击Home按钮，程序退到后台，那么执行顺序是：B：onPause -> B：onSaveInstanceState -> B：onStop。</li>
+<li>程序在后台的时候，选择主动杀死程序进程，然后再从桌面点击应用启动，会显示之前的ActivityB，执行顺序是：B：onCreate -> B：onStart –> B：onRestoreInstanceState - > B：onResume。</li>
+<li>点击Back按钮或者是执行Activity B里面提供的finish方法：B：finish –> B：onPause –> A：onCreate  -> A：onStart -> A：onRestoreInstanceState -> A：onResume -> B：onStop -> B：onDestory。</li>
+<li>最后再点击Back按钮或是执行Activity A里面的finish方法退出程序：A：finish -> A：onPause –> A：onStop -> A：onDestory。</li>
+</ul>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -279,61 +341,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-wearable-app-layouts/">Android Training - 创建可穿戴应用(2 - 创建自定义的布局)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-14T20:16:00+08:00" pubdate data-updated="true">Jul 14<span>th</span>, 2014</time>
-        
-         | <a href="/android-training-wearable-app-layouts/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>为可穿戴设备创建布局是和手持设备是一样的。但是 不要期望通过搬迁手持应用的功能与UI到可穿戴上会有一个好的用户体验。仅仅在有需要的时候，你才应该创建自定义的布局。请参考可穿戴设备的<a href="http://developer.android.com/design/wear/index.html">design guidelines</a>学习如何设计一个优秀的可穿戴应用。</p>
-
-<p><a name="CustomNotification"></a></p>
-
-<h2>创建自定义Notification</h2>
-
-<p>通常来说，你应该在手持应用上创建好notification，然后让它自动同步到可穿戴设备上。这使得你只需要创建一次notification，然后可以在不同类型的设备(不仅仅是可穿戴设备，也包含车载设备与电视)上进行显示，免去为不同设备进行重新设计。</p>
-
-<p>如果标准的notification风格无法满足你的需求(例如<a href="http://developer.android.com/reference/android/support/v4/app/NotificationCompat.BigTextStyle.html">NotificationCompat.BigTextStyle</a> 或者 <a href="http://developer.android.com/reference/android/support/v4/app/NotificationCompat.InboxStyle.html">NotificationCompat.InboxStyle</a>)，你可以使用activity，显示一个自定义的布局来达到目的。在可穿戴设备上你只可以创建并处理自定义的notification，同时系统无法为这些notification同步到手持设备上。</p>
-
-<p><strong>Note:</strong>当在可穿戴设备上创建自定义的notification时，你可以使用API Level 20上标准的APIs，不需要使用Support Library。</p>
-
-<p>为了创建自定义的notification，步骤如下：</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-wearable-app-layouts/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -349,6 +356,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-performance-compute/">Android性能优化之运算篇</a>
+      </li>
     
       <li class="post">
         <a href="/android-performance-render/">Android性能优化之渲染篇</a>
@@ -378,18 +389,14 @@
         <a href="/android-training-wearable-app-voice-input/">Android Training - 创建可穿戴应用(3 - 添加语音能力)</a>
       </li>
     
-      <li class="post">
-        <a href="/android-training-wearable-app-layouts/">Android Training - 创建可穿戴应用(2 - 创建自定义的布局)</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (89)</a></li>
-  <li><a href='/blog/categories/android-deeper'>Android:deeper (4)</a></li>
+  <li><a href='/blog/categories/android'>Android (90)</a></li>
+  <li><a href='/blog/categories/android-deeper'>Android:deeper (5)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>

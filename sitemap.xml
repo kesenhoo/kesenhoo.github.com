@@ -370,7 +370,11 @@
     </url>
     <url>
         <loc>http://hukai.me/android-performance-render/</loc>
-        <lastmod>2015-04-12T01:19:53+08:00</lastmod>
+        <lastmod>2015-04-12T11:40:00+08:00</lastmod>
+    </url>
+    <url>
+        <loc>http://hukai.me/android-performance-compute/</loc>
+        <lastmod>2015-04-12T13:53:50+08:00</lastmod>
     </url>
     <url>
         <loc>http://hukai.me/404.html</loc>
@@ -378,7 +382,7 @@
     </url>
     <url>
         <loc>http://hukai.me/about/</loc>
-        <lastmod>2015-04-12T01:19:53+08:00</lastmod>
+        <lastmod>2015-04-12T13:53:50+08:00</lastmod>
     </url>
     <url>
         <loc>
@@ -388,10 +392,10 @@
     </url>
     <url>
         <loc>http://hukai.me/blog/archives/</loc>
-        <lastmod>2015-04-12T01:19:53+08:00</lastmod>
+        <lastmod>2015-04-12T13:53:50+08:00</lastmod>
     </url>
     <url>
         <loc>http://hukai.me/</loc>
-        <lastmod>2015-04-12T01:19:53+08:00</lastmod>
+        <lastmod>2015-04-12T13:53:50+08:00</lastmod>
     </url>
 </urlset>

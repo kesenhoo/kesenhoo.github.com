@@ -9,7 +9,8 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="Loading Views On Demand 某些时候，我们需要一些很复杂的视图却仅仅很少用到。如果我们在它仅仅需要的时候再载入，这样可以减少内存的使用并且给用户带来流畅的体验。 1)Define a ViewStub ViewStub是一个轻量级的view，没有占有空间，没有花费draw的资源 &hellip;">
+  <meta name="description" content="Making ListView Scrolling Smooth 使得滚动ListView平滑的关键在与保持APP的UI thread与复杂的操作隔离。确保另起一个Thread来处理Disk IO，network access或者SQL access.
+为了测试AP的状态，可以enable &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +81,52 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-training-improve-layouts-lesson-4/">Android Training - 提升布局文件的性能(Lesson 4 - 使用ViewHolder来提升ListView的性能)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-21T21:20:00+08:00" pubdate data-updated="true">Mar 21<span>st</span>, 2012</time>
+        
+         | <a href="/android-training-improve-layouts-lesson-4/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Making ListView Scrolling Smooth</h2>
+
+<p>使得滚动ListView平滑的关键在与保持APP的UI thread与复杂的操作隔离。确保另起一个Thread来处理Disk IO，network access或者SQL access.
+为了测试AP的状态，可以enable <a href="http://developer.android.com/reference/android/os/StrictMode.html">StrictMode</a>.(Android ICS 4.0上已经默认开启了StrickMode)</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-training-improve-layouts-lesson-4/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -228,54 +275,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-supporting-different-device-lesson-3/">Android Training - 适配不同的屏幕(Lesson 3 - 实现可适配的UI流程)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-20T23:38:00+08:00" pubdate data-updated="true">Mar 20<span>th</span>, 2012</time>
-        
-         | <a href="/android-training-supporting-different-device-lesson-3/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>Implementing Adaptative UI Flows</h1>
-
-<p>根据显示不同的layout，我们需要设计不同的UI flow。比如如果你的AP是dual-pane的模式，点击左边list的item的时候，会在右边直接显示对应的内容，如果是single-pane的模式，那么需要跳转到另外一个Activity来显示对于的内容</p>
-
-<p><strong>注：</strong>个人认为目前很多AP都会针对比较大的屏幕设计一个对于的版本，比如QQ Pad版，QQ HD版，QQ Pad Mini版，这些信息可以看出来大多数情况，还是不太会采取同一份代码适应所有屏幕的方案。
-这一课主要就是讲如何在运行的时候判断当前的布局，从而让AP选择不同行为。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-supporting-different-device-lesson-3/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/22/">&larr; Older</a>
@@ -291,6 +290,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-performance-compute/">Android性能优化之运算篇</a>
+      </li>
     
       <li class="post">
         <a href="/android-performance-render/">Android性能优化之渲染篇</a>
@@ -320,18 +323,14 @@
         <a href="/android-training-wearable-app-voice-input/">Android Training - 创建可穿戴应用(3 - 添加语音能力)</a>
       </li>
     
-      <li class="post">
-        <a href="/android-training-wearable-app-layouts/">Android Training - 创建可穿戴应用(2 - 创建自定义的布局)</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (89)</a></li>
-  <li><a href='/blog/categories/android-deeper'>Android:deeper (4)</a></li>
+  <li><a href='/blog/categories/android'>Android (90)</a></li>
+  <li><a href='/blog/categories/android-deeper'>Android:deeper (5)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>

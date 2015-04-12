@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="这节课会介绍如何实现你自定义的请求类型，这些自定义的类型不属于Volley内置支持包里面。 编写一个自定义的请求Write a Custom Request 大多数的请求类型都已经包含在Volley的工具箱里面。如果你的请求返回数值是一个string，image或者JSON， &hellip;">
+  <meta name="description" content="可能你写的代码在性能测试上表现良好，但是你的应用仍然有时候会反应迟缓(sluggish)，停顿(hang)或者长时间卡死(frezze)，或者应用处理输入的数据花费时间过长。对于你的应用来说最槽糕的事情是出现&#8221;程序无响应(Application Not Responding)&# &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +80,61 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-training-performance-anr/">Android Training - 避免程序无响应ANR</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-06T12:09:00+08:00" pubdate data-updated="true">Jul 6<span>th</span>, 2014</time>
+        
+         | <a href="/android-training-performance-anr/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>可能你写的代码在性能测试上表现良好，但是你的应用仍然有时候会反应迟缓(sluggish)，停顿(hang)或者长时间卡死(frezze)，或者应用处理输入的数据花费时间过长。对于你的应用来说最槽糕的事情是出现&#8221;程序无响应(Application Not Responding)&#8221; (ANR)的警示框。</p>
+
+<p>在Android中，系统通过显示ANR警示框来保护程序的长时间无响应。对话框如下：</p>
+
+<p><img src="/images/anr.png" alt="anr" /></p>
+
+<p>此时，你的应用已经经历过一段时间的无法响应了，因此系统提供用户可以退出应用的选择。为你的程序提供良好的响应性是至关重要的，这样才能够避免系统为用户显示ANR的警示框。</p>
+
+<p>这节课描述了Android系统是如何判断一个应用不可响应的。这节课还会提供程序编写的指导原则，确保你的程序保持响应性。</p>
+
+<h2>是什么导致了ANR?(What Triggers ANR?)</h2>
+
+<p>通常来说，系统会在程序无法响应用户的输入事件时显示ANR。例如，如果一个程序在UI线程执行I/O操作(通常是网络请求或者是文件读写)，这样系统就无法处理用户的输入事件。或者是应用在UI线程花费了太多的时间用来建立一个复杂的在内存中的数据结构，又或者是在一个游戏程序的UI线程中执行了一个复杂耗时的计算移动的操作。确保那些计算操作高效是很重要的，不过即使是最高效的代码也是需要花时间执行的。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-training-performance-anr/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -283,61 +338,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-volley-simple-request/">Android Training - Volley(Lesson 1 - 发送简单的请求)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-24T09:00:00+08:00" pubdate data-updated="true">Jun 24<span>th</span>, 2014</time>
-        
-         | <a href="/android-training-volley-simple-request/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>使用Volley的方式是，你通过创建一个<code>RequestQueue</code>并传递<code>Request</code>对象给它。RequestQueue管理工作线程用来执行网络操作，从Cache中读取与写入数据，以及解析Http的响应内容。<code>Requests</code>执行raw responses的解析，Volley会把响应的数据分发给主线程。</p>
-
-<p>这节课会介绍如何使用<code>Volley.newRequestQueue</code>这个建立请求队列的方法来发送一个请求，在下一节课<a href="request-queue.html">建立一个请求队列Setting Up a RequestQueue</a>中会介绍你自己如何建立一个请求队列。</p>
-
-<p>这节课也会介绍如何添加一个请求到RequesutQueue以及如何取消一个请求。</p>
-
-<h2>Add the INTERNET Permission</h2>
-
-<p>为了使用Volley，你必须添加<code>android.permission.INTERNET</code>权限到你的manifest文件中。没有这个权限，你的app将无法访问网络。</p>
-
-<h2>Use newRequestQueue</h2>
-
-<p>Volley提供了一个简便的方法：<code>Volley.newRequestQueue</code>用来为你建立一个<code>RequestQueue</code>，使用默认值，并启动这个队列。例如：</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-volley-simple-request/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/5/">&larr; Older</a>
@@ -353,6 +353,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-performance-compute/">Android性能优化之运算篇</a>
+      </li>
     
       <li class="post">
         <a href="/android-performance-render/">Android性能优化之渲染篇</a>
@@ -382,18 +386,14 @@
         <a href="/android-training-wearable-app-voice-input/">Android Training - 创建可穿戴应用(3 - 添加语音能力)</a>
       </li>
     
-      <li class="post">
-        <a href="/android-training-wearable-app-layouts/">Android Training - 创建可穿戴应用(2 - 创建自定义的布局)</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (89)</a></li>
-  <li><a href='/blog/categories/android-deeper'>Android:deeper (4)</a></li>
+  <li><a href='/blog/categories/android'>Android (90)</a></li>
+  <li><a href='/blog/categories/android-deeper'>Android:deeper (5)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
