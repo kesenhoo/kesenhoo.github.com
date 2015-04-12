@@ -7,7 +7,8 @@ sidebar: false
 categories: Android Android:Deeper
 ---
 
-![](/images/android_performance_course_udacity.png)
+![](/images/android_performance_course_udacity.jpg)
+
 Google近期在Udacity上发布了[Android性能优化的在线课程](https://www.udacity.com/course/ud825)，分别从渲染，运算与内存，电量几个方面介绍了如何去优化性能，这些课程是Google之前在Youtube上发布的[Android性能优化典范](http://hukai.me/android-performance-patterns/)专题课程的细化与补充。
 
 下面是运算篇章的学习笔记，部分内容与前面的性能优化典范有重合，欢迎大家一起学习交流！

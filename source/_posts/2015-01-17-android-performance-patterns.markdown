@@ -142,7 +142,7 @@ Android系统里面有一个**Generational Heap Memory**的模型，系统会根
 
 ![](/images/memory_mode_generation.png)
 
-除了速度差异之外，执行GC操作的时候，任何线程的任何操作都会需要暂停，等待GC操作完成之后，其他操作才能够继续运行。
+除了速度差异之外，执行GC操作的时候，所有线程的任何操作都会需要暂停，等待GC操作完成之后，其他操作才能够继续运行。
 
 ![](/images/gc_event_thread_stop.png)
 
@@ -201,7 +201,7 @@ JVM的回收机制给开发人员带来很大的好处，不用时刻处理对�
 * **Heap Tool：**查看当前内存快照，便于对比分析哪些对象有可能是泄漏了的，请参考前面的Case。
 
 ## 12)Tool - Memory Monitor
-Android Studio中的Memory Monitor可以很好的帮组我们查看程序的内存使用情况。
+Android Studio中的Memory Monitor可以很好的帮助我们查看程序的内存使用情况。
 
 ![](/images/memory_monitor_overview.png)
 
