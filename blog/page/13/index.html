@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="章节概要： 虽然可以在onPause()的时候保存一些信息以免用户的使用进度被丢失，但是大多数Android app仍然是需要做保存数据的动作。大多数比较好的apps都需要保存用户的设置信息，而且有一些apps必须维护大量的文件信息与DB信息。 &hellip;">
+  <meta name="description" content="Android使用与其他平台类似的基于磁盘文件系统(disk-based file systems)。这节课会描述如何在Android文件系统上使用 File 的读写APIs。File 对象非常适合用来读写那种流式顺序的数据。例如，很适合用来读写图片文件或者是网络中交换的数据。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +80,49 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-training-saving-data-lesson-2/">Android Training - 保存数据(Lesson 2 - 保存到文件)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-11-29T20:37:00+08:00" pubdate data-updated="true">Nov 29<span>th</span>, 2012</time>
+        
+         | <a href="/android-training-saving-data-lesson-2/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Android使用与其他平台类似的基于磁盘文件系统(disk-based file systems)。这节课会描述如何在Android文件系统上使用 <a href="http://developer.android.com/reference/java/io/File.html">File</a> 的读写APIs。File 对象非常适合用来读写那种流式顺序的数据。例如，很适合用来读写图片文件或者是网络中交换的数据。这节课会演示在app中如何执行基本的文件操作任务。假定你已经对linux的文件系统与java.io中标准的I/O APIs有一定认识。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-training-saving-data-lesson-2/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -230,53 +273,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-building-a-dynamic-ui-with-fragments-lesson-2/">Android Training - 使用Fragments建立动态的UI(Lesson 2 - 新建一个Fragment)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-11-27T16:48:00+08:00" pubdate data-updated="true">Nov 27<span>th</span>, 2012</time>
-        
-         | <a href="/android-training-building-a-dynamic-ui-with-fragments-lesson-2/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><ul>
-<li>你可以把fragment当作activity的一部分，它有自己的lifecycle,它会接受自己的输入事件。你可以在activity运行的时候增加或者拿掉fragment。（类似子activity，你可以在不同的activity中重用fragment）。这节课演示如何使用support library来创建一个继承自 Fragment 的类。</li>
-<li>Note: 如果你的app决定跑在Level 11或者更高的系统上，你不需要添加这个support library,你可以使用那个版本的系统自带的API来实现。请注意这节课是专注于使用support library里面的API，这里面的API名称与那些本身就包含这些功能的平台上的名称有可能不一样。</li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-building-a-dynamic-ui-with-fragments-lesson-2/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/14/">&larr; Older</a>
@@ -292,6 +288,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-performance-memory/">Android性能优化之内存篇</a>
+      </li>
     
       <li class="post">
         <a href="/android-performance-compute/">Android性能优化之运算篇</a>
@@ -321,18 +321,14 @@
         <a href="/android-training-wearable-app-packaging/">Android Training - 创建可穿戴应用(4 - 打包可穿戴应用)</a>
       </li>
     
-      <li class="post">
-        <a href="/android-training-wearable-app-voice-input/">Android Training - 创建可穿戴应用(3 - 添加语音能力)</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (90)</a></li>
-  <li><a href='/blog/categories/android-deeper'>Android:deeper (5)</a></li>
+  <li><a href='/blog/categories/android'>Android (91)</a></li>
+  <li><a href='/blog/categories/android-deeper'>Android:deeper (6)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>

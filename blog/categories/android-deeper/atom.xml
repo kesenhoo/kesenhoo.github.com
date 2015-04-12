@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android:Deeper | 胡凯]]></title>
   <link href="http://hukai.me/blog/categories/android-deeper/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2015-04-12T13:54:02+08:00</updated>
+  <updated>2015-04-12T16:41:52+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -14,12 +14,130 @@
 
   
   <entry>
+    <title type="html"><![CDATA[Android性能优化之内存篇]]></title>
+    <link href="http://hukai.me/android-performance-memory/"/>
+    <updated>2015-04-12T14:51:00+08:00</updated>
+    <id>http://hukai.me/android-performance-memory</id>
+    <content type="html"><![CDATA[<p><img src="/images/android_performance_course_udacity.jpg" alt="" /></p>
+
+<p>Google近期在Udacity上发布了<a href="https://www.udacity.com/course/ud825">Android性能优化的在线课程</a>，分别从渲染，运算与内存，电量几个方面介绍了如何去优化性能，这些课程是Google之前在Youtube上发布的<a href="http://hukai.me/android-performance-patterns/">Android性能优化典范</a>专题课程的细化与补充。</p>
+
+<p>下面是内存篇章的学习笔记，部分内容与前面的性能优化典范有重合，欢迎大家一起学习交流！</p>
+
+<h3>1)Memory, GC, and Performance</h3>
+
+<p>众所周知，与C/C++需要通过手动编码来申请以及释放内存有所不同，Java拥有GC的机制。Android系统里面有一个<strong>Generational Heap Memory</strong>的模型，系统会根据内存中不同的内存数据类型分别执行不同的GC操作。例如，最近刚分配的对象会放在Young Generation区域，这个区域的对象通常都是会快速被创建并且很快被销毁回收的，同时这个区域的GC操作速度也是比Old Generation区域的GC操作速度更快的。</p>
+
+<p><img src="/images/memory_mode_generation.png" alt="" /></p>
+
+<p>除了速度差异之外，执行GC操作的时候，所有线程的任何操作都会需要暂停，等待GC操作完成之后，其他操作才能够继续运行。</p>
+
+<!-- More -->
+
+
+<p><img src="/images/gc_event_thread_stop.png" alt="" /></p>
+
+<p>通常来说，单个的GC并不会占用太多时间，但是大量不停的GC操作则会显著占用帧间隔时间(16ms)。如果在帧间隔时间里面做了过多的GC操作，那么自然其他类似计算，渲染等操作的可用时间就变得少了。</p>
+
+<h3>2)Memory Monitor Walkthrough</h3>
+
+<p>Android Studio中的Memory Monitor可以很好的帮助我们查看程序的内存使用情况。</p>
+
+<p><img src="/images/memory_monitor_overview.png" alt="" /></p>
+
+<p><img src="/images/memory_monitor_free_allocation.png" alt="" /></p>
+
+<p><img src="/images/memory_monitor_gc_event.png" alt="" /></p>
+
+<h3>3)Memory Leaks</h3>
+
+<p>内存泄漏表示的是不再用到的对象因为被错误引用而无法进行回收。</p>
+
+<p><img src="/images/android_perf_memory_leak.png" alt="" /></p>
+
+<p>发生内存泄漏会导致Memory Generation中的剩余可用Heap Size越来越小，这样会导致频繁触发GC，更进一步引起性能问题。</p>
+
+<p>举例内存泄漏，下面<code>init()</code>方法来自某个自定义View：</p>
+
+<p>```java</p>
+
+<pre><code>private void init() {
+ListenerCollector collector = new ListenerCollector();
+collector.setListener(this, mListener);
+</code></pre>
+
+<p>}
+```</p>
+
+<p>上面的例子容易存在内存泄漏，如果activity因为设备翻转而重新创建，自定义的View会自动重新把新创建出来的mListener给绑定到ListenerCollector中，但是当activity被销毁的时候，mListener却无法被回收了。</p>
+
+<h3>4)Heap Viewer Walkthrough</h3>
+
+<p>下图演示了Android Tools里面的Heap Viewer的功能，我们可以看到当前进程中的Heap Size的情况，分别有哪些类型的数据，占比是多少。</p>
+
+<p><img src="/images/android_perf_memory_heap_viewer.png" alt="" /></p>
+
+<h3>5)Understanding Memory Churn</h3>
+
+<p><strong>Memory Churn内存抖动</strong>，内存抖动是因为在短时间内大量的对象被创建又马上被释放。瞬间产生大量的对象会严重占用Young Generation的内存区域，当达到阀值，剩余空间不够的时候，会触发GC从而导致刚产生的对象又很快被回收。即使每次分配的对象占用了很少的内存，但是他们叠加在一起会增加Heap的压力，从而触发更多其他类型的GC。这个操作有可能会影响到帧率，并使得用户感知到性能问题。</p>
+
+<p><img src="/images/gc_overtime.png" alt="" /></p>
+
+<p>解决上面的问题有简洁直观方法，如果你在<strong>Memory Monitor</strong>里面查看到短时间发生了多次内存的涨跌，这意味着很有可能发生了内存抖动。</p>
+
+<p><img src="/images/memory_monitor_gc.png" alt="" /></p>
+
+<p>同时我们还可以通过<strong>Allocation Tracker</strong>来查看在短时间内，同一个栈中不断进出的相同对象。这是内存抖动的典型信号之一。</p>
+
+<p>当你大致定位问题之后，接下去的问题修复也就显得相对直接简单了。例如，你需要避免在for循环里面分配对象占用内存，需要尝试把对象的创建移到循环体之外，自定义View中的onDraw方法也需要引起注意，每次屏幕发生绘制以及动画执行过程中，onDraw方法都会被调用到，避免在onDraw方法里面执行复杂的操作，避免创建对象。对于那些无法避免需要创建对象的情况，我们可以考虑对象池模型，通过对象池来解决频繁创建与销毁的问题，但是这里需要注意结束使用之后，需要手动释放对象池中的对象。</p>
+
+<h3>6)Allocation Tracker</h3>
+
+<p>关于Allocation Tracker工具的使用，不展开了，参考下面的链接：</p>
+
+<ul>
+<li><a href="http://developer.android.com/tools/debugging/ddms.html#alloc">http://developer.android.com/tools/debugging/ddms.html#alloc</a></li>
+<li><a href="http://android-developers.blogspot.com/2009/02/track-memory-allocations.html">http://android-developers.blogspot.com/2009/02/track-memory-allocations.html</a></li>
+</ul>
+
+
+<h3>7)Improve Your Code To Reduce Churn</h3>
+
+<p>下面演示一个例子，如何通过修改代码来避免内存抖动。优化之前的内存检测图：</p>
+
+<p><img src="/images/android_perf_memory_churn_1.png" alt="" /></p>
+
+<p>定位代码之后，修复了String拼接的问题：</p>
+
+<p><img src="/images/android_perf_memory_churn_code.png" alt="" /></p>
+
+<p>优化之后的内存监测图：</p>
+
+<p><img src="/images/android_perf_memory_churn_2.png" alt="" /></p>
+
+<h3>8)Recap</h3>
+
+<p>上面提到了三种测量内存的工具，下面再简要概括一下他们各自的特点：</p>
+
+<ul>
+<li><strong>Memory Monitor：</strong>跟踪整个app的内存变化情况。</li>
+<li><strong>Heap Viewer：</strong>查看当前内存快照，便于对比分析哪些对象有可能发生了泄漏。</li>
+<li><strong>Allocation Tracker：</strong>追踪内存对象的来源。</li>
+</ul>
+
+
+<p><strong>Notes:</strong>关于更多内存优化，这里还有一篇文章，请点击<a href="http://hukai.me/android-training-managing_your_app_memory/">这里</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Android性能优化之运算篇]]></title>
     <link href="http://hukai.me/android-performance-compute/"/>
     <updated>2015-04-12T13:50:00+08:00</updated>
     <id>http://hukai.me/android-performance-compute</id>
-    <content type="html"><![CDATA[<p><img src="/images/android_performance_course_udacity.png" alt="" />
-Google近期在Udacity上发布了<a href="https://www.udacity.com/course/ud825">Android性能优化的在线课程</a>，分别从渲染，运算与内存，电量几个方面介绍了如何去优化性能，这些课程是Google之前在Youtube上发布的<a href="http://hukai.me/android-performance-patterns/">Android性能优化典范</a>专题课程的细化与补充。</p>
+    <content type="html"><![CDATA[<p><img src="/images/android_performance_course_udacity.jpg" alt="" /></p>
+
+<p>Google近期在Udacity上发布了<a href="https://www.udacity.com/course/ud825">Android性能优化的在线课程</a>，分别从渲染，运算与内存，电量几个方面介绍了如何去优化性能，这些课程是Google之前在Youtube上发布的<a href="http://hukai.me/android-performance-patterns/">Android性能优化典范</a>专题课程的细化与补充。</p>
 
 <p>下面是运算篇章的学习笔记，部分内容与前面的性能优化典范有重合，欢迎大家一起学习交流！</p>
 
@@ -97,8 +215,9 @@ Google近期在Udacity上发布了<a href="https://www.udacity.com/course/ud825"
     <link href="http://hukai.me/android-performance-render/"/>
     <updated>2015-04-11T22:16:00+08:00</updated>
     <id>http://hukai.me/android-performance-render</id>
-    <content type="html"><![CDATA[<p><img src="/images/android_performance_course_udacity.png" alt="" />
-Google近期在Udacity上发布了<a href="https://www.udacity.com/course/ud825">Android性能优化的在线课程</a>，目前有三个篇章，分别从渲染，运算与内存，电量三个方面介绍了如何去优化性能，这些课程是Google之前在Youtube上发布的<a href="http://hukai.me/android-performance-patterns/">Android性能优化典范</a>专题课程的细化与补充。</p>
+    <content type="html"><![CDATA[<p><img src="/images/android_performance_course_udacity.jpg" alt="" /></p>
+
+<p>Google近期在Udacity上发布了<a href="https://www.udacity.com/course/ud825">Android性能优化的在线课程</a>，目前有三个篇章，分别从渲染，运算与内存，电量三个方面介绍了如何去优化性能，这些课程是Google之前在Youtube上发布的<a href="http://hukai.me/android-performance-patterns/">Android性能优化典范</a>专题课程的细化与补充。</p>
 
 <p>下面是渲染篇章的学习笔记，部分内容和前面的性能优化典范有重合，欢迎大家一起学习交流！</p>
 
@@ -398,7 +517,7 @@ Google近期在Udacity上发布了<a href="https://www.udacity.com/course/ud825"
 
 <p><img src="/images/memory_mode_generation.png" alt="" /></p>
 
-<p>除了速度差异之外，执行GC操作的时候，任何线程的任何操作都会需要暂停，等待GC操作完成之后，其他操作才能够继续运行。</p>
+<p>除了速度差异之外，执行GC操作的时候，所有线程的任何操作都会需要暂停，等待GC操作完成之后，其他操作才能够继续运行。</p>
 
 <p><img src="/images/gc_event_thread_stop.png" alt="" /></p>
 
@@ -467,7 +586,7 @@ Google近期在Udacity上发布了<a href="https://www.udacity.com/course/ud825"
 
 <h2>12)Tool - Memory Monitor</h2>
 
-<p>Android Studio中的Memory Monitor可以很好的帮组我们查看程序的内存使用情况。</p>
+<p>Android Studio中的Memory Monitor可以很好的帮助我们查看程序的内存使用情况。</p>
 
 <p><img src="/images/memory_monitor_overview.png" alt="" /></p>
 
@@ -787,261 +906,6 @@ Google近期在Udacity上发布了<a href="https://www.udacity.com/course/ud825"
 
 <p>=====
 学习自：<a href="http://source.android.com/devices/graphics/architecture.html">http://source.android.com/devices/graphics/architecture.html</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Deeper(00) - Touch事件分发响应机制]]></title>
-    <link href="http://hukai.me/android-deeper-touch-event-dispatch-process/"/>
-    <updated>2014-04-05T13:13:00+08:00</updated>
-    <id>http://hukai.me/android-deeper-touch-event-dispatch-process</id>
-    <content type="html"><![CDATA[<h2>1)概述</h2>
-
-<p>Android的TouchEvent通常包含三个动作,ACTION_DOWN,ACTION_MOVE与ACTION_UP。发出的顺序是DOWN->MOVE->MOVE->...->UP(注意MOVE事件是否能够被触发取决于操作手势里面是否包含了移动的动作)。</p>
-
-<p>消息分发流程，从上到下，从父到子：Activity->ViewGroup1->ViewGroup1的子ViewGroup2->...->Target View<br/>
-消息响应流程，从下到上，从子到父：Target View->...->ViewGroup1的子ViewGroup2->ViewGroup1->Activity</p>
-
-<ul>
-<li><p><strong>public boolean dispatchTouchEvent(MotionEvent ev);</strong><br/>
-事件分发处理函数，通常会在Activity层根据UI的显示情况，把事件传递给相应的ViewGroup。下面的演示代码中，为了方便模拟，会直接return true，解说中称之为“丢弃”。(因为事件实际上没有传递给任何组件，没有被消费，而且是主动的行为，故称之为丢弃)</p></li>
-<li><p><strong>public boolean onInterceptTouchEvent(MotionEvent ev);</strong><br/>
-对分发的事件进行拦截，注意拦截ACION_DOWN与其他ACTION的差异。<br/>
-第1种情况：如果ACTION_DOWN的事件没有被拦截，顺利找到了TargetView，那么后续的MOVE与UP都能够下发。如果后续的MOVE与UP下发时还有继续拦截的话，事件只能传递到拦截层，并且发出ACTION_CANCEL。<br/>
-第2种情况：如果ACITON_DOWN的事件下发时被拦截，导致没有找到TargetView，那么后续的MOVE与UP都无法向下派发了，在Activity层就终止了传递。</p></li>
-<li><p><strong>public boolean onTouchEvent(MotionEvent ev);</strong><br/>
-响应处理函数,如果有设置对应listener的话,这里还会与onTouch,onClick,onLongClick有关联。具体执行顺序是onTouch()->onTouchEvent()->onClick()->onLongClick()。是否能够顺序执行，取决于每个方法的返回值是true还是false。具体这里不展开说。</p></li>
-</ul>
-
-
-<p><strong>强关注点：dispatch与intercept的差异，ACTION_DOWN与其他ACITON会对寻找target组件带来差异，而是否寻找到Target组件对整个流程有着重大的的影响。</strong></p>
-
-<!-- More -->
-
-
-<h2>2)dispatchTouchEvent()的源码解读</h2>
-
-<p>```java Android 4.4 ViewGroup.dispatchTouchEvent()源码解读
-@Override
-public boolean dispatchTouchEvent(MotionEvent ev) {</p>
-
-<pre><code>......
-boolean handled = false;
-......
-final int action = ev.getAction();
-final int actionMasked = action &amp; MotionEvent.ACTION_MASK;
-
-// 1)处理初始的ACTION_DOWN
-if (actionMasked == MotionEvent.ACTION_DOWN) {
-    // 把ACTION_DOWN作为一个Touch手势的始点，清除之前的手势状态。
-    cancelAndClearTouchTargets(ev); //清除前一个手势，*关键操作:mFirstTouchTarget重置为null*
-    resetTouchState(); //重置Touch状态标识
-}
-
-// 2)检查是否会被拦截
-final boolean intercepted;
-if (actionMasked == MotionEvent.ACTION_DOWN || mFirstTouchTarget != null) {
-    // 是ACTION_DOWN的事件，或者mFirstTouchTarget不为null(已经找到能够接收touch事件的目标组件)
-    final boolean disallowIntercept = (mGroupFlags &amp; FLAG_DISALLOW_INTERCEPT) != 0; 
-    // 判断禁止拦截的FLAG，因为requestDisallowInterceptTouchEvent(boolean disallowIntercept)方法可以禁止执行是否需要拦截的判断
-    if (!disallowIntercept) {
-        // 禁止拦截的FLAG为false，说明可以执行拦截判断，则执行此ViewGroup的onInterceptTouchEvent方法
-        intercepted = onInterceptTouchEvent(ev); // 此方法默认返回false，如果想修改默认的行为，需要override此方法，修改返回值。
-        ev.setAction(action);
-    } else {
-        // 禁止拦截的FLAG为ture，说明没有必要去执行是否需要拦截了，这个事件是无法拦截的，能够顺利通过，所以设置拦截变量为false
-        intercepted = false; 
-    }
-} else {
-    // 当不是ACTION_DOWN事件并且mFirstTouchTarget为null(意味着没有touch的目标组件)时，这个ViewGroup应该继续执行拦截的操作。
-    intercepted = true;
-}
-// 通过前面的逻辑处理，得到了是否需要进行拦截的变量值
-
-final boolean canceled = resetCancelNextUpFlag(this) || actionMasked == MotionEvent.ACTION_CANCEL;
-final boolean split = (mGroupFlags &amp; FLAG_SPLIT_MOTION_EVENTS) != 0;
-TouchTarget newTouchTarget = null;
-boolean alreadyDispatchedToNewTouchTarget = false;
-if (!canceled &amp;&amp; !intercepted) {
-    // 不是ACTION_CANCEL并且拦截变量为false
-    if (actionMasked == MotionEvent.ACTION_DOWN) {
-        // 在ACTION_DOWN时去寻找这次DOWN事件新出现的TouchTarget
-        final int actionIndex = ev.getActionIndex(); // always 0 for down
-
-        .....
-
-        final int childrenCount = mChildrenCount;
-        if (newTouchTarget == null &amp;&amp; childrenCount != 0) {
-            // 根据触摸的坐标寻找能够接收这个事件的子组件
-            final float x = ev.getX(actionIndex);
-            final float y = ev.getY(actionIndex);
-
-            final View[] children = mChildren;
-            // 逆序遍历所有子组件
-            for (int i = childrenCount - 1; i &gt;= 0; i--) {
-                final int childIndex = i;
-                final View child = children[childIndex];
-                // 寻找可接收这个事件并且组件区域内包含点击坐标的子View
-                if (!canViewReceivePointerEvents(child) || !isTransformedTouchPointInView(x, y, child, null)) {
-                    continue;
-                }
-
-                newTouchTarget = getTouchTarget(child); // 找到了符合条件的子组件，赋值给newTouchTarget
-
-                ......
-
-                // 把ACTION_DOWN事件传递给子组件进行处理
-                if (dispatchTransformedTouchEvent(ev, false, child, idBitsToAssign)) {
-                    // 如果此子ViewGroup消费了这个touch事件
-                    mLastTouchDownTime = ev.getDownTime();
-                    mLastTouchDownIndex = childIndex;
-                    mLastTouchDownX = ev.getX();
-                    mLastTouchDownY = ev.getY();
-                    // 则为mFirstTouchTarget赋值为newTouchTarget，此子组件成为新的touch事件的起点
-                    newTouchTarget = addTouchTarget(child, idBitsToAssign); 
-                    alreadyDispatchedToNewTouchTarget = true;
-                    break;
-                }
-            }
-        }
-        ......
-    }
-}
-
-// 经过前面的ACTION_DOWN的处理，有两种情况。
-if (mFirstTouchTarget == null) {
-    // 情况1：(mFirstTouchTarget为null) 没有找到能够消费touch事件的子组件或者是touch事件被拦截了，
-    // 那么在ViewGroup的dispatchTransformedTouchEvent方法里面，处理Touch事件则和普通View一样，
-    // 自己无法消费，调用super.dispatchOnTouchEvent()把事件回递给父ViewGroup进行处理
-    handled = dispatchTransformedTouchEvent(ev, canceled, null, TouchTarget.ALL_POINTER_IDS);
-} else {
-    // 情况2：(mFirstTouchTarget!=null) 找到了能够消费touch事件的子组件，那么后续的touch事件都可以传递到子View
-    TouchTarget target = mFirstTouchTarget;
-    // (这里为了理解简单，省略了一个Target List的概念，有需要的同学再查看源码)
-    while (target != null) {
-        if (alreadyDispatchedToNewTouchTarget &amp;&amp; target == newTouchTarget) {
-            // 如果前面利用ACTION_DOWN事件寻找符合接收条件的子组件的同时消费掉了ACTION_DOWN事件，这里直接返回true
-            handled = true;
-        } else {
-            final boolean cancelChild = resetCancelNextUpFlag(target.child) || intercepted;
-            // 对于非ACTION_DOWN事件，则继续传递给目标子组件进行处理(注意这里的非ACTION_DOWN事件已经不需要再判断是否拦截)
-            if (dispatchTransformedTouchEvent(ev, cancelChild, target.child, target.pointerIdBits)) {
-                // 如果target子组件进行处理，符合某些条件的话，会传递ACTION_CANCEL给target子组件
-                // 条件是：如果ACTION_DOWN时没有被拦截，而后面的touch事件被拦截，则需要发送ACTION_CANCEL给target子组件
-                handled = true;
-            }
-            ......
-        }
-    }
-}
-
-if (canceled || actionMasked == MotionEvent.ACTION_UP) {
-    // 如果是ACTION_CANCEL或者ACTION_UP，重置Touch状态标识，mFirstTouchTarget赋值为null，后面的Touch事件都无法派发给子View
-    resetTouchState();
-}
-......
-
-return handled;
-</code></pre>
-
-<p>}
-```</p>
-
-<h2>3)dispatchTouchEvent()流程图</h2>
-
-<p><img src="/images/articles/dispatchtouchevent_process.jpg" title="演示ViewGroup中的dispatchTouchEvent的流程" alt="dispatchtouchevent_process.jpg" /></p>
-
-<h2>4)代码举例说明</h2>
-
-<p><img src="/images/articles/dispatchtouchevent_demo.jpg" title="Demo的layout层级" alt="dispatchtouchevent_demo.jpg" /></p>
-
-<p><a href="https://github.com/kesenhoo/TouchEventDemo.git">Demo Source Code</a>下面是截取的片段
-```java
-@Override
-public boolean dispatchTouchEvent(MotionEvent ev) {</p>
-
-<pre><code>switch (ev.getAction()) {
-    case MotionEvent.ACTION_DOWN:
-        Log.d(TAG, "[dispatchTouchEvent] -&gt; ACTION_DOWN");
-        break;
-        //Log.i(TAG, "[dispatchTouchEvent] -&gt; ACTION_DOWN, return true");
-        //return true;
-    case MotionEvent.ACTION_MOVE:
-        Log.d(TAG, "[dispatchTouchEvent] -&gt; ACTION_MOVE");
-        break;
-        //Log.i(TAG, "[dispatchTouchEvent] -&gt; ACTION_MOVE, return true");
-        //return true;
-    case MotionEvent.ACTION_UP:
-        Log.d(TAG, "[dispatchTouchEvent] -&gt; ACTION_UP");
-        break;
-    case MotionEvent.ACTION_CANCEL:
-        Log.d(TAG, "[dispatchTouchEvent] -&gt; ACTION_CANCEL");
-        break;
-    default:
-        break;
-}
-boolean superReturn = super.dispatchTouchEvent(ev);
-Log.i(TAG, "[dispatchTouchEvent] return super. = " + superReturn);
-return superReturn;
-</code></pre>
-
-<p>}
-```
-下面演示的每一种情况，操作均为点击中间的Button，然后松开。请仔细看下面的案例，里面均有对应的解释。</p>
-
-<h3>Case 0:没有任何的分发丢弃，也没有任何的拦截</h3>
-
-<p><img src="/images/articles/Touch_Case_0_All_Normal.png" title="CASE 0" alt="Touch_Case_0_All_Normal.png" /></p>
-
-<h3>Case 1:Activity层的dispatch函数对ACTION_DOWN进行return true.</h3>
-
-<p><img src="/images/articles/Touch_Case_1_Activity_Dispatch_Down_Return_True.png" title="CASE 1" alt="Touch_Case_1_Activity_Dispatch_Down_Return_True.png" /></p>
-
-<h3>Case 2:ParentLayout层的dispatch函数对ACTION_DOWN进行return true.</h3>
-
-<p><img src="/images/articles/Touch_Case_2_Parent_Dispatch_Down_Return_True.png" title="CASE 2" alt="Touch_Case_2_Parent_Dispatch_Down_Return_True.png" /></p>
-
-<p>因为ChildLayout层的dispatch函数对ACITON_DOWN进行return true和在activity层,ParentLayout层是类似的逻辑，因为都没有找到Target组件，又没有拦截的因素影响，所以后续的MOVE与UP都只传递到DOWN被return true的那一层截至，然后都回传，也都没有被消费掉。(注意发生在ChildLayout层的return true与ParentLayout层的差异在于：回传时，只有return层与activity层才可以接收到onTouchEvent()的回调，但是默认都无法消费)。</p>
-
-<h3>Case 3:Activity层的dispatch函数对ACTION_MOVE进行return true.</h3>
-
-<p><img src="/images/articles/Touch_Case_3_Activity_Dispatch_Move_Return_True.png" title="CASE 3" alt="Touch_Case_2_Activity_Dispatch_Move_Return_True.png" /></p>
-
-<p>因为ParentLayout层的dispatch函数对ACITON_MOVE进行return true和在activity层是类似的道理，不做新的分析</p>
-
-<h3>Case 4:ParentLayout层的intercept函数对ACTION_DOWN进行return true.</h3>
-
-<p><img src="/images/articles/Touch_Case_4_Parent_Intercept_Down_Return_True.png" title="CASE 4" alt="Touch_Case_4_Parent_Intercept_Down_Return_True.png" /></p>
-
-<h3>Case 5:ChildLayout层的intercept函数对ACTION_DOWN进行return true.</h3>
-
-<p><img src="/images/articles/Touch_Case_5_Child_Intercept_Down_Return_True.png" title="CASE 5" alt="Touch_Case_5_Child_Intercept_Down_Return_True.png" /></p>
-
-<h3>Case 6:ChildLayout层的intercept函数对ACTION_MOVE进行return true.</h3>
-
-<p><img src="/images/articles/Touch_Case_6_Child_Intercept_Move_Return_True.png" title="CASE 6" alt="Touch_Case_6_Child_Intercept_Move_Return_True.png" /></p>
-
-<h2>5)写在最后</h2>
-
-<ul>
-<li>对于dispatch分发某个事件的情况：
-
-<ul>
-<li>如果是ACTION_DOWN被return true,那么在哪一层return的，后续的MOVE与UP都只传递到该层，然后回传(<strong>Case 1,2</strong>)(注意在回传的过程中只有在return层与activity层才会触发onTouchEvent，中间若是有其他层，均会被跳过。这一规律暂时没有找到比较有力的解释，需要查看更多的源码。)</li>
-<li>如果非ACTION_DOWN被return true,意味着DOWN事件正常被下发并找到Target组件，那么后续只有被return的事件会无法正常下发，并只传递到return层，没有return的事件还能够正常下方到Target组件并被Target消费。(<strong>Case 3</strong>)</li>
-</ul>
-</li>
-<li>对于intercept拦截某个事件的情况：
-
-<ul>
-<li>如果ACTION_DOWN被拦截，无论拦截发生在哪一层，都会导致Target组件都无法找到，那么后续的MOVE与UP事件都只在Activity层处理，不会下发(<strong>Case 4,5</strong>)。</li>
-<li>如果ACTION_DOWN没被拦截，此时可以找到Target组件，DOWN事件是正常被消费。后续的MOVE如果被拦截，会对子组件触发CANCEL的事件，并且UP事件只能传递到拦截MOVE的那一层，无法消费并返回(<strong>Case 6</strong>)。Ps:因为Case 6演示的是在ChildLayout层对MOVE进行拦截，所以看到的效果是Button直接收到了CANCEL,实际上如果是ParentLayout对MOVE进行拦截，那么CANCEL事件需要经过ChildLayout(如果有需要的话，可以在这里继续拦截CANCEL)，最终CANCEL事件都是由Button进行消费。</li>
-</ul>
-</li>
-</ul>
-
-
-<p><strong>经过上面的描述，对Android的Touch事件传递机制应该有更深入的了解，理解错误或者有偏差的地方，欢迎提出一起讨论，谢谢！</strong></p>
 ]]></content>
   </entry>
   

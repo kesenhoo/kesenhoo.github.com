@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="章节概要 这一章节会介绍一些通用的用来处理与加载Bitmap对象的方法，这些技术能够使得不会卡到程序的UI并且避免程序消耗过度内存.如果你不注意这些，Bitmaps会迅速的消耗你可用的内存而导致程序crash,出现下面的异常:java.lang.OutofMemoryError: bitmap &hellip;">
+  <meta name="description" content="在上一课中有介绍一系列的BitmapFactory.decode* 方法，当数据源是网络或者是磁盘时(或者是任何实际源不在内存的)，这些方法都不应该在main UI 线程中执行。那些情况下加载数据是不可以预知的，它依赖于许多因素(从网络或者硬盘读取数据的速度, 图片的大小, CPU的速度, etc &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +80,51 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-training-displaying-bitmaps-efficiently-lesson-2/">Android Training - 高效地显示Bitmap(Lesson 2 - 在UI线程之外处理Bitmaps)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-23T19:55:00+08:00" pubdate data-updated="true">Apr 23<span>rd</span>, 2012</time>
+        
+         | <a href="/android-training-displaying-bitmaps-efficiently-lesson-2/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>在上一课中有介绍一系列的BitmapFactory.decode* 方法，当数据源是网络或者是磁盘时(或者是任何实际源不在内存的)，这些方法都不应该在main UI 线程中执行。那些情况下加载数据是不可以预知的，它依赖于许多因素(从网络或者硬盘读取数据的速度, 图片的大小, CPU的速度, etc.)。如果其中任何一个任务卡住了UI thread, 系统会出现ANR的错误。</p>
+
+<p>这一节课会介绍如何使用 AsyncTask 在后台线程中处理bitmap并且演示了如何处理并发(concurrency)的问题。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-training-displaying-bitmaps-efficiently-lesson-2/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -237,51 +282,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-share-simple-data-lesson-3/">Android Training - 分享简单数据(Lesson 3 - 在Actionbar上添加分享功能)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-31T19:16:00+08:00" pubdate data-updated="true">Mar 31<span>st</span>, 2012</time>
-        
-         | <a href="/android-training-share-simple-data-lesson-3/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>这一课会介绍在ActionBar 中添加一个高效率且比较友好的Share功能，会使用到ActionProvider(在Android 4.0上才被引进)。它会handle出现share功能的appearance与hehavior。在ShareActionProvider的例子里面，你之需要提供一个share intent，剩下的就交给<a href="https://developer.android.com/reference/android/widget/ShareActionProvider.html">ShareActionProvider</a>来做。</p>
-
-<p><img src="/images/articles/actionbar-shareaction.png" title="Figure 1. The ShareActionProvider in the Gallery app." alt="actionbar-shareaction.png" /></p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-share-simple-data-lesson-3/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/17/">&larr; Older</a>
@@ -297,6 +297,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-performance-memory/">Android性能优化之内存篇</a>
+      </li>
     
       <li class="post">
         <a href="/android-performance-compute/">Android性能优化之运算篇</a>
@@ -326,18 +330,14 @@
         <a href="/android-training-wearable-app-packaging/">Android Training - 创建可穿戴应用(4 - 打包可穿戴应用)</a>
       </li>
     
-      <li class="post">
-        <a href="/android-training-wearable-app-voice-input/">Android Training - 创建可穿戴应用(3 - 添加语音能力)</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (90)</a></li>
-  <li><a href='/blog/categories/android-deeper'>Android:deeper (5)</a></li>
+  <li><a href='/blog/categories/android'>Android (91)</a></li>
+  <li><a href='/blog/categories/android-deeper'>Android:deeper (6)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>

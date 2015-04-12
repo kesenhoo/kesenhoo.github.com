@@ -9,8 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content=" Hi.This is my first post. By markdown.
-">
+  <meta name="description" content="管理Activity生命周期 当用户进入，退出，回到你的App，在程序中的Activity 实例都经历了生命周期中的不同状态。例如，当你的activity第一次启动的时候，它来到系统的前台，开始接受用户的焦点。在此期间，Android系统调用了一系列的生命周期中的方法。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -19,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://hukai.me/blog/page/11/">
+  <link rel="canonical" href="http://hukai.me/blog/page/24/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
 
@@ -87,7 +86,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/hi/">Hello, World</a></h1>
+      <h1 class="entry-title"><a href="/android-training-managing-the-activity-lifecycle-lesson-0/">Android Training - 详解Activity声明周期(Lesson 0 - 章节概要)</a></h1>
     
     
       <p class="meta">
@@ -103,176 +102,30 @@
   
 
 
-<time datetime="2012-12-20T00:57:00+08:00" pubdate data-updated="true">Dec 20<span>th</span>, 2012</time>
+<time datetime="2012-03-07T18:34:00+08:00" pubdate data-updated="true">Mar 7<span>th</span>, 2012</time>
         
-         | <a href="/hi/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><img src="/images/articles/hello_world.jpg"></p>
-
-<p>Hi.This is my first post. <strong>By markdown.</strong></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-capturing-photos-lesson-3/">Android Training - 捕获照片(Lesson 3 - 直接操控相机)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-12-18T23:59:00+08:00" pubdate data-updated="true">Dec 18<span>th</span>, 2012</time>
-        
-         | <a href="/android-training-capturing-photos-lesson-3/#disqus_thread">Comments</a>
+         | <a href="/android-training-managing-the-activity-lifecycle-lesson-0/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>在这一节课，我们会讨论如何通过使用framework的APIs来直接控制相机的硬件。直接控制设备的相机，相比起拍照与录像来说，要复杂一些。然而，如果你想要创建一个专业的特殊的相机程序，这节课会演示这部分内容。</p>
+  <div class="entry-content"><h2>管理Activity生命周期</h2>
 
-<h2>Open the Camera Object(打开相机对象)</h2>
+<p>当用户进入，退出，回到你的App，在程序中的<a href="http://developer.android.com/reference/android/app/Activity.html">Activity</a> 实例都经历了生命周期中的不同状态。例如，当你的activity第一次启动的时候，它来到系统的前台，开始接受用户的焦点。在此期间，Android系统调用了一系列的生命周期中的方法。如果用户执行了启动另一个activity或者切换到另一个app的操作, 系统又会调用一些生命周期中的方法。</p>
 
-<p>获取到 Camera 对象是直接控制Camera的第一步。正如Android自带的相机程序一样，推荐访问Camera的方式是在onCreate方法里面另起一个Thread来打开Camera。这个方法可以避免因为打开工作比较费时而引起ANR。在一个更加基础的实现方法里面，打开Camera的动作被延迟到onResume()方法里面去执行，这样使得代码能够更好的重用，并且保持控制流程不会复杂化。(原文是：In a more basic implementation, opening the camera can be deferred to the onResume() method to facilitate code reuse and keep the flow of control simple.)</p>
+<p>在生命周期的回调方法里面，你可以声明当用户离开或者重新进入这个Activity所需要执行的操作。例如, 如果你建立了一个streaming video player, 在用户切换到另外一个app的时候，你应该暂停video 并终止网络连接。当用户返回时，你可以重新建立网络连接并允许用户从同样的位置恢复播放。</p>
+
+<p>这一章会介绍一些<a href="http://developer.android.com/reference/android/app/Activity.html">Activity</a>中重要的生命周期回调方法，如何使用那些方法使得程序符合用户的期望且在activity不需要的时候不会导致系统资源的浪费。</p>
+
+<p><strong>完整的Demo示例</strong>：<a href="http://developer.android.com/shareables/training/ActivityLifecycle.zip">ActivityLifecycle.zip</a></p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/android-training-capturing-photos-lesson-3/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-capturing-photos-lesson-2/">Android Training - 捕获照片(Lesson 2 - 简单的录像动作)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-12-18T23:21:00+08:00" pubdate data-updated="true">Dec 18<span>th</span>, 2012</time>
-        
-         | <a href="/android-training-capturing-photos-lesson-2/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>这节课会介绍如何使用现有的Camera程序来录制一个视频。和拍照一样，我们没有必要去重新发明录像程序。大多数的Android程序都有自带Camera来进行录像。(<em>这一课的内容大多数与前面一课类似，简要带过，一些细节不赘述了</em>)</p>
-
-<h2>Request Camera Permission [请求权限]</h2>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;manifest</span> <span class="err">...</span> <span class="nt">&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;uses-feature</span> <span class="na">android:name=</span><span class="s">&quot;android.hardware.camera&quot;</span> <span class="nt">/&gt;</span>
-</span><span class='line'>    ...
-</span><span class='line'><span class="err">&lt;</span>/manifest ... &gt;
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>与上一课的拍照一样，你可以在启动Camera之前，使用hasSystemFeature(PackageManager.FEATURE_CAMERA).来检查是否存在Camera。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-capturing-photos-lesson-2/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-capturing-photos-lesson-1/">Android Training - 捕获照片(Lesson 1 - 简单的拍照动作)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-12-18T22:21:00+08:00" pubdate data-updated="true">Dec 18<span>th</span>, 2012</time>
-        
-         | <a href="/android-training-capturing-photos-lesson-1/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>在多媒体流行之前，世界是沉闷(dismal)并且特色稀少(featureless)的。还记得Gopher? (<em>Gopher是计算机上的一个工具软件，是Internet提供的一种由菜单式驱动的信息查询工具，采用客户机/服务器模式</em>)。因为你的app将要成为你的用户的生活的一部分，请赋予你的app能够把用户生活装进去的功能。使用内置的Camera，你的程序可以使得用户扩展（augment）他们所看的事物，生成唯一的头像，查找角落的人偶（zombies）,或者仅仅是分享他们的经验。</p>
-
-<p>这一章节，会教你如何简单的使用已经存在的Camera程序。在后面的课程中，你会更加深入的（ dive deeper ）学习如何直接控制Camera的硬件。</p>
-
-<p><strong>试试下面的例子程序</strong>
-<a href="http://developer.android.com/shareables/training/PhotoIntentActivity.zip">PhotoIntentActivity.zip</a></p>
-
-<hr />
-
-<p>假设你想通过你的客户端程序实现一个聚合全球天气的地图，上面会有各地的当前天气图片。那么集合图片只是你程序的一部分。你想要最简单的动作来获取图片，而不是重新发明（reinvent）一个camera。幸运的是，大多数Android设备都已经至少安装了一款相机程序。在这节课中，你会学习，如何拍照。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-capturing-photos-lesson-1/">Read on &rarr;</a>
+      <a rel="full-article" href="/android-training-managing-the-activity-lifecycle-lesson-0/">Read on &rarr;</a>
     </footer>
   
 
@@ -281,11 +134,9 @@
   
   <div class="pagination">
     
-      <a class="prev" href="/blog/page/12/">&larr; Older</a>
-    
     <a href="/blog/archives">Blog Archives</a>
     
-    <a class="next" href="/blog/page/10/">Newer &rarr;</a>
+    <a class="next" href="/blog/page/23/">Newer &rarr;</a>
     
   </div>
 </div>
