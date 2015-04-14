@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android | 胡凯]]></title>
   <link href="http://hukai.me/blog/categories/android/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2015-04-12T16:41:52+08:00</updated>
+  <updated>2015-04-14T17:40:14+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[Kesen Hoo]]></name>
@@ -12,6 +12,335 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Android性能优化之电量篇]]></title>
+    <link href="http://hukai.me/android-performance-battery/"/>
+    <updated>2015-04-12T16:49:00+08:00</updated>
+    <id>http://hukai.me/android-performance-battery</id>
+    <content type="html"><![CDATA[<p><img src="/images/android_performance_course_udacity.jpg" alt="android_performance_course_udacity" /></p>
+
+<p>Google近期在Udacity上发布了<a href="https://www.udacity.com/course/ud825">Android性能优化的在线课程</a>，分别从渲染，运算与内存，电量几个方面介绍了如何去优化性能，这些课程是Google之前在Youtube上发布的<a href="http://hukai.me/android-performance-patterns/">Android性能优化典范</a>专题课程的细化与补充。</p>
+
+<p>下面是电量篇章的学习笔记，部分内容与前面的性能优化典范有重合，欢迎大家一起学习交流！</p>
+
+<h3>1)Understanding Battery Drain</h3>
+
+<p>手机各个硬件模块的耗电量是不一样的，有些模块非常耗电，而有些模块则相对显得耗电量小很多。</p>
+
+<p><img src="/images/android_perf_battery_drain.png" alt="android_perf_battery_drain" /></p>
+
+<p>电量消耗的计算与统计是一件麻烦而且矛盾的事情，记录电量消耗本身也是一个费电量的事情。唯一可行的方案是使用第三方监测电量的设备，这样才能够获取到真实的电量消耗。</p>
+
+<p>当设备处于待机状态时消耗的电量是极少的，以N5为例，打开飞行模式，可以待机接近1个月。可是点亮屏幕，硬件各个模块就需要开始工作，这会需要消耗很多电量。</p>
+
+<p>使用WakeLock或者JobScheduler唤醒设备处理定时的任务之后，一定要及时让设备回到初始状态。每次唤醒蜂窝信号进行数据传递，都会消耗很多电量，它比WiFi等操作更加的耗电。</p>
+
+<!-- More -->
+
+
+<p><img src="/images/battery_drain_radio.png" alt="battery_drain_radio" /></p>
+
+<h3>2)Battery Historian</h3>
+
+<p><a href="https://developer.android.com/about/versions/android-5.0.html#Power">Battery Historian</a>是Android 5.0开始引入的新API。通过下面的指令，可以得到设备上的电量消耗信息：</p>
+
+<p><code>bash
+$ adb shell dumpsys batterystats &gt; xxx.txt  //得到整个设备的电量消耗信息
+$ adb shell dumpsys batterystats &gt; com.package.name &gt; xxx.txt //得到指定app相关的电量消耗信息
+</code></p>
+
+<p>得到了原始的电量消耗数据之后，我们需要通过Google编写的一个<a href="https://github.com/google/battery-historian">python脚本</a>把数据信息转换成可读性更好的html文件：</p>
+
+<p><code>bash
+$ python historian.py xxx.txt &gt; xxx.html
+</code></p>
+
+<p>打开这个转换过后的html文件，可以看到类似TraceView生成的列表数据，这里的数据信息量很大，这里就不展开了。</p>
+
+<p><img src="/images/android_perf_battery_historian.png" alt="android_perf_battery_historian" /></p>
+
+<h3>3)Track Battery Status &amp; Battery Manager</h3>
+
+<p>我们可以通过下面的代码来获取手机的当前充电状态：</p>
+
+<p>```java
+// It is very easy to subscribe to changes to the battery state, but you can get the current
+// state by simply passing null in as your receiver.  Nifty, isn't that?
+IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+Intent batteryStatus = this.registerReceiver(null, filter);
+int chargePlug = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+boolean acCharge = (chargePlug == BatteryManager.BATTERY_PLUGGED_AC);
+if (acCharge) {</p>
+
+<pre><code>Log.v(LOG_TAG,“The phone is charging!”);
+</code></pre>
+
+<p>}
+```</p>
+
+<p>在上面的例子演示了如何立即获取到手机的充电状态，得到充电状态信息之后，我们可以有针对性的对部分代码做优化。比如我们可以判断只有当前手机为AC充电状态时
+才去执行一些非常耗电的操作。</p>
+
+<p>```java
+/<em>*
+ * This method checks for power by comparing the current battery state against all possible
+ * plugged in states. In this case, a device may be considered plugged in either by USB, AC, or
+ * wireless charge. (Wireless charge was introduced in API Level 17.)
+ </em>/
+private boolean checkForPower() {</p>
+
+<pre><code>// It is very easy to subscribe to changes to the battery state, but you can get the current
+// state by simply passing null in as your receiver.  Nifty, isn't that?
+IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+Intent batteryStatus = this.registerReceiver(null, filter);
+
+// There are currently three ways a device can be plugged in. We should check them all.
+int chargePlug = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+boolean usbCharge = (chargePlug == BatteryManager.BATTERY_PLUGGED_USB);
+boolean acCharge = (chargePlug == BatteryManager.BATTERY_PLUGGED_AC);
+boolean wirelessCharge = false;
+if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+    wirelessCharge = (chargePlug == BatteryManager.BATTERY_PLUGGED_WIRELESS);
+}
+return (usbCharge || acCharge || wirelessCharge);
+</code></pre>
+
+<p>}
+```</p>
+
+<h3>4)Wakelock and Battery Drain</h3>
+
+<p>高效的保留更多的电量与不断促使用户使用你的App会消耗电量，这是矛盾的选择题。不过我们可以使用一些更好的办法来平衡两者。</p>
+
+<p>假设你的手机里面装了大量的社交类应用，即使手机处于待机状态，也会经常被这些应用唤醒用来检查同步新的数据信息。Android会不断关闭各种硬件来延长手机的待机时间，首先屏幕会逐渐变暗直至关闭，然后CPU进入睡眠，这一切操作都是为了节约宝贵的电量资源。但是即使在这种睡眠状态下，大多数应用还是会尝试进行工作，他们将不断的唤醒手机。一个最简单的唤醒手机的方法是使用PowerManager.WakeLock的API来保持CPU工作并防止屏幕变暗关闭。这使得手机可以被唤醒，执行工作，然后回到睡眠状态。知道如何获取WakeLock是简单的，可是及时释放WakeLock也是非常重要的，不恰当的使用WakeLock会导致严重错误。例如网络请求的数据返回时间不确定，导致本来只需要10s的事情一直等待了1个小时，这样会使得电量白白浪费了。这也是为何使用带超时参数的wakelock.acquice()方法是很关键的。</p>
+
+<p>但是仅仅设置超时并不足够解决问题，例如设置多长的超时比较合适？什么时候进行重试等等？解决上面的问题，正确的方式可能是使用非精准定时器。通常情况下，我们会设定一个时间进行某个操作，但是动态修改这个时间也许会更好。例如，如果有另外一个程序需要比你设定的时间晚5分钟唤醒，最好能够等到那个时候，两个任务捆绑一起同时进行，这就是非精确定时器的核心工作原理。我们可以定制计划的任务，可是系统如果检测到一个更好的时间，它可以推迟你的任务，以节省电量消耗。</p>
+
+<p><img src="/images/alarmmanager_inexact_wakelock.png" alt="alarmmanager_inexact_wakelock" /></p>
+
+<p>这正是JobScheduler API所做的事情。它会根据当前的情况与任务，组合出理想的唤醒时间，例如等到正在充电或者连接到WiFi的时候，或者集中任务一起执行。我们可以通过这个API实现很多免费的调度算法。</p>
+
+<h3>5)Network and Battery Drain</h3>
+
+<p>下面内容来自官方Training文档中<a href="http://hukai.me/android-training-course-in-chinese/connectivity/efficient-downloads/efficient-network-access.html">高效下载</a>章节关于手机(Radio)蜂窝信号对电量消耗的介绍。</p>
+
+<p>通常情况下，使用3G移动网络传输数据，电量的消耗有三种状态：</p>
+
+<ul>
+<li><strong>Full power</strong>: 能量最高的状态，移动网络连接被激活，允许设备以最大的传输速率进行操作。</li>
+<li><strong>Low power</strong>: 一种中间状态，对电量的消耗差不多是Full power状态下的50%。</li>
+<li><strong>Standby</strong>: 最低的状态，没有数据连接需要传输，电量消耗最少。</li>
+</ul>
+
+
+<p>下图是一个典型的3G Radio State Machine的图示(来自AT&amp;T，详情请点击<a href="http://www.research.att.com/articles/featured_stories/2011_03/201102_Energy_efficient?fbid=SYuI20FzBum">这里</a>):</p>
+
+<p><img src="/images/mobile_radio_state_machine.png" title="Figure 1. Typical 3G wireless radio state machine." alt="mobile_radio_state_machine.png" /></p>
+
+<p><strong>总之，为了减少电量的消耗，在蜂窝移动网络下，最好做到批量执行网络请求，尽量避免频繁的间隔网络请求。</strong></p>
+
+<p>通过前面学习到的Battery Historian我们可以得到设备的电量消耗数据，如果数据中的移动蜂窝网络(Mobile Radio)电量消耗呈现下面的情况，间隔很小，又频繁断断续续的出现，说明电量消耗性能很不好：</p>
+
+<p><img src="/images/android_perf_battery_bad.png" alt="android_perf_battery_bad.png" /></p>
+
+<p>经过优化之后，如果呈现下面的图示，说明电量消耗的性能是良好的：</p>
+
+<p><img src="/images/android_perf_battery_good.png" alt="android_perf_battery_good" /></p>
+
+<p>另外WiFi连接下，网络传输的电量消耗要比移动网络少很多，应该尽量减少移动网络下的数据传输，多在WiFi环境下传输数据。</p>
+
+<p><img src="/images/android_perf_battery_wifi.png" alt="android_perf_battery_wifi" /></p>
+
+<p>那么如何才能够把任务缓存起来，做到批量化执行呢？下面就轮到Job Scheduler出场了。</p>
+
+<h3>6)Using Job Scheduler</h3>
+
+<p>使用<a href="https://developer.android.com/reference/android/app/job/JobScheduler.html">Job Scheduler</a>，应用需要做的事情就是判断哪些任务是不紧急的，可以交给Job Scheduler来处理，Job Scheduler集中处理收到的任务，选择合适的时间，合适的网络，再一起进行执行。</p>
+
+<p>下面是使用Job Scheduler的一段简要示例，需要先有一个JobService：</p>
+
+<p>```java
+public class MyJobService extends JobService {</p>
+
+<pre><code>private static final String LOG_TAG = "MyJobService";
+
+@Override
+public void onCreate() {
+    super.onCreate();
+    Log.i(LOG_TAG, "MyJobService created");
+}
+
+@Override
+public void onDestroy() {
+    super.onDestroy();
+    Log.i(LOG_TAG, "MyJobService destroyed");
+}
+
+@Override
+public boolean onStartJob(JobParameters params) {
+    // This is where you would implement all of the logic for your job. Note that this runs
+    // on the main thread, so you will want to use a separate thread for asynchronous work
+    // (as we demonstrate below to establish a network connection).
+    // If you use a separate thread, return true to indicate that you need a "reschedule" to
+    // return to the job at some point in the future to finish processing the work. Otherwise,
+    // return false when finished.
+    Log.i(LOG_TAG, "Totally and completely working on job " + params.getJobId());
+    // First, check the network, and then attempt to connect.
+    if (isNetworkConnected()) {
+        new SimpleDownloadTask() .execute(params);
+        return true;
+    } else {
+        Log.i(LOG_TAG, "No connection on job " + params.getJobId() + "; sad face");
+    }
+    return false;
+}
+
+@Override
+public boolean onStopJob(JobParameters params) {
+    // Called if the job must be stopped before jobFinished() has been called. This may
+    // happen if the requirements are no longer being met, such as the user no longer
+    // connecting to WiFi, or the device no longer being idle. Use this callback to resolve
+    // anything that may cause your application to misbehave from the job being halted.
+    // Return true if the job should be rescheduled based on the retry criteria specified
+    // when the job was created or return false to drop the job. Regardless of the value
+    // returned, your job must stop executing.
+    Log.i(LOG_TAG, "Whelp, something changed, so I'm calling it on job " + params.getJobId());
+    return false;
+}
+
+/**
+ * Determines if the device is currently online.
+ */
+private boolean isNetworkConnected() {
+    ConnectivityManager connectivityManager =
+            (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+    NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+    return (networkInfo != null &amp;&amp; networkInfo.isConnected());
+}
+
+/**
+ *  Uses AsyncTask to create a task away from the main UI thread. This task creates a
+ *  HTTPUrlConnection, and then downloads the contents of the webpage as an InputStream.
+ *  The InputStream is then converted to a String, which is logged by the
+ *  onPostExecute() method.
+ */
+private class SimpleDownloadTask extends AsyncTask&lt;JobParameters, Void, String&gt; {
+
+    protected JobParameters mJobParam;
+
+    @Override
+    protected String doInBackground(JobParameters... params) {
+        // cache system provided job requirements
+        mJobParam = params[0];
+        try {
+            InputStream is = null;
+            // Only display the first 50 characters of the retrieved web page content.
+            int len = 50;
+
+            URL url = new URL("https://www.google.com");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(10000); //10sec
+            conn.setConnectTimeout(15000); //15sec
+            conn.setRequestMethod("GET");
+            //Starts the query
+            conn.connect();
+            int response = conn.getResponseCode();
+            Log.d(LOG_TAG, "The response is: " + response);
+            is = conn.getInputStream();
+
+            // Convert the input stream to a string
+            Reader reader = null;
+            reader = new InputStreamReader(is, "UTF-8");
+            char[] buffer = new char[len];
+            reader.read(buffer);
+            return new String(buffer);
+
+        } catch (IOException e) {
+            return "Unable to retrieve web page.";
+        }
+    }
+
+    @Override
+    protected void onPostExecute(String result) {
+        jobFinished(mJobParam, false);
+        Log.i(LOG_TAG, result);
+    }
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>然后模拟通过点击Button触发N个任务，交给JobService来处理</p>
+
+<p>```java
+public class FreeTheWakelockActivity extends ActionBarActivity {</p>
+
+<pre><code>public static final String LOG_TAG = "FreeTheWakelockActivity";
+
+TextView mWakeLockMsg;
+ComponentName mServiceComponent;
+
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_wakelock);
+
+    mWakeLockMsg = (TextView) findViewById(R.id.wakelock_txt);
+    mServiceComponent = new ComponentName(this, MyJobService.class);
+    Intent startServiceIntent = new Intent(this, MyJobService.class);
+    startService(startServiceIntent);
+
+    Button theButtonThatWakelocks = (Button) findViewById(R.id.wakelock_poll);
+    theButtonThatWakelocks.setText(R.string.poll_server_button);
+
+    theButtonThatWakelocks.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+                pollServer();
+        }
+    });
+}
+
+/**
+ * This method polls the server via the JobScheduler API. By scheduling the job with this API,
+ * your app can be confident it will execute, but without the need for a wake lock. Rather, the
+ * API will take your network jobs and execute them in batch to best take advantage of the
+ * initial network connection cost.
+ *
+ * The JobScheduler API works through a background service. In this sample, we have
+ * a simple service in MyJobService to get you started. The job is scheduled here in
+ * the activity, but the job itself is executed in MyJobService in the startJob() method. For
+ * example, to poll your server, you would create the network connection, send your GET
+ * request, and then process the response all in MyJobService. This allows the JobScheduler API
+ * to invoke your logic without needed to restart your activity.
+ *
+ * For brevity in the sample, we are scheduling the same job several times in quick succession,
+ * but again, try to consider similar tasks occurring over time in your application that can
+ * afford to wait and may benefit from batching.
+ */
+public void pollServer() {
+    JobScheduler scheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
+    for (int i=0; i&lt;10; i++) {
+        JobInfo jobInfo = new JobInfo.Builder(i, mServiceComponent)
+                .setMinimumLatency(5000) // 5 seconds
+                .setOverrideDeadline(60000) // 60 seconds (for brevity in the sample)
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY) // WiFi or data connections
+                .build();
+
+        mWakeLockMsg.append("Scheduling job " + i + "!\n");
+        scheduler.schedule(jobInfo);
+    }
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p><strong>Notes:</strong>关于更多电量优化，还有一篇文章，请点击<a href="http://developer.android.com/training/efficient-downloads/index.html">这里</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Android性能优化之内存篇]]></title>
@@ -370,7 +699,7 @@ collector.setListener(this, mListener);
     <updated>2015-01-17T19:42:00+08:00</updated>
     <id>http://hukai.me/android-performance-patterns</id>
     <content type="html"><![CDATA[<p><img src="/images/android_perf_patterns.png" alt="" />
-2015年伊始，Google发布了关于<a href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">Android性能优化典范的专题</a>，一共16个短视频，每个3-5分钟，帮助开发者创建更快更优秀的Android App。课程专题不仅仅介绍了Android系统中有关性能问题的底层工作原理，同时也介绍了如何通过工具来找出性能问题以及提升性能的建议。主要从三个方面展开，Android的渲染机制，内存与GC，电量优化。下面是对这些问题和建议的总结梳理。</p>
+2015新年伊始，Google发布了关于<a href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">Android性能优化典范的专题</a>，一共16个短视频，每个3-5分钟，帮助开发者创建更快更优秀的Android App。课程专题不仅仅介绍了Android系统中有关性能问题的底层工作原理，同时也介绍了如何通过工具来找出性能问题以及提升性能的建议。主要从三个方面展开，Android的渲染机制，内存与GC，电量优化。下面是对这些问题和建议的总结梳理。</p>
 
 <h2>0)Render Performance</h2>
 
@@ -630,7 +959,7 @@ collector.setListener(this, mListener);
 
 <h2>15)Battery Drain and WakeLocks</h2>
 
-<p>高效的保留更多的电量与不断促使用户使用你的App来消耗电量，这是矛盾的选择题。不过我们可以使用一些更好的办法来平衡两者。</p>
+<p>高效的保留更多的电量与不断促使用户使用你的App会消耗电量，这是矛盾的选择题。不过我们可以使用一些更好的办法来平衡两者。</p>
 
 <p>假设你的手机里面装了大量的社交类应用，即使手机处于待机状态，也会经常被这些应用唤醒用来检查同步新的数据信息。Android会不断关闭各种硬件来延长手机的待机时间，首先屏幕会逐渐变暗直至关闭，然后CPU进入睡眠，这一切操作都是为了节约宝贵的电量资源。但是即使在这种睡眠状态下，大多数应用还是会尝试进行工作，他们将不断的唤醒手机。一个最简单的唤醒手机的方法是使用PowerManager.WakeLock的API来保持CPU工作并防止屏幕变暗关闭。这使得手机可以被唤醒，执行工作，然后回到睡眠状态。知道如何获取WakeLock是简单的，可是及时释放WakeLock也是非常重要的，不恰当的使用WakeLock会导致严重错误。例如网络请求的数据返回时间不确定，导致本来只需要10s的事情一直等待了1个小时，这样会使得电量白白浪费了。这也是为何使用带超时参数的wakelock.acquice()方法是很关键的。但是仅仅设置超时并不足够解决问题，例如设置多长的超时比较合适？什么时候进行重试等等？</p>
 
@@ -643,51 +972,6 @@ collector.setListener(this, mListener);
 <p>从Android 5.0开始发布了Battery History Tool，它可以查看程序被唤醒的频率，又谁唤醒的，持续了多长的时间，这些信息都可以获取到。</p>
 
 <p>请关注程序的电量消耗，用户可以通过手机的设置选项观察到那些耗电量大户，并可能决定卸载他们。所以尽量减少程序的电量消耗是非常有必要的。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android APK安装包瘦身]]></title>
-    <link href="http://hukai.me/android-tips-for-reduce-apk-size/"/>
-    <updated>2014-09-13T20:24:00+08:00</updated>
-    <id>http://hukai.me/android-tips-for-reduce-apk-size</id>
-    <content type="html"><![CDATA[<p>很显然，APK安装包越小越好。下面从代码，资源文件，使用策略几个方面简要介绍下：</p>
-
-<h3>代码</h3>
-
-<ul>
-<li>保持良好的编程习惯，不要重复或者不用的代码，谨慎添加libs，移除使用不到的libs。</li>
-<li>使用proguard混淆代码，它会对不用的代码做优化，并且混淆后也能够减少安装包的大小。</li>
-<li>native code的部分，大多数情况下只需要支持armabi与x86的架构即可。如果非必须，可以考虑拿掉x86的部分。</li>
-</ul>
-
-
-<h3>资源</h3>
-
-<ul>
-<li>使用Lint工具查找没有使用到的资源。去除不使用的图片，String，XML等等。</li>
-<li>assets目录下的资源请确保没有用不上的文件。</li>
-<li>生成APK的时候，aapt工具本身会对png做优化，但是在此之前还可以使用其他工具如tinypng对图片进行进一步的压缩预处理。</li>
-<li>jpeg还是png，根据需要做选择，在某些时候jpeg可以减少图片的体积。</li>
-<li>对于9.png的图片，可拉伸区域尽量切小，另外可以通过使用9.png拉伸达到大图效果的时候尽量不要使用整张大图。</li>
-</ul>
-
-
-<!-- More -->
-
-
-<h3>策略</h3>
-
-<ul>
-<li>有选择性的提供hdpi，xhdpi，xxhdpi的图片资源。建议优先提供xhdpi的图片，对于mdpi，ldpi与xxxhdpi根据需要提供有差异的部分即可。</li>
-<li>尽可能的重用已有的图片资源。例如对称的图片，只需要提供一张，另外一张图片可以通过代码旋转的方式实现。</li>
-<li>能用代码绘制实现的功能，尽量不要使用大量的图片。例如减少使用多张图片组成animate-list的AnimationDrawable，这种方式提供了多张图片很占空间。</li>
-</ul>
-
-
-<h3>总结</h3>
-
-<p>一个好的应用，需要具备很多优点，尽可能提供小的安装包是其中一个重要的方面。以上的小技巧，需要综合考虑，结合实际情况进行取舍。当然我们还可以采取一些按需加载的策略来减少安装包的体积，最好提一点，砍掉不必要的功能才是安装包瘦身的终极奥秘。O(∩_∩)O哈！</p>
 ]]></content>
   </entry>
   

@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="Optimizing Layout Hierarchies Layout是Android程序影响用户体验最关键的一部分。如果布局文件不好会使得程序比较卡。SDK里面包含了一些工具用来帮助我们发现布局文件的性能问题 使用基本的Layout结构是最有效的。但是，每一个添加到系统的组件都需要初始化， &hellip;">
+  <meta name="description" content="Re-using Layouts with 尽管Android提供了很多种小的组件可以重用，我们还需要自定义一些稍微复杂一点的小组件进行重用。我们可以使用&lt;include/&gt; 与 &lt;merge/&gt; 标签来对当前的layout嵌入一些其他的layout. &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +80,53 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-training-improve-layouts-lesson-2/">Android Training - 提升布局文件的性能(Lesson 2 - 使用include标签重用Layout)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-21T18:06:00+08:00" pubdate data-updated="true">Mar 21<span>st</span>, 2012</time>
+        
+         | <a href="/android-training-improve-layouts-lesson-2/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Re-using Layouts with <include/></h2>
+
+<p>尽管Android提供了很多种小的组件可以重用，我们还需要自定义一些稍微复杂一点的小组件进行重用。我们可以使用<code>&lt;include/&gt;</code> 与 <code>&lt;merge/&gt;</code> 标签来对当前的layout嵌入一些其他的layout.</p>
+
+<p>在创建一个稍微复杂一点的layout时，重用layout是个很给力的方法。比如我们需要一个YES/NO的控制栏，包含文字提示的Progress bar。像这种的布局会在很多地方需要重用到.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-training-improve-layouts-lesson-2/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -229,73 +276,6 @@ This lesson shows you how to support different screen densities by providing dif
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-supporting-different-device-lesson-1/">Android Training - 适配不同的屏幕(Lesson 1 - 支持不同的屏幕大小)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-16T21:09:00+08:00" pubdate data-updated="true">Mar 16<span>th</span>, 2012</time>
-        
-         | <a href="/android-training-supporting-different-device-lesson-1/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><strong>Android设备屏幕不一，为了更好的用户体验，我们必须做适配不同屏幕的操作</strong></p>
-
-<ul>
-<li>Dependencies and prerequisites<br/>
-Android 1.6 or higher (2.1+ for the sample app)<br/>
-Basic knowledge of Activities and Fragment<br/>
-Experience building an Android User Interface<br/>
-Several features require the use of the support library</li>
-<li>You should also read<br/>
-<a href="http://developer.android.com/guide/practices/screens_support.html">Supporting Multiple Screens</a></li>
-<li>Download the sample app<br/>
-<a href="http://developer.android.com/shareables/training/NewsReader.zip">NewsReader.zip</a></li>
-</ul>
-
-
-<h1>Supporting Different Screen Sizes</h1>
-
-<h2>Use &#8220;wrap_content&#8221; and &#8220;match_parent&#8221;[使用wrap_content与match_parent]</h2>
-
-<ul>
-<li>wrap_content：宽高根据内容大小调整</li>
-<li>match_parent：伸展至与父控件一致<br/>
-显然我们不能hard-coded（写死大小）</li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-supporting-different-device-lesson-1/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/23/">&larr; Older</a>
@@ -311,6 +291,10 @@ Several features require the use of the support library</li>
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-performance-battery/">Android性能优化之电量篇</a>
+      </li>
     
       <li class="post">
         <a href="/android-performance-memory/">Android性能优化之内存篇</a>
@@ -340,18 +324,14 @@ Several features require the use of the support library</li>
         <a href="/android-training-wearable-app-bt-debug/">Android Training - 创建可穿戴应用(5 - 通过蓝牙进行调试)</a>
       </li>
     
-      <li class="post">
-        <a href="/android-training-wearable-app-packaging/">Android Training - 创建可穿戴应用(4 - 打包可穿戴应用)</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (91)</a></li>
-  <li><a href='/blog/categories/android-deeper'>Android:deeper (6)</a></li>
+  <li><a href='/blog/categories/android'>Android (92)</a></li>
+  <li><a href='/blog/categories/android-deeper'>Android:deeper (7)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>

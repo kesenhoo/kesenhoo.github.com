@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="语音指令是可穿戴体验的一个重要的部分。这使得用户可以释放双手，快速发出指令。穿戴提供了2种类型的语音操作： 系统提供的 这些语音指令都是基于任务的，并且内置在Wear的平台内。你在activity中过滤你想要接收的指令。例如包含&#8221;Take a note&#8221; 或者 &#8220 &hellip;">
+  <meta name="description" content="当发布应用给用户之前，你必须把可穿戴应用打包到手持应用内。因为不能直接在可穿戴设备上浏览并安装应用。如果打包正确，当用户下载手持应用时，系统会自动下发可穿戴应用到匹对的可穿戴设备上。 Note: 如果开发时签名用的是debug key，这个特性是无法正常工作的。在开发时，需要使用adb &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +80,75 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-training-wearable-app-packaging/">Android Training - 创建可穿戴应用(4 - 打包可穿戴应用)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-14T23:32:00+08:00" pubdate data-updated="true">Jul 14<span>th</span>, 2014</time>
+        
+         | <a href="/android-training-wearable-app-packaging/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>当发布应用给用户之前，你必须把可穿戴应用打包到手持应用内。因为不能直接在可穿戴设备上浏览并安装应用。如果打包正确，当用户下载手持应用时，系统会自动下发可穿戴应用到匹对的可穿戴设备上。</p>
+
+<blockquote><p><strong>Note:</strong> 如果开发时签名用的是debug key，这个特性是无法正常工作的。在开发时，需要使用<code>adb install</code>的命令或者Android Studio来安装可穿戴应用。</p></blockquote>
+
+<h2>使用Android Studio打包</h2>
+
+<p>在Android Studio中打包可穿戴应用有下面几个步骤：</p>
+
+<ol>
+<li>在手持应用的buidl.gradle文件中把可穿戴应用声明为依赖：</li>
+</ol>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'>dependencies {
+</span><span class='line'>   compile &#39;com.google.android.gms:play-services:5.0.+@aar&#39;
+</span><span class='line'>   compile &#39;com.android.support:support-v4:20.0.+&#39;&#39;
+</span><span class='line'>   wearApp project(&#39;:wearable&#39;)
+</span><span class='line'>}
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-training-wearable-app-packaging/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -250,72 +319,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-wearable-app-index/">Android Training - 创建可穿戴应用(0 - 序言)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-14T12:20:00+08:00" pubdate data-updated="true">Jul 14<span>th</span>, 2014</time>
-        
-         | <a href="/android-training-wearable-app-index/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>创建可穿戴的应用</h1>
-
-<p>可穿戴应用直接运行在穿戴设备上，应用可以直接访问例如传感器与GPU这样的硬件。这些应用和一般的Android应用的基础部分是一致的，只是在设计与可用性还有一些特殊功能上有比较大差异。手持设备与可穿戴设备上的应用主要有下面的一些差异：</p>
-
-<ul>
-<li>系统会强制执行超时机制。如果你显示了一个Activity，用户并没有进行操作，设备会进入睡眠状态。当设备唤醒时，穿戴设备会显示主界面而不是你刚才的activity。如果你想要持续的显示一些东西，请使用notification来替代。</li>
-<li>相比起手持设备的应用，可穿戴应用的界面相对更小，功能也相对更少。他仅仅包含了那些对于可穿戴有意义的功能，这些功能通常是手持设备的一个子集。通常来说，你应该尽可能的把运行操作搬到手持设备上，然后发送操作结果到可穿戴设备。</li>
-<li>用户不能直接给可穿戴设备安装应用。你需要给手持设备的应用绑定一个可穿戴设备的应用。当用户安装手持设备的应用时，系统会自动安装可穿戴应用。然而，为了开发便利，你还是可以直接安装应用到可穿戴设备。</li>
-<li>可穿戴应用可以使用大多数的标准Android APIs，除了下面的以外：
-
-<ul>
-<li><a href="http://developer.android.com/reference/android/webkit/package-summary.html">android.webkit</a></li>
-<li><a href="http://developer.android.com/reference/android/print/package-summary.html">android.print</a></li>
-<li><a href="http://developer.android.com/reference/android/app/backup/package-summary.html">android.app.backup</a></li>
-<li><a href="http://developer.android.com/reference/android/appwidget/package-summary.html">android.appwidget</a></li>
-<li><a href="http://developer.android.com/reference/android/hardware/usb/package-summary.html">android.hardware.usb</a></li>
-</ul>
-
-
-<p>在使用某个API之前，你可以通过执行<a href="http://developer.android.com/reference/android/content/pm/PackageManager.html#hasSystemFeature(java.lang.String">hasSystemFeature()</a>) 来判断功能是否可用。</p></li>
-</ul>
-
-
-<blockquote><p><strong>Note:</strong> 我们推荐使用Android Studio来开发Android Wear的应用，因为它提供了建立工程，添加库依赖，打包程序等等在ADT上没有的功能。下面的培训课程的前提是假设你已经在使用Android Studio了。</p></blockquote>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-wearable-app-index/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/4/">&larr; Older</a>
@@ -331,6 +334,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-performance-battery/">Android性能优化之电量篇</a>
+      </li>
     
       <li class="post">
         <a href="/android-performance-memory/">Android性能优化之内存篇</a>
@@ -360,18 +367,14 @@
         <a href="/android-training-wearable-app-bt-debug/">Android Training - 创建可穿戴应用(5 - 通过蓝牙进行调试)</a>
       </li>
     
-      <li class="post">
-        <a href="/android-training-wearable-app-packaging/">Android Training - 创建可穿戴应用(4 - 打包可穿戴应用)</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (91)</a></li>
-  <li><a href='/blog/categories/android-deeper'>Android:deeper (6)</a></li>
+  <li><a href='/blog/categories/android'>Android (92)</a></li>
+  <li><a href='/blog/categories/android-deeper'>Android:deeper (7)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>

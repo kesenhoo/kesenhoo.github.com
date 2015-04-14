@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="Determining and Monitoring the Docking State and Type[判断并监测设备的停驻状态与类型] 在上一课中有这样一句话：In many cases, the act of charging a device is coincident with &hellip;">
+  <meta name="description" content="Determining and Monitoring the Connectivity Status[判断并监测网络连接状态] 通常我们会有一些计划的任务，比如重复闹钟，后台定时启动的任务等。但是如果我们的网络没有连接上，那么就没有必要启动那些需要连接网络的任务。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +80,55 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-training-optimiizing-battery-life-lesson-3/">Android Training - 优化电池续航能力(Lesson 3 - 判断并监测网络连接状态)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-23T21:09:00+08:00" pubdate data-updated="true">Mar 23<span>rd</span>, 2012</time>
+        
+         | <a href="/android-training-optimiizing-battery-life-lesson-3/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Determining and Monitoring the Connectivity Status[判断并监测网络连接状态]</h2>
+
+<p>通常我们会有一些计划的任务，比如重复闹钟，后台定时启动的任务等。但是如果我们的网络没有连接上，那么就没有必要启动那些需要连接网络的任务。我们可以使用ConnectivityManager来检查是否连接上网络，是何种网络。[通过网络的连接状况改变，相应的改变app的行为，减少无谓的操作，从而延长设备的续航能力]</p>
+
+<h2>1)Determine if You Have an Internet Connection[判断当前是否有网络连接]</h2>
+
+<p>显然如果没有网络连接，那么就没有必要做那些需要联网的事情。下面是一个检查是否有网络连接的例子：</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-training-optimiizing-battery-life-lesson-3/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -229,51 +278,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-managing-audio-playback-lesson-2/">Android Training - 音频播放(Lesson 2 - 管理音频焦点Audio Focus)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-22T20:16:00+08:00" pubdate data-updated="true">Mar 22<span>nd</span>, 2012</time>
-        
-         | <a href="/android-training-managing-audio-playback-lesson-2/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>很多App都可以播放音频，因此在播放前如何获取到音频焦点就显得很重要了，这样可以避免同时出现多个声音，Android使用audio focus来节制音频的播放，仅仅是获取到audio focus的App才能够播放音频。</p>
-
-<p>在App开始播放音频之前，它需要经过发出请求[request]->接受请求[receive]->音频焦点锁定[Audio Focus]的过程。同样，它需要知道如何监听失去音频焦点[lose of audio focus]的事件并进行合适的响应。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-managing-audio-playback-lesson-2/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/21/">&larr; Older</a>
@@ -289,6 +293,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-performance-battery/">Android性能优化之电量篇</a>
+      </li>
     
       <li class="post">
         <a href="/android-performance-memory/">Android性能优化之内存篇</a>
@@ -318,18 +326,14 @@
         <a href="/android-training-wearable-app-bt-debug/">Android Training - 创建可穿戴应用(5 - 通过蓝牙进行调试)</a>
       </li>
     
-      <li class="post">
-        <a href="/android-training-wearable-app-packaging/">Android Training - 创建可穿戴应用(4 - 打包可穿戴应用)</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (91)</a></li>
-  <li><a href='/blog/categories/android-deeper'>Android:deeper (6)</a></li>
+  <li><a href='/blog/categories/android'>Android (92)</a></li>
+  <li><a href='/blog/categories/android-deeper'>Android:deeper (7)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>

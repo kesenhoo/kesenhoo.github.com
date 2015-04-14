@@ -9,7 +9,7 @@
   <meta name="author" content="Kesen Hoo">
 
   
-  <meta name="description" content="作为缓存Bitmaps的进一步延伸, 为了促进GC与bitmap的重用，你还有一些特定的事情可以做. 推荐的策略会根据Android的版本不同而有所差异. BitmapFun的示例程序会演示如何设计你的程序使得能够在不同的Android平台上高效的运行. &hellip;">
+  <meta name="description" content="Android的framework有大量的Views用来与用户进行交互并显示不同种类的数据。但是有时候你的程序有个特殊的需求，而Android内置的views组件并不能实现。这一章节会演示如何创建你自己的views，并使得它们是robust与reusable的。 Dependencies and &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +80,69 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-training-creating-custom-views-lesson-0/">Android Training - 创建自定义的Views(Lesson 0 - 章节概览)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-06-30T18:23:00+08:00" pubdate data-updated="true">Jun 30<span>th</span>, 2013</time>
+        
+         | <a href="/android-training-creating-custom-views-lesson-0/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Android的framework有大量的Views用来与用户进行交互并显示不同种类的数据。但是有时候你的程序有个特殊的需求，而Android内置的views组件并不能实现。这一章节会演示如何创建你自己的views，并使得它们是robust与reusable的。</p>
+
+<p><strong>Dependencies and Prerequisites</strong></p>
+
+<p>Android 2.1 (API level 7) or higher</p>
+
+<p><strong>YOU should also read</strong></p>
+
+<ul>
+<li><a href="http://developer.android.com/guide/topics/ui/custom-components.html">Custom Components</a></li>
+<li><a href="http://developer.android.com/guide/topics/ui/ui-events.html">Input Events</a></li>
+<li><a href="http://developer.android.com/guide/topics/graphics/prop-animation.html">Property Animation</a></li>
+<li><a href="http://developer.android.com/guide/topics/graphics/hardware-accel.html">Hardware Acceleration</a></li>
+<li><a href="http://developer.android.com/guide/topics/ui/accessibility/index.html">Accessibility</a> developer guide</li>
+</ul>
+
+
+<p><strong>Try it out</strong></p>
+
+<p>Download the sample<br/>
+<a href="http://developer.android.com/shareables/training/CustomView.zip">CustomView.zip</a></p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-training-creating-custom-views-lesson-0/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -239,53 +302,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-performance-tips/">Android Training - 代码性能优化小技巧</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-04-06T18:27:00+08:00" pubdate data-updated="true">Apr 6<span>th</span>, 2013</time>
-        
-         | <a href="/android-training-performance-tips/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Performance Tips</h2>
-
-<p><img src="/images/articles/performance_improve.jpg"></p>
-
-<p>这篇文章主要是介绍了一些小细节的优化技巧，当这些小技巧综合使用起来的时候，对于整个App的性能提升还是有作用的，只是不能较大幅度的提升性能而已。选择合适的算法与数据结构才应该是你首要考虑的因素，在这篇文章中不会涉及这方面。你应该使用这篇文章中的小技巧作为平时写代码的习惯，这样能够提升代码的效率。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-performance-tips/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/10/">&larr; Older</a>
@@ -301,6 +317,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-performance-battery/">Android性能优化之电量篇</a>
+      </li>
     
       <li class="post">
         <a href="/android-performance-memory/">Android性能优化之内存篇</a>
@@ -330,18 +350,14 @@
         <a href="/android-training-wearable-app-bt-debug/">Android Training - 创建可穿戴应用(5 - 通过蓝牙进行调试)</a>
       </li>
     
-      <li class="post">
-        <a href="/android-training-wearable-app-packaging/">Android Training - 创建可穿戴应用(4 - 打包可穿戴应用)</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (91)</a></li>
-  <li><a href='/blog/categories/android-deeper'>Android:deeper (6)</a></li>
+  <li><a href='/blog/categories/android'>Android (92)</a></li>
+  <li><a href='/blog/categories/android-deeper'>Android:deeper (7)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
