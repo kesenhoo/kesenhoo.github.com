@@ -9,7 +9,7 @@
   <meta name="author" content="HuKai">
 
   
-  <meta name="description" content="2015新年伊始，Google发布了关于Android性能优化典范的专题，一共16个短视频，每个3-5分钟，帮助开发者创建更快更优秀的Android App。课程专题不仅仅介绍了Android系统中有关性能问题的底层工作原理，同时也介绍了如何通过工具来找出性能问题以及提升性能的建议。 &hellip;">
+  <meta name="description" content="Google近期在Udacity上发布了Android性能优化的在线课程，分别从渲染，运算与内存，电量几个方面介绍了如何去优化性能，这些课程是Google之前在Youtube上发布的Android性能优化典范专题课程的细化与补充。 下面是渲染篇章的学习笔记，部分内容和前面的性能优化典范有重合， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +80,67 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-performance-render/">Android性能优化之渲染篇</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-04-11T22:16:00+08:00" pubdate data-updated="true">Apr 11<span>th</span>, 2015</time>
+        
+         | <a href="/android-performance-render/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img src="/images/android_performance_course_udacity.jpg" alt="" /></p>
+
+<p>Google近期在Udacity上发布了<a href="https://www.udacity.com/course/ud825">Android性能优化的在线课程</a>，分别从渲染，运算与内存，电量几个方面介绍了如何去优化性能，这些课程是Google之前在Youtube上发布的<a href="http://hukai.me/android-performance-patterns/">Android性能优化典范</a>专题课程的细化与补充。</p>
+
+<p>下面是渲染篇章的学习笔记，部分内容和前面的性能优化典范有重合，欢迎大家一起学习交流！</p>
+
+<h3>1)Why Rendering Performance Matters</h3>
+
+<p>现在有不少App为了达到很华丽的视觉效果，会需要在界面上层叠很多的视图组件，但是这会很容易引起性能问题。如何平衡Design与Performance就很需要智慧了。</p>
+
+<h3>2)Defining &#8216;Jank&#8217;</h3>
+
+<p>大多数手机的屏幕刷新频率是60hz，如果在1000/60=16.67ms内没有办法把这一帧的任务执行完毕，就会发生丢帧的现象。丢帧越多，用户感受到的卡顿情况就越严重。</p>
+
+<p><img src="/images/android_performance_course_drop_frame.png" alt="" /></p>
+
+<h3>3)Rendering Pipeline: Common Problems</h3>
+
+<p>渲染操作通常依赖于两个核心组件：CPU与GPU。CPU负责包括Measure，Layout，Record，Execute的计算操作，GPU负责Rasterization(栅格化)操作。CPU通常存在的问题的原因是存在非必需的视图组件，它不仅仅会带来重复的计算操作，而且还会占用额外的GPU资源。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-performance-render/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -258,74 +319,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-wearable-app-bt-debug/">Android Training - 创建可穿戴应用(5 - 通过蓝牙进行调试)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-15T00:23:00+08:00" pubdate data-updated="true">Jul 15<span>th</span>, 2014</time>
-        
-         | <a href="/android-training-wearable-app-bt-debug/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>你可以通过蓝牙来调试你的可穿戴应用，通过蓝牙把调试数据输出到手持设备上，手持设备是有连接到开发电脑上的。</p>
-
-<h2>搭建好设备用来调试</h2>
-
-<ul>
-<li>开启手持设备的USB调试：
-
-<ul>
-<li>打开设置应用并滑动到底部。</li>
-<li>如果在设置里面没有开发者选项，点击关于手机，滑动到底部，点击build number 7次。</li>
-<li>返回并点击开发者选项。</li>
-<li>开启USB调试。</li>
-</ul>
-</li>
-<li>开启可穿戴设备的蓝牙调试：
-
-<ul>
-<li>点击主界面2次，来到Wear菜单界面。</li>
-<li>滑动到底部，点击设置。</li>
-<li>滑动到底部，如果没有开发者选项，点击Build Number 7次。</li>
-<li>点击开发者选项。</li>
-<li>开启蓝牙调试。</li>
-</ul>
-</li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-wearable-app-bt-debug/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -341,6 +334,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-performance-patterns-season-2/">Android性能优化典范 - 第2季</a>
+      </li>
     
       <li class="post">
         <a href="/android-performance-battery/">Android性能优化之电量篇</a>
@@ -370,19 +367,16 @@
         <a href="/android-activitylifecycle-onsaveinstancestate/">Android Notes - Activity生命周期中的onSaveInstanceState</a>
       </li>
     
-      <li class="post">
-        <a href="/android-training-wearable-app-bt-debug/">Android Training - 创建可穿戴应用(5 - 通过蓝牙进行调试)</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (92)</a></li>
-  <li><a href='/blog/categories/android-deeper'>Android:deeper (7)</a></li>
+  <li><a href='/blog/categories/android'>Android (93)</a></li>
+  <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
+  <li><a href='/blog/categories/android-performance'>Android:performance (6)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>

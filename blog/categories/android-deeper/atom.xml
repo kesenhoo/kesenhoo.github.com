@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android:Deeper | 胡凯]]></title>
   <link href="http://hukai.me/blog/categories/android-deeper/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2015-04-15T20:55:08+08:00</updated>
+  <updated>2015-04-29T10:53:43+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[HuKai]]></name>
@@ -14,964 +14,520 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Android性能优化之电量篇]]></title>
-    <link href="http://hukai.me/android-performance-battery/"/>
-    <updated>2015-04-12T16:49:00+08:00</updated>
-    <id>http://hukai.me/android-performance-battery</id>
-    <content type="html"><![CDATA[<p><img src="/images/android_performance_course_udacity.jpg" alt="android_performance_course_udacity" /></p>
+    <title type="html"><![CDATA[Android Deeper(01) - Graphic Architecture]]></title>
+    <link href="http://hukai.me/android-deeper-graphics-architecture/"/>
+    <updated>2014-05-15T14:25:00+08:00</updated>
+    <id>http://hukai.me/android-deeper-graphics-architecture</id>
+    <content type="html"><![CDATA[<p>Android中有几个很重要的概念Surface, SurfaceHolder, EGLSurface, SurfaceView, GLSurfaceView, SurfaceTexture, TextureView与SurfaceFlinger。</p>
 
-<p>Google近期在Udacity上发布了<a href="https://www.udacity.com/course/ud825">Android性能优化的在线课程</a>，分别从渲染，运算与内存，电量几个方面介绍了如何去优化性能，这些课程是Google之前在Youtube上发布的<a href="http://hukai.me/android-performance-patterns/">Android性能优化典范</a>专题课程的细化与补充。</p>
+<p>这篇文章会介绍Android图形架构的基本构成以及它们是如何在程序framework与多媒体系统中运作的。核心关注点是，图形数据的buffer是如何在系统中传递的。如果你曾经好奇过SurfaceView与TextureView的工作方式，或者是想知道Surface与EGLSurface是如何交互的，那么这篇文章将给你解答这些疑问。<strong>You've come to the right place.</strong></p>
 
-<p>下面是电量篇章的学习笔记，部分内容与前面的性能优化典范有重合，欢迎大家一起学习交流！</p>
+<p>大多数时候，我们都不需要了解这些类的使用原理，但是学习这些它们的工作原理可以为我们提供一种Sense，用来更加高效的工作。所以这里我们学习它们是如何工作的，而不仅仅是它们是如何使用的。</p>
 
-<h3>1)Understanding Battery Drain</h3>
+<h2>BufferQueue and gralloc</h2>
 
-<p>手机各个硬件模块的耗电量是不一样的，有些模块非常耗电，而有些模块则相对显得耗电量小很多。</p>
+<p>BufferQueue and grallocGraphiccal的核心是BufferQueue,它的角色是连接产生图形数据的生产者与显示数据的消费者。生产者与消费者可以再两个不同的进程，那么数据在系统中进行传递就依赖于BufferQueue。</p>
 
-<p><img src="/images/android_perf_battery_drain.png" alt="android_perf_battery_drain" /></p>
+<p>基础的用法是很直接简单的。生产者获取到一个buffer，制定了宽，高，pixel format与usage flags之后，再放到queue中。消费者获取到buffer，消费数据后，把buffer返回到queue中。</p>
 
-<p>电量消耗的计算与统计是一件麻烦而且矛盾的事情，记录电量消耗本身也是一个费电量的事情。唯一可行的方案是使用第三方监测电量的设备，这样才能够获取到真实的电量消耗。</p>
+<ul>
+<li>生产者：dequeueBuffer() -> queueBuffer()</li>
+<li>消费者：acquireBuffer() -> releaseBuffer()</li>
+</ul>
 
-<p>当设备处于待机状态时消耗的电量是极少的，以N5为例，打开飞行模式，可以待机接近1个月。可是点亮屏幕，硬件各个模块就需要开始工作，这会需要消耗很多电量。</p>
-
-<p>使用WakeLock或者JobScheduler唤醒设备处理定时的任务之后，一定要及时让设备回到初始状态。每次唤醒蜂窝信号进行数据传递，都会消耗很多电量，它比WiFi等操作更加的耗电。</p>
 
 <!-- More -->
 
 
-<p><img src="/images/battery_drain_radio.png" alt="battery_drain_radio" /></p>
+<p>目前很多Android设备已经开始支持“Sync framework”。这使得系统可以结合hardware组件对graphic data做异步的操作。例如，生产者再rendering完成之前就开始提交一系列的OpenGL ES的绘制命令并参与到输出排队buffer中。Buffer队列中设置有多道栅栏，用来同步生产者与消费者的工作。这样的一个方法可以减少buffer数据在系统中传递的延迟并提升吞吐量。</p>
 
-<h3>2)Battery Historian</h3>
+<p>队列的一些特性，例如最大支持Hold住的数据量，取决于生产者与消费者的共同作用。</p>
 
-<p><a href="https://developer.android.com/about/versions/android-5.0.html#Power">Battery Historian</a>是Android 5.0开始引入的新API。通过下面的指令，可以得到设备上的电量消耗信息：</p>
+<p>BufferQueue的责任是分配Buffer,而Buffer则用来Hold Data的部分。</p>
 
-<p><code>bash
-$ adb shell dumpsys batterystats &gt; xxx.txt  //得到整个设备的电量消耗信息
-$ adb shell dumpsys batterystats &gt; com.package.name &gt; xxx.txt //得到指定app相关的电量消耗信息
-</code></p>
+<h3>gralloc HAL</h3>
 
-<p>得到了原始的电量消耗数据之后，我们需要通过Google编写的一个<a href="https://github.com/google/battery-historian">python脚本</a>把数据信息转换成可读性更好的html文件：</p>
+<p>真正实行buffer allocation的操作是通过gralloc来实现的，里面的alloc()方法会根据buffer的参数：宽高，pixel format与usage flags等，进行操作。</p>
 
-<p><code>bash
-$ python historian.py xxx.txt &gt; xxx.html
-</code></p>
-
-<p>打开这个转换过后的html文件，可以看到类似TraceView生成的列表数据，这里的数据信息量很大，这里就不展开了。</p>
-
-<p><img src="/images/android_perf_battery_historian.png" alt="android_perf_battery_historian" /></p>
-
-<h3>3)Track Battery Status &amp; Battery Manager</h3>
-
-<p>我们可以通过下面的代码来获取手机的当前充电状态：</p>
-
-<p>```java
-// It is very easy to subscribe to changes to the battery state, but you can get the current
-// state by simply passing null in as your receiver.  Nifty, isn't that?
-IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-Intent batteryStatus = this.registerReceiver(null, filter);
-int chargePlug = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
-boolean acCharge = (chargePlug == BatteryManager.BATTERY_PLUGGED_AC);
-if (acCharge) {</p>
-
-<pre><code>Log.v(LOG_TAG,“The phone is charging!”);
-</code></pre>
-
-<p>}
-```</p>
-
-<p>在上面的例子演示了如何立即获取到手机的充电状态，得到充电状态信息之后，我们可以有针对性的对部分代码做优化。比如我们可以判断只有当前手机为AC充电状态时
-才去执行一些非常耗电的操作。</p>
-
-<p>```java
-/<em>*
- * This method checks for power by comparing the current battery state against all possible
- * plugged in states. In this case, a device may be considered plugged in either by USB, AC, or
- * wireless charge. (Wireless charge was introduced in API Level 17.)
- </em>/
-private boolean checkForPower() {</p>
-
-<pre><code>// It is very easy to subscribe to changes to the battery state, but you can get the current
-// state by simply passing null in as your receiver.  Nifty, isn't that?
-IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-Intent batteryStatus = this.registerReceiver(null, filter);
-
-// There are currently three ways a device can be plugged in. We should check them all.
-int chargePlug = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
-boolean usbCharge = (chargePlug == BatteryManager.BATTERY_PLUGGED_USB);
-boolean acCharge = (chargePlug == BatteryManager.BATTERY_PLUGGED_AC);
-boolean wirelessCharge = false;
-if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-    wirelessCharge = (chargePlug == BatteryManager.BATTERY_PLUGGED_WIRELESS);
-}
-return (usbCharge || acCharge || wirelessCharge);
-</code></pre>
-
-<p>}
-```</p>
-
-<h3>4)Wakelock and Battery Drain</h3>
-
-<p>高效的保留更多的电量与不断促使用户使用你的App会消耗电量，这是矛盾的选择题。不过我们可以使用一些更好的办法来平衡两者。</p>
-
-<p>假设你的手机里面装了大量的社交类应用，即使手机处于待机状态，也会经常被这些应用唤醒用来检查同步新的数据信息。Android会不断关闭各种硬件来延长手机的待机时间，首先屏幕会逐渐变暗直至关闭，然后CPU进入睡眠，这一切操作都是为了节约宝贵的电量资源。但是即使在这种睡眠状态下，大多数应用还是会尝试进行工作，他们将不断的唤醒手机。一个最简单的唤醒手机的方法是使用PowerManager.WakeLock的API来保持CPU工作并防止屏幕变暗关闭。这使得手机可以被唤醒，执行工作，然后回到睡眠状态。知道如何获取WakeLock是简单的，可是及时释放WakeLock也是非常重要的，不恰当的使用WakeLock会导致严重错误。例如网络请求的数据返回时间不确定，导致本来只需要10s的事情一直等待了1个小时，这样会使得电量白白浪费了。这也是为何使用带超时参数的wakelock.acquice()方法是很关键的。</p>
-
-<p>但是仅仅设置超时并不足够解决问题，例如设置多长的超时比较合适？什么时候进行重试等等？解决上面的问题，正确的方式可能是使用非精准定时器。通常情况下，我们会设定一个时间进行某个操作，但是动态修改这个时间也许会更好。例如，如果有另外一个程序需要比你设定的时间晚5分钟唤醒，最好能够等到那个时候，两个任务捆绑一起同时进行，这就是非精确定时器的核心工作原理。我们可以定制计划的任务，可是系统如果检测到一个更好的时间，它可以推迟你的任务，以节省电量消耗。</p>
-
-<p><img src="/images/alarmmanager_inexact_wakelock.png" alt="alarmmanager_inexact_wakelock" /></p>
-
-<p>这正是JobScheduler API所做的事情。它会根据当前的情况与任务，组合出理想的唤醒时间，例如等到正在充电或者连接到WiFi的时候，或者集中任务一起执行。我们可以通过这个API实现很多免费的调度算法。</p>
-
-<h3>5)Network and Battery Drain</h3>
-
-<p>下面内容来自官方Training文档中<a href="http://hukai.me/android-training-course-in-chinese/connectivity/efficient-downloads/efficient-network-access.html">高效下载</a>章节关于手机(Radio)蜂窝信号对电量消耗的介绍。</p>
-
-<p>通常情况下，使用3G移动网络传输数据，电量的消耗有三种状态：</p>
+<p>gralloc不仅仅是native heap上分配内存的另外一个方式。通常alloc取决于usage flags,例如</p>
 
 <ul>
-<li><strong>Full power</strong>: 能量最高的状态，移动网络连接被激活，允许设备以最大的传输速率进行操作。</li>
-<li><strong>Low power</strong>: 一种中间状态，对电量的消耗差不多是Full power状态下的50%。</li>
-<li><strong>Standby</strong>: 最低的状态，没有数据连接需要传输，电量消耗最少。</li>
+<li> how often the memory will be accessed from software (CPU)</li>
+<li> how often the memory will be accessed from hardware (GPU)</li>
+<li> whether the memory will be used as an OpenGL ES ("GLES") texture(质地)</li>
+<li> whether the memory will be used by a video encoder</li>
 </ul>
 
 
-<p>下图是一个典型的3G Radio State Machine的图示(来自AT&amp;T，详情请点击<a href="http://www.research.att.com/articles/featured_stories/2011_03/201102_Energy_efficient?fbid=SYuI20FzBum">这里</a>):</p>
+<p>例如，如果你指定format RGBA8888，并且这个buffer可以从software层进行访问，那么alloc会使用R-G-B-A的顺序创建每一个pixel.如果你指定buffer只会被hardware访问并且会作为GLES texture的组成部分，那么alloc可以使用BGRA的顺序，这样效率更高。</p>
 
-<p><img src="/images/mobile_radio_state_machine.png" title="Figure 1. Typical 3G wireless radio state machine." alt="mobile_radio_state_machine.png" /></p>
+<h2>SurfaceFlinger and Hardware Composer</h2>
 
-<p><strong>总之，为了减少电量的消耗，在蜂窝移动网络下，最好做到批量执行网络请求，尽量避免频繁的间隔网络请求。</strong></p>
+<p>如何把那些数据绘制到屏幕上，需要使用到SurfaceFlinger与Hardware Composer HAL。</p>
 
-<p>通过前面学习到的Battery Historian我们可以得到设备的电量消耗数据，如果数据中的移动蜂窝网络(Mobile Radio)电量消耗呈现下面的情况，间隔很小，又频繁断断续续的出现，说明电量消耗性能很不好：</p>
+<p>SurfaceFlinger的作用是接收来自各处的数据，进行混合编制之后，然后进行显示。</p>
 
-<p><img src="/images/android_perf_battery_bad.png" alt="android_perf_battery_bad.png" /></p>
+<p>当app作为foreground时，WindowManager Service会请求SurfaceFlinger绘制一个surface。SurfaceFlinger会创建一个”layer” - 它的主要组成部分是BufferQueue。此时SurfaceFlinger扮演了消费者的角色。生产者的数据是通过WindowManager传递到app，WindowManager可以直接发送frames给SurfaceFlinger。其实可以把SurfaceFlinger理解为LayerFlinger。</p>
 
-<p>经过优化之后，如果呈现下面的图示，说明电量消耗的性能是良好的：</p>
+<p>对于大多数apps来说，在任何时刻，屏幕上会有三个layer。“Status Bar”是在屏幕的最上层，“navigation bar”在屏幕的底部或者侧边，另外一层是app UI layer。一些app可能拥有更多或者更少的layer。例如默认的home app，对于wallpaper有单独设置一层layer，全屏游戏的应用会隐藏status bar的layer。Each layer都可以单独进行更新。Status与Navigation Bar是由系统process进行绘制的。app layer是由app进行绘制的。它们之间是相互独立的。</p>
 
-<p><img src="/images/android_perf_battery_good.png" alt="android_perf_battery_good" /></p>
+<p>设备显示屏以固定的频率刷新屏幕，对于手机与平板来说，通常是60fps。刷新的频率有时是不固定的。</p>
 
-<p>另外WiFi连接下，网络传输的电量消耗要比移动网络少很多，应该尽量减少移动网络下的数据传输，多在WiFi环境下传输数据。</p>
+<p>当SurfaceFlinger接收到VSYNC刷新信号时，会遍历所有的layers，寻找可以使用的新的buffers。如果找到新的buffer，那么就获取它，否则继续使用前面获取到得buffer。SurfaceFlinger总是需要有内容可以显示，所以它会持续hold住buffer。如果没有新的buffer提交到layer上，这个layer就会被SurfaceFlinger所忽略。</p>
 
-<p><img src="/images/android_perf_battery_wifi.png" alt="android_perf_battery_wifi" /></p>
+<p>一旦SurfaceFlinger收集到了可见layer的所有buffers，它会请求Hardware composer如何进行composition的操作。</p>
 
-<p>那么如何才能够把任务缓存起来，做到批量化执行呢？下面就轮到Job Scheduler出场了。</p>
+<h3>Hardware Composer</h3>
 
-<h3>6)Using Job Scheduler</h3>
+<p>Hardware Composer HAL(HWC)是从3.0开始才被引入的。它首要的目的是结合可用的硬件，判断选择最有效的方式用来composite buffers。这部分的功能通常是硬件OEM厂商实现的。</p>
 
-<p>使用<a href="https://developer.android.com/reference/android/app/job/JobScheduler.html">Job Scheduler</a>，应用需要做的事情就是判断哪些任务是不紧急的，可以交给Job Scheduler来处理，Job Scheduler集中处理收到的任务，选择合适的时间，合适的网络，再一起进行执行。</p>
+<p>举例说明2种compossite的方式：</p>
 
-<p>下面是使用Job Scheduler的一段简要示例，需要先有一个JobService：</p>
+<ul>
+<li>先画好App的UI,然后把StatusBar与BottomBar的部分绘制到UI之上，最后把这些组合好的buffer送给硬件进行显示。</li>
+<li>分别传递三部分的Buffer，告诉硬件从不同的屏幕区域读取不同的buffer。
+显然第2种方式会更有效率。</li>
+</ul>
 
-<p>```java
-public class MyJobService extends JobService {</p>
 
-<pre><code>private static final String LOG_TAG = "MyJobService";
+<p>因为不同的设备处理能力不一样，每一个layer是否需要旋转，是否有限制的显示位置等等问题。所以HWC的工作方式是这样的：</p>
 
+<ul>
+<li>SurfaceFlinger提供给HWC一个完整的layer list,并且询问系统:该如何处理这些layers?</li>
+<li>HWC通过把每一个layer标记为”overlay”或者“GLES Composition”来作为应答。</li>
+<li>SurfaceFlinger对那些标记为GLES Composition的layer，传递buffer给HWC，并且让HWC来处理。</li>
+</ul>
+
+
+<p>Overlay的方式比GLES composition的方式效率要低很多，特别是Overlay的内容为transparent时。</p>
+
+<h3>The Need for Triple-Buffering</h3>
+
+<ul>
+<li><strong>Double-buffering</strong></li>
+</ul>
+
+
+<p>为了避免在显示上出现断层，系统需要是double-buffered: front buffer显示的同时，back buffer正在准备。
+假设frame N正在显示，那么为了在下一个VSYNC信号中显示frame N+1，此时frame N+1将被SurfaceFlinger提前获取到。当VSYNC信号到达时，HWC会flip buffer。当app需要绘制frame N+2到buffer时，SurfaceFlinger会遍历每个layer寻找是否有新的buffer，此时没有找到任何新的buffer，因此再下一个VSYNC中再次准备显示frame N+1，过了一点时间之后，app结束了rendering frame N+2并且进入了SurfaceFlinger的队列，可是此时已经太晚了，这种双重buffer的方式效率并不够高。</p>
+
+<ul>
+<li><strong>Triple-buffering</strong></li>
+</ul>
+
+
+<p>在VSYNC之前，frame N正在显示，frame N+1已经composited并且准备被显示，frame N+2已经在队列中并且准备好了被SurfaceFlinger获取。当屏幕flip时，buffers可以进行rotate，并且不产生bubble。</p>
+
+<h2>Surface and SurfaceHolder</h2>
+
+<p>Surface通常作为buffer queue的生产者，同时SurfaceFlinger作为消费者。
+用来显示Surface的BufferQueue通常是triple-buffering的，但是buffers却是按需分配的。</p>
+
+<h3>Canvas Rendering</h3>
+
+<p>曾经一段时间，所有的rendering渲染操作都是在软件层进行的。在今天，你也是可以这样做。在低版本的系统中，在软件层的渲染是通过使用Skia的图像库来实现的。如果你想要绘制一个矩形，调用一个库函数，在buffer中设置恰当的bytes数据。为了确保buffer不会在同一个时刻被两个Clients所更新，或者在显示时被写入，你必须对buffer进行加锁操作。<code>lockCanvas()</code>方法可以锁住buffer并且返回一个Canvas用来进行绘制。<code>unlockCanvasAndPost()</code>方法可以解锁buffer并且发送buffer数据给compositor进行组合。</p>
+
+<p>随着时间的推移，带有3D引擎的设备出现了，Android围绕OpenGL ES做了修改与适应。然而，为了兼容旧的API，增加了硬件加速Canvas API。</p>
+
+<p>当你为了访问Canvas而锁住Surface时，CPU渲染器会于BufferQueue的生产者建立连接，指导Surface被销毁时才回断开。大多数其他的生产者(例如GLES)可以与Surface进行断开连接与重新连接，但是Canvas-based的CPU渲染器不可以。这意味着如果你不针对一个Canvas进行加锁的话，是不可以在Surface上使用GLES进行绘制，也不可以给Surface发送来自视频解码器中的数据帧。</p>
+
+<p>生产者从BufferQueue中第一次请求一个buffer时，这个buffer是初始化分配为0的。初始化是非常有必要的，避免在不同进程中出现共享数据的意外错误。当你重用一个buffer时，之前的内容还是处于显示中。如果你重复的调用<code>lockCanvas()</code>与<code>unlockCanvasAndPost()</code>却没有绘制任何内容，你将会在前一个frame与渲染的frame中进行循环。</p>
+
+<p>Surface的lock/unlock代码保持了前一个渲染buffer的reference。如果你在锁定Surface的时候指定了一块dirty的区域，它会从之前的buffer中copy一份non-dirty的pixel数据过来。此时buffer将会机会对等的被SurfaceFlinger或者HWC进行处理，但是因为我们仅仅是需要进行读取的操作，所以没有必要进行互斥的访问。</p>
+
+<p>不通过Canvas(non-Canvas)的方式对一个Surface直接进行绘制的主要方式是通过OpenGL ES.这部分的内容会在下面被讲解。</p>
+
+<h3>SurfaceHolder</h3>
+
+<p>连接Surface与SurfaceView的是SurfaceHolder。最开始的想法是Surface代表了原始的数据buffer，那么SurfaceHolder是app用来追踪Surface的一些上层的信息，例如dimensions与format。Java语言定义好了潜在可能的native的实现接口。虽然有争议部分API是不会再可能被使用到的，可是却一直遗留在Public API中没有移除。</p>
+
+<p>通常来说，对于一个View的任何操作都回触发SurfaceHolder。一些其他的APIs，例如MediaCodec，可以直接操作Surface本身。你也可以从SurfaceHolder中获取到Surface。</p>
+
+<p>获取与设置Surface参数的APIs，例如size和format，都是通过SurfaceHolder来实现的。</p>
+
+<h2>EGLSurface and OpenGL ES</h2>
+
+<p>OpenGL ES定义了一个API用来渲染图形。为了是得GLES可以在各种平台上工作，它设计成可以和一个库进行结合的方式来工作。这个库知道如何通过操作系统创建与访问窗口。在Android中使用的库叫做EGL。如果你想要绘制textured polygons(多边形，模块)，你可以使用GLES的方法。如果你想要把渲染绘制到屏幕上，你可以使用EGL的方法。</p>
+
+<p>在开始使用GLES之前，你需要创建一个GL context。在EGL中，这意味着创建一个EGLContext与一个EGLSurface。GLES的操作是作用在当前的context上的，当前的context保存在当前thread中，这个context是不能传递的。这意味着你必需注意渲染的动作执行在哪个线程，并且在那个线程中的context是哪个。</p>
+
+<p>EGLSurface可以通过EGL(执行pbuffer)来分配一个buffer,或者通过操作系统来做一个窗口的分配。EGL window surface是通过<code>eglCreateWindowSurface()</code>方法来创建的。这个方法会使用一个window object作为参数，这个window object在android上可以是一个SurfaceView，一个SurfaceTexture，一个surfaceHolder或者是一个Surface，这些对象的内部都拥有一个BufferQuueue。当你执行了那个方法调用之后，EGL创建一个新的EGLSurface对象，并把这个对象与生产者的BufferQuueue的接口建立连接。</p>
+
+<p>EGL并没有提供lock/unlock的方法。你需要列出绘制的命令然后执行<code>eglSwapBuffer()</code>来提交当前frame。这个方法名本意是描述传统的front-back buffer的swap操作，但是实际上再后续的实现中又可能会有差异。</p>
+
+<p>在同一时刻，只能有一个EGLSurface与Surface进行结合，你只能有一个生产者连接到BufferQueue，但是如果你销毁了EGLSurface，那么就与BufferQueue连接断开，此时可以允许其他组件进行连接。</p>
+
+<p>一个EGLSurface在同一时刻必须只能存在于一个Thread中。但是一个Thread可以切换多个不同的EGLSurface。</p>
+
+<p>讨论到EGLSurface时最通常的误解是认为这只是Surface的某个方面(例如SurfaceHolder).它们实际上是有关联却相互独立的。你可以在ELGSurface上绘制没有被Surface hold住得部分，你也可以使用Surface的时候不要用EGL。EGLSurface只为GLES提供了一个绘制的地方。</p>
+
+<h2>SurfaceView and GLSurfaceView</h2>
+
+<p>从现在起，我们可以探讨下一些更上层的组件，以及它们是如何与底层的组件进行适配的。</p>
+
+<p>Android app Framework UI是基于hierarchy中的View进行搭建的。大多数的文章都没有涉及到细节的讨论，但是了解UI组件是如何经过一系列复杂的measurement与layout然后适配到一个矩形区域是非常有意义的。当app来到forground的时候，所有可见的view对象都将被SurfaceFlinger渲染到由WindowManager创建的Surface中。Layout与rendering是执行在app的UI Thread的。</p>
+
+<p>无论你又多少的layouts与Views，所有的对象都是被绘制到同一个Buffer中。无论Views是否开启了hardware-accelerated都是一样的。</p>
+
+<p>SurfaceView的参数和其他的View一样，你可以设置position与size。但是讨论到render的时候，SurfaceView的contents是透明的。SurfaceView在View中只是一个透明的占位区域。</p>
+
+<p>当SurfaceView可见时，WindowManager会请求SurfaceFlinger创建一个新的Surface。(这个过程不是同步的，所以需要实现Surface被创建的回调用来获取到信息)。默认情况下，新创建的Surface是在app UI Surface的下层(后面)，但是这个默认的Z-ordering可以被override，设置为在app UI的上面(Top表面)。</p>
+
+<p>渲染到Surface上的任何数据都是由SurfaceFlinger进行组合的，而不是由app完成。这就是SurfaceView真正牛B的地方：绘制到SurfaceView上的内容可以由单独的Thread或者Proces进行操作。你可以忽略UI Thread，但是你还是需要保持SurfaceView与Activity的生命周期一致，整个SurfaceView是和app UI还有其他被硬件加速的layer是共同协作的。</p>
+
+<p>请注意，相对于BufferQueue来说，Surface是生产者，而SurfaceFlinger layer是消费者。你可以使用任何合适的方法来更新Surface，只要使得Surface可以作为BufferQueue的生产者。你可以使用Surface提供的Canvas的功能，添加一个EGLSurface并使用GLES进行绘制并且使用MeidaCodec的Video decoder对Surface进行写操作。</p>
+
+<h2>GLSurfaceView</h2>
+
+<p>GLSurfaceView提供了一些帮助类用来协助管理EGL contexts，线程间的交互，与Activity生命周期的互动。</p>
+
+<p>GLSurfaceView创建一个线程用来渲染与配置EGL context。当Activity暂停时，状态会被自动清除。</p>
+
+<p>在大多数情况下，GLSurfaceView是非常有用的并且可以和GLES进行协作。在某些情形下，使用它是个好的选择。</p>
+
+<h2>SurfaceTexture</h2>
+
+<p>SurfaceTexture是在Android 3.0才被引入的。和SurfaceView的概念类似(Surface与View的结合体)，SurfaceTexture是Surface与GLES texture的结合体。</p>
+
+<p>当你创建一个SurfaceTexture时，你会创建一个BufferQueue，app此时扮演了消费者的角色。当新的buffer被生产者加入队列时，你的app会通过<code>onFrameAvailable()</code>的回调得到通知。<code>updateTextureImage()</code>方法会释放前面hold住得buffer，从队列中请求一个新的buffer，并执行一些EGL的方法使得buffer对于GLES来说可以作为一个external texture。</p>
+
+<p>External texture(<code>GL_TEXTURE_EXTERNAL_OES</code>)与GLES(<code>GL_TEXTURE_2D</code>)创建的texture并不相同。你必须对你的渲染器做一些不同的配置，同时有些东西是不能修改的。但是最主要的是：你可以把从BufferQueue中获取到的数据直接渲染为textured模型。</p>
+
+<p>你可能好奇我们如何能够确保在buffer中的数据格式是能够被GLES可以识别的。当SurfaceTexture创建了BufferQueue，它会设置消费者的usge flag为<code>GRALLOC_USAGE_HW_TEXTURE</code>，确保被gralloc创建的任何buffer可以被GLES所使用。</p>
+
+<p>因为SurfaceTexture是需要和EGL context进行交互的，你需要注意从正确的线程中调用SurfaceTexture的方法。</p>
+
+<p>每一个传递的Buffer都不仅仅是buffer本身，还包含了一个timestamp与transformation的信息。</p>
+
+<p>提供transformation的信息是为了提供效率。在某些情况下，对于消费者来说，source data可能是错误的orientation，我们没有在发送数据之前就做方向矫正，而是把数据与它的角度信息一起进行传递。transformation matrix的信息可以在数据被使用的时候与其他transformation信息进行整合，这样能够最大化的减少额外的开销。</p>
+
+<p>timestamp也是很有帮助的。例如，假设你连接到了一个生产者的接口上(通过<code>setPreviewTexture()</code>连接到Camera的输出接口)，如果你想要创建一个Video，你需要为每一帧数据设置当前的timestamp，这个timestamp应该是基于frame被captured来计算的，而不是buffer被接收到得时间。这个timestamp是被camera的代码进行设置的，这样确保了timestamp更加具有连续性。</p>
+
+<h2>SurfaceTexture and Surface</h2>
+
+<p>如果你仔细查看API文档，你将会发现：对于程序来说，创建一个空白Surface的唯一方式是通过它的构造函数来实现，这个构造函数使用SufaceTexture作为唯一的参数。（在API 11之前，还没有public的surface构造器）。如果你把SurfaceTexture作为Surface与Texture的结合体，只有唯一的构造方法就会成为一个缺点。</p>
+
+<p>其实SurfaceTexture可以称为GLConsumer，这能够更加准确的描述它扮演的角色：作为BufferQueue的owner与comsumer。当你从SurfaceTexture中创建一个Surface时，从SurfaceTexture的BufferQueue的角度来看，你是在创建一个对象用来作为生产者。</p>
+
+<h2>TextureView</h2>
+
+<p>TextureView是Android 4.0才开始被引入的。它是很复杂的一个View对象，它会组合View与SurfaceTexture。</p>
+
+<p>SurfaceTexture被称为一个GL comsumer，它会消费图形数据的buffer并使得他们作为texture的形式存在。TextureView对SurfaceTexture做了包装，取代了响应回调的职责并负责请求新的buffer。新的buffer会导致TextureView进行invalidate的操作。当请求绘制时，TextureView使用最近接收到得buffer作为它的source data，渲染时不用考虑View的任何状态值。</p>
+
+<p>你可以使用GLES对TextureView进行渲染，就像SurfaceView一样。仅仅是把SurfaceTexture传递到EGL的window创建的方法里面。然而这样做，暴露了一个隐藏的问题。</p>
+
+<p>在前面我们有提到，BufferQueues可以在不同的进程中传递buffers。当使用GLES渲染TextureView的时候，producer与consumer是在同一个进程，并且他们可能会执行在同一个thread。假设我们从UI Thread快速的提交了一连串的buffers。EGL buffer swap的方法会需要从BufferQueue中执行dequeue的操作，他会一直停留直到有一个buffer可用。可是直到consumer请求一个buffer进行渲染之前，不会有任何的buffer可用，而且这件事情也发生在UI Thread。所以这就出现问题了。</p>
+
+<p>解决方案是使得BufferQueue确保总是有一个可用的buffer用来进行dequeue，这样避免buffer swap会被卡住。其中一个方法是当新的buffer进行queued操作时，BufferQueue能够discard前一个queued的buffer，并且确保queue中存在的最少buffer数同时限制加入队列中得最多的buffer个数。(<strong>如果你的队列中，有三个buffers，消费者一次请求了所有的三个buffer，那么就没有buffer用来出队了，buffer swap的调用会被卡住或者失败，隐藏我们需要阻止消费者一次请求超过2个buffer。</strong>)错失Buffer通常是不希望发生的事情，因此只有在特殊情况下才允许发生，例如生产者与消费者在同一个Process。</p>
+
+<h2>SurfaceView or TextureView</h2>
+
+<p>SurfaceView与TextureView扮演了相似的角色，但在实现原理上却有着非常大的差异。选择哪个才是最好的需要知道如何进行权衡利弊。</p>
+
+<p>TextureView是View hierarchy中一个普通的成员，它的行为和其他View类似，可以叠加到其他View上也可以被其他View进行重叠覆盖。你可以对它执行任意的transformation，也可以通过简单的API调用获取其中的数据内容。</p>
+
+<p>TextureView的主要缺陷是composition步骤的效率。对于SurfaceView来说，数据内容是由SurfaceFlinger绘制到单独的一个layer上的，完美的实现了层叠。对于TextureView，View的composition是由GLES执行的，同时更新TextureView的数据内容可能会导致其他View组件也出现redraw(如果view是放在TextureView的上面的话)。在View渲染成功之后，app UI layer必须通过SurfaceFlinger与其他layer(StatusBar layer,NavigationBar layer)进行composition。对于一个全屏的视频播放应用，还有那些UI元素全部在video layer上面的应用，SurfaceView提供了更好的性能。</p>
+
+<p>前面有提到过，对于RDM保护的Video只能在上层的layer上呈现。能够播放DRM的Video Player必须使用SurfaceView。</p>
+
+<h2>SurfaceView and Activity Lifecycle</h2>
+
+<p>当使用SurfaceView的时候，渲染Surface应该使用单独的Thread而不是Main UI Thread。这会带来一些thread与activity生命周期的交互问题。</p>
+
+<p>首先，对于一个拥有SurfaceView的Activity，他们有两个互相依赖的生命周期：</p>
+
+<ul>
+<li>App onCreate/onResume/onPause</li>
+<li>Surface created/changed/destoryed</li>
+</ul>
+
+
+<p>当Activity启动时，你会按下面的顺序接收到callback:</p>
+
+<ul>
+<li>onCreate</li>
+<li>onResume</li>
+<li>surfaceCreated</li>
+<li>surfaceChanged</li>
+</ul>
+
+
+<p>如果你点击back按钮，你将会收到下面的callback:</p>
+
+<ul>
+<li>onPause</li>
+<li>surfaceDestoryed(在Surface消失之前就会执行)</li>
+</ul>
+
+
+<p>如果你点击电源按钮来关闭屏幕，你只会收到<code>onPause()</code>，没有<code>surfaceDestroyed()</code>。此时Surface仍然是存活的，渲染操作还可以继续进行。如果你有需要，还可以持续请求获取到Choreographyer的信号。如果你在锁屏的情况下旋转屏幕，然后对设备进行解锁，此时Activity会被重新启动。但是如果没有进行旋转，解锁之后还是能够获取到之前的Surface。</p>
+
+<p>当在SurfaceView里面使用一个单独的渲染线程时有一个问题：这个Thread的生命周期是不是应该和Surface或者Activity进行绑定？答案取决于在屏幕关闭时你想要做的操作。有两个方法：(1)在Activity的start/stop时对Thread做start/stop的操作。(2)在Surface的create/destory时对thread做start/stop的操作。</p>
+
+<ul>
+<li>方法(1)是和app的生命周期进行绑定。在onResume()的时候开启渲染线程，在onPause时停止它。这会遇到一点麻烦是：不知道何时创建于配置thread，因为Surface有时存在有时又不在。我们必须等待Surface被创建时候才能做一些线程中的初始化的操作。但是我们还不能简单的把这些操作放到<code>surfaceCreated()</code>的回调里面执行，因为如果surface不被重新创建的话，就没有办法触发那些初始化的操作。因此我们不要查询与保存Surface的状态，并且把这些信息传递给渲染thread。请注意，在多核的系统中，线程间传递数据需要小心谨慎，最好的方式是通过Handler message来传递Surface或者SurfaceHolder，而不仅仅是把他们放到thread里面。</li>
+<li>方法(2)呼声更高，因为Surface与渲染的逻辑是相关联的。在Surface创建之后开启渲染Thread，这样避免了一些线程间通信的问题。Surface created/changed的消息都是先于Thread收到的。我们需要确保屏幕关闭之后，渲染操作会停止，在屏幕点亮之后操作能够恢复。可以通过简单的通知Choreographer来停止触发frame绘制的回调。仅仅只有在渲染thread正在运行，我们的<code>onReusme</code>方法才需要恢复那些callback。如果我们基于frame之间的时间做动画的操作，中间省略掉得一些数据是不要紧的。给出明确的pause/resume的消息是个不错的写法。</li>
+</ul>
+
+
+<p>=====
+学习自：<a href="http://source.android.com/devices/graphics/architecture.html">http://source.android.com/devices/graphics/architecture.html</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Deeper(00) - Touch事件分发响应机制]]></title>
+    <link href="http://hukai.me/android-deeper-touch-event-dispatch-process/"/>
+    <updated>2014-04-05T13:13:00+08:00</updated>
+    <id>http://hukai.me/android-deeper-touch-event-dispatch-process</id>
+    <content type="html"><![CDATA[<h2>1)概述</h2>
+
+<p>Android的TouchEvent通常包含三个动作,ACTION_DOWN,ACTION_MOVE与ACTION_UP。发出的顺序是DOWN->MOVE->MOVE->...->UP(注意MOVE事件是否能够被触发取决于操作手势里面是否包含了移动的动作)。</p>
+
+<p>消息分发流程，从上到下，从父到子：Activity->ViewGroup1->ViewGroup1的子ViewGroup2->...->Target View<br/>
+消息响应流程，从下到上，从子到父：Target View->...->ViewGroup1的子ViewGroup2->ViewGroup1->Activity</p>
+
+<ul>
+<li><p><strong>public boolean dispatchTouchEvent(MotionEvent ev);</strong><br/>
+事件分发处理函数，通常会在Activity层根据UI的显示情况，把事件传递给相应的ViewGroup。下面的演示代码中，为了方便模拟，会直接return true，解说中称之为“丢弃”。(因为事件实际上没有传递给任何组件，没有被消费，而且是主动的行为，故称之为丢弃)</p></li>
+<li><p><strong>public boolean onInterceptTouchEvent(MotionEvent ev);</strong><br/>
+对分发的事件进行拦截，注意拦截ACION_DOWN与其他ACTION的差异。<br/>
+第1种情况：如果ACTION_DOWN的事件没有被拦截，顺利找到了TargetView，那么后续的MOVE与UP都能够下发。如果后续的MOVE与UP下发时还有继续拦截的话，事件只能传递到拦截层，并且发出ACTION_CANCEL。<br/>
+第2种情况：如果ACITON_DOWN的事件下发时被拦截，导致没有找到TargetView，那么后续的MOVE与UP都无法向下派发了，在Activity层就终止了传递。</p></li>
+<li><p><strong>public boolean onTouchEvent(MotionEvent ev);</strong><br/>
+响应处理函数,如果有设置对应listener的话,这里还会与onTouch,onClick,onLongClick有关联。具体执行顺序是onTouch()->onTouchEvent()->onClick()->onLongClick()。是否能够顺序执行，取决于每个方法的返回值是true还是false。具体这里不展开说。</p></li>
+</ul>
+
+
+<p><strong>强关注点：dispatch与intercept的差异，ACTION_DOWN与其他ACITON会对寻找target组件带来差异，而是否寻找到Target组件对整个流程有着重大的的影响。</strong></p>
+
+<!-- More -->
+
+
+<h2>2)dispatchTouchEvent()的源码解读</h2>
+
+<p>```java Android 4.4 ViewGroup.dispatchTouchEvent()源码解读
 @Override
-public void onCreate() {
-    super.onCreate();
-    Log.i(LOG_TAG, "MyJobService created");
+public boolean dispatchTouchEvent(MotionEvent ev) {</p>
+
+<pre><code>......
+boolean handled = false;
+......
+final int action = ev.getAction();
+final int actionMasked = action &amp; MotionEvent.ACTION_MASK;
+
+// 1)处理初始的ACTION_DOWN
+if (actionMasked == MotionEvent.ACTION_DOWN) {
+    // 把ACTION_DOWN作为一个Touch手势的始点，清除之前的手势状态。
+    cancelAndClearTouchTargets(ev); //清除前一个手势，*关键操作:mFirstTouchTarget重置为null*
+    resetTouchState(); //重置Touch状态标识
 }
 
-@Override
-public void onDestroy() {
-    super.onDestroy();
-    Log.i(LOG_TAG, "MyJobService destroyed");
-}
-
-@Override
-public boolean onStartJob(JobParameters params) {
-    // This is where you would implement all of the logic for your job. Note that this runs
-    // on the main thread, so you will want to use a separate thread for asynchronous work
-    // (as we demonstrate below to establish a network connection).
-    // If you use a separate thread, return true to indicate that you need a "reschedule" to
-    // return to the job at some point in the future to finish processing the work. Otherwise,
-    // return false when finished.
-    Log.i(LOG_TAG, "Totally and completely working on job " + params.getJobId());
-    // First, check the network, and then attempt to connect.
-    if (isNetworkConnected()) {
-        new SimpleDownloadTask() .execute(params);
-        return true;
+// 2)检查是否会被拦截
+final boolean intercepted;
+if (actionMasked == MotionEvent.ACTION_DOWN || mFirstTouchTarget != null) {
+    // 是ACTION_DOWN的事件，或者mFirstTouchTarget不为null(已经找到能够接收touch事件的目标组件)
+    final boolean disallowIntercept = (mGroupFlags &amp; FLAG_DISALLOW_INTERCEPT) != 0; 
+    // 判断禁止拦截的FLAG，因为requestDisallowInterceptTouchEvent(boolean disallowIntercept)方法可以禁止执行是否需要拦截的判断
+    if (!disallowIntercept) {
+        // 禁止拦截的FLAG为false，说明可以执行拦截判断，则执行此ViewGroup的onInterceptTouchEvent方法
+        intercepted = onInterceptTouchEvent(ev); // 此方法默认返回false，如果想修改默认的行为，需要override此方法，修改返回值。
+        ev.setAction(action);
     } else {
-        Log.i(LOG_TAG, "No connection on job " + params.getJobId() + "; sad face");
+        // 禁止拦截的FLAG为ture，说明没有必要去执行是否需要拦截了，这个事件是无法拦截的，能够顺利通过，所以设置拦截变量为false
+        intercepted = false; 
     }
-    return false;
+} else {
+    // 当不是ACTION_DOWN事件并且mFirstTouchTarget为null(意味着没有touch的目标组件)时，这个ViewGroup应该继续执行拦截的操作。
+    intercepted = true;
+}
+// 通过前面的逻辑处理，得到了是否需要进行拦截的变量值
+
+final boolean canceled = resetCancelNextUpFlag(this) || actionMasked == MotionEvent.ACTION_CANCEL;
+final boolean split = (mGroupFlags &amp; FLAG_SPLIT_MOTION_EVENTS) != 0;
+TouchTarget newTouchTarget = null;
+boolean alreadyDispatchedToNewTouchTarget = false;
+if (!canceled &amp;&amp; !intercepted) {
+    // 不是ACTION_CANCEL并且拦截变量为false
+    if (actionMasked == MotionEvent.ACTION_DOWN) {
+        // 在ACTION_DOWN时去寻找这次DOWN事件新出现的TouchTarget
+        final int actionIndex = ev.getActionIndex(); // always 0 for down
+
+        .....
+
+        final int childrenCount = mChildrenCount;
+        if (newTouchTarget == null &amp;&amp; childrenCount != 0) {
+            // 根据触摸的坐标寻找能够接收这个事件的子组件
+            final float x = ev.getX(actionIndex);
+            final float y = ev.getY(actionIndex);
+
+            final View[] children = mChildren;
+            // 逆序遍历所有子组件
+            for (int i = childrenCount - 1; i &gt;= 0; i--) {
+                final int childIndex = i;
+                final View child = children[childIndex];
+                // 寻找可接收这个事件并且组件区域内包含点击坐标的子View
+                if (!canViewReceivePointerEvents(child) || !isTransformedTouchPointInView(x, y, child, null)) {
+                    continue;
+                }
+
+                newTouchTarget = getTouchTarget(child); // 找到了符合条件的子组件，赋值给newTouchTarget
+
+                ......
+
+                // 把ACTION_DOWN事件传递给子组件进行处理
+                if (dispatchTransformedTouchEvent(ev, false, child, idBitsToAssign)) {
+                    // 如果此子ViewGroup消费了这个touch事件
+                    mLastTouchDownTime = ev.getDownTime();
+                    mLastTouchDownIndex = childIndex;
+                    mLastTouchDownX = ev.getX();
+                    mLastTouchDownY = ev.getY();
+                    // 则为mFirstTouchTarget赋值为newTouchTarget，此子组件成为新的touch事件的起点
+                    newTouchTarget = addTouchTarget(child, idBitsToAssign); 
+                    alreadyDispatchedToNewTouchTarget = true;
+                    break;
+                }
+            }
+        }
+        ......
+    }
 }
 
-@Override
-public boolean onStopJob(JobParameters params) {
-    // Called if the job must be stopped before jobFinished() has been called. This may
-    // happen if the requirements are no longer being met, such as the user no longer
-    // connecting to WiFi, or the device no longer being idle. Use this callback to resolve
-    // anything that may cause your application to misbehave from the job being halted.
-    // Return true if the job should be rescheduled based on the retry criteria specified
-    // when the job was created or return false to drop the job. Regardless of the value
-    // returned, your job must stop executing.
-    Log.i(LOG_TAG, "Whelp, something changed, so I'm calling it on job " + params.getJobId());
-    return false;
-}
-
-/**
- * Determines if the device is currently online.
- */
-private boolean isNetworkConnected() {
-    ConnectivityManager connectivityManager =
-            (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-    NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-    return (networkInfo != null &amp;&amp; networkInfo.isConnected());
-}
-
-/**
- *  Uses AsyncTask to create a task away from the main UI thread. This task creates a
- *  HTTPUrlConnection, and then downloads the contents of the webpage as an InputStream.
- *  The InputStream is then converted to a String, which is logged by the
- *  onPostExecute() method.
- */
-private class SimpleDownloadTask extends AsyncTask&lt;JobParameters, Void, String&gt; {
-
-    protected JobParameters mJobParam;
-
-    @Override
-    protected String doInBackground(JobParameters... params) {
-        // cache system provided job requirements
-        mJobParam = params[0];
-        try {
-            InputStream is = null;
-            // Only display the first 50 characters of the retrieved web page content.
-            int len = 50;
-
-            URL url = new URL("https://www.google.com");
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setReadTimeout(10000); //10sec
-            conn.setConnectTimeout(15000); //15sec
-            conn.setRequestMethod("GET");
-            //Starts the query
-            conn.connect();
-            int response = conn.getResponseCode();
-            Log.d(LOG_TAG, "The response is: " + response);
-            is = conn.getInputStream();
-
-            // Convert the input stream to a string
-            Reader reader = null;
-            reader = new InputStreamReader(is, "UTF-8");
-            char[] buffer = new char[len];
-            reader.read(buffer);
-            return new String(buffer);
-
-        } catch (IOException e) {
-            return "Unable to retrieve web page.";
+// 经过前面的ACTION_DOWN的处理，有两种情况。
+if (mFirstTouchTarget == null) {
+    // 情况1：(mFirstTouchTarget为null) 没有找到能够消费touch事件的子组件或者是touch事件被拦截了，
+    // 那么在ViewGroup的dispatchTransformedTouchEvent方法里面，处理Touch事件则和普通View一样，
+    // 自己无法消费，调用super.dispatchOnTouchEvent()把事件回递给父ViewGroup进行处理
+    handled = dispatchTransformedTouchEvent(ev, canceled, null, TouchTarget.ALL_POINTER_IDS);
+} else {
+    // 情况2：(mFirstTouchTarget!=null) 找到了能够消费touch事件的子组件，那么后续的touch事件都可以传递到子View
+    TouchTarget target = mFirstTouchTarget;
+    // (这里为了理解简单，省略了一个Target List的概念，有需要的同学再查看源码)
+    while (target != null) {
+        if (alreadyDispatchedToNewTouchTarget &amp;&amp; target == newTouchTarget) {
+            // 如果前面利用ACTION_DOWN事件寻找符合接收条件的子组件的同时消费掉了ACTION_DOWN事件，这里直接返回true
+            handled = true;
+        } else {
+            final boolean cancelChild = resetCancelNextUpFlag(target.child) || intercepted;
+            // 对于非ACTION_DOWN事件，则继续传递给目标子组件进行处理(注意这里的非ACTION_DOWN事件已经不需要再判断是否拦截)
+            if (dispatchTransformedTouchEvent(ev, cancelChild, target.child, target.pointerIdBits)) {
+                // 如果target子组件进行处理，符合某些条件的话，会传递ACTION_CANCEL给target子组件
+                // 条件是：如果ACTION_DOWN时没有被拦截，而后面的touch事件被拦截，则需要发送ACTION_CANCEL给target子组件
+                handled = true;
+            }
+            ......
         }
     }
-
-    @Override
-    protected void onPostExecute(String result) {
-        jobFinished(mJobParam, false);
-        Log.i(LOG_TAG, result);
-    }
 }
+
+if (canceled || actionMasked == MotionEvent.ACTION_UP) {
+    // 如果是ACTION_CANCEL或者ACTION_UP，重置Touch状态标识，mFirstTouchTarget赋值为null，后面的Touch事件都无法派发给子View
+    resetTouchState();
+}
+......
+
+return handled;
 </code></pre>
 
 <p>}
 ```</p>
 
-<p>然后模拟通过点击Button触发N个任务，交给JobService来处理</p>
+<h2>3)dispatchTouchEvent()流程图</h2>
 
-<p>```java
-public class FreeTheWakelockActivity extends ActionBarActivity {</p>
+<p><img src="/images/articles/dispatchtouchevent_process.jpg" title="演示ViewGroup中的dispatchTouchEvent的流程" alt="dispatchtouchevent_process.jpg" /></p>
 
-<pre><code>public static final String LOG_TAG = "FreeTheWakelockActivity";
+<h2>4)代码举例说明</h2>
 
-TextView mWakeLockMsg;
-ComponentName mServiceComponent;
+<p><img src="/images/articles/dispatchtouchevent_demo.jpg" title="Demo的layout层级" alt="dispatchtouchevent_demo.jpg" /></p>
 
+<p><a href="https://github.com/kesenhoo/TouchEventDemo.git">Demo Source Code</a>下面是截取的片段
+```java
 @Override
-protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_wakelock);
+public boolean dispatchTouchEvent(MotionEvent ev) {</p>
 
-    mWakeLockMsg = (TextView) findViewById(R.id.wakelock_txt);
-    mServiceComponent = new ComponentName(this, MyJobService.class);
-    Intent startServiceIntent = new Intent(this, MyJobService.class);
-    startService(startServiceIntent);
-
-    Button theButtonThatWakelocks = (Button) findViewById(R.id.wakelock_poll);
-    theButtonThatWakelocks.setText(R.string.poll_server_button);
-
-    theButtonThatWakelocks.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-                pollServer();
-        }
-    });
+<pre><code>switch (ev.getAction()) {
+    case MotionEvent.ACTION_DOWN:
+        Log.d(TAG, "[dispatchTouchEvent] -&gt; ACTION_DOWN");
+        break;
+        //Log.i(TAG, "[dispatchTouchEvent] -&gt; ACTION_DOWN, return true");
+        //return true;
+    case MotionEvent.ACTION_MOVE:
+        Log.d(TAG, "[dispatchTouchEvent] -&gt; ACTION_MOVE");
+        break;
+        //Log.i(TAG, "[dispatchTouchEvent] -&gt; ACTION_MOVE, return true");
+        //return true;
+    case MotionEvent.ACTION_UP:
+        Log.d(TAG, "[dispatchTouchEvent] -&gt; ACTION_UP");
+        break;
+    case MotionEvent.ACTION_CANCEL:
+        Log.d(TAG, "[dispatchTouchEvent] -&gt; ACTION_CANCEL");
+        break;
+    default:
+        break;
 }
-
-/**
- * This method polls the server via the JobScheduler API. By scheduling the job with this API,
- * your app can be confident it will execute, but without the need for a wake lock. Rather, the
- * API will take your network jobs and execute them in batch to best take advantage of the
- * initial network connection cost.
- *
- * The JobScheduler API works through a background service. In this sample, we have
- * a simple service in MyJobService to get you started. The job is scheduled here in
- * the activity, but the job itself is executed in MyJobService in the startJob() method. For
- * example, to poll your server, you would create the network connection, send your GET
- * request, and then process the response all in MyJobService. This allows the JobScheduler API
- * to invoke your logic without needed to restart your activity.
- *
- * For brevity in the sample, we are scheduling the same job several times in quick succession,
- * but again, try to consider similar tasks occurring over time in your application that can
- * afford to wait and may benefit from batching.
- */
-public void pollServer() {
-    JobScheduler scheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
-    for (int i=0; i&lt;10; i++) {
-        JobInfo jobInfo = new JobInfo.Builder(i, mServiceComponent)
-                .setMinimumLatency(5000) // 5 seconds
-                .setOverrideDeadline(60000) // 60 seconds (for brevity in the sample)
-                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY) // WiFi or data connections
-                .build();
-
-        mWakeLockMsg.append("Scheduling job " + i + "!\n");
-        scheduler.schedule(jobInfo);
-    }
-}
+boolean superReturn = super.dispatchTouchEvent(ev);
+Log.i(TAG, "[dispatchTouchEvent] return super. = " + superReturn);
+return superReturn;
 </code></pre>
 
 <p>}
-```</p>
+```
+下面演示的每一种情况，操作均为点击中间的Button，然后松开。请仔细看下面的案例，里面均有对应的解释。</p>
 
-<p><strong>Notes:</strong>关于更多电量优化，还有一篇文章，请点击<a href="http://developer.android.com/training/efficient-downloads/index.html">这里</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android性能优化之内存篇]]></title>
-    <link href="http://hukai.me/android-performance-memory/"/>
-    <updated>2015-04-12T14:51:00+08:00</updated>
-    <id>http://hukai.me/android-performance-memory</id>
-    <content type="html"><![CDATA[<p><img src="/images/android_performance_course_udacity.jpg" alt="" /></p>
+<h3>Case 0:没有任何的分发丢弃，也没有任何的拦截</h3>
 
-<p>Google近期在Udacity上发布了<a href="https://www.udacity.com/course/ud825">Android性能优化的在线课程</a>，分别从渲染，运算与内存，电量几个方面介绍了如何去优化性能，这些课程是Google之前在Youtube上发布的<a href="http://hukai.me/android-performance-patterns/">Android性能优化典范</a>专题课程的细化与补充。</p>
+<p><img src="/images/articles/Touch_Case_0_All_Normal.png" title="CASE 0" alt="Touch_Case_0_All_Normal.png" /></p>
 
-<p>下面是内存篇章的学习笔记，部分内容与前面的性能优化典范有重合，欢迎大家一起学习交流！</p>
+<h3>Case 1:Activity层的dispatch函数对ACTION_DOWN进行return true.</h3>
 
-<h3>1)Memory, GC, and Performance</h3>
+<p><img src="/images/articles/Touch_Case_1_Activity_Dispatch_Down_Return_True.png" title="CASE 1" alt="Touch_Case_1_Activity_Dispatch_Down_Return_True.png" /></p>
 
-<p>众所周知，与C/C++需要通过手动编码来申请以及释放内存有所不同，Java拥有GC的机制。Android系统里面有一个<strong>Generational Heap Memory</strong>的模型，系统会根据内存中不同的内存数据类型分别执行不同的GC操作。例如，最近刚分配的对象会放在Young Generation区域，这个区域的对象通常都是会快速被创建并且很快被销毁回收的，同时这个区域的GC操作速度也是比Old Generation区域的GC操作速度更快的。</p>
+<h3>Case 2:ParentLayout层的dispatch函数对ACTION_DOWN进行return true.</h3>
 
-<p><img src="/images/memory_mode_generation.png" alt="" /></p>
+<p><img src="/images/articles/Touch_Case_2_Parent_Dispatch_Down_Return_True.png" title="CASE 2" alt="Touch_Case_2_Parent_Dispatch_Down_Return_True.png" /></p>
 
-<p>除了速度差异之外，执行GC操作的时候，所有线程的任何操作都会需要暂停，等待GC操作完成之后，其他操作才能够继续运行。</p>
+<p>因为ChildLayout层的dispatch函数对ACITON_DOWN进行return true和在activity层,ParentLayout层是类似的逻辑，因为都没有找到Target组件，又没有拦截的因素影响，所以后续的MOVE与UP都只传递到DOWN被return true的那一层截至，然后都回传，也都没有被消费掉。(注意发生在ChildLayout层的return true与ParentLayout层的差异在于：回传时，只有return层与activity层才可以接收到onTouchEvent()的回调，但是默认都无法消费)。</p>
 
-<!-- More -->
+<h3>Case 3:Activity层的dispatch函数对ACTION_MOVE进行return true.</h3>
 
+<p><img src="/images/articles/Touch_Case_3_Activity_Dispatch_Move_Return_True.png" title="CASE 3" alt="Touch_Case_2_Activity_Dispatch_Move_Return_True.png" /></p>
 
-<p><img src="/images/gc_event_thread_stop.png" alt="" /></p>
+<p>因为ParentLayout层的dispatch函数对ACITON_MOVE进行return true和在activity层是类似的道理，不做新的分析</p>
 
-<p>通常来说，单个的GC并不会占用太多时间，但是大量不停的GC操作则会显著占用帧间隔时间(16ms)。如果在帧间隔时间里面做了过多的GC操作，那么自然其他类似计算，渲染等操作的可用时间就变得少了。</p>
+<h3>Case 4:ParentLayout层的intercept函数对ACTION_DOWN进行return true.</h3>
 
-<h3>2)Memory Monitor Walkthrough</h3>
+<p><img src="/images/articles/Touch_Case_4_Parent_Intercept_Down_Return_True.png" title="CASE 4" alt="Touch_Case_4_Parent_Intercept_Down_Return_True.png" /></p>
 
-<p>Android Studio中的Memory Monitor可以很好的帮助我们查看程序的内存使用情况。</p>
+<h3>Case 5:ChildLayout层的intercept函数对ACTION_DOWN进行return true.</h3>
 
-<p><img src="/images/memory_monitor_overview.png" alt="" /></p>
+<p><img src="/images/articles/Touch_Case_5_Child_Intercept_Down_Return_True.png" title="CASE 5" alt="Touch_Case_5_Child_Intercept_Down_Return_True.png" /></p>
 
-<p><img src="/images/memory_monitor_free_allocation.png" alt="" /></p>
+<h3>Case 6:ChildLayout层的intercept函数对ACTION_MOVE进行return true.</h3>
 
-<p><img src="/images/memory_monitor_gc_event.png" alt="" /></p>
+<p><img src="/images/articles/Touch_Case_6_Child_Intercept_Move_Return_True.png" title="CASE 6" alt="Touch_Case_6_Child_Intercept_Move_Return_True.png" /></p>
 
-<h3>3)Memory Leaks</h3>
-
-<p>内存泄漏表示的是不再用到的对象因为被错误引用而无法进行回收。</p>
-
-<p><img src="/images/android_perf_memory_leak.png" alt="" /></p>
-
-<p>发生内存泄漏会导致Memory Generation中的剩余可用Heap Size越来越小，这样会导致频繁触发GC，更进一步引起性能问题。</p>
-
-<p>举例内存泄漏，下面<code>init()</code>方法来自某个自定义View：</p>
-
-<p>```java</p>
-
-<pre><code>private void init() {
-ListenerCollector collector = new ListenerCollector();
-collector.setListener(this, mListener);
-</code></pre>
-
-<p>}
-```</p>
-
-<p>上面的例子容易存在内存泄漏，如果activity因为设备翻转而重新创建，自定义的View会自动重新把新创建出来的mListener给绑定到ListenerCollector中，但是当activity被销毁的时候，mListener却无法被回收了。</p>
-
-<h3>4)Heap Viewer Walkthrough</h3>
-
-<p>下图演示了Android Tools里面的Heap Viewer的功能，我们可以看到当前进程中的Heap Size的情况，分别有哪些类型的数据，占比是多少。</p>
-
-<p><img src="/images/android_perf_memory_heap_viewer.png" alt="" /></p>
-
-<h3>5)Understanding Memory Churn</h3>
-
-<p><strong>Memory Churn内存抖动</strong>，内存抖动是因为在短时间内大量的对象被创建又马上被释放。瞬间产生大量的对象会严重占用Young Generation的内存区域，当达到阀值，剩余空间不够的时候，会触发GC从而导致刚产生的对象又很快被回收。即使每次分配的对象占用了很少的内存，但是他们叠加在一起会增加Heap的压力，从而触发更多其他类型的GC。这个操作有可能会影响到帧率，并使得用户感知到性能问题。</p>
-
-<p><img src="/images/gc_overtime.png" alt="" /></p>
-
-<p>解决上面的问题有简洁直观方法，如果你在<strong>Memory Monitor</strong>里面查看到短时间发生了多次内存的涨跌，这意味着很有可能发生了内存抖动。</p>
-
-<p><img src="/images/memory_monitor_gc.png" alt="" /></p>
-
-<p>同时我们还可以通过<strong>Allocation Tracker</strong>来查看在短时间内，同一个栈中不断进出的相同对象。这是内存抖动的典型信号之一。</p>
-
-<p>当你大致定位问题之后，接下去的问题修复也就显得相对直接简单了。例如，你需要避免在for循环里面分配对象占用内存，需要尝试把对象的创建移到循环体之外，自定义View中的onDraw方法也需要引起注意，每次屏幕发生绘制以及动画执行过程中，onDraw方法都会被调用到，避免在onDraw方法里面执行复杂的操作，避免创建对象。对于那些无法避免需要创建对象的情况，我们可以考虑对象池模型，通过对象池来解决频繁创建与销毁的问题，但是这里需要注意结束使用之后，需要手动释放对象池中的对象。</p>
-
-<h3>6)Allocation Tracker</h3>
-
-<p>关于Allocation Tracker工具的使用，不展开了，参考下面的链接：</p>
+<h2>5)写在最后</h2>
 
 <ul>
-<li><a href="http://developer.android.com/tools/debugging/ddms.html#alloc">http://developer.android.com/tools/debugging/ddms.html#alloc</a></li>
-<li><a href="http://android-developers.blogspot.com/2009/02/track-memory-allocations.html">http://android-developers.blogspot.com/2009/02/track-memory-allocations.html</a></li>
+<li>对于dispatch分发某个事件的情况：
+
+<ul>
+<li>如果是ACTION_DOWN被return true,那么在哪一层return的，后续的MOVE与UP都只传递到该层，然后回传(<strong>Case 1,2</strong>)(注意在回传的过程中只有在return层与activity层才会触发onTouchEvent，中间若是有其他层，均会被跳过。这一规律暂时没有找到比较有力的解释，需要查看更多的源码。)</li>
+<li>如果非ACTION_DOWN被return true,意味着DOWN事件正常被下发并找到Target组件，那么后续只有被return的事件会无法正常下发，并只传递到return层，没有return的事件还能够正常下方到Target组件并被Target消费。(<strong>Case 3</strong>)</li>
+</ul>
+</li>
+<li>对于intercept拦截某个事件的情况：
+
+<ul>
+<li>如果ACTION_DOWN被拦截，无论拦截发生在哪一层，都会导致Target组件都无法找到，那么后续的MOVE与UP事件都只在Activity层处理，不会下发(<strong>Case 4,5</strong>)。</li>
+<li>如果ACTION_DOWN没被拦截，此时可以找到Target组件，DOWN事件是正常被消费。后续的MOVE如果被拦截，会对子组件触发CANCEL的事件，并且UP事件只能传递到拦截MOVE的那一层，无法消费并返回(<strong>Case 6</strong>)。Ps:因为Case 6演示的是在ChildLayout层对MOVE进行拦截，所以看到的效果是Button直接收到了CANCEL,实际上如果是ParentLayout对MOVE进行拦截，那么CANCEL事件需要经过ChildLayout(如果有需要的话，可以在这里继续拦截CANCEL)，最终CANCEL事件都是由Button进行消费。</li>
+</ul>
+</li>
 </ul>
 
 
-<h3>7)Improve Your Code To Reduce Churn</h3>
-
-<p>下面演示一个例子，如何通过修改代码来避免内存抖动。优化之前的内存检测图：</p>
-
-<p><img src="/images/android_perf_memory_churn_1.png" alt="" /></p>
-
-<p>定位代码之后，修复了String拼接的问题：</p>
-
-<p><img src="/images/android_perf_memory_churn_code.png" alt="" /></p>
-
-<p>优化之后的内存监测图：</p>
-
-<p><img src="/images/android_perf_memory_churn_2.png" alt="" /></p>
-
-<h3>8)Recap</h3>
-
-<p>上面提到了三种测量内存的工具，下面再简要概括一下他们各自的特点：</p>
-
-<ul>
-<li><strong>Memory Monitor：</strong>跟踪整个app的内存变化情况。</li>
-<li><strong>Heap Viewer：</strong>查看当前内存快照，便于对比分析哪些对象有可能发生了泄漏。</li>
-<li><strong>Allocation Tracker：</strong>追踪内存对象的来源。</li>
-</ul>
-
-
-<p><strong>Notes:</strong>关于更多内存优化，这里还有一篇文章，请点击<a href="http://hukai.me/android-training-managing_your_app_memory/">这里</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android性能优化之运算篇]]></title>
-    <link href="http://hukai.me/android-performance-compute/"/>
-    <updated>2015-04-12T13:50:00+08:00</updated>
-    <id>http://hukai.me/android-performance-compute</id>
-    <content type="html"><![CDATA[<p><img src="/images/android_performance_course_udacity.jpg" alt="" /></p>
-
-<p>Google近期在Udacity上发布了<a href="https://www.udacity.com/course/ud825">Android性能优化的在线课程</a>，分别从渲染，运算与内存，电量几个方面介绍了如何去优化性能，这些课程是Google之前在Youtube上发布的<a href="http://hukai.me/android-performance-patterns/">Android性能优化典范</a>专题课程的细化与补充。</p>
-
-<p>下面是运算篇章的学习笔记，部分内容与前面的性能优化典范有重合，欢迎大家一起学习交流！</p>
-
-<h3>1)Intro to Compute and Memory Problems</h3>
-
-<p>Android中的Java代码会需要经过编译优化再执行的过程。代码的不同写法会影响到Java编译器的优化效率。例如for循环的不同写法就会对编译器优化这段代码产生不同的效率，当程序中包含大量这种可优化的代码的时候，运算性能就会出现问题。想要知道如何优化代码的运算性能就需要知道代码在硬件层的执行差异。</p>
-
-<h3>2)Slow Function Performance</h3>
-
-<p>如果你写了一段代码，它的执行效率比想象中的要差很多。我们需要知道有哪些因素有可能影响到这段代码的执行效率。例如：比较两个float数值大小的执行时间是int数值的4倍左右。这是因为CPU的运算架构导致的，如下图所示：</p>
-
-<p><img src="/images/android_perf_compute_float_int.png" alt="" /></p>
-
-<p>虽然现代的CPU架构得到了很大的提升，也许并不存在上面所示的那么大的差异，但是这个例子说明了代码写法上的差异会对运算性能产生很大的影响。</p>
-
-<!-- More -->
-
-
-<p>通常来说有两类运行效率差的情况：第1种是相对执行时间长的方法，我们可以很轻松的找到这些方法并做一定的优化。第2种是执行时间短，但是执行频次很高的方法，因为执行次数多，累积效应下就会对性能产生很大的影响。</p>
-
-<p>修复这些细节效率问题，需要使用Android SDK提供的工具，进行仔细的测量，然后再进行微调修复。</p>
-
-<h3>3)Traceview Walkthrough</h3>
-
-<p>通过Android Studio打开里面的Android Device Monitor，切换到DDMS窗口，点击左边栏上面想要跟踪的进程，再点击上面的Start Method Tracing的按钮，如下图所示：</p>
-
-<p><img src="/images/android_perf_compute_traceview.png" alt="" /></p>
-
-<p>启动跟踪之后，再操控app，做一些你想要跟踪的事件，例如滑动listview，点击某些视图进入另外一个页面等等。操作完之后，回到Android Device Monitor，再次点击Method Tracing的按钮停止跟踪。此时工具会为刚才的操作生成TraceView的详细视图。</p>
-
-<p><img src="/images/android_perf_compute_traceview_2.png" alt="" /></p>
-
-<p>关于TraceView中详细数据如何查看，这里不展开了，有很多文章介绍过。</p>
-
-<h3>4)Batching and Caching</h3>
-
-<p>为了提升运算性能，这里介绍2个非常重要的技术，Batching与Caching。</p>
-
-<p><strong>Batching</strong>是在真正执行运算操作之前对数据进行批量预处理，例如你需要有这样一个方法，它的作用是查找某个值是否存在与于一堆数据中。假设一个前提，我们会先对数据做排序，然后使用二分查找法来判断值是否存在。我们先看第一种情况，下图中存在着多次重复的排序操作。</p>
-
-<p><img src="/images/android_perf_compute_batching_1.png" alt="" /></p>
-
-<p>在上面的那种写法下，如果数据的量级并不大的话，应该还可以接受，可是如果数据集非常大，就会有严重的效率问题。那么我们看下改进的写法，把排序的操作打包绑定只执行一次：</p>
-
-<p><img src="/images/android_perf_compute_batching_2.png" alt="" /></p>
-
-<p>上面就是Batching的一种示例：把重复的操作拎出来，打包只执行一次。</p>
-
-<p><strong>Caching</strong>的理念很容易理解，在很多方面都有体现，下面举一个for循环的例子：</p>
-
-<p><img src="/images/android_perf_compute_caching.png" alt="" /></p>
-
-<p>上面这2种基础技巧非常实用，积极恰当的使用能够显著提升运算性能。</p>
-
-<h3>5)Blocking the UI Thread</h3>
-
-<p>提升代码的运算效率是改善性能的一方面，让代码执行在哪个线程也同样很重要。我们都知道Android的Main Thread也是UI Thread，它需要承担用户的触摸事件的反馈，界面视图的渲染等操作。这就意味着，我们不能在Main Thread里面做任何非轻量级的操作，类似I/O操作会花费大量时间，这很有可能会导致界面渲染发生丢帧的现象，甚至有可能导致ANR。防止这些问题的解决办法就是把那些可能有性能问题的代码移到非UI线程进行操作。</p>
-
-<h3>6)Container Performance</h3>
-
-<p>另外一个我们需要注意的运算性能问题是基础算法的合理选择，例如冒泡排序与快速排序的性能差异：</p>
-
-<p><img src="/images/android_perf_compute_container.png" alt="" /></p>
-
-<p>避免我们重复造轮子，Java提供了很多现成的容器，例如Vector，ArrayList，LinkedList，HashMap等等，在Android里面还有新增加的SparseArray等，我们需要了解这些基础容器的性能差异以及适用场景。这样才能够选择合适的容器，达到最佳的性能。</p>
-
-<p><img src="/images/android_perf_compute_container_2.png" alt="" /></p>
-
-<p><strong>Notes:</strong>关于更多代码优化的小技巧，请点击<a href="http://hukai.me/android-training-performance-tips/">这里</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android性能优化之渲染篇]]></title>
-    <link href="http://hukai.me/android-performance-render/"/>
-    <updated>2015-04-11T22:16:00+08:00</updated>
-    <id>http://hukai.me/android-performance-render</id>
-    <content type="html"><![CDATA[<p><img src="/images/android_performance_course_udacity.jpg" alt="" /></p>
-
-<p>Google近期在Udacity上发布了<a href="https://www.udacity.com/course/ud825">Android性能优化的在线课程</a>，目前有三个篇章，分别从渲染，运算与内存，电量三个方面介绍了如何去优化性能，这些课程是Google之前在Youtube上发布的<a href="http://hukai.me/android-performance-patterns/">Android性能优化典范</a>专题课程的细化与补充。</p>
-
-<p>下面是渲染篇章的学习笔记，部分内容和前面的性能优化典范有重合，欢迎大家一起学习交流！</p>
-
-<h3>1)Why Rendering Performance Matters</h3>
-
-<p>现在有不少App为了达到很华丽的视觉效果，会需要在界面上层叠很多的视图组件，但是这会很容易引起性能问题。如何平衡Design与Performance就很需要智慧了。</p>
-
-<h3>2)Defining 'Jank'</h3>
-
-<p>大多数手机的屏幕刷新频率是60hz，如果在1000/60=16.67ms内没有办法把这一帧的任务执行完毕，就会发生丢帧的现象。丢帧越多，用户感受到的卡顿情况就越严重。</p>
-
-<p><img src="/images/android_performance_course_drop_frame.png" alt="" /></p>
-
-<h3>3)Rendering Pipeline: Common Problems</h3>
-
-<p>渲染操作通常依赖于两个核心组件：CPU与GPU。CPU负责包括Measure，Layout，Record，Execute的计算操作，GPU负责Rasterization(栅格化)操作。CPU通常存在的问题的原因是存在非必需的视图组件，它不仅仅会带来重复的计算操作，而且还会占用额外的GPU资源。</p>
-
-<!-- More -->
-
-
-<p><img src="/images/android_performance_course_render_problems.jpg" alt="" /></p>
-
-<h3>4)Android UI and the GPU</h3>
-
-<p>了解Android是如何利用GPU进行画面渲染有助于我们更好的理解性能问题。一个很直接的问题是：activity的画面是如何绘制到屏幕上的？那些复杂的XML布局文件又是如何能够被识别并绘制出来的？</p>
-
-<p><img src="/images/gpu_rasterization.png" alt="" /></p>
-
-<p><strong>Resterization栅格化</strong>是绘制那些Button，Shape，Path，String，Bitmap等组件最基础的操作。它把那些组件拆分到不同的像素上进行显示。这是一个很费时的操作，GPU的引入就是为了加快栅格化的操作。</p>
-
-<p>CPU负责把UI组件计算成Polygons，Texture纹理，然后交给GPU进行栅格化渲染。</p>
-
-<p><img src="/images/gpu_cpu_rasterization.png" alt="" /></p>
-
-<p>然而每次从CPU转移到GPU是一件很麻烦的事情，所幸的是OpenGL ES可以把那些需要渲染的纹理Hold在GPU Memory里面，在下次需要渲染的时候直接进行操作。所以如果你更新了GPU所hold住的纹理内容，那么之前保存的状态就丢失了。</p>
-
-<p>在Android里面那些由主题所提供的资源，例如Bitmaps，Drawables都是一起打包到统一的Texture纹理当中，然后再传递到GPU里面，这意味着每次你需要使用这些资源的时候，都是直接从纹理里面进行获取渲染的。当然随着UI组件的越来越丰富，有了更多演变的形态。例如显示图片的时候，需要先经过CPU的计算加载到内存中，然后传递给GPU进行渲染。文字的显示比较复杂，需要先经过CPU换算成纹理，然后交给GPU进行渲染，返回到CPU绘制单个字符的时候，再重新引用经过GPU渲染的内容。动画则存在一个更加复杂的操作流程。</p>
-
-<p>为了能够使得App流畅，我们需要在每帧16ms以内处理完所有的CPU与GPU的计算，绘制，渲染等等操作。</p>
-
-<h3>5)GPU Problem: Overdraw</h3>
-
-<p>Overdraw(过度绘制)描述的是屏幕上的某个像素在同一帧的时间内被绘制了多次。在多层次重叠的UI结构里面，如果不可见的UI也在做绘制的操作，会导致某些像素区域被绘制了多次。这样就会浪费大量的CPU以及GPU资源。</p>
-
-<p><img src="/images/overdraw_hidden_view.png" alt="" /></p>
-
-<p>当设计上追求更华丽的视觉效果的时候，我们就容易陷入采用复杂的多层次重叠视图来实现这种视觉效果的怪圈。这很容易导致大量的性能问题，为了获得最佳的性能，我们必须尽量减少Overdraw的情况发生。</p>
-
-<p>幸运的是，我们可以通过手机设置里面的开发者选项，打开Show GPU Overdraw的选项，观察UI上的Overdraw情况。</p>
-
-<p><img src="/images/overdraw_options_view.png" alt="" /></p>
-
-<p>蓝色，淡绿，淡红，深红代表了4种不同程度的Overdraw情况，我们的目标就是尽量减少红色Overdraw，看到更多的蓝色区域。</p>
-
-<h3>6)Visualize and Fix Overdraw - Quiz &amp; Solution</h3>
-
-<p>这里举了一个例子，通过XML文件可以看到有好几处非必需的background。通过把XML中非必需的background移除之后，可以显著减少布局的过度绘制。其中一个比较有意思的地方是：针对ListView中的Avatar ImageView的设置，在getView的代码里面，判断是否获取到对应的Bitmap，在获取到Avatar的图像之后，把ImageView的Background设置为Transparent，只有当图像没有获取到的时候才设置对应的Background占位图片，这样可以避免因为给Avatar设置背景图而导致的过度渲染。</p>
-
-<p><img src="/images/android_perf_course_overdraw_compare.png" alt="" /></p>
-
-<p>总结一下，优化步骤如下：</p>
-
-<ul>
-<li>移除Window默认的Background</li>
-<li>移除XML布局文件中非必需的Background</li>
-<li>按需显示占位背景图片</li>
-</ul>
-
-
-<h3>7)ClipRect &amp; QuickReject</h3>
-
-<p>前面有提到过，对不可见的UI组件进行绘制更新会导致Overdraw。例如Nav Drawer从前置可见的Activity滑出之后，如果还继续绘制那些在Nav Drawer里面不可见的UI组件，这就导致了Overdraw。为了解决这个问题，Android系统会通过避免绘制那些完全不可见的组件来尽量减少Overdraw。那些Nav Drawer里面不可见的View就不会被执行浪费资源。</p>
-
-<p><img src="/images/overdraw_invisible.png" alt="" /></p>
-
-<p>但是不幸的是，对于那些过于复杂的自定义的View(通常重写了onDraw方法)，Android系统无法检测在onDraw里面具体会执行什么操作，系统无法监控并自动优化，也就无法避免Overdraw了。但是我们可以通过<a href="http://developer.android.com/reference/android/graphics/Canvas.html">canvas.clipRect()</a>来帮助系统识别那些可见的区域。这个方法可以指定一块矩形区域，只有在这个区域内才会被绘制，其他的区域会被忽视。这个API可以很好的帮助那些有多组重叠组件的自定义View来控制显示的区域。同时clipRect方法还可以帮助节约CPU与GPU资源，在clipRect区域之外的绘制指令都不会被执行，那些部分内容在矩形区域内的组件，仍然会得到绘制。</p>
-
-<p><img src="/images/overdraw_reduce_cpu_gpu.png" alt="" /></p>
-
-<p>除了clipRect方法之外，我们还可以使用<a href="http://developer.android.com/reference/android/graphics/Canvas.html">canvas.quickreject()</a>来判断是否没和某个矩形相交，从而跳过那些非矩形区域内的绘制操作。</p>
-
-<h3>8)Apply clipRect and quickReject - Quiz &amp; Solution</h3>
-
-<p><img src="/images/android_perf_course_clip_1.png" alt="" /></p>
-
-<p>上面的示例图中显示了一个自定义的View，主要效果是呈现多张重叠的卡片。这个View的onDraw方法如下图所示：</p>
-
-<p><img src="/images/android_perf_course_clip_3.png" alt="" /></p>
-
-<p>打开开发者选项中的显示过度渲染，可以看到我们这个自定义的View部分区域存在着过度绘制。那么是什么原因导致过度绘制的呢？</p>
-
-<p><img src="/images/android_perf_course_clip_2.png" alt="" /></p>
-
-<h3>9)Fixing Overdraw with Canvas API</h3>
-
-<p>下面的代码显示了如何通过clipRect来解决自定义View的过度绘制，提高自定义View的绘制性能：</p>
-
-<p><img src="/images/android_perf_course_clip_code_compare.png" alt="" /></p>
-
-<p>下面是优化过后的效果：</p>
-
-<p><img src="/images/android_perf_course_clip_result.png" alt="" /></p>
-
-<h3>10)Layouts, Invalidations and Perf</h3>
-
-<p>Android需要把XML布局文件转换成GPU能够识别并绘制的对象。这个操作是在<strong>DisplayList</strong>的帮助下完成的。DisplayList持有所有将要交给GPU绘制到屏幕上的数据信息。</p>
-
-<p>在某个View第一次需要被渲染时，Display List会因此被创建，当这个View要显示到屏幕上时，我们会执行GPU的绘制指令来进行渲染。</p>
-
-<p>如果View的Property属性发生了改变（例如移动位置），我们就仅仅需要Execute Display List就够了。</p>
-
-<p><img src="/images/android_perf_course_displaylist_execute.png" alt="" /></p>
-
-<p>然而如果你修改了View中的某些可见组件的内容，那么之前的DisplayList就无法继续使用了，我们需要重新创建一个DisplayList并重新执行渲染指令更新到屏幕上。</p>
-
-<p><img src="/images/android_perf_course_displaylist_invalidation.png" alt="" /></p>
-
-<p>请注意：任何时候View中的绘制内容发生变化时，都会需要重新创建DisplayList，渲染DisplayList，更新到屏幕上等一系列操作。这个流程的表现性能取决于你的View的复杂程度，View的状态变化以及渲染管道的执行性能。举个例子，假设某个Button的大小需要增大到目前的两倍，在增大Button大小之前，需要通过父View重新计算并摆放其他子View的位置。修改View的大小会触发整个HierarcyView的重新计算大小的操作。如果是修改View的位置则会触发HierarchView重新计算其他View的位置。如果布局很复杂，这就会很容易导致严重的性能问题。</p>
-
-<p><img src="/images/android_perf_course_displaylist_kick_off.png" alt="" /></p>
-
-<h3>11)Hierarchy Viewer: Walkthrough</h3>
-
-<p>Hierarchy Viewer可以很直接的呈现布局的层次关系，视图组件的各种属性。
-我们可以通过红，黄，绿三种不同的颜色来区分布局的Measure，Layout，Executive的相对性能表现如何。</p>
-
-<h3>12)Nested Hierarchies and Performance</h3>
-
-<p>提升布局性能的关键点是尽量保持布局层级的扁平化，避免出现重复的嵌套布局。例如下面的例子，有2行显示相同内容的视图，分别用两种不同的写法来实现，他们有着不同的层级。</p>
-
-<p><img src="/images/android_perf_course_hierarchy_1.png" alt="" /></p>
-
-<p><img src="/images/android_perf_course_hierarchy_2.png" alt="" /></p>
-
-<p>下图显示了使用2种不同的写法，在Hierarchy Viewer上呈现出来的性能测试差异：</p>
-
-<p><img src="/images/android_perf_course_hierarchy_3.png" alt="" /></p>
-
-<h3>13)Optimizing Your Layout</h3>
-
-<p>下图举例演示了如何优化ListItem的布局，通过RelativeLayout替代旧方案中的嵌套LinearLayout来优化布局。</p>
-
-<p><img src="/images/android_perf_course_hierarchy_4.png" alt="" /></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android性能优化典范]]></title>
-    <link href="http://hukai.me/android-performance-patterns/"/>
-    <updated>2015-01-17T19:42:00+08:00</updated>
-    <id>http://hukai.me/android-performance-patterns</id>
-    <content type="html"><![CDATA[<p><img src="/images/android_perf_patterns.png" alt="" />
-2015新年伊始，Google发布了关于<a href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">Android性能优化典范的专题</a>，一共16个短视频，每个3-5分钟，帮助开发者创建更快更优秀的Android App。课程专题不仅仅介绍了Android系统中有关性能问题的底层工作原理，同时也介绍了如何通过工具来找出性能问题以及提升性能的建议。主要从三个方面展开，Android的渲染机制，内存与GC，电量优化。下面是对这些问题和建议的总结梳理。</p>
-
-<h2>0)Render Performance</h2>
-
-<p>大多数用户感知到的卡顿等性能问题的最主要根源都是因为渲染性能。从设计师的角度，他们希望App能够有更多的动画，图片等时尚元素来实现流畅的用户体验。但是Android系统很有可能无法及时完成那些复杂的界面渲染操作。Android系统每隔16ms发出VSYNC信号，触发对UI进行渲染，如果每次渲染都成功，这样就能够达到流畅的画面所需要的60fps，为了能够实现60fps，这意味着程序的大多数操作都必须在16ms内完成。</p>
-
-<p><img src="/images/draw_per_16ms.png" alt="" /></p>
-
-<!-- More -->
-
-
-<p>如果你的某个操作花费时间是24ms，系统在得到VSYNC信号的时候就无法进行正常渲染，这样就发生了丢帧现象。那么用户在32ms内看到的会是同一帧画面。</p>
-
-<p><img src="/images/vsync_over_draw.png" alt="" /></p>
-
-<p>用户容易在UI执行动画或者滑动ListView的时候感知到卡顿不流畅，是因为这里的操作相对复杂，容易发生丢帧的现象，从而感觉卡顿。有很多原因可以导致丢帧，也许是因为你的layout太过复杂，无法在16ms内完成渲染，有可能是因为你的UI上有层叠太多的绘制单元，还有可能是因为动画执行的次数过多。这些都会导致CPU或者GPU负载过重。</p>
-
-<p>我们可以通过一些工具来定位问题，比如可以使用HierarchyViewer来查找Activity中的布局是否过于复杂，也可以使用手机设置里面的开发者选项，打开Show GPU Overdraw等选项进行观察。你还可以使用TraceView来观察CPU的执行情况，更加快捷的找到性能瓶颈。</p>
-
-<h2>1)Understanding Overdraw</h2>
-
-<p>Overdraw(过度绘制)描述的是屏幕上的某个像素在同一帧的时间内被绘制了多次。在多层次的UI结构里面，如果不可见的UI也在做绘制的操作，这就会导致某些像素区域被绘制了多次。这就浪费大量的CPU以及GPU资源。</p>
-
-<p><img src="/images/overdraw_hidden_view.png" alt="" /></p>
-
-<p>当设计上追求更华丽的视觉效果的时候，我们就容易陷入采用越来越多的层叠组件来实现这种视觉效果的怪圈。这很容易导致大量的性能问题，为了获得最佳的性能，我们必须尽量减少Overdraw的情况发生。</p>
-
-<p>幸运的是，我们可以通过手机设置里面的开发者选项，打开Show GPU Overdraw的选项，可以观察UI上的Overdraw情况。</p>
-
-<p><img src="/images/overdraw_options_view.png" alt="" /></p>
-
-<p>蓝色，淡绿，淡红，深红代表了4种不同程度的Overdraw情况，我们的目标就是尽量减少红色Overdraw，看到更多的蓝色区域。</p>
-
-<p>Overdraw有时候是因为你的UI布局存在大量重叠的部分，还有的时候是因为非必须的重叠背景。例如某个Activity有一个背景，然后里面的Layout又有自己的背景，同时子View又分别有自己的背景。仅仅是通过移除非必须的背景图片，这就能够减少大量的红色Overdraw区域，增加蓝色区域的占比。这一措施能够显著提升程序性能。</p>
-
-<h2>2)Understanding VSYNC</h2>
-
-<p>为了理解App是如何进行渲染的，我们必须了解手机硬件是如何工作，那么就必须理解什么是<em>VSYNC</em>。</p>
-
-<p>在讲解VSYNC之前，我们需要了解两个相关的概念：</p>
-
-<ul>
-<li>Refresh Rate：代表了屏幕在一秒内刷新屏幕的次数，这取决于硬件的固定参数，例如60Hz。</li>
-<li>Frame Rate：代表了GPU在一秒内绘制操作的帧数，例如30fps，60fps。</li>
-</ul>
-
-
-<p>GPU会获取图形数据进行渲染，然后硬件负责把渲染后的内容呈现到屏幕上，他们两者不停的进行协作。</p>
-
-<p><img src="/images/vsync_gpu_hardware.png" alt="" /></p>
-
-<p>不幸的是，刷新频率和帧率并不是总能够保持相同的节奏。如果发生帧率与刷新频率不一致的情况，就会容易出现<strong>Tearing</strong>的现象(画面上下两部分显示内容发生断裂，来自不同的两帧数据发生重叠)。</p>
-
-<p><img src="/images/vsync_gpu_hardware_not_sync.png" alt="" /></p>
-
-<p><img src="/images/vsync_buffer.png" alt="" /></p>
-
-<p>理解图像渲染里面的双重与三重缓存机制，这个概念比较复杂，请移步查看这里：<a href="http://source.android.com/devices/graphics/index.html">http://source.android.com/devices/graphics/index.html</a>，还有这里<a href="http://article.yeeyan.org/view/37503/304664">http://article.yeeyan.org/view/37503/304664</a>。</p>
-
-<p>通常来说，帧率超过刷新频率只是一种理想的状况，在超过60fps的情况下，GPU所产生的帧数据会因为等待VSYNC的刷新信息而被Hold住，这样能够保持每次刷新都有实际的新的数据可以显示。但是我们遇到更多的情况是帧率小于刷新频率。</p>
-
-<p><img src="/images/vsync_gpu_hardware_not_sync2.png" alt="" /></p>
-
-<p>在这种情况下，某些帧显示的画面内容就会与上一帧的画面相同。糟糕的事情是，帧率从超过60fps突然掉到60fps以下，这样就会发生<strong>LAG</strong>，<strong>JANK</strong>，<strong>HITCHING</strong>等卡顿掉帧的不顺滑的情况。这也是用户感受不好的原因所在。</p>
-
-<h2>3)Tool:Profile GPU Rendering</h2>
-
-<p>性能问题如此的麻烦，幸好我们可以有工具来进行调试。打开手机里面的开发者选项，选择Profile GPU Rendering，选中On screen as bars的选项。</p>
-
-<p><img src="/images/tools_gpu_profile_rendering.png" alt="" /></p>
-
-<p>选择了这样以后，我们可以在手机画面上看到丰富的GPU绘制图形信息，分别关于StatusBar，NavBar，激活的程序Activity区域的GPU Rending信息。</p>
-
-<p><img src="/images/tools_gpu_profile_rendering_graphic_activity.png" alt="" /></p>
-
-<p>随着界面的刷新，界面上会滚动显示垂直的柱状图来表示每帧画面所需要渲染的时间，柱状图越高表示花费的渲染时间越长。</p>
-
-<p><img src="/images/tools_gpu_rendering_bar.png" alt="" /></p>
-
-<p>中间有一根绿色的横线，代表16ms，我们需要确保每一帧花费的总时间都低于这条横线，这样才能够避免出现卡顿的问题。</p>
-
-<p><img src="/images/tools_gpu_profile_three_color.png" alt="" /></p>
-
-<p>每一条柱状线都包含三部分，蓝色代表测量绘制Display List的时间，红色代表OpenGL渲染Display List所需要的时间，黄色代表CPU等待GPU处理的时间。</p>
-
-<h2>4)Why 60fps?</h2>
-
-<p>我们通常都会提到60fps与16ms，可是知道为何会是以程序是否达到60fps来作为App性能的衡量标准吗？这是因为人眼与大脑之间的协作无法感知超过60fps的画面更新。</p>
-
-<p>12fps大概类似手动快速翻动书籍的帧率，这明显是可以感知到不够顺滑的。24fps使得人眼感知的是连续线性的运动，这其实是归功于运动模糊的效果。24fps是电影胶圈通常使用的帧率，因为这个帧率已经足够支撑大部分电影画面需要表达的内容，同时能够最大的减少费用支出。但是低于30fps是无法顺畅表现绚丽的画面内容的，此时就需要用到60fps来达到想要的效果，当然超过60fps是没有必要的。</p>
-
-<p>开发app的性能目标就是保持60fps，这意味着每一帧你只有16ms=1000/60的时间来处理所有的任务。</p>
-
-<h2>5)Android, UI and the GPU</h2>
-
-<p>了解Android是如何利用GPU进行画面渲染有助于我们更好的理解性能问题。那么一个最实际的问题是：activity的画面是如何绘制到屏幕上的？那些复杂的XML布局文件又是如何能够被识别并绘制出来的？</p>
-
-<p><img src="/images/gpu_rasterization.png" alt="" /></p>
-
-<p><strong>Resterization栅格化</strong>是绘制那些Button，Shape，Path，String，Bitmap等组件最基础的操作。它把那些组件拆分到不同的像素上进行显示。这是一个很费时的操作，GPU的引入就是为了加快栅格化的操作。</p>
-
-<p>CPU负责把UI组件计算成Polygons，Texture纹理，然后交给GPU进行栅格化渲染。</p>
-
-<p><img src="/images/gpu_cpu_rasterization.png" alt="" /></p>
-
-<p>然而每次从CPU转移到GPU是一件很麻烦的事情，所幸的是OpenGL ES可以把那些需要渲染的纹理Hold在GPU Memory里面，在下次需要渲染的时候直接进行操作。所以如果你更新了GPU所hold住的纹理内容，那么之前保存的状态就丢失了。</p>
-
-<p>在Android里面那些由主题所提供的资源，例如Bitmaps，Drawables都是一起打包到统一的Texture纹理当中，然后再传递到GPU里面，这意味着每次你需要使用这些资源的时候，都是直接从纹理里面进行获取渲染的。当然随着UI组件的越来越丰富，有了更多演变的形态。例如显示图片的时候，需要先经过CPU的计算加载到内存中，然后传递给GPU进行渲染。文字的显示更加复杂，需要先经过CPU换算成纹理，然后再交给GPU进行渲染，回到CPU绘制单个字符的时候，再重新引用经过GPU渲染的内容。动画则是一个更加复杂的操作流程。</p>
-
-<p>为了能够使得App流畅，我们需要在每一帧16ms以内处理完所有的CPU与GPU计算，绘制，渲染等等操作。</p>
-
-<h2>6)Invalidations, Layouts, and Performance</h2>
-
-<p>顺滑精妙的动画是app设计里面最重要的元素之一，这些动画能够显著提升用户体验。下面会讲解Android系统是如何处理UI组件的更新操作的。</p>
-
-<p>通常来说，Android需要把XML布局文件转换成GPU能够识别并绘制的对象。这个操作是在<strong>DisplayList</strong>的帮助下完成的。DisplayList持有所有将要交给GPU绘制到屏幕上的数据信息。</p>
-
-<p>在某个View第一次需要被渲染时，DisplayList会因此而被创建，当这个View要显示到屏幕上时，我们会执行GPU的绘制指令来进行渲染。如果你在后续有执行类似移动这个View的位置等操作而需要再次渲染这个View时，我们就仅仅需要额外操作一次渲染指令就够了。然而如果你修改了View中的某些可见组件，那么之前的DisplayList就无法继续使用了，我们需要回头重新创建一个DisplayList并且重新执行渲染指令并更新到屏幕上。</p>
-
-<p>需要注意的是：任何时候View中的绘制内容发生变化时，都会重新执行创建DisplayList，渲染DisplayList，更新到屏幕上等一系列操作。这个流程的表现性能取决于你的View的复杂程度，View的状态变化以及渲染管道的执行性能。举个例子，假设某个Button的大小需要增大到目前的两倍，在增大Button大小之前，需要通过父View重新计算并摆放其他子View的位置。修改View的大小会触发整个HierarcyView的重新计算大小的操作。如果是修改View的位置则会触发HierarchView重新计算其他View的位置。如果布局很复杂，这就会很容易导致严重的性能问题。我们需要尽量减少Overdraw。</p>
-
-<p><img src="/images/layout_three_steps.png" alt="" /></p>
-
-<p>我们可以通过前面介绍的Monitor GPU Rendering来查看渲染的表现性能如何，另外也可以通过开发者选项里面的Show GPU view updates来查看视图更新的操作，最后我们还可以通过HierarchyViewer这个工具来查看布局，使得布局尽量扁平化，移除非必需的UI组件，这些操作能够减少Measure，Layout的计算时间。</p>
-
-<h2>7)Overdraw, Cliprect, QuickReject</h2>
-
-<p>引起性能问题的一个很重要的方面是因为过多复杂的绘制操作。我们可以通过工具来检测并修复标准UI组件的Overdraw问题，但是针对高度自定义的UI组件则显得有些力不从心。</p>
-
-<p>有一个窍门是我们可以通过执行几个APIs方法来显著提升绘制操作的性能。前面有提到过，非可见的UI组件进行绘制更新会导致Overdraw。例如Nav Drawer从前置可见的Activity滑出之后，如果还继续绘制那些在Nav Drawer里面不可见的UI组件，这就导致了Overdraw。为了解决这个问题，Android系统会通过避免绘制那些完全不可见的组件来尽量减少Overdraw。那些Nav Drawer里面不可见的View就不会被执行浪费资源。</p>
-
-<p><img src="/images/overdraw_invisible.png" alt="" /></p>
-
-<p>但是不幸的是，对于那些过于复杂的自定义的View(重写了onDraw方法)，Android系统无法检测具体在onDraw里面会执行什么操作，系统无法监控并自动优化，也就无法避免Overdraw了。但是我们可以通过<a href="http://developer.android.com/reference/android/graphics/Canvas.html">canvas.clipRect()</a>来帮助系统识别那些可见的区域。这个方法可以指定一块矩形区域，只有在这个区域内才会被绘制，其他的区域会被忽视。这个API可以很好的帮助那些有多组重叠组件的自定义View来控制显示的区域。同时clipRect方法还可以帮助节约CPU与GPU资源，在clipRect区域之外的绘制指令都不会被执行，那些部分内容在矩形区域内的组件，仍然会得到绘制。</p>
-
-<p><img src="/images/overdraw_reduce_cpu_gpu.png" alt="" /></p>
-
-<p>除了clipRect方法之外，我们还可以使用<a href="http://developer.android.com/reference/android/graphics/Canvas.html">canvas.quickreject()</a>来判断是否没和某个矩形相交，从而跳过那些非矩形区域内的绘制操作。做了那些优化之后，我们可以通过上面介绍的Show GPU Overdraw来查看效果。</p>
-
-<h2>8)Memory Churn and performance</h2>
-
-<p>虽然Android有自动管理内存的机制，但是对内存的不恰当使用仍然容易引起严重的性能问题。在同一帧里面创建过多的对象是件需要特别引起注意的事情。</p>
-
-<p>Android系统里面有一个<strong>Generational Heap Memory</strong>的模型，系统会根据内存中不同的内存数据类型分别执行不同的GC操作。例如，最近刚分配的对象会放在Young Generation区域，这个区域的对象通常都是会快速被创建并且很快被销毁回收的，同时这个区域的GC操作速度也是比Old Generation区域的GC操作速度更快的。</p>
-
-<p><img src="/images/memory_mode_generation.png" alt="" /></p>
-
-<p>除了速度差异之外，执行GC操作的时候，所有线程的任何操作都会需要暂停，等待GC操作完成之后，其他操作才能够继续运行。</p>
-
-<p><img src="/images/gc_event_thread_stop.png" alt="" /></p>
-
-<p>通常来说，单个的GC并不会占用太多时间，但是大量不停的GC操作则会显著占用帧间隔时间(16ms)。如果在帧间隔时间里面做了过多的GC操作，那么自然其他类似计算，渲染等操作的可用时间就变得少了。</p>
-
-<p>导致GC频繁执行有两个原因：</p>
-
-<ul>
-<li><strong>Memory Churn内存抖动</strong>，内存抖动是因为大量的对象被创建又在短时间内马上被释放。</li>
-<li>瞬间产生大量的对象会严重占用Young Generation的内存区域，当达到阀值，剩余空间不够的时候，也会触发GC。即使每次分配的对象占用了很少的内存，但是他们叠加在一起会增加Heap的压力，从而触发更多其他类型的GC。这个操作有可能会影响到帧率，并使得用户感知到性能问题。</li>
-</ul>
-
-
-<p><img src="/images/gc_overtime.png" alt="" /></p>
-
-<p>解决上面的问题有简洁直观方法，如果你在<strong>Memory Monitor</strong>里面查看到短时间发生了多次内存的涨跌，这意味着很有可能发生了内存抖动。</p>
-
-<p><img src="/images/memory_monitor_gc.png" alt="" /></p>
-
-<p>同时我们还可以通过<strong>Allocation Tracker</strong>来查看在短时间内，同一个栈中不断进出的相同对象。这是内存抖动的典型信号之一。</p>
-
-<p>当你大致定位问题之后，接下去的问题修复也就显得相对直接简单了。例如，你需要避免在for循环里面分配对象占用内存，需要尝试把对象的创建移到循环体之外，自定义View中的onDraw方法也需要引起注意，每次屏幕发生绘制以及动画执行过程中，onDraw方法都会被调用到，避免在onDraw方法里面执行复杂的操作，避免创建对象。对于那些无法避免需要创建对象的情况，我们可以考虑对象池模型，通过对象池来解决频繁创建与销毁的问题，但是这里需要注意结束使用之后，需要手动释放对象池中的对象。</p>
-
-<h2>9)Garbage Collection in Android</h2>
-
-<p>JVM的回收机制给开发人员带来很大的好处，不用时刻处理对象的分配与回收，可以更加专注于更加高级的代码实现。相比起Java，C与C++等语言具备更高的执行效率，他们需要开发人员自己关注对象的分配与回收，但是在一个庞大的系统当中，还是免不了经常发生部分对象忘记回收的情况，这就是内存泄漏。</p>
-
-<p>原始JVM中的GC机制在Android中得到了很大程度上的优化。Android里面是一个三级Generation的内存模型，最近分配的对象会存放在Young Generation区域，当这个对象在这个区域停留的时间达到一定程度，它会被移动到Old Generation，最后到Permanent Generation区域。</p>
-
-<p><img src="/images/android_memory_gc_mode.png" alt="" /></p>
-
-<p>每一个级别的内存区域都有固定的大小，此后不断有新的对象被分配到此区域，当这些对象总的大小快达到这一级别内存区域的阀值时，会触发GC的操作，以便腾出空间来存放其他新的对象。</p>
-
-<p><img src="/images/gc_threshold.png" alt="" /></p>
-
-<p>前面提到过每次GC发生的时候，所有的线程都是暂停状态的。GC所占用的时间和它是哪一个Generation也有关系，Young Generation的每次GC操作时间是最短的，Old Generation其次，Permanent Generation最长。执行时间的长短也和当前Generation中的对象数量有关，遍历查找20000个对象比起遍历50个对象自然是要慢很多的。</p>
-
-<p>虽然Google的工程师在尽量缩短每次GC所花费的时间，但是特别注意GC引起的性能问题还是很有必要。如果不小心在最小的for循环单元里面执行了创建对象的操作，这将很容易引起GC并导致性能问题。通过Memory Monitor我们可以查看到内存的占用情况，每一次瞬间的内存降低都是因为此时发生了GC操作，如果在短时间内发生大量的内存上涨与降低的事件，这说明很有可能这里有性能问题。我们还可以通过<strong>Heap and Allocation Tracker</strong>工具来查看此时内存中分配的到底有哪些对象。</p>
-
-<h2>10)Performance Cost of Memory Leaks</h2>
-
-<p>虽然Java有自动回收的机制，可是这不意味着Java中不存在内存泄漏的问题，而内存泄漏会很容易导致严重的性能问题。</p>
-
-<p>内存泄漏指的是那些程序不再使用的对象无法被GC识别，这样就导致这个对象一直留在内存当中，占用了宝贵的内存空间。显然，这还使得每级Generation的内存区域可用空间变小，GC就会更容易被触发，从而引起性能问题。</p>
-
-<p>寻找内存泄漏并修复这个漏洞是件很棘手的事情，你需要对执行的代码很熟悉，清楚的知道在特定环境下是如何运行的，然后仔细排查。例如，你想知道程序中的某个activity退出的时候，它之前所占用的内存是否有完整的释放干净了？首先你需要在activity处于前台的时候使用Heap Tool获取一份当前状态的内存快照，然后你需要创建一个几乎不这么占用内存的空白activity用来给前一个Activity进行跳转，其次在跳转到这个空白的activity的时候主动调用System.gc()方法来确保触发一个GC操作。最后，如果前面这个activity的内存都有全部正确释放，那么在空白activity被启动之后的内存快照中应该不会有前面那个activity中的任何对象了。</p>
-
-<p><img src="/images/memory_leak_profile_method.png" alt="" /></p>
-
-<p>如果你发现在空白activity的内存快照中有一些可疑的没有被释放的对象存在，那么接下去就应该使用<strong>Alocation Track Tool</strong>来仔细查找具体的可疑对象。我们可以从空白activity开始监听，启动到观察activity，然后再回到空白activity结束监听。这样操作以后，我们可以仔细观察那些对象，找出内存泄漏的真凶。</p>
-
-<p><img src="/images/memory_leak_track_method.png" alt="" /></p>
-
-<h2>11)Memory Performance</h2>
-
-<p>通常来说，Android对GC做了大量的优化操作，虽然执行GC操作的时候会暂停其他任务，可是大多数情况下，GC操作还是相对很安静并且高效的。但是如果我们对内存的使用不恰当，导致GC频繁执行，这样就会引起不小的性能问题。</p>
-
-<p>为了寻找内存的性能问题，Android Studio提供了工具来帮助开发者。</p>
-
-<ul>
-<li><strong>Memory Monitor：</strong>查看整个app所占用的内存，以及发生GC的时刻，短时间内发生大量的GC操作是一个危险的信号。</li>
-<li><strong>Allocation Tracker：</strong>使用此工具来追踪内存的分配，前面有提到过。</li>
-<li><strong>Heap Tool：</strong>查看当前内存快照，便于对比分析哪些对象有可能是泄漏了的，请参考前面的Case。</li>
-</ul>
-
-
-<h2>12)Tool - Memory Monitor</h2>
-
-<p>Android Studio中的Memory Monitor可以很好的帮助我们查看程序的内存使用情况。</p>
-
-<p><img src="/images/memory_monitor_overview.png" alt="" /></p>
-
-<p><img src="/images/memory_monitor_free_allocation.png" alt="" /></p>
-
-<p><img src="/images/memory_monitor_gc_event.png" alt="" /></p>
-
-<h2>13)Battery Performance</h2>
-
-<p>电量其实是目前手持设备最宝贵的资源之一，大多数设备都需要不断的充电来维持继续使用。不幸的是，对于开发者来说，电量优化是他们最后才会考虑的的事情。但是可以确定的是，千万不能让你的应用成为消耗电量的大户。</p>
-
-<p>Purdue University研究了最受欢迎的一些应用的电量消耗，平均只有30%左右的电量是被程序最核心的方法例如绘制图片，摆放布局等等所使用掉的，剩下的70%左右的电量是被上报数据，检查位置信息，定时检索后台广告信息所使用掉的。如何平衡这两者的电量消耗，就显得非常重要了。</p>
-
-<p>有下面一些措施能够显著减少电量的消耗：</p>
-
-<ul>
-<li>我们应该尽量减少唤醒屏幕的次数与持续的时间，使用WakeLock来处理唤醒的问题，能够正确执行唤醒操作并根据设定及时关闭操作进入睡眠状态。</li>
-<li>某些非必须马上执行的操作，例如上传歌曲，图片处理等，可以等到设备处于充电状态或者电量充足的时候才进行。</li>
-<li>触发网络请求的操作，每次都会保持无线信号持续一段时间，我们可以把零散的网络请求打包进行一次操作，避免过多的无线信号引起的电量消耗。关于网络请求引起无线信号的电量消耗，还可以参考这里<a href="http://hukai.me/android-training-course-in-chinese/connectivity/efficient-downloads/efficient-network-access.html">http://hukai.me/android-training-course-in-chinese/connectivity/efficient-downloads/efficient-network-access.html</a></li>
-</ul>
-
-
-<p>我们可以通过手机设置选项找到对应App的电量消耗统计数据。我们还可以通过<strong>Battery Historian Tool</strong>来查看详细的电量消耗。</p>
-
-<p><img src="/images/battery_usages_settings.png" alt="" /></p>
-
-<p>如果发现我们的App有电量消耗过多的问题，我们可以使用JobScheduler API来对一些任务进行定时处理，例如我们可以把那些任务重的操作等到手机处于充电状态，或者是连接到WiFi的时候来处理。
-关于JobScheduler的更多知识可以参考<a href="http://hukai.me/android-training-course-in-chinese/background-jobs/scheduling/index.html">http://hukai.me/android-training-course-in-chinese/background-jobs/scheduling/index.html</a></p>
-
-<h2>14)Understanding Battery Drain on Android</h2>
-
-<p>电量消耗的计算与统计是一件麻烦而且矛盾的事情，记录电量消耗本身也是一个费电量的事情。唯一可行的方案是使用第三方监测电量的设备，这样才能够获取到真实的电量消耗。</p>
-
-<p>当设备处于待机状态时消耗的电量是极少的，以N5为例，打开飞行模式，可以待机接近1个月。可是点亮屏幕，硬件各个模块就需要开始工作，这会需要消耗很多电量。</p>
-
-<p>使用WakeLock或者JobScheduler唤醒设备处理定时的任务之后，一定要及时让设备回到初始状态。每次唤醒无线信号进行数据传递，都会消耗很多电量，它比WiFi等操作更加的耗电，详情请关注<a href="http://hukai.me/android-training-course-in-chinese/connectivity/efficient-downloads/efficient-network-access.html">http://hukai.me/android-training-course-in-chinese/connectivity/efficient-downloads/efficient-network-access.html</a></p>
-
-<p><img src="/images/battery_drain_radio.png" alt="" /></p>
-
-<p>修复电量的消耗是另外一个很大的课题，这里就不展开继续了。</p>
-
-<h2>15)Battery Drain and WakeLocks</h2>
-
-<p>高效的保留更多的电量与不断促使用户使用你的App会消耗电量，这是矛盾的选择题。不过我们可以使用一些更好的办法来平衡两者。</p>
-
-<p>假设你的手机里面装了大量的社交类应用，即使手机处于待机状态，也会经常被这些应用唤醒用来检查同步新的数据信息。Android会不断关闭各种硬件来延长手机的待机时间，首先屏幕会逐渐变暗直至关闭，然后CPU进入睡眠，这一切操作都是为了节约宝贵的电量资源。但是即使在这种睡眠状态下，大多数应用还是会尝试进行工作，他们将不断的唤醒手机。一个最简单的唤醒手机的方法是使用PowerManager.WakeLock的API来保持CPU工作并防止屏幕变暗关闭。这使得手机可以被唤醒，执行工作，然后回到睡眠状态。知道如何获取WakeLock是简单的，可是及时释放WakeLock也是非常重要的，不恰当的使用WakeLock会导致严重错误。例如网络请求的数据返回时间不确定，导致本来只需要10s的事情一直等待了1个小时，这样会使得电量白白浪费了。这也是为何使用带超时参数的wakelock.acquice()方法是很关键的。但是仅仅设置超时并不足够解决问题，例如设置多长的超时比较合适？什么时候进行重试等等？</p>
-
-<p>解决上面的问题，正确的方式可能是使用非精准定时器。通常情况下，我们会设定一个时间进行某个操作，但是动态修改这个时间也许会更好。例如，如果有另外一个程序需要比你设定的时间晚5分钟唤醒，最好能够等到那个时候，两个任务捆绑一起同时进行，这就是非精确定时器的核心工作原理。我们可以定制计划的任务，可是系统如果检测到一个更好的时间，它可以推迟你的任务，以节省电量消耗。</p>
-
-<p><img src="/images/alarmmanager_inexact_wakelock.png" alt="" /></p>
-
-<p>这正是JobScheduler API所做的事情。它会根据当前的情况与任务，组合出理想的唤醒时间，例如等到正在充电或者连接到WiFi的时候，或者集中任务一起执行。我们可以通过这个API实现很多免费的调度算法。</p>
-
-<p>从Android 5.0开始发布了Battery History Tool，它可以查看程序被唤醒的频率，又谁唤醒的，持续了多长的时间，这些信息都可以获取到。</p>
-
-<p>请关注程序的电量消耗，用户可以通过手机的设置选项观察到那些耗电量大户，并可能决定卸载他们。所以尽量减少程序的电量消耗是非常有必要的。</p>
+<p><strong>经过上面的描述，对Android的Touch事件传递机制应该有更深入的了解，理解错误或者有偏差的地方，欢迎提出一起讨论，谢谢！</strong></p>
 ]]></content>
   </entry>
   
