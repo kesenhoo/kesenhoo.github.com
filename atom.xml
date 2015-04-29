@@ -4,7 +4,7 @@
   <title><![CDATA[胡凯]]></title>
   <link href="http://hukai.me/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2015-04-29T10:53:19+08:00</updated>
+  <updated>2015-04-29T16:05:10+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[HuKai]]></name>
@@ -388,6 +388,8 @@
 <h2>20)Memory Profiling 101</h2>
 
 <p>围绕Android生态系统，不仅仅有Phone，还有Wear，TV，Auto等等。对这些不同形态的程序进行性能优化，都离不开内存调试这个步骤。这节中介绍的内容大部分和<a href="http://hukai.me/android-performance-patterns/">Android性能优化典范</a>与<a href="http://hukai.me/android-performance-memory/">Android性能优化之内存篇</a>重合，不展开了。</p>
+
+<p>首发于CSDN：<a href="http://www.csdn.net/article/2015-04-29/2824583-android-performance-patterns-season-2">Android性能优化典范（二）</a></p>
 ]]></content>
   </entry>
   
