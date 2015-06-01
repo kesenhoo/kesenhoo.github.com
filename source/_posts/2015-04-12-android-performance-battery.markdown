@@ -4,7 +4,7 @@ title: "Android性能优化之电量篇"
 date: 2015-04-12 16:49
 comments: true
 sidebar: false
-categories: Android Android:Deeper
+categories: Android Android:Performance
 ---
 
 ![android_performance_course_udacity](/images/android_performance_course_udacity.jpg)

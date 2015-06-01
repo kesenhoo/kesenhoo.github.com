@@ -4,7 +4,7 @@ title: "Android性能优化典范"
 date: 2015-01-17 19:42
 comments: true
 sidebar: false
-categories: Android Android:Deeper
+categories: Android Android:Performance
 ---
 
 ![](/images/android_perf_patterns.png)

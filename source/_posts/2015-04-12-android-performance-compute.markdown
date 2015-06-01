@@ -4,7 +4,7 @@ title: "Android性能优化之运算篇"
 date: 2015-04-12 13:50
 comments: true
 sidebar: false
-categories: Android Android:Deeper
+categories: Android Android:Performance
 ---
 
 ![](/images/android_performance_course_udacity.jpg)
