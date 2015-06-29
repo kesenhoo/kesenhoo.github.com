@@ -4,7 +4,7 @@ title: "Android Training - 提升布局文件的性能(Lesson 4 - 使用ViewHold
 date: 2012-03-21 21:20
 comments: true
 sidebar: false
-categories: Android Android:Training
+categories: Android Android:Training Android:Performance
 ---
 
 ## Making ListView Scrolling Smooth

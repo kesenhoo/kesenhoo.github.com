@@ -4,7 +4,7 @@ title: "Android Training - 提升布局文件的性能(Lesson 2 - 使用include�
 date: 2012-03-21 18:06
 comments: true
 sidebar: false
-categories: Android Android:Training
+categories: Android Android:Training Android:Performance
 ---
 
 ## Re-using Layouts with <include/>

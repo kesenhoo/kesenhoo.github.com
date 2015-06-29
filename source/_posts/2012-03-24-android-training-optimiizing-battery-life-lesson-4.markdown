@@ -4,7 +4,7 @@ title: "Android Training - 优化电池续航能力(Lesson 4 - 判断并监测�
 date: 2012-03-24 16:37
 comments: true
 sidebar: false
-categories: Android Android:Training
+categories: Android Android:Training Android:Performance
 ---
 
 ## Manipulating Broadcast Receivers On Demand[按需操控广播接收者]

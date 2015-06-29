@@ -4,7 +4,7 @@ title: "Android Training - 优化电池续航能力(Lesson 2 - 判断设备的�
 date: 2012-03-23 19:53
 comments: true
 sidebar: false
-categories: Android Android:Training
+categories: Android Android:Training Android:Performance
 ---
 
 ## Determining and Monitoring the Docking State and Type[判断并监测设备的停驻状态与类型]

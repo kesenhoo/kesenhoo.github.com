@@ -4,7 +4,7 @@ title: "Android Training - 优化电池续航能力(Lesson 1 - 监测设备的�
 date: 2012-03-23 18:28
 comments: true
 sidebar: false
-categories: Android Android:Training
+categories: Android Android:Training Android:Performance
 ---
 
 显然，手持设备的电量需要引起很大的重视。通过这一系列的课程，可以学会如何根据设备电池状态来改变App的某些行为与功能。
