@@ -9,7 +9,7 @@
   <meta name="author" content="HuKai">
 
   
-  <meta name="description" content="前一篇文章演示了如何创建一个IntentService类。这次会演示如何通过发送一个Intent来触发IntentService执行任务。这个Intent可以传递一些数据给IntentService。可以在Activity或者Fragment的任何时间点发送这个Intent。 &hellip;">
+  <meta name="description" content="前一篇文章演示了如何创建一个IntentService类。这次会演示如何通过发送一个Intent来触发IntentService执行任务。这个Intent可以传递一些数据给IntentService。我们可以在Activity或者Fragment的任何时间点发送这个Intent。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -111,14 +111,17 @@
   </header>
 
 
-  <div class="entry-content"><p>前一篇文章演示了如何创建一个IntentService类。这次会演示如何通过发送一个Intent来触发IntentService执行任务。这个Intent可以传递一些数据给IntentService。可以在Activity或者Fragment的任何时间点发送这个Intent。</p>
+  <div class="entry-content"><p>前一篇文章演示了如何创建一个IntentService类。这次会演示如何通过发送一个Intent来触发IntentService执行任务。这个Intent可以传递一些数据给IntentService。我们可以在Activity或者Fragment的任何时间点发送这个Intent。</p>
 
-<p>为了创建一个工作请求并发送到IntentService。需要先创建一个explicit Intent，添加数据到intent，然后通过执行<a href="http://developer.android.com/reference/android/content/Context.html#startService(android.content.Intent">startService()</a>) 把它发送到IntentService。</p>
+<h2>创建任务请求并发送到IntentService</h2>
+
+<p>为了创建一个任务请求并发送到IntentService。需要先创建一个显式Intent，并将请求数据添加到intent中，然后通过调用
+<code>startService()</code> 方法把任务请求数据发送到IntentService。</p>
 
 <p>下面的是代码示例：</p>
 
 <ul>
-<li>创建一个新的显式的Intent用来启动IntentService。</li>
+<li>创建一个新的显式Intent用来启动IntentService。</li>
 </ul>
 
 
@@ -184,26 +187,20 @@
 
   <div class="entry-content"><p><strong>写在开始：</strong>接下去的一段时间会学习专题《Background Jobs》的几篇文章，演示如何在后台执行任务，以此加速程序的性能并降低能耗的使用。第一章节会学习如何通过发送任务到后台的Service中执行，从而提示UI的表现性能。</p>
 
-<p>除非你特意指定，否则大部分在前台的操作都执行在一个叫做UI Thread的特殊线程中。这可能会导致某些问题，因为耗时操作可能会干扰界面的响应性能。为了避免这样的问题，Android Framework提供了几个类，用来帮助你把那些耗时操作移动到后台线程中执行。那些类中最常用的就是<a href="http://developer.android.com/reference/android/app/IntentService.html">IntentService</a>.</p>
+<p>IntentService为在单一后台线程中执行任务提供了一种直接的实现方式。它可以处理一个耗时的任务并确保不影响到UI的响应性。另外IntentService的执行还不受UI生命周期的影响，以此来确保AsyncTask能够顺利运行。</p>
 
-<p>这一章节会讲到如何实现一个IntentService，向它发送任务并反馈它的结果给其他模块。</p>
-
-<h2>0)概述</h2>
-
-<p>IntentService为执行一个操作在单个后台线程，提供了一种直接的实现方式。它可以处理一个长时间操作的任务并确保不影响到UI的响应性。而且IntentService的执行并不受UI的生命周期的影响。</p>
-
-<p>IntentService有下面几个局限性：</p>
+<p>但是IntentService有下面几个局限性：</p>
 
 <ul>
-<li>不可以直接和UI做交互。为了把他执行的结果体现在UI上，需要发送给Activity。</li>
-<li>工作任务队列是顺序执行的，如果一个任务正在IntentService中执行，此时你再发送一个任务请求，这个任务会一直等待直到前面一个任务执行完毕。</li>
+<li>不可以直接和UI做交互。为了把他执行的结果体现在UI上，需要把结果返回给Activity。</li>
+<li>工作任务队列是顺序执行的，如果一个任务正在IntentService中执行，此时你再发送一个新的任务请求，这个新的任务会一直等待直到前面一个任务执行完毕才开始执行。</li>
 <li>正在执行的任务无法打断。</li>
 </ul>
 
 
-<p>然而，在大多数情况下，IntentService都是简单后台任务操作的理想选择。</p>
+<p>虽然有上面那些限制，然而在在大多数情况下，IntentService都是执行简单后台任务操作的理想选择。</p>
 
-<p>这节课会演示如何创建继承的IntentService。同样也会演示如何创建必须实现的回调<a href="http://developer.android.com/reference/android/app/IntentService.html#onHandleIntent(android.content.Intent">onHandleIntent()</a>)。最后，还会解释如何在manifest文件中定义这个IntentService。</p>
+<p>这节课会演示如何创建继承的IntentService。同样也会演示如何创建必须的回调方法<code>onHandleIntent()</code>。最后，还会解释如何在manifest文件中定义这个IntentService。</p>
 
 </div>
   

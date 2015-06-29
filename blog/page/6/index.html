@@ -301,13 +301,13 @@
   </header>
 
 
-  <div class="entry-content"><p>这章节会演示如何回传IntentService中执行的任务状态与结果给发送方。 例如，回传任务的状态给Activity并进行更新UI。推荐的方式是使用<a href="http://developer.android.com/reference/android/support/v4/content/LocalBroadcastManager.html">LocalBroadcastManager</a>，这个组件可以限制broadcast只在自己的App中进行传递。</p>
+  <div class="entry-content"><p>这章节会演示如何回传IntentService中执行的任务状态与结果给发送方。 例如，回传任务的执行状态给Activity并进行更新UI。推荐的方式是使用<a href="http://developer.android.com/reference/android/support/v4/content/LocalBroadcastManager.html">LocalBroadcastManager</a>，这个组件可以限制broadcast intent只在自己的app中进行传递。</p>
 
-<h2>Report Status From an IntentService</h2>
+<h2>利用IntentService 发送任务状态</h2>
 
 <p>为了在IntentService中向其他组件发送任务状态，首先创建一个Intent并在data字段中包含需要传递的信息。作为一个可选项，还可以给这个Intent添加一个action与data URI。</p>
 
-<p>下一步，通过执行<a href="http://developer.android.com/reference/android/support/v4/content/LocalBroadcastManager.html#sendBroadcast(android.content.Intent">LocalBroadcastManager.sendBroadcast()</a>))来发送Intent。Intent被发送到任何有注册接受它的组件中。为了获取到LocalBroadcastManager的实例，可以执行getInstance().代码示例如下：</p>
+<p>下一步，通过执行<code>LocalBroadcastManager.sendBroadcast()</code> 来发送Intent。Intent被发送到任何有注册接受它的组件中。为了获取到LocalBroadcastManager的实例，可以执行getInstance()。代码示例如下：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>

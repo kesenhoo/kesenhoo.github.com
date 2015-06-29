@@ -9,7 +9,7 @@
   <meta name="author" content="HuKai">
 
   
-  <meta name="description" content="前一篇文章演示了如何创建一个IntentService类。这次会演示如何通过发送一个Intent来触发IntentService执行任务。这个Intent可以传递一些数据给IntentService。可以在Activity或者Fragment的任何时间点发送这个Intent。 &hellip;">
+  <meta name="description" content="前一篇文章演示了如何创建一个IntentService类。这次会演示如何通过发送一个Intent来触发IntentService执行任务。这个Intent可以传递一些数据给IntentService。我们可以在Activity或者Fragment的任何时间点发送这个Intent。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -108,14 +108,17 @@
   </header>
 
 
-<div class="entry-content"><p>前一篇文章演示了如何创建一个IntentService类。这次会演示如何通过发送一个Intent来触发IntentService执行任务。这个Intent可以传递一些数据给IntentService。可以在Activity或者Fragment的任何时间点发送这个Intent。</p>
+<div class="entry-content"><p>前一篇文章演示了如何创建一个IntentService类。这次会演示如何通过发送一个Intent来触发IntentService执行任务。这个Intent可以传递一些数据给IntentService。我们可以在Activity或者Fragment的任何时间点发送这个Intent。</p>
 
-<p>为了创建一个工作请求并发送到IntentService。需要先创建一个explicit Intent，添加数据到intent，然后通过执行<a href="http://developer.android.com/reference/android/content/Context.html#startService(android.content.Intent">startService()</a>) 把它发送到IntentService。</p>
+<h2>创建任务请求并发送到IntentService</h2>
+
+<p>为了创建一个任务请求并发送到IntentService。需要先创建一个显式Intent，并将请求数据添加到intent中，然后通过调用
+<code>startService()</code> 方法把任务请求数据发送到IntentService。</p>
 
 <p>下面的是代码示例：</p>
 
 <ul>
-<li>创建一个新的显式的Intent用来启动IntentService。</li>
+<li>创建一个新的显式Intent用来启动IntentService。</li>
 </ul>
 
 
@@ -142,7 +145,7 @@
 
 
 <ul>
-<li>执行startService()</li>
+<li>执行<code>startService()</code></li>
 </ul>
 
 
@@ -153,9 +156,9 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p><strong>注意：</strong>可以在Activity或者Fragment的任何位置发送任务请求。</p>
+<p>注意可以在Activity或者Fragment的任何位置发送任务请求。例如，如果你先获取用户输入，您可以从响应按钮单击或类似手势的回调方法里面发送任务请求。</p>
 
-<p>一旦执行了startService()，IntentService在自己本身的<a href="http://developer.android.com/reference/android/app/IntentService.html#onHandleIntent(android.content.Intent">onHandleIntent()</a>)方法里面开始执行这个任务。</p>
+<p>一旦执行了startService()，IntentService在自己本身的<code>onHandleIntent()</code>方法里面开始执行这个任务，任务结束之后，会自动停止这个Service。</p>
 
 <p>下一步是如何把工作任务的执行结果返回给发送任务的Activity或者Fragment。下节课会演示如何使用<a href="http://developer.android.com/reference/android/content/BroadcastReceiver.html">BroadcastReceiver</a>来完成这个任务。</p>
 

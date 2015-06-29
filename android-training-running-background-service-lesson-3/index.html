@@ -9,7 +9,7 @@
   <meta name="author" content="HuKai">
 
   
-  <meta name="description" content="这章节会演示如何回传IntentService中执行的任务状态与结果给发送方。 例如，回传任务的状态给Activity并进行更新UI。推荐的方式是使用LocalBroadcastManager，这个组件可以限制broadcast只在自己的App中进行传递。 Report Status From &hellip;">
+  <meta name="description" content="这章节会演示如何回传IntentService中执行的任务状态与结果给发送方。 例如，回传任务的执行状态给Activity并进行更新UI。推荐的方式是使用LocalBroadcastManager，这个组件可以限制broadcast intent只在自己的app中进行传递。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -108,13 +108,13 @@
   </header>
 
 
-<div class="entry-content"><p>这章节会演示如何回传IntentService中执行的任务状态与结果给发送方。 例如，回传任务的状态给Activity并进行更新UI。推荐的方式是使用<a href="http://developer.android.com/reference/android/support/v4/content/LocalBroadcastManager.html">LocalBroadcastManager</a>，这个组件可以限制broadcast只在自己的App中进行传递。</p>
+<div class="entry-content"><p>这章节会演示如何回传IntentService中执行的任务状态与结果给发送方。 例如，回传任务的执行状态给Activity并进行更新UI。推荐的方式是使用<a href="http://developer.android.com/reference/android/support/v4/content/LocalBroadcastManager.html">LocalBroadcastManager</a>，这个组件可以限制broadcast intent只在自己的app中进行传递。</p>
 
-<h2>Report Status From an IntentService</h2>
+<h2>利用IntentService 发送任务状态</h2>
 
 <p>为了在IntentService中向其他组件发送任务状态，首先创建一个Intent并在data字段中包含需要传递的信息。作为一个可选项，还可以给这个Intent添加一个action与data URI。</p>
 
-<p>下一步，通过执行<a href="http://developer.android.com/reference/android/support/v4/content/LocalBroadcastManager.html#sendBroadcast(android.content.Intent">LocalBroadcastManager.sendBroadcast()</a>))来发送Intent。Intent被发送到任何有注册接受它的组件中。为了获取到LocalBroadcastManager的实例，可以执行getInstance().代码示例如下：</p>
+<p>下一步，通过执行<code>LocalBroadcastManager.sendBroadcast()</code> 来发送Intent。Intent被发送到任何有注册接受它的组件中。为了获取到LocalBroadcastManager的实例，可以执行getInstance()。代码示例如下：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -176,9 +176,9 @@
 
 <p>下一步是在发送任务的组件中接收发送出来的broadcast数据。</p>
 
-<h2>Receive Status Broadcasts from an IntentService</h2>
+<h2>接收来自IntentService的状态广播</h2>
 
-<p>为了接受广播的数据对象，需要使用BroadcastReceiver的子类并实现<a href="http://developer.android.com/reference/android/content/BroadcastReceiver.html#onReceive(android.content.Context,%20android.content.Intent">BroadcastReceiver.onReceive()</a>)的方法，这里可以接收LocalBroadcastManager发出的广播数据。</p>
+<p>为了接受广播的数据对象，需要使用BroadcastReceiver的子类并实现<code>BroadcastReceiver.onReceive()</code> 的方法，这里可以接收LocalBroadcastManager发出的广播数据。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -215,7 +215,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>一旦定义了BroadcastReceiver，也应该定义actions，categories与data用来做广播过滤。为了实现这些，需要使用<a href="http://developer.android.com/reference/android/content/IntentFilter.html">IntentFilter</a>.如下所示：</p>
+<p>一旦定义了BroadcastReceiver，也应该定义actions，categories与data用过滤广播。为了实现这些，需要使用<a href="http://developer.android.com/reference/android/content/IntentFilter.html">IntentFilter</a>。如下所示：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -244,11 +244,11 @@
 </span><span class='line'>
 </span><span class='line'>        <span class="c1">// Adds a data filter for the HTTP scheme</span>
 </span><span class='line'>        <span class="n">mStatusIntentFilter</span><span class="o">.</span><span class="na">addDataScheme</span><span class="o">(</span><span class="s">&quot;http&quot;</span><span class="o">);</span>
-</span><span class='line'>
+</span><span class='line'>        <span class="o">...</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>为了给系统注册这个BroadcastReceiver，需要通过LocalBroadcastManager执行registerReceiver()的方法。如下所示：</p>
+<p>为了给系统注册这个BroadcastReceiver和IntentFilter，需要通过LocalBroadcastManager执行registerReceiver()的方法。如下所示：</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -259,13 +259,13 @@
 <span class='line-number'>7</span>
 <span class='line-number'>8</span>
 </pre></td><td class='code'><pre><code class='java'><span class='line'><span class="c1">// Instantiates a new DownloadStateReceiver</span>
-</span><span class='line'>        <span class="n">DownloadStateReceiver</span> <span class="n">mDownloadStateReceiver</span> <span class="o">=</span>
-</span><span class='line'>                <span class="k">new</span> <span class="nf">DownloadStateReceiver</span><span class="o">();</span>
-</span><span class='line'>        <span class="c1">// Registers the DownloadStateReceiver and its intent filters</span>
-</span><span class='line'>        <span class="n">LocalBroadcastManager</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="k">this</span><span class="o">).</span><span class="na">registerReceiver</span><span class="o">(</span>
-</span><span class='line'>                <span class="n">mDownloadStateReceiver</span><span class="o">,</span>
-</span><span class='line'>                <span class="n">mStatusIntentFilter</span><span class="o">);</span>
-</span><span class='line'>        <span class="o">...</span>
+</span><span class='line'><span class="n">DownloadStateReceiver</span> <span class="n">mDownloadStateReceiver</span> <span class="o">=</span>
+</span><span class='line'>        <span class="k">new</span> <span class="nf">DownloadStateReceiver</span><span class="o">();</span>
+</span><span class='line'><span class="c1">// Registers the DownloadStateReceiver and its intent filters</span>
+</span><span class='line'><span class="n">LocalBroadcastManager</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="k">this</span><span class="o">).</span><span class="na">registerReceiver</span><span class="o">(</span>
+</span><span class='line'>        <span class="n">mDownloadStateReceiver</span><span class="o">,</span>
+</span><span class='line'>        <span class="n">mStatusIntentFilter</span><span class="o">);</span>
+</span><span class='line'><span class="o">...</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -282,19 +282,19 @@
 <span class='line-number'>9</span>
 <span class='line-number'>10</span>
 </pre></td><td class='code'><pre><code class='java'><span class='line'><span class="cm">/*</span>
-</span><span class='line'><span class="cm">         * Instantiates a new action filter.</span>
-</span><span class='line'><span class="cm">         * No data filter is needed.</span>
-</span><span class='line'><span class="cm">         */</span>
-</span><span class='line'>        <span class="n">statusIntentFilter</span> <span class="o">=</span> <span class="k">new</span> <span class="n">IntentFilter</span><span class="o">(</span><span class="n">Constants</span><span class="o">.</span><span class="na">ACTION_ZOOM_IMAGE</span><span class="o">);</span>
-</span><span class='line'>        <span class="o">...</span>
-</span><span class='line'>        <span class="c1">// Registers the receiver with the new filter</span>
-</span><span class='line'>        <span class="n">LocalBroadcastManager</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="n">getActivity</span><span class="o">()).</span><span class="na">registerReceiver</span><span class="o">(</span>
-</span><span class='line'>                <span class="n">mDownloadStateReceiver</span><span class="o">,</span>
-</span><span class='line'>                <span class="n">mIntentFilter</span><span class="o">);</span>
+</span><span class='line'><span class="cm"> * Instantiates a new action filter.</span>
+</span><span class='line'><span class="cm"> * No data filter is needed.</span>
+</span><span class='line'><span class="cm"> */</span>
+</span><span class='line'><span class="n">statusIntentFilter</span> <span class="o">=</span> <span class="k">new</span> <span class="n">IntentFilter</span><span class="o">(</span><span class="n">Constants</span><span class="o">.</span><span class="na">ACTION_ZOOM_IMAGE</span><span class="o">);</span>
+</span><span class='line'><span class="o">...</span>
+</span><span class='line'><span class="c1">// Registers the receiver with the new filter</span>
+</span><span class='line'><span class="n">LocalBroadcastManager</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="n">getActivity</span><span class="o">()).</span><span class="na">registerReceiver</span><span class="o">(</span>
+</span><span class='line'>        <span class="n">mDownloadStateReceiver</span><span class="o">,</span>
+</span><span class='line'>        <span class="n">mIntentFilter</span><span class="o">);</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>发送一个广播并不会start或者resume一个Activity。BroadcastReceiver可以接收广播数据，即使是你的app是在后台运行中。但是这不会强迫使得你的app变成foreground的。如果想在app不可见的时候通知用户一个后台的事件，建议使用<a href="http://developer.android.com/reference/android/app/Notification.html">Notification</a>。永远不要为了响应一个广播而去启动Activity。</p>
+<p>发送一个广播Intent并不会启动或重启一个Activity。即使是你的app在后台运行，Activity的BroadcastReceiver也可以接收、处理Intent对象。但是这不会迫使你的app进入前台。当你的app不可见时，如果想通知用户一个发生在后台的事件，建议使用<a href="http://developer.android.com/reference/android/app/Notification.html">Notification</a>。<strong>永远</strong>不要为了响应一个广播Intent而去启动Activity。</p>
 
 <hr />
 
