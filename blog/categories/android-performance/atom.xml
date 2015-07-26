@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android:Performance | 胡凯]]></title>
   <link href="http://hukai.me/blog/categories/android-performance/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2015-06-30T01:29:46+08:00</updated>
+  <updated>2015-07-26T14:29:27+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[HuKai]]></name>
@@ -287,7 +287,7 @@ public void onCreate() {</p>
 
 <p>所以为了避免加载一张超大的图片，需要尽量减少这张图片所占用的内存大小，Android为图片提供了4种解码格式，他们分别占用的内存大小如下图所示：</p>
 
-<p><img src="/images/android_perf_2_pixel_heap_free.png" alt="android_perf_2_pixel_format" /></p>
+<p><img src="/images/android_perf_2_pixel_format.png" alt="android_perf_2_pixel_format" /></p>
 
 <p>随着解码占用内存大小的降低，清晰度也会有损失。我们需要针对不同的应用场景做不同的处理，大图和小图可以采用不同的解码率。在Android里面可以通过下面的代码来设置解码率：</p>
 
