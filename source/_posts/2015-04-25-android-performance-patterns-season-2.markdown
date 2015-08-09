@@ -244,7 +244,7 @@ Android的Heap空间是不会自动做兼容压缩的，意思就是如果Heap�
 
 所以为了避免加载一张超大的图片，需要尽量减少这张图片所占用的内存大小，Android为图片提供了4种解码格式，他们分别占用的内存大小如下图所示：
 
-![android_perf_2_pixel_format](/images/android_perf_2_pixel_heap_free.png)
+![android_perf_2_pixel_format](/images/android_perf_2_pixel_format.png)
 
 随着解码占用内存大小的降低，清晰度也会有损失。我们需要针对不同的应用场景做不同的处理，大图和小图可以采用不同的解码率。在Android里面可以通过下面的代码来设置解码率：
 
