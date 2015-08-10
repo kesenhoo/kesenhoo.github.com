@@ -149,7 +149,7 @@ Android系统提供了一些回调来通知应用的内存使用情况，通常�
 ![android_perf_3_location_accuracy](/images/android_perf_3_location_accuracy.png)
 
 ## 8)Double Layout Taxation
-布局中的任何一个View发生了一些属性变化，都可能引起极大的连锁反应。例如某个button的大小突然增加一倍，有可能会导致兄弟视图的位置变化，也有可能导致父视图的大小发生改变。当大量layout操作被执行的时候，很可能引起丢帧的现象。
+布局中的任何一个View一旦发生一些属性变化，都可能引起很大的连锁反应。例如某个button的大小突然增加一倍，有可能会导致兄弟视图的位置变化，也有可能导致父视图的大小发生改变。当大量的layout()操作被频繁调用执行的时候，就很可能引起丢帧的现象。
 
 ![android_perf_3_layout_double](/images/android_perf_3_layout_double.png)
 
@@ -163,11 +163,9 @@ Android系统提供了一些回调来通知应用的内存使用情况，通常�
 
 ![android_perf_3_layout_first_adjust](/images/android_perf_3_layout_first_adjust.png)
 
-经历过上面2个步骤，relativeLayout会立即触发第二次位置的计算操作，同时再次发生adjust bounds的操作，这样一来，就总共发生了4次
+经历过上面2个步骤，relativeLayout会立即触发第二次layout()的操作来确定最终的位置信息。
 
-？？？？
-
-除了RelativeLayout会发生两次layout操作之外，LinearLayout通常情况下只会发生一次layout操作，可是一旦调用了measureWithLargetChild()方法就会导致触发两次layout的操作。另外，如果GridLayout里面的某些子视图使用了fill parent或者是weight的属性，也会导致多次layout的操作。
+除了RelativeLayout会发生两次layout操作之外，LinearLayout也有可能触发两次layout操作，通常情况下LinearLayout只会发生一次layout操作，可是一旦调用了measureWithLargetChild()方法就会导致触发两次layout的操作。另外，通常来说，GridLayout会自动预处理子视图的关系来避免两次layout，可是如果GridLayout里面的某些子视图使用了weight等复杂的属性，还是会导致重复layout的操作。
 
 如果只是少量的重复layout并不会引起严重的性能问题，但是如果他们发生在布局的根节点，或者是ListView里面的某个ListItem，这样就会引起比较严重的性能问题。如下图所示：
 
