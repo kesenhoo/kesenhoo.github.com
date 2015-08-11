@@ -9,7 +9,7 @@
   <meta name="author" content="HuKai">
 
   
-  <meta name="description" content="恰当的停止与重启你的activity是很重要的，在activity生命周期中，他们能确保用户感知到程序的存在并不会丢失他们的进度。在下面一些关键的场景中会涉及到停止与重启： 用户打开最近使用app的菜单并切换你的app到另外一个app，这个时候你的app是被停止的。 &hellip;">
+  <meta name="description" content="在使用通常的app时，前端的activity有时候会被其他可见的组件而阻塞(obstructed)，这样会导致当前的activity进入Pause状态。例如，当打开一个半透明的activity时(例如以对话框的形式)，之前的activity会被暂停。 只要这个activity仍然被部分可见， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,62 +80,6 @@
     <div id="content">
       <div class="blog-index">
   
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-managing-the-activity-lifecycle-lesson-3/">Android Training - 详解Activity生命周期(Lesson 3 - 停止与重启activity)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-10T21:27:00+08:00" pubdate data-updated="true">Mar 10<span>th</span>, 2012</time>
-        
-         | <a href="/android-training-managing-the-activity-lifecycle-lesson-3/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><ul>
-<li>恰当的停止与重启你的activity是很重要的，在activity生命周期中，他们能确保用户感知到程序的存在并不会丢失他们的进度。在下面一些关键的场景中会涉及到停止与重启：
-
-<ul>
-<li>用户打开最近使用app的菜单并切换你的app到另外一个app，这个时候你的app是被停止的。如果用户通过手机主界面的启动程序图标或者最近使用程序的窗口回到你的app，那么你的activity会重启。</li>
-<li>用户在你的app里面执行启动一个新的activity的操作，当前activity会在第二个activity被创建后stop。如果用户点击back按钮，第一个activtiy会被重启。</li>
-<li>用户在使用你的app时接受到一个来电通话.</li>
-</ul>
-</li>
-<li><a href="http://developer.android.com/reference/android/app/Activity.html">Activity</a>类提供了<a href="http://developer.android.com/reference/android/app/Activity.html#onStop()">onStop()</a>与<a href="http://developer.android.com/reference/android/app/Activity.html#onRestart()">onRestart()</a>方法来允许在activity停止与重启时进行调用。不像暂停状态是部分阻塞UI，停止状态是UI不再可见并且用户的焦点转移到另一个activity中.</li>
-</ul>
-
-
-<blockquote><p><strong>Note:</strong>因为系统在activity停止时会在内存中保存了Activity实例。有些时候你不需要实现onStop(),onRestart()甚至是onStart()方法. 因为大多数的activity相对比较简单，activity会自己停止与重启，你只需要使用onPause()来停止正在运行的动作并断开系统资源链接。</p></blockquote>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-managing-the-activity-lifecycle-lesson-3/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
   
   
     <article>
@@ -384,10 +328,6 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/android-performance-patterns-season-3/">Android性能优化典范 - 第3季</a>
-      </li>
-    
-      <li class="post">
         <a href="/android-performance-patterns-season-2/">Android性能优化典范 - 第2季</a>
       </li>
     
@@ -415,16 +355,20 @@
         <a href="/android-tips-for-reduce-apk-size/">Android APK安装包瘦身</a>
       </li>
     
+      <li class="post">
+        <a href="/android-activitylifecycle-onsaveinstancestate/">Android Notes - Activity生命周期中的onSaveInstanceState</a>
+      </li>
+    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (94)</a></li>
+  <li><a href='/blog/categories/android'>Android (93)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
-  <li><a href='/blog/categories/android-performance'>Android:performance (18)</a></li>
+  <li><a href='/blog/categories/android-performance'>Android:performance (17)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
