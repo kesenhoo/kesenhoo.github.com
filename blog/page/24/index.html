@@ -9,7 +9,7 @@
   <meta name="author" content="HuKai">
 
   
-  <meta name="description" content="恰当的停止与重启你的activity是很重要的，在activity生命周期中，他们能确保用户感知到程序的存在并不会丢失他们的进度。在下面一些关键的场景中会涉及到停止与重启： 用户打开最近使用app的菜单并切换你的app到另外一个app，这个时候你的app是被停止的。 &hellip;">
+  <meta name="description" content="有几个场景中，Activity是由于正常的程序行为而被Destory的，例如当用户点击返回按钮或者是你的Activity通过调用finish()来发出停止信号。系统也有可能会在你的Activity处于stop状态且长时间不被使用，或者是在前台activity需要更多系统资源的时候把关闭后台进程， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +80,55 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-training-managing-the-activity-lifecycle-lesson-4/">Android Training - 详解Activity生命周期(Lesson 4 - 重新创建销毁的activity)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-11T21:51:00+08:00" pubdate data-updated="true">Mar 11<span>th</span>, 2012</time>
+        
+         | <a href="/android-training-managing-the-activity-lifecycle-lesson-4/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><ul>
+<li>有几个场景中，Activity是由于正常的程序行为而被Destory的，例如当用户点击返回按钮或者是你的Activity通过调用<a href="http://developer.android.com/reference/android/app/Activity.html#finish()">finish()</a>来发出停止信号。系统也有可能会在你的Activity处于stop状态且长时间不被使用，或者是在前台activity需要更多系统资源的时候把关闭后台进程，这样来获取更多的内存。</li>
+<li>当你的Activity是因为用户点击Back按钮或者是activity通过调用finish()结束自己时，系统就丢失了Activity实例这个概念，因为前面的行为意味着不再需要这个activity了。然而，如果因为系统资源紧张而导致Activity的Destory， 系统会在用户回到这个Activity时有这个Activity存在过的记录，系统会使用那些保存的记录数据（描述了当Activity被Destory时的状态）来重新创建一个新的Activity实例。那些被系统用来恢复之前状态而保存的数据被叫做 &#8220;instance state&#8221; ，它是一些存放在<a href="http://developer.android.com/reference/android/os/Bundle.html">Bundle</a>对象中的key-value pairs。(<em>请注意这里的描述，这对理解onSaveInstanceState执行的时刻很重要</em>)</li>
+</ul>
+
+
+<blockquote><p><strong>Caution:</strong>你的Activity会在每次旋转屏幕时被destroyed与recreated。当屏幕改变方向时，系统会Destory与Recreate前台的activity，因为屏幕配置被改变，你的Activity可能需要加载一些alternative的资源(例如layout).</p></blockquote>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-training-managing-the-activity-lifecycle-lesson-4/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -318,58 +367,9 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-managing-the-activity-lifecycle-lesson-0/">Android Training - 详解Activity声明周期(Lesson 0 - 章节概要)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-07T18:34:00+08:00" pubdate data-updated="true">Mar 7<span>th</span>, 2012</time>
-        
-         | <a href="/android-training-managing-the-activity-lifecycle-lesson-0/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>管理Activity生命周期</h2>
-
-<p>当用户进入，退出，回到你的App，在程序中的<a href="http://developer.android.com/reference/android/app/Activity.html">Activity</a> 实例都经历了生命周期中的不同状态。例如，当你的activity第一次启动的时候，它来到系统的前台，开始接受用户的焦点。在此期间，Android系统调用了一系列的生命周期中的方法。如果用户执行了启动另一个activity或者切换到另一个app的操作, 系统又会调用一些生命周期中的方法。</p>
-
-<p>在生命周期的回调方法里面，你可以声明当用户离开或者重新进入这个Activity所需要执行的操作。例如, 如果你建立了一个streaming video player, 在用户切换到另外一个app的时候，你应该暂停video 并终止网络连接。当用户返回时，你可以重新建立网络连接并允许用户从同样的位置恢复播放。</p>
-
-<p>这一章会介绍一些<a href="http://developer.android.com/reference/android/app/Activity.html">Activity</a>中重要的生命周期回调方法，如何使用那些方法使得程序符合用户的期望且在activity不需要的时候不会导致系统资源的浪费。</p>
-
-<p><strong>完整的Demo示例</strong>：<a href="http://developer.android.com/shareables/training/ActivityLifecycle.zip">ActivityLifecycle.zip</a></p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-managing-the-activity-lifecycle-lesson-0/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
+    
+      <a class="prev" href="/blog/page/25/">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
@@ -382,6 +382,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-performance-oom/">Android内存优化之OOM</a>
+      </li>
     
       <li class="post">
         <a href="/android-performance-patterns-season-3/">Android性能优化典范 - 第3季</a>
@@ -411,20 +415,16 @@
         <a href="/android-performance-patterns/">Android性能优化典范</a>
       </li>
     
-      <li class="post">
-        <a href="/android-tips-for-reduce-apk-size/">Android APK安装包瘦身</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (94)</a></li>
+  <li><a href='/blog/categories/android'>Android (95)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
-  <li><a href='/blog/categories/android-performance'>Android:performance (18)</a></li>
+  <li><a href='/blog/categories/android-performance'>Android:performance (19)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>

@@ -9,7 +9,7 @@
   <meta name="author" content="HuKai">
 
   
-  <meta name="description" content="使用Volley的方式是，你通过创建一个RequestQueue并传递Request对象给它。RequestQueue管理工作线程用来执行网络操作，从Cache中读取与写入数据，以及解析Http的响应内容。Requests执行raw responses的解析，Volley会把响应的数据分发给主线程 &hellip;">
+  <meta name="description" content="前一节课演示了如何使用Volley.newRequestQueue这一简便的方法来建立一个RequestQueue，这是利用了Volley默认的优势。这节课会介绍如何显式的建立一个RequestQueue，以便满足你自定义的需求。 这节课同样会介绍一种推荐的实现方式： &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +80,57 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-training-volley-request-queue/">Android Training - Volley(Lesson 2 - 建立请求队列)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-24T21:03:00+08:00" pubdate data-updated="true">Jun 24<span>th</span>, 2014</time>
+        
+         | <a href="/android-training-volley-request-queue/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>前一节课演示了如何使用<code>Volley.newRequestQueue</code>这一简便的方法来建立一个<code>RequestQueue</code>，这是利用了Volley默认的优势。这节课会介绍如何显式的建立一个RequestQueue，以便满足你自定义的需求。</p>
+
+<p>这节课同样会介绍一种推荐的实现方式：创建一个单例的RequestQueue，这使得RequestQueue能够持续保持在你的app的生命周期中。</p>
+
+<h2>Set Up a Network and Cache</h2>
+
+<p>一个RequestQueue需要两部分来支持它的工作：一部分是网络操作用来执行请求的数据传输，另外一个是用来处理缓存操作的Cache。在Volley的工具箱中包含了标准的实现方式：<code>DiskBasedCache</code>提供了每个文件与对应响应数据一一映射的缓存实现。 <code>BasicNetwork</code>提供了一个网络传输的实现，连接方式可以是<a href="http://developer.android.com/reference/android/net/http/AndroidHttpClient.html">AndroidHttpClient</a> 或者是 <a href="http://developer.android.com/reference/java/net/HttpURLConnection.html">HttpURLConnection</a>.</p>
+
+<p><code>BasicNetwork</code>是Volley默认的网络操作实现方式。一个BasicNetwork必须使用HTTP Client进行初始化。这个Client通常是AndroidHttpClient 或者 HttpURLConnection:</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-training-volley-request-queue/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -256,76 +307,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-notes-camera/">Android Notes(06) - Camera</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-04-21T21:24:00+08:00" pubdate data-updated="true">Apr 21<span>st</span>, 2014</time>
-        
-         | <a href="/android-notes-camera/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Android framework为各种不同的Camera与Camera的特色功能提供了支持，使得可以在应用中进行拍照与录像。这篇文章会讨论一种简便，快速的拍照录像方式，为了给用户创建定制的相机体验，文章也会概述相机的高级功能。</p>
-
-<h2>0)开始之前</h2>
-
-<p>在应用中开启Android设备的相机功能之前，应该考量如下几个问题：</p>
-
-<ul>
-<li><strong>必须的相机硬件</strong> - 当然不能把一个包含相机功能的应用安装到一个连相机硬件都没有的设备上。因此，应该在mainfest文件中声明需要使用到相机。</li>
-<li><strong>快速获取图片还是定制相机</strong> - 应用将如何使用相机？是想做一个快速的抓拍还是录制一小段视频剪辑？还是说想提供一种新的相机使用方式？如果是快速的获取一张抓拍图片或者是一小段视频剪辑，建议查看下面的<strong>3)使用已经安装的相机应用。</strong>如果是为了开发一个定制相机功能的应用，查看下面的<strong>4)创建一个相机应用</strong>。</li>
-<li><strong>存储位置</strong> - 生成的图片与视频是只对自己的应用可见还是其它类似Gallery的应用也可以访问？即使自己的应用被卸载后也不能被其他应用访问吗？建议查看<strong>5)保存媒体文件</strong></li>
-</ul>
-
-
-<h2>1)简要概述</h2>
-
-<p>Android framework通过提供Camera API来支持拍照与录制视频的功能。下面是相关的类：</p>
-
-<ul>
-<li><a href="http://developer.android.com/reference/android/hardware/Camera.html"><strong>Camera</strong></a><br/>
-该类是控制相机硬件的基础的API。它可以用来拍照或者录制视频。</li>
-<li><a href="http://developer.android.com/reference/android/view/SurfaceView.html"><strong>SurfaceView</strong></a><br/>
-该类是用来呈现一个动态的相机预览界面。</li>
-<li><a href="http://developer.android.com/reference/android/media/MediaRecorder.html"><strong>MediaRecorder</strong></a><br/>
-该类用来使用相机录制视频。</li>
-<li><a href="http://developer.android.com/reference/android/content/Intent.html"><strong>Intent</strong></a><br/>
-使用<a href="http://developer.android.com/reference/android/provider/MediaStore.html#ACTION_IMAGE_CAPTURE">MediaStore.ACTION_IMAGE_CAPTURE</a> 或者 <a href="http://developer.android.com/reference/android/provider/MediaStore.html#ACTION_VIDEO_CAPTURE">MediaStore.ACTION_VIDEO_CAPTURE</a>作为Intent的action可以用来拍照与录制视频。</li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-notes-camera/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/7/">&larr; Older</a>
@@ -341,6 +322,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-performance-oom/">Android内存优化之OOM</a>
+      </li>
     
       <li class="post">
         <a href="/android-performance-patterns-season-3/">Android性能优化典范 - 第3季</a>
@@ -370,20 +355,16 @@
         <a href="/android-performance-patterns/">Android性能优化典范</a>
       </li>
     
-      <li class="post">
-        <a href="/android-tips-for-reduce-apk-size/">Android APK安装包瘦身</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (94)</a></li>
+  <li><a href='/blog/categories/android'>Android (95)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
-  <li><a href='/blog/categories/android-performance'>Android:performance (18)</a></li>
+  <li><a href='/blog/categories/android-performance'>Android:performance (19)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>

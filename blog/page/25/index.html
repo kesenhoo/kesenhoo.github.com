@@ -9,7 +9,7 @@
   <meta name="author" content="HuKai">
 
   
-  <meta name="description" content="Determining and Monitoring the Docking State and Type[判断并监测设备的停驻状态与类型] 在上一课中有这样一句话：In many cases, the act of charging a device is coincident with &hellip;">
+  <meta name="description" content="管理Activity生命周期 当用户进入，退出，回到你的App，在程序中的Activity 实例都经历了生命周期中的不同状态。例如，当你的activity第一次启动的时候，它来到系统的前台，开始接受用户的焦点。在此期间，Android系统调用了一系列的生命周期中的方法。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://hukai.me/blog/page/21/">
+  <link rel="canonical" href="http://hukai.me/blog/page/25/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
 
@@ -86,7 +86,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/android-training-optimiizing-battery-life-lesson-2/">Android Training - 优化电池续航能力(Lesson 2 - 判断设备的停驻模式)</a></h1>
+      <h1 class="entry-title"><a href="/android-training-managing-the-activity-lifecycle-lesson-0/">Android Training - 详解Activity声明周期(Lesson 0 - 章节概要)</a></h1>
     
     
       <p class="meta">
@@ -102,172 +102,30 @@
   
 
 
-<time datetime="2012-03-23T19:53:00+08:00" pubdate data-updated="true">Mar 23<span>rd</span>, 2012</time>
+<time datetime="2012-03-07T18:34:00+08:00" pubdate data-updated="true">Mar 7<span>th</span>, 2012</time>
         
-         | <a href="/android-training-optimiizing-battery-life-lesson-2/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Determining and Monitoring the Docking State and Type[判断并监测设备的停驻状态与类型]</h2>
-
-<p>在上一课中有这样一句话：In many cases, the act of charging a device is coincident with putting it into a dock.</p>
-
-<p>在很多情况下，为设备充电也是一种设备停驻方式</p>
-
-<p>Android设备能够有好几种停驻状态。包括车载模式，家庭模式与数字对战模拟模式[这个有点奇怪]。停驻状态通常与充电状态是非常密切关联的。</p>
-
-<p>停驻模式会如何影响更新频率这完全取决于app的设置。我们可以选择在桌面模式下频繁的更新数据也可以选择在车载模式下关闭更新操作。相反的，你也可以选择在车载模式下最大化更新交通数据频率。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-optimiizing-battery-life-lesson-2/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-optimiizing-battery-life-lesson-1/">Android Training - 优化电池续航能力(Lesson 1 - 监测设备的电量与充电状态)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-23T18:28:00+08:00" pubdate data-updated="true">Mar 23<span>rd</span>, 2012</time>
-        
-         | <a href="/android-training-optimiizing-battery-life-lesson-1/#disqus_thread">Comments</a>
+         | <a href="/android-training-managing-the-activity-lifecycle-lesson-0/#disqus_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>显然，手持设备的电量需要引起很大的重视。通过这一系列的课程，可以学会如何根据设备电池状态来改变App的某些行为与功能。</p>
+  <div class="entry-content"><h2>管理Activity生命周期</h2>
 
-<p>通过在断开连接时关闭后台服务，在电量减少时减少更新数据的频率等等操作可以在不影响用户体验的前提下，确保App对电池寿命的影响减到最小。</p>
+<p>当用户进入，退出，回到你的App，在程序中的<a href="http://developer.android.com/reference/android/app/Activity.html">Activity</a> 实例都经历了生命周期中的不同状态。例如，当你的activity第一次启动的时候，它来到系统的前台，开始接受用户的焦点。在此期间，Android系统调用了一系列的生命周期中的方法。如果用户执行了启动另一个activity或者切换到另一个app的操作, 系统又会调用一些生命周期中的方法。</p>
 
-<h2>Monitoring the Battery Level and Charging State[监测电池的电量与充电状态]</h2>
+<p>在生命周期的回调方法里面，你可以声明当用户离开或者重新进入这个Activity所需要执行的操作。例如, 如果你建立了一个streaming video player, 在用户切换到另外一个app的时候，你应该暂停video 并终止网络连接。当用户返回时，你可以重新建立网络连接并允许用户从同样的位置恢复播放。</p>
 
-<p>当你想通过改变后台更新操作的频率来减少对电池寿命的影响，那么先手需要检查当前电量与充电状态。</p>
+<p>这一章会介绍一些<a href="http://developer.android.com/reference/android/app/Activity.html">Activity</a>中重要的生命周期回调方法，如何使用那些方法使得程序符合用户的期望且在activity不需要的时候不会导致系统资源的浪费。</p>
 
-<p>电池的电量与是否在充电状态会影响到一个程序去执行更新的操作。当设备在进行AC充电时，程序做任何操作都不太会受到电量的影响，所以在大多数时候，我们可以在设备充电时做很多想做的事情（刷新数据，下载文件等），相反的，如果设备没有在充电状态，那么我们就需要尽量减少设备的更新操作等来延长电池的续航能力。</p>
-
-<p>同样的，我们可以通过检查电池目前的电量来减少甚至停止一些更新操作。</p>
+<p><strong>完整的Demo示例</strong>：<a href="http://developer.android.com/shareables/training/ActivityLifecycle.zip">ActivityLifecycle.zip</a></p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/android-training-optimiizing-battery-life-lesson-1/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-managing-audio-playback-lesson-3/">Android Training - 音频播放(Lesson 3 - 音频设备的相关问题)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-22T23:28:00+08:00" pubdate data-updated="true">Mar 22<span>nd</span>, 2012</time>
-        
-         | <a href="/android-training-managing-audio-playback-lesson-3/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>用户在播放音乐的时候有多个选择，可以使用内置的扬声器，有线耳机或者是支持A2DP的蓝牙耳机。
-【补充：A2DP全名是Advanced Audio Distribution Profile 蓝牙音频传输模型协定! A2DP是能够采用耳机内的芯片来堆栈数据，达到声音的高清晰度。有A2DP的耳机就是蓝牙立体声耳机。声音能达到44.1kHz，一般的耳机只能达到8kHz。如果手机支持蓝牙，只要装载A2DP协议，就能使用A2DP耳机了。还有消费者看到技术参数提到蓝牙V1.0 V1.1 V1.2 V2.0——这些是指蓝牙的技术版本，是指通过蓝牙传输的速度，他们是否支持A2DP具体要看蓝牙产品制造商是否使用这个技术。来自<a href="http://baike.baidu.com/view/551149.htm">百度百科</a>】</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-managing-audio-playback-lesson-3/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-managing-audio-playback-lesson-2/">Android Training - 音频播放(Lesson 2 - 管理音频焦点Audio Focus)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-22T20:16:00+08:00" pubdate data-updated="true">Mar 22<span>nd</span>, 2012</time>
-        
-         | <a href="/android-training-managing-audio-playback-lesson-2/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>很多App都可以播放音频，因此在播放前如何获取到音频焦点就显得很重要了，这样可以避免同时出现多个声音，Android使用audio focus来节制音频的播放，仅仅是获取到audio focus的App才能够播放音频。</p>
-
-<p>在App开始播放音频之前，它需要经过发出请求[request]->接受请求[receive]->音频焦点锁定[Audio Focus]的过程。同样，它需要知道如何监听失去音频焦点[lose of audio focus]的事件并进行合适的响应。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-managing-audio-playback-lesson-2/">Read on &rarr;</a>
+      <a rel="full-article" href="/android-training-managing-the-activity-lifecycle-lesson-0/">Read on &rarr;</a>
     </footer>
   
 
@@ -276,11 +134,9 @@
   
   <div class="pagination">
     
-      <a class="prev" href="/blog/page/22/">&larr; Older</a>
-    
     <a href="/blog/archives">Blog Archives</a>
     
-    <a class="next" href="/blog/page/20/">Newer &rarr;</a>
+    <a class="next" href="/blog/page/24/">Newer &rarr;</a>
     
   </div>
 </div>

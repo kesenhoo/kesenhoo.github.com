@@ -9,7 +9,7 @@
   <meta name="author" content="HuKai">
 
   
-  <meta name="description" content="Google近期在Udacity上发布了Android性能优化的在线课程，分别从渲染，运算与内存，电量几个方面介绍了如何去优化性能，这些课程是Google之前在Youtube上发布的Android性能优化典范专题课程的细化与补充。 下面是运算篇章的学习笔记，部分内容与前面的性能优化典范有重合， &hellip;">
+  <meta name="description" content="Google近期在Udacity上发布了Android性能优化的在线课程，分别从渲染，运算与内存，电量几个方面介绍了如何去优化性能，这些课程是Google之前在Youtube上发布的Android性能优化典范专题课程的细化与补充。 下面是内存篇章的学习笔记，部分内容与前面的性能优化典范有重合， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +80,61 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-performance-memory/">Android性能优化之内存篇</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-04-12T14:51:00+08:00" pubdate data-updated="true">Apr 12<span>th</span>, 2015</time>
+        
+         | <a href="/android-performance-memory/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img src="/images/android_performance_course_udacity.jpg" alt="" /></p>
+
+<p>Google近期在Udacity上发布了<a href="https://www.udacity.com/course/ud825">Android性能优化的在线课程</a>，分别从渲染，运算与内存，电量几个方面介绍了如何去优化性能，这些课程是Google之前在Youtube上发布的<a href="http://hukai.me/android-performance-patterns/">Android性能优化典范</a>专题课程的细化与补充。</p>
+
+<p>下面是内存篇章的学习笔记，部分内容与前面的性能优化典范有重合，欢迎大家一起学习交流！</p>
+
+<h3>1)Memory, GC, and Performance</h3>
+
+<p>众所周知，与C/C++需要通过手动编码来申请以及释放内存有所不同，Java拥有GC的机制。Android系统里面有一个<strong>Generational Heap Memory</strong>的模型，系统会根据内存中不同的内存数据类型分别执行不同的GC操作。例如，最近刚分配的对象会放在Young Generation区域，这个区域的对象通常都是会快速被创建并且很快被销毁回收的，同时这个区域的GC操作速度也是比Old Generation区域的GC操作速度更快的。</p>
+
+<p><img src="/images/memory_mode_generation.png" alt="" /></p>
+
+<p>除了速度差异之外，执行GC操作的时候，所有线程的任何操作都会需要暂停，等待GC操作完成之后，其他操作才能够继续运行。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-performance-memory/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -251,69 +306,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-tips-for-reduce-apk-size/">Android APK安装包瘦身</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-09-13T20:24:00+08:00" pubdate data-updated="true">Sep 13<span>th</span>, 2014</time>
-        
-         | <a href="/android-tips-for-reduce-apk-size/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>很显然，APK安装包越小越好。下面从代码，资源文件，使用策略几个方面简要介绍下：</p>
-
-<h3>代码</h3>
-
-<ul>
-<li>保持良好的编程习惯，不要重复或者不用的代码，谨慎添加libs，移除使用不到的libs。</li>
-<li>使用proguard混淆代码，它会对不用的代码做优化，并且混淆后也能够减少安装包的大小。</li>
-<li>native code的部分，大多数情况下只需要支持armabi与x86的架构即可。如果非必须，可以考虑拿掉x86的部分。</li>
-</ul>
-
-
-<h3>资源</h3>
-
-<ul>
-<li>使用Lint工具查找没有使用到的资源。去除不使用的图片，String，XML等等。</li>
-<li>assets目录下的资源请确保没有用不上的文件。</li>
-<li>生成APK的时候，aapt工具本身会对png做优化，但是在此之前还可以使用其他工具如tinypng对图片进行进一步的压缩预处理。</li>
-<li>jpeg还是png，根据需要做选择，在某些时候jpeg可以减少图片的体积。</li>
-<li>对于9.png的图片，可拉伸区域尽量切小，另外可以通过使用9.png拉伸达到大图效果的时候尽量不要使用整张大图。</li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-tips-for-reduce-apk-size/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -329,6 +321,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-performance-oom/">Android内存优化之OOM</a>
+      </li>
     
       <li class="post">
         <a href="/android-performance-patterns-season-3/">Android性能优化典范 - 第3季</a>
@@ -358,20 +354,16 @@
         <a href="/android-performance-patterns/">Android性能优化典范</a>
       </li>
     
-      <li class="post">
-        <a href="/android-tips-for-reduce-apk-size/">Android APK安装包瘦身</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (94)</a></li>
+  <li><a href='/blog/categories/android'>Android (95)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
-  <li><a href='/blog/categories/android-performance'>Android:performance (18)</a></li>
+  <li><a href='/blog/categories/android-performance'>Android:performance (19)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
