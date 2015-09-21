@@ -123,7 +123,7 @@ Android系统提供了一些回调来通知应用的内存使用情况，通常�
 ![android_perf_3_leak_static](/images/android_perf_3_leak_static.png)
 
 ### 6.3)避免把View添加到没有清除机制的容器里面
-假如把view添加到[WeekHashMap](http://stackoverflow.com/questions/5511279/what-is-a-weakhashmap-and-when-to-use-it)，如果没有执行清除操作，很可能会导致泄漏。
+假如把view添加到[WeakHashMap](http://stackoverflow.com/questions/5511279/what-is-a-weakhashmap-and-when-to-use-it)，如果没有执行清除操作，很可能会导致泄漏。
 
 ![android_perf_3_leak_map](/images/android_perf_3_leak_map.png)
 
@@ -238,3 +238,6 @@ Google Play Service中提供了一个叫做[GCMNetworkManager](https://developer
 ![android_perf_3_prefetching_over](/images/android_perf_3_prefetching_over.png)
 
 我们可以参考在WiFi，4G，3G等不同的网络下设计不同大小的预取数据量，也可以是按照图片数量或者操作时间来作为阀值。这需要我们需要根据特定的场景，不同的网络情况设计合适的方案。
+
+***
+首发于CSDN：[Android性能优化典范（三）](http://www.csdn.net/article/2015-08-12/2825447-android-performance-patterns-season-3)
