@@ -9,7 +9,7 @@
   <meta name="author" content="HuKai">
 
   
-  <meta name="description" content="这一课会介绍在ActionBar 中添加一个高效率且比较友好的Share功能，会使用到ActionProvider(在Android 4.0上才被引进)。它会handle出现share功能的appearance与hehavior。在ShareActionProvider的例子里面， &hellip;">
+  <meta name="description" content="Syncing with App Engine[使用App Engine进行同步] 写一个能够同步到云端的app是具有挑战性的。那存在许多细节需要处理，例如服务端身份验证，客户端身份验证，分享数据的模块，还有API。简化这些操作的一个方法是使用Google Plugin for Eclipse， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +80,57 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-training-syncing-to-the-cloud-lesson-1/">Android Training - 云同步(Lesson 1 - 使用App Engine进行同步)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-22T13:56:00+08:00" pubdate data-updated="true">Apr 22<span>nd</span>, 2012</time>
+        
+         | <a href="/android-training-syncing-to-the-cloud-lesson-1/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Syncing with App Engine[使用App Engine进行同步]</h2>
+
+<p>写一个能够同步到云端的app是具有挑战性的。那存在许多细节需要处理，例如服务端身份验证，客户端身份验证，分享数据的模块，还有API。简化这些操作的一个方法是使用<strong>Google Plugin for Eclipse</strong>，这个插件帮你垂直整合处理了那些Android系统与App Engine程序交互的操作。这一课会介绍如何创建那样一个项目。</p>
+
+<p>关于App Engine，请参考：https://developers.google.com/appengine/docs/whatisgoogleappengine?hl=zh-CN</p>
+
+<p>下面会介绍:  <br/>
+* 建立Android与App engine apps能够交互的程序。<br/>
+* 利用Cloud to Device Messaging(C2DM)的优势，这样app就不需要使用轮询机制去更新。[关于C2DM的详情请参考前面课程与http://code.google.com/intl/zh-CN/android/c2dm/)]</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-training-syncing-to-the-cloud-lesson-1/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -216,55 +267,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-remembering-users-lesson-3/">Android Training - 记住用户的信息(Lesson 3 - 创建自定义的账户类型)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-29T12:37:00+08:00" pubdate data-updated="true">Mar 29<span>th</span>, 2012</time>
-        
-         | <a href="/android-training-remembering-users-lesson-3/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Creating a Custom Account Type</h2>
-
-<p>到目前为止，我们讨论了如何使用Google APIs。但是我们应该不仅仅是只需要Google的服务而已，比如增加QQ账户，Sina账户等。那么这一课会讲述如何创建一个自定义的账户，并且像内置的账户那样进行工作。</p>
-
-<h2>(1)Implement Your Custom Account Code</h2>
-
-<p>首先需要做的是从用户那获取证书[输入账户与密码后进行验证],这个过程也许只是简单的显示一个对话框来输入用户名与密码，或者是比较复杂的操作来获取证书，比如一次性的密码口令或者精密的扫描。不管怎么样，你需要实现下面的操作:</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-remembering-users-lesson-3/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/19/">&larr; Older</a>
@@ -280,6 +282,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-dev-patterns/">Android开发最佳实践</a>
+      </li>
     
       <li class="post">
         <a href="/android-performance-oom/">Android内存优化之OOM</a>
@@ -309,17 +315,13 @@
         <a href="/android-performance-render/">Android性能优化之渲染篇</a>
       </li>
     
-      <li class="post">
-        <a href="/android-performance-patterns/">Android性能优化典范</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (95)</a></li>
+  <li><a href='/blog/categories/android'>Android (96)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
   <li><a href='/blog/categories/android-performance'>Android:performance (19)</a></li>

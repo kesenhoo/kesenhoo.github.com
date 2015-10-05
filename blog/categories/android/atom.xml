@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android | 胡凯]]></title>
   <link href="http://hukai.me/blog/categories/android/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2015-09-21T23:08:19+08:00</updated>
+  <updated>2015-10-04T23:14:18+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[HuKai]]></name>
@@ -12,6 +12,279 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Android开发最佳实践]]></title>
+    <link href="http://hukai.me/android-dev-patterns/"/>
+    <updated>2015-10-02T15:38:00+08:00</updated>
+    <id>http://hukai.me/android-dev-patterns</id>
+    <content type="html"><![CDATA[<p><img src="/images/android_dev_patterns_logo.png" alt="android_dev_patterns_logo" /></p>
+
+<p>前段时间，Google公布了<a href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc-lJo_RGGXL2Psr8vVCTWjM">Android开发最佳实践</a>的一系列课程，涉及到一些平时开发过程中应该保持的良好习惯以及如何使用最新的<a href="http://android-developers.blogspot.com/2015/05/android-design-support-library.html">Android Design Support Library</a>来快速实现官方推荐的Material Design样式的应用。下面是个人的学习摘要总结，不对的地方请多多交流指点，谢谢！</p>
+
+<h2>1）注意对隐式Intent的运行时检查保护</h2>
+
+<p>类似打开相机，发送图片等隐式Intent，是并不一定能够在所有的Android设备上都正常运行。例如打开相机的隐式Intent，如果系统相机应用被关闭或者不存在相机应用，又或者是相机应用的某些权限被关闭等等情况都可能导致这个隐式的Intent无法正常工作。一旦发生隐式Intent找不到合适的调用组件的情况，系统就会抛出<code>ActivityNotFoundException</code>的异常，如果我们的应用没有对这个异常做任何处理，那应用就会发生Crash。</p>
+
+<p>预防这个问题的最佳解决方案是在发出这个隐式Intent之前调用<code>resolveActivity</code>做检查，关于这个API的解释以及用法如下：</p>
+
+<!-- More -->
+
+
+<p><img src="/images/android_dev_patterns_implicit_intent.png" alt="android_dev_patterns_implicit_intent" /></p>
+
+<p>然后这个API的使用范例如下：</p>
+
+<p>```java
+Intent intent = new Intent(Intent.ACTION_XXX);
+ComponentName componentName = intent.resolveActivity(getPackageManager());
+if(componentName != null) {</p>
+
+<pre><code>String className = componentName.getClassName();
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>2）使用NotificationCompat兼容包来处理消息通知</h2>
+
+<p>为了解决Android系统版本差异导致的Notification兼容性问题，Android官方提供了<code>NotificationCompat</code>兼容类来帮助开发实现体验统一的Notification。通常来说，建立一个Notification至少会有三种元素：图标，标题，文本。我们通常会使用如下的代码来实现一个基础的Notification功能：</p>
+
+<p><img src="/images/android_dev_patterns_notification_base.png" alt="android_dev_patterns_notification_base" /></p>
+
+<p>上面那段代码，运行时候的效果应该如下所示：</p>
+
+<p><img src="/images/android_dev_patterns_notification_base_show.png" alt="android_dev_patterns_notification_base_show" /></p>
+
+<p>为了给上面的Notification添加点击之后的响应效果，我们还需要构造一个<code>PendingIntent</code>作为contentIntent，例如：</p>
+
+<p><code>java
+PendingIntent intent = xxx;
+builder.setContentIntent(intent);
+</code></p>
+
+<p>为了使得Notification更加的具有辨识度，我们还有可能做如下的设置：</p>
+
+<p><img src="/images/android_dev_patterns_notification_set_large.png" alt="android_dev_patterns_notification_set_large" /></p>
+
+<p>从Android 4.1开始，Notification可以支持展开显示的模式，这样一来，Notification就演变出了下面4种不同的风格样式：</p>
+
+<p><img src="/images/android_dev_patterns_notification_4_styles.png" alt="android_dev_patterns_notification_4_styles" /></p>
+
+<p>Notification还提供了快捷操作的功能，如下图所示：</p>
+
+<p><img src="/images/android_dev_patterns_notification_set_action_show.png" alt="android_dev_patterns_notification_set_action_show" />
+<img src="/images/android_dev_patterns_notification_set_action.png" alt="android_dev_patterns_notification_set_action" /></p>
+
+<p>除了显示在手机上的Notification，我们还可以给Notification分别设置在Wearable，Auto上的不同表现行为，例如针对可穿戴设备上显示Notification，我们可以如下的设置：</p>
+
+<p><img src="/images/android_dev_patterns_notification_wearable.png" alt="android_dev_patterns_notification_wearable" /></p>
+
+<p>关于更多的Wearable上的Notification相关的知识，还可以参考<a href="https://www.youtube.com/watch?v=N7aJPyvHPgs&amp;feature=iv&amp;src_vid=-iog_fmm6mE&amp;annotation_id=annotation_347477041">Pages of Content</a>与<a href="https://www.youtube.com/watch?v=L4LvKOTkZ7Q&amp;feature=iv&amp;src_vid=-iog_fmm6mE&amp;annotation_id=annotation_2485794965">Stackable Notifications</a></p>
+
+<h2>3）Android 6.0 Marshmallow的运行时权限</h2>
+
+<p>Android 6.0开始引入了新的运行时权限检查授权机制，替代了之前安装应用的时候对权限进行授权的方案。为了避免6.0及以上的机器运行发生运行时异常，我们需要做到至少以下5个步骤：</p>
+
+<ul>
+<li><strong>检查系统版本号</strong>：针对6.0以下的系统版本，默认权限在安装的时候已经获取到了，对于6.0开始的版本，才需要做运行时的权限检查。</li>
+<li><strong>检查申请的权限</strong>：在使用某个权限之前，需要检查权限是否已经获取到了。</li>
+<li><strong>解释申请的权限</strong>：在权限没有获取到的情况下，需要通过<code>shouldShowRequestPermissionRationable()</code>的判断来决定如何给用户进行提示。</li>
+<li><strong>执行申请权限操作</strong>：前面判断没有获取到权限，为了能够让功能顺利执行，我们会需要在代码里面再次执行申请此权限的操作。</li>
+</ul>
+
+
+<p><img src="/images/android_dev_patterns_permission_check.png" alt="android_dev_patterns_permission_check" /></p>
+
+<ul>
+<li><strong>处理权限申请的结果</strong>：申请权限之后，我们需要处理申请的响应结果，分别处理权限申请成功与失败的情况</li>
+</ul>
+
+
+<p><img src="/images/android_dev_patterns_permission_response.png" alt="android_dev_patterns_permission_response" /></p>
+
+<h2>4）使用MediaSessionCompat操作音乐的播放</h2>
+
+<p>MediaSessionCompat来自Android官方的兼容包，通过它可以告诉Android系统与其他的应用，自己正在播放的内容是什么以及自己支持哪些类型的播放控制：</p>
+
+<p><img src="/images/android_dev_patterns_media_session.png" alt="android_dev_patterns_media_session" /></p>
+
+<p>在Android的官方培训课程中有介绍过关于<a href="http://developer.android.com/training/managing-audio/volume-playback.html">Media Button Receiver</a>的概念，Android系统会把来自蓝牙控制器或者是耳机等其他设备的操作事件转换成Media Button事件传递出来，如果我们的应用程序需要监听这些事件并做出相应的响应，就需要注册MEDIA_BUTTON的action，接收到这些事件之后，再传递给音乐播放模块进行控制处理。</p>
+
+<p><img src="/images/android_dev_patterns_media_receiver.png" alt="android_dev_patterns_media_receiver" /></p>
+
+<p>基于上面的认知，我们现在演示如何使用MediaSessionCompat，下面演示了如何构造一个MediaSessionCompat以及构造完之后通常需要做的三件事情：设置合理的flag，设置回调（在5.0开始会响应onPlay，onPause等等回调），设置激活。</p>
+
+<p><img src="/images/android_dev_patterns_media_usage.png" alt="android_dev_patterns_media_usage" /></p>
+
+<p>搭建好了MediaSessionCompat之后，还需要通过<code>MediaMetadataCompat</code>来传递播放的资料信息，通过<code>PlaybackStateCompat</code>来传递播放的状态信息。</p>
+
+<p><img src="/images/android_dev_patterns_media_set.png" alt="android_dev_patterns_media_set" /></p>
+
+<p>做了上面那些操作之后，MediaSessionCompat的任务就算是完成了。</p>
+
+<p><img src="/images/android_dev_patterns_media_done.png" alt="android_dev_patterns_media_done" /></p>
+
+<h2>5）使用Toolbar替代ActionBar</h2>
+
+<p>自从MaterialDesign开始，Android官方就开始使用Toolbar替代了原来的ActionBar，现在Toolbar已经加入Support兼容包。Toolbar是一个相比起ActionBar更加丰富，更加灵活的组件，另外它的布局本身还是View Hierarchy的一部分，这就意味着可以对Toolbar执行动画操作，增加点击滑动事件等等，甚至我们还可以在一个页面里面加入两个Toolbar。</p>
+
+<p>为了启用Toolbar，首先要做的事情就是关闭当前Activity的ActionBar。我们可以通过使得Activity的主题继承<code>Theme.AppCompat.NoActionBar</code>，然后在对应的XML布局文件中，添加类似下面的toolbar布局信息：</p>
+
+<p>```xml</p>
+
+<!--Toolbar-->
+
+
+<p>&lt;android.support.v7.widget.Toolbar</p>
+
+<pre><code>android:id="@+id/toolbar_layout"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:layout_alignParentTop="true"
+android:minHeight="?attr/actionBarSize"&gt;
+</code></pre>
+
+<p>&lt;/android.support.v7.widget.Toolbar>
+```</p>
+
+<p>在布局文件中添加Toolbar的信息之后，需要启动Toolbar替代ActionBar，需要像下面一样做设置：</p>
+
+<p>```java
+@Override
+protected void onCreate(Bundle savedInstanceState) {</p>
+
+<pre><code>super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+
+Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_layout);
+setSupportActionBar(toolbar);
+</code></pre>
+
+<p>}
+```</p>
+
+<p>关于更多Toolbar的细节，请参考官方文档<a href="https://developer.android.com/reference/android/support/v7/widget/Toolbar.html">https://developer.android.com/reference/android/support/v7/widget/Toolbar.html</a></p>
+
+<h2>6）使用AppBarLayout并处理滑动手势</h2>
+
+<p>AppBarLayout是一个在android.support.design兼容包（这里有关于该兼容包的官方博客介绍<a href="http://android-developers.blogspot.com/2015/05/android-design-support-library.html">http://android-developers.blogspot.com/2015/05/android-design-support-library.html</a>）里面的新推出的组件，它是一个垂直方向的LinearLayout，包装了很多Material Design的设计元素，例如滑动手势的处理。我们可以使用<code>app:layout_scrollFlags</code>这样的标签来设置滑动的行为表现。关于App Bar，官方还有这样一段描述：</p>
+
+<p><img src="/images/android_dev_patterns_appbar_des.png" alt="android_dev_patterns_appbar_des" /></p>
+
+<p>使用AppBarLayout需要注意下面几个要点：</p>
+
+<ul>
+<li>首先，AppBarLayout必须作为<code>CoordinatorLayout</code>的直接子View</li>
+<li>其次，在AppBarLayout里面必须包含一个ToolBar</li>
+<li>最后，在CoordinatorLayout里面可以添加那些可以滑动的组件，例如RecyclerView</li>
+</ul>
+
+
+<p>一个标准的布局文件应该是类似下面结构的：</p>
+
+<p><img src="/images/android_dev_patterns_appbar_scroll_xml.png" alt="android_dev_patterns_appbar_scroll_xml" /></p>
+
+<p>我们需要注意，在Toolbar里面设置的layout_scrollFlags会影响到滑动之后的显示效果，请看下面的具体解释：</p>
+
+<p><img src="/images/android_dev_patterns_appbar_scroll_flag.png" alt="android_dev_patterns_appbar_scroll_flag" /></p>
+
+<h2>7）使用SearchView来实现搜索功能</h2>
+
+<p>关于在使用搜索的时候及时显示给用户的候选词，会需要根据数据的类型以及具体的情况做不同的处理，这里先暂时不讨论那一块的内容。</p>
+
+<p><img src="/images/android_dev_patterns_searchview_show.png" alt="android_dev_patterns_searchview_show" />
+<img src="/images/android_dev_patterns_searchview_tips.png" alt="android_dev_patterns_searchview_tips" /></p>
+
+<p>上面的图示已经清楚的演示了使用SearchView处理搜索的通常情况，关于如何实现这个功能，需要做到以下几个步骤：</p>
+
+<ul>
+<li>在Menu的XML文件中，声明使用SearchView</li>
+</ul>
+
+
+<p><img src="/images/android_dev_patterns_searchview_xml.png" alt="android_dev_patterns_searchview_xml" /></p>
+
+<ul>
+<li>在onCreateOptionsMenu的回调函数里面获取到SearchView，并设置监听（请注意使用MenuItemCompat的那行代码，否者会出现很多兼容性问题，获取不到这个View等等奇怪的BUG），在监听回调里面处理业务逻辑</li>
+</ul>
+
+
+<p><img src="/images/android_dev_patterns_searchview_code.png" alt="android_dev_patterns_searchview_code" /></p>
+
+<p>至此，其实就已经实现了一个基础的搜索功能。但是，如果为了能够让自己的应用的某些功能被Android系统的Search功能检索到，我们就需要做更进一步的操作，例如定义Searchable，实现一个SearchableActivity，响应系统的Search行为等等。国内的应用很少会去关注这个功能，这里就不展开了，感兴趣点击下面的链接进一步学习：<a href="https://developer.android.com/guide/topics/search/index.html">https://developer.android.com/guide/topics/search/index.html</a></p>
+
+<h2>8）Navigation Drawer, DrawerLayout, NavigationView</h2>
+
+<p>Navigation Drawer是Material Design当中很重要的一种设计元素，为了能够快速的实现这种设计，Android在新的design support包里面为我们提供了DrawerLayout与NavigationView。</p>
+
+<p><img src="/images/android_dev_patterns_navigation_show.png" alt="android_dev_patterns_navigation_show" /></p>
+
+<p>实现这样的一个功能，我们需要在XML中写下类似下面的布局文件</p>
+
+<p><img src="/images/android_dev_patterns_navigation_xml.png" alt="android_dev_patterns_navigation_xml" /></p>
+
+<p>在NavigationView中有两个重要的标签，app:headerLayout与app:menu，分别代表了拉出菜单的顶部布局与下面的菜单项列表。创建菜单项列表，可以使用类似下面的MenuItem文件：</p>
+
+<p><img src="/images/android_dev_patterns_navigation_menu.png" alt="android_dev_patterns_navigation_menu" /></p>
+
+<p><code>android:checked</code>表示当前选中的Item，会被系统Highlight出来。除了上面简单的平铺的菜单，还可以使用菜单嵌套的方式实现多级的菜单。关于点击具体某个菜单的时候的监听与响应，需要做如下的设置：</p>
+
+<p><img src="/images/android_dev_patterns_navigation_click.png" alt="android_dev_patterns_navigation_click" /></p>
+
+<p>除了点击菜单事件，我们还需要处理整个侧滑菜单的打开与关闭事件，当我们给DrawerLayout设置了setDrawerListener之后，可以得到下面两个回调：</p>
+
+<p><img src="/images/android_dev_patterns_navigation_drawer_event.png" alt="android_dev_patterns_navigation_drawer_event" /></p>
+
+<p>大多数时候，侧滑菜单都是从左到右滑出的，但是我们也可以做到从右往左滑出，只需要在DrawerLayout的菜单布局LinearLayout里面修改一下margin的相关属性即可：</p>
+
+<p><img src="/images/android_dev_patterns_navigation_right.png" alt="android_dev_patterns_navigation_right" /></p>
+
+<h2>9）Tabs and ViewPager</h2>
+
+<p><img src="/images/android_dev_patterns_viewpager_show.png" alt="android_dev_patterns_viewpager_show" /></p>
+
+<p>ViewPager是Android上面实现横向滑动的基础组件，能够帮助大家迅速搭建类似上面图示一样的左右滑动交互设计。ViewPager需要使用PagerAdapter来提供内容，除了PagerAdpater，Android还提供了FragmentPagerAdpater与FragmentStatePagerAdapter，前者会把所有的fragment都保存在内存中，以便提高切换速度，后者仅仅保留了fragment状态信息，fragment还是会进行正常的重建与销毁。一个典型的使用demo代码如下：</p>
+
+<p><img src="/images/android_dev_patterns_viewpager_code.png" alt="android_dev_patterns_viewpager_code" /></p>
+
+<p>为了实现前面图示的Tab与ViewPager的绑定，我们可以使用<a href="http://android-developers.blogspot.com/2015/05/android-design-support-library.html">Android Design Support Library</a>提供的<code>TabLayout</code>，仅仅需要按照下面的代码示例一样把TabLayout与ViewPager做一个绑定，就能够实现左右滑动与点击Tab快速切换的功能：</p>
+
+<p><img src="/images/android_dev_patterns_viewpager_tablayout.png" alt="android_dev_patterns_viewpager_tablayout" /></p>
+
+<p>关于Material Design里面的Tabs设计，请再参考<a href="http://www.google.com/design/spec/components/tabs.html">http://www.google.com/design/spec/components/tabs.html</a>以及官方Training课程里面的<a href="http://developer.android.com/training/implementing-navigation/lateral.html">http://developer.android.com/training/implementing-navigation/lateral.html</a></p>
+
+<h2>10）Making Apps Accessible</h2>
+
+<p>为了照顾部分视力或者听觉不好的用户，我们需要做一定的处理使得自己的应用能够被每一个可用。Android系统为了帮组应用实现辅助功能，提供了诸如文本朗读，触感反馈，指向炳导航，手势导航等等功能来更好的帮助用户使用这些应用。</p>
+
+<p><img src="/images/android_dev_patterns_accessible_feature.png" alt="android_dev_patterns_accessible_feature" /></p>
+
+<p>为了确保你的应用能够被Android系统提供的辅助功能正常使用，需要做以下三个步骤的检查：</p>
+
+<ul>
+<li><strong>Content Description</strong>：确保类似ImageView，ImageButton，CheckBox等组件都包含了content descrption。</li>
+</ul>
+
+
+<p><img src="/images/android_dev_patterns_accessible_content.png" alt="android_dev_patterns_accessible_content" /></p>
+
+<ul>
+<li><strong>Focus Order</strong>：确保给布局里面的关键元素增加了Focus的指示顺序，只有这样，辅助功能才能够在指向导航的时候帮助用户按照指定的顺序来聚焦界面元素。</li>
+</ul>
+
+
+<p><img src="/images/android_dev_patterns_accessible_focus_order.png" alt="android_dev_patterns_accessible_focus_order" />
+<img src="/images/android_dev_patterns_accessible_focus_code.png" alt="android_dev_patterns_accessible_focus_code" /></p>
+
+<ul>
+<li><strong>Feedback Mechanisms</strong>：确保部分关键的操作有多个反馈，例如当短信来的时候，既有声音也有震动，这样才能够确保听力不好的用户可以通过震动的反馈来感知到响应。</li>
+</ul>
+
+
+<p>更多关于辅助功能的知识，请参考<a href="http://developer.android.com/guide/topics/ui/accessibility/checklist.html">http://developer.android.com/guide/topics/ui/accessibility/checklist.html</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Android内存优化之OOM]]></title>
@@ -1373,123 +1646,6 @@ public void pollServer() {
 ```</p>
 
 <p><strong>Notes:</strong>关于更多电量优化，还有一篇文章，请点击<a href="http://developer.android.com/training/efficient-downloads/index.html">这里</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android性能优化之内存篇]]></title>
-    <link href="http://hukai.me/android-performance-memory/"/>
-    <updated>2015-04-12T14:51:00+08:00</updated>
-    <id>http://hukai.me/android-performance-memory</id>
-    <content type="html"><![CDATA[<p><img src="/images/android_performance_course_udacity.jpg" alt="" /></p>
-
-<p>Google近期在Udacity上发布了<a href="https://www.udacity.com/course/ud825">Android性能优化的在线课程</a>，分别从渲染，运算与内存，电量几个方面介绍了如何去优化性能，这些课程是Google之前在Youtube上发布的<a href="http://hukai.me/android-performance-patterns/">Android性能优化典范</a>专题课程的细化与补充。</p>
-
-<p>下面是内存篇章的学习笔记，部分内容与前面的性能优化典范有重合，欢迎大家一起学习交流！</p>
-
-<h3>1)Memory, GC, and Performance</h3>
-
-<p>众所周知，与C/C++需要通过手动编码来申请以及释放内存有所不同，Java拥有GC的机制。Android系统里面有一个<strong>Generational Heap Memory</strong>的模型，系统会根据内存中不同的内存数据类型分别执行不同的GC操作。例如，最近刚分配的对象会放在Young Generation区域，这个区域的对象通常都是会快速被创建并且很快被销毁回收的，同时这个区域的GC操作速度也是比Old Generation区域的GC操作速度更快的。</p>
-
-<p><img src="/images/memory_mode_generation.png" alt="" /></p>
-
-<p>除了速度差异之外，执行GC操作的时候，所有线程的任何操作都会需要暂停，等待GC操作完成之后，其他操作才能够继续运行。</p>
-
-<!-- More -->
-
-
-<p><img src="/images/gc_event_thread_stop.png" alt="" /></p>
-
-<p>通常来说，单个的GC并不会占用太多时间，但是大量不停的GC操作则会显著占用帧间隔时间(16ms)。如果在帧间隔时间里面做了过多的GC操作，那么自然其他类似计算，渲染等操作的可用时间就变得少了。</p>
-
-<h3>2)Memory Monitor Walkthrough</h3>
-
-<p>Android Studio中的Memory Monitor可以很好的帮助我们查看程序的内存使用情况。</p>
-
-<p><img src="/images/memory_monitor_overview.png" alt="" /></p>
-
-<p><img src="/images/memory_monitor_free_allocation.png" alt="" /></p>
-
-<p><img src="/images/memory_monitor_gc_event.png" alt="" /></p>
-
-<h3>3)Memory Leaks</h3>
-
-<p>内存泄漏表示的是不再用到的对象因为被错误引用而无法进行回收。</p>
-
-<p><img src="/images/android_perf_memory_leak.png" alt="" /></p>
-
-<p>发生内存泄漏会导致Memory Generation中的剩余可用Heap Size越来越小，这样会导致频繁触发GC，更进一步引起性能问题。</p>
-
-<p>举例内存泄漏，下面<code>init()</code>方法来自某个自定义View：</p>
-
-<p>```java</p>
-
-<pre><code>private void init() {
-ListenerCollector collector = new ListenerCollector();
-collector.setListener(this, mListener);
-</code></pre>
-
-<p>}
-```</p>
-
-<p>上面的例子容易存在内存泄漏，如果activity因为设备翻转而重新创建，自定义的View会自动重新把新创建出来的mListener给绑定到ListenerCollector中，但是当activity被销毁的时候，mListener却无法被回收了。</p>
-
-<h3>4)Heap Viewer Walkthrough</h3>
-
-<p>下图演示了Android Tools里面的Heap Viewer的功能，我们可以看到当前进程中的Heap Size的情况，分别有哪些类型的数据，占比是多少。</p>
-
-<p><img src="/images/android_perf_memory_heap_viewer.png" alt="" /></p>
-
-<h3>5)Understanding Memory Churn</h3>
-
-<p><strong>Memory Churn内存抖动</strong>，内存抖动是因为在短时间内大量的对象被创建又马上被释放。瞬间产生大量的对象会严重占用Young Generation的内存区域，当达到阀值，剩余空间不够的时候，会触发GC从而导致刚产生的对象又很快被回收。即使每次分配的对象占用了很少的内存，但是他们叠加在一起会增加Heap的压力，从而触发更多其他类型的GC。这个操作有可能会影响到帧率，并使得用户感知到性能问题。</p>
-
-<p><img src="/images/gc_overtime.png" alt="" /></p>
-
-<p>解决上面的问题有简洁直观方法，如果你在<strong>Memory Monitor</strong>里面查看到短时间发生了多次内存的涨跌，这意味着很有可能发生了内存抖动。</p>
-
-<p><img src="/images/memory_monitor_gc.png" alt="" /></p>
-
-<p>同时我们还可以通过<strong>Allocation Tracker</strong>来查看在短时间内，同一个栈中不断进出的相同对象。这是内存抖动的典型信号之一。</p>
-
-<p>当你大致定位问题之后，接下去的问题修复也就显得相对直接简单了。例如，你需要避免在for循环里面分配对象占用内存，需要尝试把对象的创建移到循环体之外，自定义View中的onDraw方法也需要引起注意，每次屏幕发生绘制以及动画执行过程中，onDraw方法都会被调用到，避免在onDraw方法里面执行复杂的操作，避免创建对象。对于那些无法避免需要创建对象的情况，我们可以考虑对象池模型，通过对象池来解决频繁创建与销毁的问题，但是这里需要注意结束使用之后，需要手动释放对象池中的对象。</p>
-
-<h3>6)Allocation Tracker</h3>
-
-<p>关于Allocation Tracker工具的使用，不展开了，参考下面的链接：</p>
-
-<ul>
-<li><a href="http://developer.android.com/tools/debugging/ddms.html#alloc">http://developer.android.com/tools/debugging/ddms.html#alloc</a></li>
-<li><a href="http://android-developers.blogspot.com/2009/02/track-memory-allocations.html">http://android-developers.blogspot.com/2009/02/track-memory-allocations.html</a></li>
-</ul>
-
-
-<h3>7)Improve Your Code To Reduce Churn</h3>
-
-<p>下面演示一个例子，如何通过修改代码来避免内存抖动。优化之前的内存检测图：</p>
-
-<p><img src="/images/android_perf_memory_churn_1.png" alt="" /></p>
-
-<p>定位代码之后，修复了String拼接的问题：</p>
-
-<p><img src="/images/android_perf_memory_churn_code.png" alt="" /></p>
-
-<p>优化之后的内存监测图：</p>
-
-<p><img src="/images/android_perf_memory_churn_2.png" alt="" /></p>
-
-<h3>8)Recap</h3>
-
-<p>上面提到了三种测量内存的工具，下面再简要概括一下他们各自的特点：</p>
-
-<ul>
-<li><strong>Memory Monitor：</strong>跟踪整个app的内存变化情况。</li>
-<li><strong>Heap Viewer：</strong>查看当前内存快照，便于对比分析哪些对象有可能发生了泄漏。</li>
-<li><strong>Allocation Tracker：</strong>追踪内存对象的来源。</li>
-</ul>
-
-
-<p><strong>Notes:</strong>关于更多内存优化，这里还有一篇文章，请点击<a href="http://hukai.me/android-training-managing_your_app_memory/">这里</a></p>
 ]]></content>
   </entry>
   

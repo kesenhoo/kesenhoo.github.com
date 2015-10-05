@@ -9,7 +9,7 @@
   <meta name="author" content="HuKai">
 
   
-  <meta name="description" content="Android framework为各种不同的Camera与Camera的特色功能提供了支持，使得可以在应用中进行拍照与录像。这篇文章会讨论一种简便，快速的拍照录像方式，为了给用户创建定制的相机体验，文章也会概述相机的高级功能。 0)开始之前 在应用中开启Android设备的相机功能之前， &hellip;">
+  <meta name="description" content="Android中有几个很重要的概念Surface, SurfaceHolder, EGLSurface, SurfaceView, GLSurfaceView, SurfaceTexture, TextureView与SurfaceFlinger。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +80,65 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-deeper-graphics-architecture/">Android Deeper(01) - Graphic Architecture</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-15T14:25:00+08:00" pubdate data-updated="true">May 15<span>th</span>, 2014</time>
+        
+         | <a href="/android-deeper-graphics-architecture/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Android中有几个很重要的概念Surface, SurfaceHolder, EGLSurface, SurfaceView, GLSurfaceView, SurfaceTexture, TextureView与SurfaceFlinger。</p>
+
+<p>这篇文章会介绍Android图形架构的基本构成以及它们是如何在程序framework与多媒体系统中运作的。核心关注点是，图形数据的buffer是如何在系统中传递的。如果你曾经好奇过SurfaceView与TextureView的工作方式，或者是想知道Surface与EGLSurface是如何交互的，那么这篇文章将给你解答这些疑问。<strong>You&#8217;ve come to the right place.</strong></p>
+
+<p>大多数时候，我们都不需要了解这些类的使用原理，但是学习这些它们的工作原理可以为我们提供一种Sense，用来更加高效的工作。所以这里我们学习它们是如何工作的，而不仅仅是它们是如何使用的。</p>
+
+<h2>BufferQueue and gralloc</h2>
+
+<p>BufferQueue and grallocGraphiccal的核心是BufferQueue,它的角色是连接产生图形数据的生产者与显示数据的消费者。生产者与消费者可以再两个不同的进程，那么数据在系统中进行传递就依赖于BufferQueue。</p>
+
+<p>基础的用法是很直接简单的。生产者获取到一个buffer，制定了宽，高，pixel format与usage flags之后，再放到queue中。消费者获取到buffer，消费数据后，把buffer返回到queue中。</p>
+
+<ul>
+<li>生产者：dequeueBuffer() -> queueBuffer()</li>
+<li>消费者：acquireBuffer() -> releaseBuffer()</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-deeper-graphics-architecture/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -329,64 +388,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-running-background-service-lesson-1/">Android Training - 使用IntentService执行任务(Lesson 1 - 创建IntentService)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-04-14T18:30:00+08:00" pubdate data-updated="true">Apr 14<span>th</span>, 2014</time>
-        
-         | <a href="/android-training-running-background-service-lesson-1/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><strong>写在开始：</strong>接下去的一段时间会学习专题《Background Jobs》的几篇文章，演示如何在后台执行任务，以此加速程序的性能并降低能耗的使用。第一章节会学习如何通过发送任务到后台的Service中执行，从而提示UI的表现性能。</p>
-
-<p>IntentService为在单一后台线程中执行任务提供了一种直接的实现方式。它可以处理一个耗时的任务并确保不影响到UI的响应性。另外IntentService的执行还不受UI生命周期的影响，以此来确保AsyncTask能够顺利运行。</p>
-
-<p>但是IntentService有下面几个局限性：</p>
-
-<ul>
-<li>不可以直接和UI做交互。为了把他执行的结果体现在UI上，需要把结果返回给Activity。</li>
-<li>工作任务队列是顺序执行的，如果一个任务正在IntentService中执行，此时你再发送一个新的任务请求，这个新的任务会一直等待直到前面一个任务执行完毕才开始执行。</li>
-<li>正在执行的任务无法打断。</li>
-</ul>
-
-
-<p>虽然有上面那些限制，然而在在大多数情况下，IntentService都是执行简单后台任务操作的理想选择。</p>
-
-<p>这节课会演示如何创建继承的IntentService。同样也会演示如何创建必须的回调方法<code>onHandleIntent()</code>。最后，还会解释如何在manifest文件中定义这个IntentService。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-running-background-service-lesson-1/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/8/">&larr; Older</a>
@@ -402,6 +403,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-dev-patterns/">Android开发最佳实践</a>
+      </li>
     
       <li class="post">
         <a href="/android-performance-oom/">Android内存优化之OOM</a>
@@ -431,17 +436,13 @@
         <a href="/android-performance-render/">Android性能优化之渲染篇</a>
       </li>
     
-      <li class="post">
-        <a href="/android-performance-patterns/">Android性能优化典范</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (95)</a></li>
+  <li><a href='/blog/categories/android'>Android (96)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
   <li><a href='/blog/categories/android-performance'>Android:performance (19)</a></li>

@@ -9,7 +9,7 @@
   <meta name="author" content="HuKai">
 
   
-  <meta name="description" content="1)概述 Android的TouchEvent通常包含三个动作,ACTION_DOWN,ACTION_MOVE与ACTION_UP。发出的顺序是DOWN->MOVE->MOVE->&#8230;->UP(注意MOVE事件是否能够被触发取决于操作手势里面是否包含了移动的动作)。 消息分发流程， &hellip;">
+  <meta name="description" content="写在开始：接下去的一段时间会学习专题《Background Jobs》的几篇文章，演示如何在后台执行任务，以此加速程序的性能并降低能耗的使用。第一章节会学习如何通过发送任务到后台的Service中执行，从而提示UI的表现性能。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +80,64 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-training-running-background-service-lesson-1/">Android Training - 使用IntentService执行任务(Lesson 1 - 创建IntentService)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-14T18:30:00+08:00" pubdate data-updated="true">Apr 14<span>th</span>, 2014</time>
+        
+         | <a href="/android-training-running-background-service-lesson-1/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><strong>写在开始：</strong>接下去的一段时间会学习专题《Background Jobs》的几篇文章，演示如何在后台执行任务，以此加速程序的性能并降低能耗的使用。第一章节会学习如何通过发送任务到后台的Service中执行，从而提示UI的表现性能。</p>
+
+<p>IntentService为在单一后台线程中执行任务提供了一种直接的实现方式。它可以处理一个耗时的任务并确保不影响到UI的响应性。另外IntentService的执行还不受UI生命周期的影响，以此来确保AsyncTask能够顺利运行。</p>
+
+<p>但是IntentService有下面几个局限性：</p>
+
+<ul>
+<li>不可以直接和UI做交互。为了把他执行的结果体现在UI上，需要把结果返回给Activity。</li>
+<li>工作任务队列是顺序执行的，如果一个任务正在IntentService中执行，此时你再发送一个新的任务请求，这个新的任务会一直等待直到前面一个任务执行完毕才开始执行。</li>
+<li>正在执行的任务无法打断。</li>
+</ul>
+
+
+<p>虽然有上面那些限制，然而在在大多数情况下，IntentService都是执行简单后台任务操作的理想选择。</p>
+
+<p>这节课会演示如何创建继承的IntentService。同样也会演示如何创建必须的回调方法<code>onHandleIntent()</code>。最后，还会解释如何在manifest文件中定义这个IntentService。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-training-running-background-service-lesson-1/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -268,49 +326,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-creating-custom-views-lesson-4/">Android Training - 创建自定义的Views(Lesson 4 - 优化Views)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-08-18T17:30:00+08:00" pubdate data-updated="true">Aug 18<span>th</span>, 2013</time>
-        
-         | <a href="/android-training-creating-custom-views-lesson-4/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>前面的课程学习到了如何创建设计良好的View，并且能够使之在手势与状态切换时得到正确的反馈。下面要介绍的是如何使得view能够执行更快。为了避免UI显得卡顿，你必须确保动画能够保持在60fps以上。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-creating-custom-views-lesson-4/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/9/">&larr; Older</a>
@@ -326,6 +341,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-dev-patterns/">Android开发最佳实践</a>
+      </li>
     
       <li class="post">
         <a href="/android-performance-oom/">Android内存优化之OOM</a>
@@ -355,17 +374,13 @@
         <a href="/android-performance-render/">Android性能优化之渲染篇</a>
       </li>
     
-      <li class="post">
-        <a href="/android-performance-patterns/">Android性能优化典范</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (95)</a></li>
+  <li><a href='/blog/categories/android'>Android (96)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
   <li><a href='/blog/categories/android-performance'>Android:performance (19)</a></li>

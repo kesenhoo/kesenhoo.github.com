@@ -9,7 +9,7 @@
   <meta name="author" content="HuKai">
 
   
-  <meta name="description" content="Google近期在Udacity上发布了Android性能优化的在线课程，分别从渲染，运算与内存，电量几个方面介绍了如何去优化性能，这些课程是Google之前在Youtube上发布的Android性能优化典范专题课程的细化与补充。 下面是内存篇章的学习笔记，部分内容与前面的性能优化典范有重合， &hellip;">
+  <meta name="description" content="Google近期在Udacity上发布了Android性能优化的在线课程，分别从渲染，运算与内存，电量几个方面介绍了如何去优化性能，这些课程是Google之前在Youtube上发布的Android性能优化典范专题课程的细化与补充。 下面是电量篇章的学习笔记，部分内容与前面的性能优化典范有重合， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +80,65 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-performance-battery/">Android性能优化之电量篇</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-04-12T16:49:00+08:00" pubdate data-updated="true">Apr 12<span>th</span>, 2015</time>
+        
+         | <a href="/android-performance-battery/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img src="/images/android_performance_course_udacity.jpg" alt="android_performance_course_udacity" /></p>
+
+<p>Google近期在Udacity上发布了<a href="https://www.udacity.com/course/ud825">Android性能优化的在线课程</a>，分别从渲染，运算与内存，电量几个方面介绍了如何去优化性能，这些课程是Google之前在Youtube上发布的<a href="http://hukai.me/android-performance-patterns/">Android性能优化典范</a>专题课程的细化与补充。</p>
+
+<p>下面是电量篇章的学习笔记，部分内容与前面的性能优化典范有重合，欢迎大家一起学习交流！</p>
+
+<h3>1)Understanding Battery Drain</h3>
+
+<p>手机各个硬件模块的耗电量是不一样的，有些模块非常耗电，而有些模块则相对显得耗电量小很多。</p>
+
+<p><img src="/images/android_perf_battery_drain.png" alt="android_perf_battery_drain" /></p>
+
+<p>电量消耗的计算与统计是一件麻烦而且矛盾的事情，记录电量消耗本身也是一个费电量的事情。唯一可行的方案是使用第三方监测电量的设备，这样才能够获取到真实的电量消耗。</p>
+
+<p>当设备处于待机状态时消耗的电量是极少的，以N5为例，打开飞行模式，可以待机接近1个月。可是点亮屏幕，硬件各个模块就需要开始工作，这会需要消耗很多电量。</p>
+
+<p>使用WakeLock或者JobScheduler唤醒设备处理定时的任务之后，一定要及时让设备回到初始状态。每次唤醒蜂窝信号进行数据传递，都会消耗很多电量，它比WiFi等操作更加的耗电。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-performance-battery/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -256,56 +315,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-performance-patterns/">Android性能优化典范</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-01-17T19:42:00+08:00" pubdate data-updated="true">Jan 17<span>th</span>, 2015</time>
-        
-         | <a href="/android-performance-patterns/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><img src="/images/android_perf_patterns.png" alt="" />
-2015新年伊始，Google发布了关于<a href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">Android性能优化典范的专题</a>，一共16个短视频，每个3-5分钟，帮助开发者创建更快更优秀的Android App。课程专题不仅仅介绍了Android系统中有关性能问题的底层工作原理，同时也介绍了如何通过工具来找出性能问题以及提升性能的建议。主要从三个方面展开，Android的渲染机制，内存与GC，电量优化。下面是对这些问题和建议的总结梳理。</p>
-
-<h2>0)Render Performance</h2>
-
-<p>大多数用户感知到的卡顿等性能问题的最主要根源都是因为渲染性能。从设计师的角度，他们希望App能够有更多的动画，图片等时尚元素来实现流畅的用户体验。但是Android系统很有可能无法及时完成那些复杂的界面渲染操作。Android系统每隔16ms发出VSYNC信号，触发对UI进行渲染，如果每次渲染都成功，这样就能够达到流畅的画面所需要的60fps，为了能够实现60fps，这意味着程序的大多数操作都必须在16ms内完成。</p>
-
-<p><img src="/images/draw_per_16ms.png" alt="" /></p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-performance-patterns/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -321,6 +330,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-dev-patterns/">Android开发最佳实践</a>
+      </li>
     
       <li class="post">
         <a href="/android-performance-oom/">Android内存优化之OOM</a>
@@ -350,17 +363,13 @@
         <a href="/android-performance-render/">Android性能优化之渲染篇</a>
       </li>
     
-      <li class="post">
-        <a href="/android-performance-patterns/">Android性能优化典范</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (95)</a></li>
+  <li><a href='/blog/categories/android'>Android (96)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
   <li><a href='/blog/categories/android-performance'>Android:performance (19)</a></li>

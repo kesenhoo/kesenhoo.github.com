@@ -9,14 +9,7 @@
   <meta name="author" content="HuKai">
 
   
-  <meta name="description" content="偶然被人问到如何添加复制到剪切板的选项到分享列表，如下图所示： 一般情况下，分享一段文字或者图片，我们会使用如下Android默认的方式： 1
-2
-3
-4
-5
-6
-7
-public void shareText(Context context, String text) { Intent &hellip;">
+  <meta name="description" content="创建可穿戴的应用 可穿戴应用直接运行在穿戴设备上，应用可以直接访问例如传感器与GPU这样的硬件。这些应用和一般的Android应用的基础部分是一致的，只是在设计与可用性还有一些特殊功能上有比较大差异。手持设备与可穿戴设备上的应用主要有下面的一些差异： 系统会强制执行超时机制。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -87,6 +80,72 @@ public void shareText(Context context, String text) { Intent &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-training-wearable-app-index/">Android Training - 创建可穿戴应用(0 - 序言)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-14T12:20:00+08:00" pubdate data-updated="true">Jul 14<span>th</span>, 2014</time>
+        
+         | <a href="/android-training-wearable-app-index/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>创建可穿戴的应用</h1>
+
+<p>可穿戴应用直接运行在穿戴设备上，应用可以直接访问例如传感器与GPU这样的硬件。这些应用和一般的Android应用的基础部分是一致的，只是在设计与可用性还有一些特殊功能上有比较大差异。手持设备与可穿戴设备上的应用主要有下面的一些差异：</p>
+
+<ul>
+<li>系统会强制执行超时机制。如果你显示了一个Activity，用户并没有进行操作，设备会进入睡眠状态。当设备唤醒时，穿戴设备会显示主界面而不是你刚才的activity。如果你想要持续的显示一些东西，请使用notification来替代。</li>
+<li>相比起手持设备的应用，可穿戴应用的界面相对更小，功能也相对更少。他仅仅包含了那些对于可穿戴有意义的功能，这些功能通常是手持设备的一个子集。通常来说，你应该尽可能的把运行操作搬到手持设备上，然后发送操作结果到可穿戴设备。</li>
+<li>用户不能直接给可穿戴设备安装应用。你需要给手持设备的应用绑定一个可穿戴设备的应用。当用户安装手持设备的应用时，系统会自动安装可穿戴应用。然而，为了开发便利，你还是可以直接安装应用到可穿戴设备。</li>
+<li>可穿戴应用可以使用大多数的标准Android APIs，除了下面的以外：
+
+<ul>
+<li><a href="http://developer.android.com/reference/android/webkit/package-summary.html">android.webkit</a></li>
+<li><a href="http://developer.android.com/reference/android/print/package-summary.html">android.print</a></li>
+<li><a href="http://developer.android.com/reference/android/app/backup/package-summary.html">android.app.backup</a></li>
+<li><a href="http://developer.android.com/reference/android/appwidget/package-summary.html">android.appwidget</a></li>
+<li><a href="http://developer.android.com/reference/android/hardware/usb/package-summary.html">android.hardware.usb</a></li>
+</ul>
+
+
+<p>在使用某个API之前，你可以通过执行<a href="http://developer.android.com/reference/android/content/pm/PackageManager.html#hasSystemFeature(java.lang.String">hasSystemFeature()</a>) 来判断功能是否可用。</p></li>
+</ul>
+
+
+<blockquote><p><strong>Note:</strong> 我们推荐使用Android Studio来开发Android Wear的应用，因为它提供了建立工程，添加库依赖，打包程序等等在ADT上没有的功能。下面的培训课程的前提是假设你已经在使用Android Studio了。</p></blockquote>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-training-wearable-app-index/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -297,69 +356,6 @@ public void shareText(Context context, String text) { Intent &hellip;">
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-volley-standard-request/">Android Training - Volley(Lesson 3 - 创建标准的请求)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-24T22:10:00+08:00" pubdate data-updated="true">Jun 24<span>th</span>, 2014</time>
-        
-         | <a href="/android-training-volley-standard-request/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>这一课会介绍如何使用Volley支持的常用请求类型：</p>
-
-<ul>
-<li><code>StringRequest</code>。指定一个URL并在相应回调中接受一个原始的raw string数据。请参考前一课的示例。</li>
-<li><code>ImageRequest</code>。指定一个URL并在相应回调中接受一个image。</li>
-<li><code>JsonObjectRequest</code>与<code>JsonArrayRequest</code> (均为<code>JsonRequest</code>的子类)。指定一个URL并在相应回调中获取到一个JSON对象或者JSON数组。</li>
-</ul>
-
-
-<p>如果你需要的是上面演示的请求类型，那么你应该不需要自己实现一个自定义的请求。这节课会演示如何使用那些标准的请求类型。关于如何实现自定义的请求，请看下一课：<a href="request-costom.html">实现自定义的请求</a>。</p>
-
-<h2>1)Request an Image</h2>
-
-<p>Volley为请求图片提供了如下的类。这些类依次有着依赖关系，用来支持在不同的层级进行图片处理：</p>
-
-<ul>
-<li><p><code>ImageRequest</code> - 一个封装好的，用来处理URL请求图片并且返回一张decode好的bitmap的类。它同样提供了一些简便的接口方法，例如指定一个大小进行重新裁剪。它的主要好处是Volley回确保类似decode，resize等耗时的操作执行在工作线程中。</p></li>
-<li><p><code>ImageLoader</code> - 一个用来处理加载与缓存从网络上获取到的图片的帮助类。ImageLoader是管理协调大量的ImageRequest的类。例如，在ListView中需要显示大量缩略图的时候。ImageLoader为通常的Volley cache提供了更加前瞻的内存缓存，这个缓存对于防止图片抖动非常有用。。这还使得能够在避免阻挡或者延迟主线程的前提下在缓存中能够被Hit到。ImageLoader还能够实现响应联合Coalescing，每一个响应回调里面都可以设置bitmap到view上面。联合Coalescing使得能够同时提交多个响应，这提升了性能。</p></li>
-<li><p><code>NetworkImageView</code> - 在ImageLoader的基础上建立，替换ImageView进行使用。对于需要对ImageView设置网络图片的情况下使用很有效。NetworkImageView同样可以在view被detached的时候取消pending的请求。</p></li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-volley-standard-request/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/6/">&larr; Older</a>
@@ -375,6 +371,10 @@ public void shareText(Context context, String text) { Intent &hellip;">
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-dev-patterns/">Android开发最佳实践</a>
+      </li>
     
       <li class="post">
         <a href="/android-performance-oom/">Android内存优化之OOM</a>
@@ -404,17 +404,13 @@ public void shareText(Context context, String text) { Intent &hellip;">
         <a href="/android-performance-render/">Android性能优化之渲染篇</a>
       </li>
     
-      <li class="post">
-        <a href="/android-performance-patterns/">Android性能优化典范</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (95)</a></li>
+  <li><a href='/blog/categories/android'>Android (96)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
   <li><a href='/blog/categories/android-performance'>Android:performance (19)</a></li>

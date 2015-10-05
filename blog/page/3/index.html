@@ -9,9 +9,7 @@
   <meta name="author" content="HuKai">
 
   
-  <meta name="description" content="很显然，APK安装包越小越好。下面从代码，资源文件，使用策略几个方面简要介绍下： 代码 保持良好的编程习惯，不要重复或者不用的代码，谨慎添加libs，移除使用不到的libs。
-使用proguard混淆代码，它会对不用的代码做优化，并且混淆后也能够减少安装包的大小。
-native code的部分， &hellip;">
+  <meta name="description" content="2015新年伊始，Google发布了关于Android性能优化典范的专题，一共16个短视频，每个3-5分钟，帮助开发者创建更快更优秀的Android App。课程专题不仅仅介绍了Android系统中有关性能问题的底层工作原理，同时也介绍了如何通过工具来找出性能问题以及提升性能的建议。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -82,6 +80,56 @@ native code的部分， &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-performance-patterns/">Android性能优化典范</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-01-17T19:42:00+08:00" pubdate data-updated="true">Jan 17<span>th</span>, 2015</time>
+        
+         | <a href="/android-performance-patterns/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img src="/images/android_perf_patterns.png" alt="" />
+2015新年伊始，Google发布了关于<a href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">Android性能优化典范的专题</a>，一共16个短视频，每个3-5分钟，帮助开发者创建更快更优秀的Android App。课程专题不仅仅介绍了Android系统中有关性能问题的底层工作原理，同时也介绍了如何通过工具来找出性能问题以及提升性能的建议。主要从三个方面展开，Android的渲染机制，内存与GC，电量优化。下面是对这些问题和建议的总结梳理。</p>
+
+<h2>0)Render Performance</h2>
+
+<p>大多数用户感知到的卡顿等性能问题的最主要根源都是因为渲染性能。从设计师的角度，他们希望App能够有更多的动画，图片等时尚元素来实现流畅的用户体验。但是Android系统很有可能无法及时完成那些复杂的界面渲染操作。Android系统每隔16ms发出VSYNC信号，触发对UI进行渲染，如果每次渲染都成功，这样就能够达到流畅的画面所需要的60fps，为了能够实现60fps，这意味着程序的大多数操作都必须在16ms内完成。</p>
+
+<p><img src="/images/draw_per_16ms.png" alt="" /></p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-performance-patterns/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -278,75 +326,6 @@ native code的部分， &hellip;">
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-wearable-app-packaging/">Android Training - 创建可穿戴应用(4 - 打包可穿戴应用)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-14T23:32:00+08:00" pubdate data-updated="true">Jul 14<span>th</span>, 2014</time>
-        
-         | <a href="/android-training-wearable-app-packaging/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>当发布应用给用户之前，你必须把可穿戴应用打包到手持应用内。因为不能直接在可穿戴设备上浏览并安装应用。如果打包正确，当用户下载手持应用时，系统会自动下发可穿戴应用到匹对的可穿戴设备上。</p>
-
-<blockquote><p><strong>Note:</strong> 如果开发时签名用的是debug key，这个特性是无法正常工作的。在开发时，需要使用<code>adb install</code>的命令或者Android Studio来安装可穿戴应用。</p></blockquote>
-
-<h2>使用Android Studio打包</h2>
-
-<p>在Android Studio中打包可穿戴应用有下面几个步骤：</p>
-
-<ol>
-<li>在手持应用的buidl.gradle文件中把可穿戴应用声明为依赖：</li>
-</ol>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='xml'><span class='line'>dependencies {
-</span><span class='line'>   compile &#39;com.google.android.gms:play-services:5.0.+@aar&#39;
-</span><span class='line'>   compile &#39;com.android.support:support-v4:20.0.+&#39;&#39;
-</span><span class='line'>   wearApp project(&#39;:wearable&#39;)
-</span><span class='line'>}
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-wearable-app-packaging/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/4/">&larr; Older</a>
@@ -362,6 +341,10 @@ native code的部分， &hellip;">
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-dev-patterns/">Android开发最佳实践</a>
+      </li>
     
       <li class="post">
         <a href="/android-performance-oom/">Android内存优化之OOM</a>
@@ -391,17 +374,13 @@ native code的部分， &hellip;">
         <a href="/android-performance-render/">Android性能优化之渲染篇</a>
       </li>
     
-      <li class="post">
-        <a href="/android-performance-patterns/">Android性能优化典范</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (95)</a></li>
+  <li><a href='/blog/categories/android'>Android (96)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
   <li><a href='/blog/categories/android-performance'>Android:performance (19)</a></li>
