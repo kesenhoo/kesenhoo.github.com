@@ -162,7 +162,7 @@ AppBarLayout是一个在android.support.design兼容包（这里有关于该兼�
 
 ![android_dev_patterns_searchview_xml](/images/android_dev_patterns_searchview_xml.png)
 
-* 在onCreateOptionsMenu的回调函数里面获取到SearchView，并设置监听（请注意使用MenuItemCompat的那行代码，否者会出现很多兼容性问题，获取不到这个View等等奇怪的BUG），在监听回调里面处理业务逻辑
+* 在onCreateOptionsMenu的回调函数里面获取到SearchView，并设置监听（请注意使用MenuItemCompat的那行代码，否则会出现很多兼容性问题，获取不到这个View等等奇怪的BUG），在监听回调里面处理业务逻辑
 
 ![android_dev_patterns_searchview_code](/images/android_dev_patterns_searchview_code.png)
 
@@ -207,7 +207,7 @@ ViewPager是Android上面实现横向滑动的基础组件，能够帮助大家�
 关于Material Design里面的Tabs设计，请再参考<http://www.google.com/design/spec/components/tabs.html>以及官方Training课程里面的<http://developer.android.com/training/implementing-navigation/lateral.html>
 
 ## 10）Making Apps Accessible
-为了照顾部分视力或者听觉不好的用户，我们需要做一定的处理使得自己的应用能够被每一个可用。Android系统为了帮组应用实现辅助功能，提供了诸如文本朗读，触感反馈，指向炳导航，手势导航等等功能来更好的帮助用户使用这些应用。
+为了照顾部分视力或者听觉不好的用户，我们需要做一定的处理使得自己的应用能够被每一个可用。Android系统为了帮助应用实现辅助功能，提供了诸如文本朗读，触感反馈，指向炳导航，手势导航等等功能来更好的帮助用户使用这些应用。
 
 ![android_dev_patterns_accessible_feature](/images/android_dev_patterns_accessible_feature.png)
 
