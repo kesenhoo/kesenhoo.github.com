@@ -44,7 +44,20 @@ Android系统上的Http Response Cache是默认关闭的，这样每次即使一
 ![android_perf_4_network_frequencies_gcm](/images/android_perf_4_network_frequencies_gcm.png)
 
 ## 3)Effective Prefetching
- 
+关于提升网络操作的性能，除了避免频繁的网络同步操作之外，还可以使用捆绑批量访问的方式来减少访问的频率，这说的就是Prefetching。
+
+举个例子，在某个场景下，一开始发出了网络请求需要得到一张图片，隔了10s之后，发出第二次请求想要拿到另外一张图片，再隔了6s发出第三张图片的网络请求。这会导致设备的无线蜂窝一直处于高消耗的状态。Prefetching就是预先判定那些可能马上就会使用到的网络资源，捆绑一起集中进行网络请求。这样能够极大的减少电量的消耗，提升设备的续航时间。
+
+![android_perf_4_prefetching_bundle](/images/android_perf_4_prefetching_bundle.png)
+
+使用Prefetching的难点在于如何平衡事先获取的数据量到底是多少，如果预取的数据量偏少，那么就起不到什么效果，但是如果预期过多，又会导致访问的时间过长。
+
+![android_perf_4_prefetching_tricky](/images/android_perf_4_prefetching_tricky.png)
+
+那么问题来了，到底预取多少才比较合适呢？一个比较普适的规则是，在3G网络下可以预取1-5Mb的数据量，或者是按照提前预期后续1-2分钟的数据作为衡量标准。在实际的操作当中，我们还需要考虑当前的网络速度来决定预取的数据量，例如在同样的时间下，4G网络可以获取到12张图片的数据，而2G网络则只能拿到3张图片的数据。所以，我们还需要把当前的网络环境情况添加到设计预取数据量的策略当中去。判断当前设备的状态与网络情况，可以使用前面提到过的[GCMNetworkManager](https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager)。
+
+## 4)Adapting to Latency
+
 
 
 
