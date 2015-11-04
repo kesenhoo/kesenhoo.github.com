@@ -16,6 +16,8 @@ categories: Android Android:Performance
 
 Android系统上的Http Response Cache是默认关闭的，这样每次即使一样的数据请求也需要重复被执行，我们可以通过下面的代码示例开启[HttpResponseCache](http://developer.android.com/reference/android/net/http/HttpResponseCache.html)。
 
+<!-- More -->
+
 ![android_perf_4_network_cache_enable](/images/android_perf_4_network_cache_enable.png)
 
 开启Cache之后，Http操作相关的返回数据就会缓存到文件系统上，他们可能发生的场景有普通的http请求，或者是打开某个URL去获取数据。HttpResponseCache的数据清除通过两种方式：第一种方式是缓存溢出的时候删除最旧最老的文件，第二种方式是通过Http返回Header中的Cache-Control字段来进行控制的。
@@ -25,10 +27,26 @@ Android系统上的Http Response Cache是默认关闭的，这样每次即使一
 实现好网络缓存之后，我们可以使用Android Studio里面的Network Traffic Tools来查看网络访问的情况，另外我们还可以使用[AT&T ARO](https://developer.att.com/application-resource-optimizer?utm_campaign=android_series_#cachematters_for_networking_101315&utm_source=anddev&utm_medium=yt-annt)工具来抓取网络数据包进行分析查看。
 
 ## 2)Optimizing Network Request Frequencies
+保持应用呈现的数据最新是一个很重要的基础功能，例如最新的新闻，天气，信息流等等。但是，过于频繁的同步最新数据会对性能产生很大的负面影响，在进行网络请求操作的时候一定要避免多度同步。
+
+有时候退到后台的应用为了能够在切换回前台的时候呈现最新的数据，会偷偷在后台不停的做同步的操作。这种行为会带来很严重的问题，首先因为网络请求的行为异常的耗电，其次不停的进行网络同步会耗费很多带宽流量。
+
+为了能够尽量的减少不必要的同步操作，我们需要遵守下面的一些规则：
+
+* 首先我们要对网络行为进行分类，区分需要立即更新数据的行为和其他可以进行延迟的更新行为，在不同的场景下进行差异化处理。
+* 其次要避免客户端对服务器的轮询操作，这样会浪费很多的电量与带宽流量。解决这个问题，我们可以使用Google Cloud Message来对更新的数据进行推送。
+* 最后在某些必须做同步的场景下，需要避免使用固定相同的时间进行更新，应该在返回数据无更新的时候，使用双倍的时间进行下一次同步。更进一步，我们还可以通过判断当前设备的状态来决定同步的频率，例如判断设备处于休眠，运动等不同的状态设计不同的同步频率。
+
+![android_perf_4_network_frequencies_backoff](/images/android_perf_4_network_frequencies_backoff.png)
+
+另外，我们还可以通过判断设备是否连接上WiFi，是否正在充电来决定更新的频率。为了能够方便的实现这个功能，Android为我们提供了[GCMNetworkManager](https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager)来判断设备当下的状态，从而设计更加高效的网络同步操作，如下图所示：
+
+![android_perf_4_network_frequencies_gcm](/images/android_perf_4_network_frequencies_gcm.png)
+
+## 3)Effective Prefetching
+ 
 
 
-
-<!-- More -->
 
 ![android_perf_3_arraymap_two_array](/images/android_perf_3_arraymap_two_array.png)
 
