@@ -88,7 +88,27 @@ Android系统上关于网络请求的Http Response Cache是默认关闭的，这
 Android官方为了帮助我们设计自己的网络请求策略，为我们提供了模拟器的网络流量控制功能来对实际环境进行模拟测量，或者还可以使用AT&T提供的[AT&T Network Attenuator](http://developer.att.com/developer/legalAgreementPage.jsp?passedItemId=14500040)来帮助预估网络延迟。
 
 ## 5)Minimizing Asset Payload
+对于网络传输的数据需要做压缩处理，这能够减少传输的数据量，提高网络操作的性能。不同的网络环境，下载速度以及网络延迟都存在差异：
 
+![android_perf_4_min_asset_load](/images/android_perf_4_min_asset_load.png)
+
+如果我们选择在网速更低的网络环境下进行数据传输，这就意味着需要执行更长的时间，而更长的网络操作行为，会导致电量消耗更加严重。另外传输的数据如果不做压缩处理，也同样会增加网络传输的时间，消耗更多的电量。不仅如此，未经过压缩的数据，也会消耗更多的流量，使得用户需要付出更多的流量费。通常来说，网络传输数据量的大小主要由两部分组成：图片与序列化的数据。
+
+A)首先需要做的是减少图片的大小，选择合适的图片保存格式是第一步。下图展示了PNG,JPEG,WEBP三种主流格式在占用空间与图片质量之间的对比：
+
+![android_perf_4_min_asset_png_jpeg_webp](/images/android_perf_4_min_asset_png_jpeg_webp.png)
+
+对于JPEG与WEBP格式的图片，不同的清晰度对占用空间的大小会产生很大的影响：
+
+![android_perf_4_min_asset_jpeg_level](/images/android_perf_4_min_asset_jpeg_level.png)
+
+我们需要为不同的场景提供当前场景下最合适的图片，例如针对全屏显示的情况我们会需要一张清晰度比较高的图片，而如果只是显示为缩略图的形式，就只需要一个相对清晰度低很多的图片即可。服务器应该支持到为不同的使用场景分别准备多套清晰度不一样的图片，以便在对应的场景下能够获取到最适合自己的图片。
+
+B)其次需要做的是减少序列化数据的大小。JSON与XML为了提高可读性，在文件中加入了大量的符号，空格等等字符，而这些字符对于程序来说是没有任何意义的。我们应该使用Protocal Buffers，Nano-Proto-Buffers，FlatBuffer来减少序列化的数据的大小。
+
+Android系统为我们提供了工具来查看网络传输的数据情况，打开Android Studio的Monitor，里面有网络访问的模块。或者是打开AT&T提供的[ARO](https://developer.att.com/application-resource-optimizer)工具来查看网络请求状态。
+
+## 6)
 
 
 
