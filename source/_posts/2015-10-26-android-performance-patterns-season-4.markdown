@@ -108,7 +108,42 @@ B)其次需要做的是减少序列化数据的大小。JSON与XML为了提高�
 
 Android系统为我们提供了工具来查看网络传输的数据情况，打开Android Studio的Monitor，里面有网络访问的模块。或者是打开AT&T提供的[ARO](https://developer.att.com/application-resource-optimizer)工具来查看网络请求状态。
 
-## 6)
+## 6)Service Performance Patterns
+Service是Android程序里面最常用的基础组件之一，但是使用Service很容易引起电量的过度消耗以及系统资源的未及时释放。学会在什么情况才使用Service以及采用何种方式杀掉Service就显得十分有必要了。
+
+简要过一下Service的特性：Service和UI没有关联，Service的创建，执行，销毁Service都是需要占用系统时间和内存的。另外Service是默认运行在UI线程的，这意味着Service会影响到系统的刷新流畅度。
+
+使用Service应该遵循下面的一些规则：
+
+* 绝大多数情况下，我们应该避免错误的使用Service，例如我们不应该使用Service来监听某些事件的变化，不应该搞一个Service在后台对服务器不断的进行轮询(应该使用Google Cloud Messaging)
+* 如果已经事先知道Service里面的任务应该执行在后台线程(非默认的主线程)的时候，我们应该使用IntentService或者结合HanderThread，AsycnTask Loader实现的Service。
+
+Android系统为我们提供了以下的一些异步相关的工具类
+
+* GCM
+* BroadcastReciever
+* LocalBroadcastReciever
+* WakefulBroadcastReciver
+* HandlerThreads
+* AsyncTaskLoaders
+* IntentService
+
+如果使用上面的诸多方案还是无法替代普通的Service，那么需要注意的就是如何正确的关闭Service。
+
+普通的Started Service，需要通过stopSelf()来停止Service
+
+![android_perf_4_service_started](/images/android_perf_4_service_started.png)
+
+另外一种Bound Service，会在其他组件都unBind之后自动关闭自己
+
+![android_perf_4_service_bound](/images/android_perf_4_service_bound.png.png)
+
+把上面两种Service进行合并之后，我们可以得到如下图所示的Service(相关知识，还可以参考<http://hukai.me/android-notes-services/>, <http://hukai.me/android-notes-bound-services/>)
+
+![android_perf_4_service_mix](/images/android_perf_4_service_mix.png)
+
+
+
 
 
 
