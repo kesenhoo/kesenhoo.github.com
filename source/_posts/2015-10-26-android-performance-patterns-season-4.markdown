@@ -142,6 +142,37 @@ Android系统为我们提供了以下的一些异步相关的工具类
 
 ![android_perf_4_service_mix](/images/android_perf_4_service_mix.png)
 
+## 7)Removing unused code
+使用第三方库(library)不仅仅可以在不用自己编写大量代码的前提下帮助我们解决一些难题，还可以帮助我们节约大量的时间，但是这些引入的第三方库很可能会导致主程序代码臃肿冗余。
+
+如果我们处在人力，财力都相对匮乏的情况下，我们会倾向大量使用第三方库来帮助编写应用程序。这其实是无可厚非的，那些著名的第三方库的可行性早就被其他应用所采用并实践证明过。但是这里面存在的问题是，如果我们因为只需要这个library的一小部分功能而把整个library都导入自己的项目，这就会引起代码臃肿。一旦发生代码臃肿，用户就会下载到安装包偏大的应用程序，另外因为代码臃肿，这很有可能会超过单个编译文件只能有65536个方法的上限。解决这个问题的办法是使用**MultiDex**的方案，可是这实在是无奈之举，我们还是应该尽量避免出现这种情况。
+
+Android为我们提供了Proguard的工具来帮助应用程序对代码进行瘦身，优化，混淆的处理。它会帮助移除那些没有使用到的代码，对类名，方法名进行混淆处理以避免程序被反编译。举个例子，Google I/O 2015这个应用使用了大量的library，没有经过Proguard处理之前编译出来的包是8.4Mb大小，经过处理之后的包仅仅是4.1Mb大小。
+
+使用Proguard相当的简单，只需要在build.gradle文件中配置minifEnable为true即可，如下图所示：
+
+![android_perf_4_remove_unused_code_proguard](/images/android_perf_4_remove_unused_code_proguard.png)
+
+但是Proguard还是不足够聪明到能够判断那些类，那些方法是不能够被混淆的，针对这些情况，我们需要手动的把这些需要保留的类名与方法名添加到Proguard的配置文件中，如下图所示：
+
+![android_perf_4_remove_unused_code_proguard_setting](/images/android_perf_4_remove_unused_code_proguard_setting.png)
+
+在使用library的时候，需要特别注意这些library在proguard配置上的说明文档，我们需要把这些配置信息添加到自己的主项目中。关于Proguard的详细说明，请看官方文档<http://developer.android.com/tools/help/proguard.html>
+
+## 8)Removing unused resources
+减少APK的安装大小也是Android程序优化中很重要的一个部分，我们不应该给用户下载到一个臃肿的安装包。假设这样一个场景，我们引入了Google Play Service的library，是想要使用里面的Maps的功能，但是里面的登入等等其他功能是不需要的，可是这些功能相关的代码与图片资源，布局资源都会被引入我们的项目，这样就会导致我们的程序安装包臃肿。
+
+所幸的是，我们可以使用Gradle来帮助我们分析代码，分析引用的资源，对于那些没有被引用到的资源，会在编译阶段被排除在apk之外，要实现这个功能，对我们来说仅仅只需要在build.gradle文件中配置shrinkResource为true就好了，如下图所示：
+
+![android_perf_4_remove_unused_resource](/images/android_perf_4_remove_unused_resource.png)
+
+为了辅助gradle对资源进行瘦身，或者是某些时候的特殊需要，我们可以通过tools:keep或者是tools:discard标签来实现对特定资源的保留与废弃，如下图所示：
+
+![android_perf_4_remove_unused_resource_tools](/images/android_perf_4_remove_unused_resource_tools.png)
+
+Gradle目前无法对values，drawable等根据运行时来决定使用的资源进行优化，对于这些资源，需要我们自己来确保资源不会有冗余。
+
+
 
 
 
