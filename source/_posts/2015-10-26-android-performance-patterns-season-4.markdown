@@ -193,7 +193,17 @@ Gradle目前无法对values，drawable等根据运行时来决定使用的资源
 ## 12)Perf Theory: Threading
 使用多线程并发处理任务，从某种程度上可以快速提高程序的执行性能。对于Android程序来说，主线程通常也成为UI线程，需要处理UI的渲染，响应用户的操作等等。对于那些可能影响到UI线程的任务都需要特别留意是否有必要放到其他的线程来进行处理。如果处理不当，很有可能引起程序ANR。关于多线程的使用建议，可以参考官方的培训课程<http://developer.android.com/training/best-background.html>
 
-## 13)
+## 13)Perf Theory: Batching
+关于Batching，在前几季的性能优化课程里面也不止一次提到，下面使用一张图演示下Batching的原理：
+
+![android_perf_4_batching](/images/android_perf_4_batching.png)
+
+网络请求的批量执行是另外一个比较适合说明batching使用场景的例子，因为每次发起网络请求都相对来说比较耗时耗电，如果能够做到批量一起执行，可以大大的减少电量的消耗。
+
+![android_perf_4_batching_network](/images/android_perf_4_batching_network.png)
+
+## 14)Serialization performance
+
 
 
 
