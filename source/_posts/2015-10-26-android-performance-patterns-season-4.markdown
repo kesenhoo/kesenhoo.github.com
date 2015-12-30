@@ -203,8 +203,32 @@ Gradle目前无法对values，drawable等根据运行时来决定使用的资源
 ![android_perf_4_batching_network](/images/android_perf_4_batching_network.png)
 
 ## 14)Serialization performance
+数据的序列化是程序代码里面必不可少的组成部分，当我们讨论到数据序列化的性能的时候，需要了解有哪些候选的方案，他们各自的优缺点是什么。首先什么是序列化？用下面的图来解释一下：
 
+![android_perf_4_serialIzation](/images/android_perf_4_serialIzation.png)
 
+数据序列化的行为可能发生在数据传递过程中的任何阶段，例如网络传输，不同进程间数据传递，不同类之间的参数传递，把数据存储到磁盘上等等。通常情况下，我们会把那些需要序列化的类实现Serializable接口(如下图所示)，但是这种传统的做法效率不高，实施的过程会消耗更多的内存。
+
+![android_perf_4_serialIzation_implement](/images/android_perf_4_serialIzation_implement.png)
+
+但是我们如果使用GSON库来处理这个序列化的问题，不仅仅执行速度更快，内存的使用效率也更高。Android的XML布局文件会在编译的阶段被转换成更加复杂的格式，具备更加高效的执行性能与更高的内存使用效率。
+
+![android_perf_4_serialIzation_gson](/images/android_perf_4_serialIzation_gson.png)
+
+下面介绍三个数据序列化的候选方案：
+
+* **[Protocal Buffers](https://developers.google.com/protocol-buffers/?utm_campaign=android_series_serialization_performance_101315&utm_source=anddev&utm_medium=yt-annt)**：强大，灵活，但是对内存的消耗会比较大，并不是移动终端上的最佳选择。
+* **[Nano-Proto-Buffers](https://android.googlesource.com/platform/external/protobuf/+/master/java/README.txt?utm_campaign=android_series_serialization_performance_101315&utm_source=anddev&utm_medium=yt-annt)**：基于Protocal，为移动终端做了特殊的优化，代码执行效率更高，内存使用效率更佳。
+* **[FlatBuffers](https://google.github.io/flatbuffers/)**：这个开源库最开始是由Google研发的，专注于提供更优秀的性能。
+
+上面这些方案在性能方面的数据对比如下图所示：
+
+![android_perf_4_serialIzation_filesize](/images/android_perf_4_serialIzation_filesize.png)
+![android_perf_4_serialIzation_encode](/images/android_perf_4_serialIzation_encode.png)
+
+为了避免序列化带来的性能问题，我们其实可以考虑使用SharedPreference或者SQLite来存储那些数据，避免需要先把那些复杂的数据进行序列化操作，然后在不同的组件中进行传输。
+
+## 15)Smaller Serialized Data
 
 
 
