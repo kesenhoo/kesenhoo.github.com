@@ -226,9 +226,40 @@ Gradle目前无法对values，drawable等根据运行时来决定使用的资源
 ![android_perf_4_serialIzation_filesize](/images/android_perf_4_serialIzation_filesize.png)
 ![android_perf_4_serialIzation_encode](/images/android_perf_4_serialIzation_encode.png)
 
-为了避免序列化带来的性能问题，我们其实可以考虑使用SharedPreference或者SQLite来存储那些数据，避免需要先把那些复杂的数据进行序列化操作，然后在不同的组件中进行传输。
+为了避免序列化带来的性能问题，我们其实可以考虑使用SharedPreference或者SQLite来存储那些数据，避免需要先把那些复杂的数据进行序列化的操作。
 
 ## 15)Smaller Serialized Data
+数据呈现的顺序以及结构会对序列化之后的空间产生不小的影响。通常来说，一般的数据序列化的过程如下图所示：
+
+![android_perf_4_serialIzation_java_2_json](/images/android_perf_4_serialIzation_java_2_json.png)
+
+上面的过程，存在两个弊端，第一个是重复的属性名称：
+
+![android_perf_4_serialIzation_java_2_json_dup](/images/android_perf_4_serialIzation_java_2_json_dup.png)
+
+另外一个是GZIP没有办法对上面的数据进行更加有效的压缩，假如相似数据间隔了32k的数据量，这样GZIP就无法进行更加有效的压缩：
+
+![android_perf_4_serialIzation_java_2_json_gzip](/images/android_perf_4_serialIzation_java_2_json_gzip.png)
+
+但是我们稍微改变下数据的记录方式，就可以得到占用空间更小的数据，如下图所示：
+
+![android_perf_4_serialIzation_java_2_json2](/images/android_perf_4_serialIzation_java_2_json2.png)
+
+通过优化，至少有三方面的性能提升，如下图所示：
+
+1）减少了重复的属性名：
+
+![android_perf_4_serialIzation_opt_1](/images/android_perf_4_serialIzation_opt_1.png)
+
+2）使得GZIP的压缩效率更高：
+
+![android_perf_4_serialIzation_opt_2](/images/android_perf_4_serialIzation_opt_2.png)
+
+3）同样的数据类型可以批量优化
+![android_perf_4_serialIzation_opt_3](/images/android_perf_4_serialIzation_opt_3.png)
+
+## 16)
+
 
 
 
