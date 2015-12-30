@@ -9,9 +9,7 @@ categories: Android Android:Performance
 
 ![android_perf_patterns_season_4](/images/android_perf_patterns_season_4.png)
 
-[Android性能优化典范](https://www.youtube.com/playlist?list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE)第4季的课程终于更新了，这次一共17个短视频课程，包括的内容大致有：
-
-下面是对这些课程的总结摘要，认知有限，理解偏差的地方请多多交流指正！
+[Android性能优化典范](https://www.youtube.com/playlist?list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE)第4季的课程学习笔记终于在2015年的最后一天完成了，这次一共17个段落，包括的内容大致有：优化网络操作的行为，优化安装包的资源文件，优化数据传输的效率，性能优化的几大原理等等。因为学习认知有限，肯定存在不少理解偏差甚至严重错误的地方，请多多指正交流！
 
 ## 1)Cachematters for networking
 你知道在Android上面效率最高，速度最快的下载一段数据内容的方式是什么吗？当我们讨论到网络操作性能的时候，处理好网络数据的缓存是最基础的步骤之一。从设备的缓存中直接读取数据肯定比从网络上获取要更加的便捷高效，特别是在某些数据会需要频繁访问到的情况下，把这些数据存放到设备上以便快速进行访问就显得十分有必要了。
@@ -263,21 +261,20 @@ Gradle目前无法对values，drawable等根据运行时来决定使用的资源
 
 缓存UI界面上的数据，可以采用方案有存储到文件系统，Preference，SQLite等等，做了缓存之后，这样就可以在请求数据返回结果之前，呈现给用户旧的数据，而不是使用正在加载的方式让用户什么数据都看不到，当然在请求网络最新数据的过程中，需要有正在刷新的提示。至于到底选择哪个方案来对数据进行缓存，就需要根据具体情况来做选择了。
 
-## 17)
+## 17)CPU Frequency Scaling
+调节CPU的频率会执行的性能产生较大的影响，为了最大化的延长设备的续航时间，系统会动态调整CPU的频率，频率越高执行代码的速度自然就越快。
 
+![android_perf_4_CPU](/images/android_perf_4_CPU.png)
 
+Android系统会在电量消耗与表现性能之间不断的做权衡，当有需要的时候会迅速调整CPU的频率到一个比较高负荷的状态，当程序不需要高性能的时候就会降低频率来确保更长的续航时间。
 
+![android_perf_4_CPU_adjust](/images/android_perf_4_CPU_adjust.png)
 
+Android系统检测到需要调整CPU的频率到CPU频率真的达到对应频率会需要花费大概20ms的时间，在此期间很有可能会因为CPU频率不够而导致代码执行偏慢。
 
+![android_perf_4_CPU_gap](/images/android_perf_4_CPU_gap.png)
 
-
-
-
-
-
-
-
-![android_perf_3_arraymap_two_array](/images/android_perf_3_arraymap_two_array.png)
+我们可以使用Systrace工具来导出CPU的执行情况，以便帮助定位性能问题。
 
 ***
-首发于CSDN：[Android性能优化典范（三）](http://www.csdn.net/article/2015-08-12/2825447-android-performance-patterns-season-3)
+首发于CSDN：[Android性能优化典范（四）](http://www.csdn.net/article/2015-08-12/2825447-android-performance-patterns-season-4)
