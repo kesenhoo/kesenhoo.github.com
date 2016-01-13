@@ -9,8 +9,7 @@
   <meta name="author" content="HuKai">
 
   
-  <meta name="description" content="这一课会介绍如何使用Volley支持的常用请求类型： StringRequest。指定一个URL并在相应回调中接受一个原始的raw string数据。请参考前一课的示例。
-ImageRequest。指定一个URL并在相应回调中接受一个image。 &hellip;">
+  <meta name="description" content="这节课会介绍如何实现你自定义的请求类型，这些自定义的类型不属于Volley内置支持包里面。 编写一个自定义的请求Write a Custom Request 大多数的请求类型都已经包含在Volley的工具箱里面。如果你的请求返回数值是一个string，image或者JSON， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +80,94 @@ ImageRequest。指定一个URL并在相应回调中接受一个image。 &hellip;
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-training-volley-custom-request/">Android Training - Volley(Lesson 4 - 实现自定义的请求)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-25T23:20:00+08:00" pubdate data-updated="true">Jun 25<span>th</span>, 2014</time>
+        
+         | <a href="/android-training-volley-custom-request/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>这节课会介绍如何实现你自定义的请求类型，这些自定义的类型不属于Volley内置支持包里面。</p>
+
+<h2>编写一个自定义的请求Write a Custom Request</h2>
+
+<p>大多数的请求类型都已经包含在Volley的工具箱里面。如果你的请求返回数值是一个string，image或者JSON，那么你是不需要自己去实现请求类的。</p>
+
+<p>对于那些你需要自定义的请求类型，下面是你需要做得步骤：</p>
+
+<ul>
+<li>继承<code>Request&lt;T&gt;</code>类，<code>&lt;T&gt;</code>表示了请求返回的数据类型。因此如果你需要解析的响应类型是一个String，可以通过继承<code>Request&lt;String&gt;</code>来创建你自定义的请求。请参考Volley工具类中的StringRequest与 ImageRequest来学习如何继承Request<T>。</li>
+<li>实现抽象方法<code>parseNetworkResponse()</code>与<code>deliverResponse()</code>，下面会详细介绍。</li>
+</ul>
+
+
+<h3>parseNetworkResponse</h3>
+
+<p>为了能够提交一种指定类型的数据(例如，string，image，JSON等)，需要对解析后的结果进行封装。下面会演示如何实现<code>parseNetworkResponse()</code>。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">protected</span> <span class="n">Response</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">parseNetworkResponse</span><span class="o">(</span>
+</span><span class='line'>        <span class="n">NetworkResponse</span> <span class="n">response</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">String</span> <span class="n">json</span> <span class="o">=</span> <span class="k">new</span> <span class="n">String</span><span class="o">(</span><span class="n">response</span><span class="o">.</span><span class="na">data</span><span class="o">,</span>
+</span><span class='line'>        <span class="n">HttpHeaderParser</span><span class="o">.</span><span class="na">parseCharset</span><span class="o">(</span><span class="n">response</span><span class="o">.</span><span class="na">headers</span><span class="o">));</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">Response</span><span class="o">.</span><span class="na">success</span><span class="o">(</span><span class="n">gson</span><span class="o">.</span><span class="na">fromJson</span><span class="o">(</span><span class="n">json</span><span class="o">,</span> <span class="n">clazz</span><span class="o">),</span>
+</span><span class='line'>    <span class="n">HttpHeaderParser</span><span class="o">.</span><span class="na">parseCacheHeaders</span><span class="o">(</span><span class="n">response</span><span class="o">));</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="c1">// handle errors</span>
+</span><span class='line'><span class="o">...</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-training-volley-custom-request/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -251,67 +338,6 @@ ImageRequest。指定一个URL并在相应回调中接受一个image。 &hellip;
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-volley-index/">Android Training - Volley(Lesson 0 - 序言)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-24T08:30:00+08:00" pubdate data-updated="true">Jun 24<span>th</span>, 2014</time>
-        
-         | <a href="/android-training-volley-index/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><code>Volley</code> 是一个HTTP库，它能够帮助Android apps更方便的执行网络操作，最重要的是，它更快速高效。可以通过开源的 <a href="https://android.googlesource.com/platform/frameworks/volley">AOSP</a> 仓库获取到Volley 。</p>
-
-<hr />
-
-<p><strong>DEPENDENCIES AND PREREQUISITES</strong></p>
-
-<p>Android 1.6 (API Level 4) or higher</p>
-
-<p><strong>YOU SHOULD ALSO SEE</strong></p>
-
-<p>使用Volley来编写一个app，请参考<a href="https://github.com/google/iosched">2013 Google I/O schedule app</a>. 另外需要特别关注下面2个部分：
-* <a href="https://github.com/google/iosched/blob/master/android/src/main/java/com/google/android/apps/iosched/util/ImageLoader.java">ImageLoader</a>
-* <a href="https://github.com/google/iosched/blob/master/android/src/main/java/com/google/android/apps/iosched/util/BitmapCache.java">BitmapCache</a></p>
-
-<p><strong> <a href="https://developers.google.com/events/io/sessions/325304728">VIDEO - Volley:Easy,Fast Networking for Android</a> </strong></p>
-
-<hr />
-
-<p>Volley 有如下的优点：</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-volley-index/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/7/">&larr; Older</a>
@@ -327,6 +353,10 @@ ImageRequest。指定一个URL并在相应回调中接受一个image。 &hellip;
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-performance-patterns-season-4/">Android性能优化典范 - 第4季</a>
+      </li>
     
       <li class="post">
         <a href="/android-dev-patterns/">Android开发最佳实践</a>
@@ -356,20 +386,16 @@ ImageRequest。指定一个URL并在相应回调中接受一个image。 &hellip;
         <a href="/android-performance-compute/">Android性能优化之运算篇</a>
       </li>
     
-      <li class="post">
-        <a href="/android-performance-render/">Android性能优化之渲染篇</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (96)</a></li>
+  <li><a href='/blog/categories/android'>Android (97)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
-  <li><a href='/blog/categories/android-performance'>Android:performance (19)</a></li>
+  <li><a href='/blog/categories/android-performance'>Android:performance (20)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
@@ -413,7 +439,7 @@ ImageRequest。指定一个URL并在相应回调中接受一个image。 &hellip;
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2015 - HuKai -
+  Copyright &copy; 2016 - HuKai -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> - 本站作品采用 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a>进行许可.</span> 
   
   <script src="/javascripts/modernizr-2.0.js"></script>

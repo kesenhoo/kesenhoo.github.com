@@ -9,7 +9,9 @@
   <meta name="author" content="HuKai">
 
   
-  <meta name="description" content="当发布应用给用户之前，你必须把可穿戴应用打包到手持应用内。因为不能直接在可穿戴设备上浏览并安装应用。如果打包正确，当用户下载手持应用时，系统会自动下发可穿戴应用到匹对的可穿戴设备上。 Note: 如果开发时签名用的是debug key，这个特性是无法正常工作的。在开发时，需要使用adb &hellip;">
+  <meta name="description" content="你可以通过蓝牙来调试你的可穿戴应用，通过蓝牙把调试数据输出到手持设备上，手持设备是有连接到开发电脑上的。 搭建好设备用来调试 开启手持设备的USB调试： 打开设置应用并滑动到底部。
+如果在设置里面没有开发者选项，点击关于手机，滑动到底部，点击build number 7次。
+返回并点击开发者选项 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +82,74 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-training-wearable-app-bt-debug/">Android Training - 创建可穿戴应用(5 - 通过蓝牙进行调试)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-15T00:23:00+08:00" pubdate data-updated="true">Jul 15<span>th</span>, 2014</time>
+        
+         | <a href="/android-training-wearable-app-bt-debug/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>你可以通过蓝牙来调试你的可穿戴应用，通过蓝牙把调试数据输出到手持设备上，手持设备是有连接到开发电脑上的。</p>
+
+<h2>搭建好设备用来调试</h2>
+
+<ul>
+<li>开启手持设备的USB调试：
+
+<ul>
+<li>打开设置应用并滑动到底部。</li>
+<li>如果在设置里面没有开发者选项，点击关于手机，滑动到底部，点击build number 7次。</li>
+<li>返回并点击开发者选项。</li>
+<li>开启USB调试。</li>
+</ul>
+</li>
+<li>开启可穿戴设备的蓝牙调试：
+
+<ul>
+<li>点击主界面2次，来到Wear菜单界面。</li>
+<li>滑动到底部，点击设置。</li>
+<li>滑动到底部，如果没有开发者选项，点击Build Number 7次。</li>
+<li>点击开发者选项。</li>
+<li>开启蓝牙调试。</li>
+</ul>
+</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-training-wearable-app-bt-debug/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -264,61 +334,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-wearable-app-creating/">Android Training - 创建可穿戴应用(1 - 创建并执行可穿戴应用)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-14T19:26:00+08:00" pubdate data-updated="true">Jul 14<span>th</span>, 2014</time>
-        
-         | <a href="/android-training-wearable-app-creating/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>可穿戴应用可以直接运行在可穿戴的设备上。拥有访问类似传感器的硬件权限，还有操作activity，services等权限。</p>
-
-<p>你无法直接发布可穿戴应用到Google Play商城，需要利用手持应用来达到目的。因为可穿戴的设备不支持Google Play商城，所以当用户下载手持设备应用的时候，，会自动安装可穿戴应用到可穿戴设备上。手持应用还可以用来处理一些复杂繁重的任务，网络指令，或者其他的任务，最好发送操作结果返回给可穿戴设备。</p>
-
-<p>这节课会介绍如何创建一个包含了手持应用与可穿戴应用的工程。</p>
-
-<h2>搭建Android Wear模拟器或者真机设备。</h2>
-
-<p>我们推荐在真机上进行开发，这样可以更好的评估用户体验。然而，模拟器可以使得你在不同类型的设备屏幕上进行模拟，这对测试来说更加有用。</p>
-
-<h3>搭建Android Wear虚拟设备</h3>
-
-<p>建立Android Wear虚拟设备需要下面几个步骤：</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-wearable-app-creating/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/5/">&larr; Older</a>
@@ -334,6 +349,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-performance-patterns-season-4/">Android性能优化典范 - 第4季</a>
+      </li>
     
       <li class="post">
         <a href="/android-dev-patterns/">Android开发最佳实践</a>
@@ -363,20 +382,16 @@
         <a href="/android-performance-compute/">Android性能优化之运算篇</a>
       </li>
     
-      <li class="post">
-        <a href="/android-performance-render/">Android性能优化之渲染篇</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (96)</a></li>
+  <li><a href='/blog/categories/android'>Android (97)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
-  <li><a href='/blog/categories/android-performance'>Android:performance (19)</a></li>
+  <li><a href='/blog/categories/android-performance'>Android:performance (20)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
@@ -420,7 +435,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2015 - HuKai -
+  Copyright &copy; 2016 - HuKai -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> - 本站作品采用 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a>进行许可.</span> 
   
   <script src="/javascripts/modernizr-2.0.js"></script>
