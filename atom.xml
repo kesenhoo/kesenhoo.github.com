@@ -4,7 +4,7 @@
   <title><![CDATA[胡凯]]></title>
   <link href="http://hukai.me/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2016-03-14T16:50:15+08:00</updated>
+  <updated>2016-03-22T21:54:52+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[HuKai]]></name>
@@ -2548,7 +2548,7 @@ Android 4.x的系统废除了external的计数器，类似bitmap的分配改到d
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Android性能优化典范]]></title>
+    <title type="html"><![CDATA[Android性能优化典范 - 第1季]]></title>
     <link href="http://hukai.me/android-performance-patterns/"/>
     <updated>2015-01-17T19:42:00+08:00</updated>
     <id>http://hukai.me/android-performance-patterns</id>
