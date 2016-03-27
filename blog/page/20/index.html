@@ -9,7 +9,7 @@
   <meta name="author" content="HuKai">
 
   
-  <meta name="description" content="章节概览:Remembering Users Android用户希望把自己的信息绑定到喜欢的app与设备上，那么使得你的程序更加令人喜爱的一个方法是使得它更加的人性化。Android设备知道你的使用者是谁，他们都使用过哪些服务，在哪里存储了你的数据。在得到你的用户授权的前提下， &hellip;">
+  <meta name="description" content="Redundant Downloads are Redundant[重复下载是冗余的] 减少下载的最基本方法是仅仅下载那些你需要的。从数据的角度看，我们可以通过传递类似上次更新时间这样的参数来制定查询数据的条件。同样，在下载图片的时候，server那边最好能够减少图片的大小， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,61 +81,6 @@
     <div id="content">
       <div class="blog-index">
   
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-remembering-users-lesson-1/">Android Training - 记住用户的信息(Lesson 1 - 使用AccountManager来记录用户)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-27T11:12:00+08:00" pubdate data-updated="true">Mar 27<span>th</span>, 2012</time>
-        
-         | <a href="/android-training-remembering-users-lesson-1/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><strong>章节概览:Remembering Users</strong></p>
-
-<p>Android用户希望把自己的信息绑定到喜欢的app与设备上，那么使得你的程序更加令人喜爱的一个方法是使得它更加的人性化。Android设备知道你的使用者是谁，他们都使用过哪些服务，在哪里存储了你的数据。在得到你的用户授权的前提下，你可以使用那些信息来使得你的app更加丰富，更加人性化。</p>
-
-<p>在这一章节，你将学习到鉴定用户信息的多种技术，你可以:</p>
-
-<ul>
-<li>通过记住用户账户名来人性化你的appd。</li>
-<li>鉴定用户以确保是否是那个人。</li>
-<li>通过service来获取访问用户线上数据的权限，例如Google APIs。</li>
-<li>增加一个自定义的账户来鉴定自己后台的服务。</li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-remembering-users-lesson-1/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
   
   
     <article>
@@ -289,6 +234,66 @@
 
     </article>
   
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-training-transferring-data-without-draining-the-battery-lesson-1/">Android Training - 优化下载效率(Lesson 1 - 用有效率的网络访问方式来优化下载)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-25T16:54:00+08:00" pubdate data-updated="true">Mar 25<span>th</span>, 2012</time>
+        
+         | <a href="/android-training-transferring-data-without-draining-the-battery-lesson-1/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>在这一章，我们将学习为了最小化某些操作对电量的影响是如何处理下载，网络连接，尤其是无线电连接的。
+下面几节课会演示了如何使用缓存caching，轮询polling，预取prefetching等技术来计划与执行下载操作。
+我们还会学习无线电波的power-use属性配置是如何影响我们对于在何时，用什么，以何种方式来传输数据的选择。
+当然这些选择是为了最小化对电池寿命的影响。</p>
+
+<p><strong>Dependencies and prerequisites</strong><br/>
+Android 2.0 (API Level 5) or higher</p>
+
+<p><strong>You should also read</strong><br/>
+<a href="http://developer.android.com/training/monitoring-device-state/index.html">Optimizing Battery Life</a></p>
+
+<h2>Lessons</h2>
+
+<ul>
+<li><strong>Optimizing Downloads for Efficient Network Access[使用有效的网络连接方式来最优化下载]</strong><br/>
+This lesson introduces the wireless radio state machine, explains how your app’s connectivity model interacts with it, and how you can minimize your data connection and use prefetching and bundling to minimize the battery drain associated with your data transfers.</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-training-transferring-data-without-draining-the-battery-lesson-1/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/21/">&larr; Older</a>
@@ -304,10 +309,6 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
-    
-      <li class="post">
-        <a href="/android-performance-patterns-season-5/">Android性能优化典范 - 第5季</a>
-      </li>
     
       <li class="post">
         <a href="/android-performance-patterns-season-4/">Android性能优化典范 - 第4季</a>
@@ -337,16 +338,20 @@
         <a href="/android-performance-memory/">Android性能优化之内存篇</a>
       </li>
     
+      <li class="post">
+        <a href="/android-performance-compute/">Android性能优化之运算篇</a>
+      </li>
+    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (98)</a></li>
+  <li><a href='/blog/categories/android'>Android (97)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
-  <li><a href='/blog/categories/android-performance'>Android:performance (21)</a></li>
+  <li><a href='/blog/categories/android-performance'>Android:performance (20)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>

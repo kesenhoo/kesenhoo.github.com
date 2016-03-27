@@ -9,7 +9,8 @@
   <meta name="author" content="HuKai">
 
   
-  <meta name="description" content="Implementing Adaptative UI Flows 根据显示不同的layout，我们需要设计不同的UI flow。比如如果你的AP是dual-pane的模式，点击左边list的item的时候，会在右边直接显示对应的内容，如果是single-pane的模式， &hellip;">
+  <meta name="description" content="Supporting Different Densities 上一篇文章和大家分享了如何适配不同大小的屏幕，有个概念需要提前弄清楚，屏幕大的不一定就分辨率高，详细请看下面的内容。
+This lesson shows you how to support different screen &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,54 +82,6 @@
     <div id="content">
       <div class="blog-index">
   
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-supporting-different-device-lesson-3/">Android Training - 适配不同的屏幕(Lesson 3 - 实现可适配的UI流程)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-03-20T23:38:00+08:00" pubdate data-updated="true">Mar 20<span>th</span>, 2012</time>
-        
-         | <a href="/android-training-supporting-different-device-lesson-3/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>Implementing Adaptative UI Flows</h1>
-
-<p>根据显示不同的layout，我们需要设计不同的UI flow。比如如果你的AP是dual-pane的模式，点击左边list的item的时候，会在右边直接显示对应的内容，如果是single-pane的模式，那么需要跳转到另外一个Activity来显示对于的内容</p>
-
-<p><strong>注：</strong>个人认为目前很多AP都会针对比较大的屏幕设计一个对于的版本，比如QQ Pad版，QQ HD版，QQ Pad Mini版，这些信息可以看出来大多数情况，还是不太会采取同一份代码适应所有屏幕的方案。
-这一课主要就是讲如何在运行的时候判断当前的布局，从而让AP选择不同行为。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-supporting-different-device-lesson-3/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
   
   
     <article>
@@ -297,6 +250,62 @@ Several features require the use of the support library</li>
 
     </article>
   
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-training-managing-the-activity-lifecycle-lesson-3/">Android Training - 详解Activity生命周期(Lesson 3 - 停止与重启activity)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-03-10T21:27:00+08:00" pubdate data-updated="true">Mar 10<span>th</span>, 2012</time>
+        
+         | <a href="/android-training-managing-the-activity-lifecycle-lesson-3/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><ul>
+<li>恰当的停止与重启你的activity是很重要的，在activity生命周期中，他们能确保用户感知到程序的存在并不会丢失他们的进度。在下面一些关键的场景中会涉及到停止与重启：
+
+<ul>
+<li>用户打开最近使用app的菜单并切换你的app到另外一个app，这个时候你的app是被停止的。如果用户通过手机主界面的启动程序图标或者最近使用程序的窗口回到你的app，那么你的activity会重启。</li>
+<li>用户在你的app里面执行启动一个新的activity的操作，当前activity会在第二个activity被创建后stop。如果用户点击back按钮，第一个activtiy会被重启。</li>
+<li>用户在使用你的app时接受到一个来电通话.</li>
+</ul>
+</li>
+<li><a href="http://developer.android.com/reference/android/app/Activity.html">Activity</a>类提供了<a href="http://developer.android.com/reference/android/app/Activity.html#onStop()">onStop()</a>与<a href="http://developer.android.com/reference/android/app/Activity.html#onRestart()">onRestart()</a>方法来允许在activity停止与重启时进行调用。不像暂停状态是部分阻塞UI，停止状态是UI不再可见并且用户的焦点转移到另一个activity中.</li>
+</ul>
+
+
+<blockquote><p><strong>Note:</strong>因为系统在activity停止时会在内存中保存了Activity实例。有些时候你不需要实现onStop(),onRestart()甚至是onStart()方法. 因为大多数的activity相对比较简单，activity会自己停止与重启，你只需要使用onPause()来停止正在运行的动作并断开系统资源链接。</p></blockquote>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-training-managing-the-activity-lifecycle-lesson-3/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/25/">&larr; Older</a>
@@ -312,10 +321,6 @@ Several features require the use of the support library</li>
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
-    
-      <li class="post">
-        <a href="/android-performance-patterns-season-5/">Android性能优化典范 - 第5季</a>
-      </li>
     
       <li class="post">
         <a href="/android-performance-patterns-season-4/">Android性能优化典范 - 第4季</a>
@@ -345,16 +350,20 @@ Several features require the use of the support library</li>
         <a href="/android-performance-memory/">Android性能优化之内存篇</a>
       </li>
     
+      <li class="post">
+        <a href="/android-performance-compute/">Android性能优化之运算篇</a>
+      </li>
+    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (98)</a></li>
+  <li><a href='/blog/categories/android'>Android (97)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
-  <li><a href='/blog/categories/android-performance'>Android:performance (21)</a></li>
+  <li><a href='/blog/categories/android-performance'>Android:performance (20)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
