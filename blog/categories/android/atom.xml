@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android | 胡凯]]></title>
   <link href="http://hukai.me/blog/categories/android/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2016-03-22T21:54:52+08:00</updated>
+  <updated>2016-03-27T11:26:35+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[HuKai]]></name>
@@ -12,6 +12,342 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Android性能优化典范 - 第5季]]></title>
+    <link href="http://hukai.me/android-performance-patterns-season-5/"/>
+    <updated>2016-03-27T11:05:00+08:00</updated>
+    <id>http://hukai.me/android-performance-patterns-season-5</id>
+    <content type="html"><![CDATA[<p><img src="/images/android_perf_patterns_season_5.png" alt="android_perf_patterns_season_5" /></p>
+
+<p><a href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">Android性能优化典范</a>第4季的课程学习笔记终于在2015年的最后一天完成了，文章共17个段落，包含的内容大致有：优化网络请求的行为，优化安装包的资源文件，优化数据传输的效率，性能优化的几大基础原理等等。因为学习认知水平有限，肯定存在不少理解偏差甚至错误的地方，请多多交流指正！</p>
+
+<h2>1)Cachematters for networking</h2>
+
+<p>想要使得Android系统上的网络访问操作更加的高效就必须做好网络数据的缓存。这是提高网络访问性能最基础的步骤之一。从手机的缓存中直接读取数据肯定比从网络上获取数据要更加的便捷高效，特别是对于那些会被频繁访问到的数据，需要把这些数据缓存到设备上，以便更加快速的进行访问。</p>
+
+<p>Android系统上关于网络请求的Http Response Cache是默认关闭的，这样会导致每次即使请求的数据内容是一样的也会需要重复被调用执行，效率低下。我们可以通过下面的代码示例开启<a href="http://developer.android.com/reference/android/net/http/HttpResponseCache.html">HttpResponseCache</a>。</p>
+
+<!-- More -->
+
+
+<p><img src="/images/android_perf_4_network_cache_enable.png" alt="android_perf_4_network_cache_enable" /></p>
+
+<p>开启Http Response Cache之后，Http操作相关的返回数据就会缓存到文件系统上，不仅仅是主程序自己编写的网络请求相关的数据会被缓存，另外引入的library库中的网络相关的请求数据也会被缓存到这个Cache中。</p>
+
+<p>网络请求的场景有可以是普通的http请求，也可以打开某个URL去获取数据，如下图所示：</p>
+
+<p><img src="/images/android_perf_4_network_cache_code.png" alt="android_perf_4_network_cache_code" /></p>
+
+<p>我们有两种方式来清除<code>HttpResponseCache</code>的缓存数据：第一种方式是缓存溢出的时候删除最旧最老的文件，第二种方式是通过Http返回Header中的<code>Cache-Control</code>字段来进行控制的。如下图所示：</p>
+
+<p><img src="/images/android_perf_4_network_cache_control.png" alt="android_perf_4_network_cache_control" /></p>
+
+<p>通常来说，<code>HttpResponseCache</code>会缓存所有的返回信息，包括实际的数据与Header的部分.一般情况下，这个Cache会自动根据协议返回<code>Cache-Control</code>的内容与当前缓存的数据量来决定哪些数据应该继续保留，哪些数据应该删除。但是在一些极端的情况下，例如服务器返回的数据没有设置Cache废弃的时间，或者是本地的Cache文件系统与返回的缓存数据有冲突，或者是某些特殊的网络环境导致HttpResponseCache工作异常，在这些情况下就需要我们自己来实现Http的缓存Cache。</p>
+
+<p>实现自定义的http缓存，需要解决两个问题：第一个是实现一个DiskCacheManager，另外一个是制定Cache的缓存策略。关于DiskCacheManager，我们可以扩展Android系统提供的<a href="https://developer.android.com/intl/zh-cn/samples/DisplayingBitmaps/src/com.example.android.displayingbitmaps/util/DiskLruCache.html">DiskLruCache</a>来实现。而Cache的缓存策略，相对来说复杂一些，我们可能需要把部分JSON数据设计成不能缓存的，另外一些JSON数据设计成可以缓存几天的，把缩略图设计成缓存一两天的等等，为不同的数据类型根据他们的使用特点制定不同的缓存策略。</p>
+
+<p><img src="/images/android_perf_4_network_cache_diff.png" alt="android_perf_4_network_cache_diff" /></p>
+
+<p>想要比较好的实现这两件事情，如果全部自己从头开始写会比较繁琐复杂，所幸的是，有不少著名的开源框架帮助我们快速的解决了那些问题。我们可以使用<a href="https://developer.android.com/training/volley/index.html">Volly</a>，<a href="http://square.github.io/okhttp/">okHTTP</a>，<a href="http://square.github.io/picasso/">Picasso</a>来实现网络缓存。</p>
+
+<p>实现好网络缓存之后，我们可以使用Android Studio里面的<code>Network Traffic Tools</code>来查看网络数据的请求与返回情况，另外我们还可以使用<a href="https://developer.att.com/application-resource-optimizer">AT&amp;T ARO</a>工具来抓取网络数据包进行分析查看。</p>
+
+<h2>2)Optimizing Network Request Frequencies</h2>
+
+<p>应用程序的一个基础功能是能够保持确保界面上呈现的信息是即时最新的，例如呈现最新的新闻，天气，信息流等等信息。但是，过于频繁的促使手机客户端应用去同步最新的服务器数据会对性能产生很大的负面影响，不仅仅使得CPU不停的在工作，内存，网络流量，电量等等都会持续的被消耗，所以在进行网络请求操作的时候一定要避免多度同步操作。</p>
+
+<p>退到后台的应用为了能够在切换回前台的时候呈现最新的数据，会偷偷在后台不停的做同步的操作。这种行为会带来很严重的问题，首先因为网络请求的行为异常的耗电，其次不停的进行网络同步会耗费很多带宽流量。</p>
+
+<p>为了能够尽量的减少不必要的同步操作，我们需要遵守下面的一些规则：</p>
+
+<ul>
+<li>首先我们要对网络行为进行分类，区分需要立即更新数据的行为和其他可以进行延迟的更新行为，为不同的场景进行差异化处理。</li>
+<li>其次要避免客户端对服务器的轮询操作，这样会浪费很多的电量与带宽流量。解决这个问题，我们可以使用Google Cloud Message来对更新的数据进行推送。</li>
+<li>然后在某些必须做同步的场景下，需要避免使用固定的间隔频率来进行更新操作，我们应该在返回的数据无更新的时候，使用双倍的间隔时间来进行下一次同步。</li>
+<li>最后更进一步，我们还可以通过判断当前设备的状态来决定同步的频率，例如判断设备处于休眠，运动等不同的状态设计各自不同时间间隔的同步频率。</li>
+</ul>
+
+
+<p><img src="/images/android_perf_4_network_frequencies_backoff.png" alt="android_perf_4_network_frequencies_backoff" /></p>
+
+<p>另外，我们还可以通过判断设备是否连接上WiFi，是否正在充电来决定更新的频率。为了能够方便的实现这个功能，Android为我们提供了<a href="https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">GCMNetworkManager</a>来判断设备当下的状态，从而设计更加高效的网络同步操作，如下图所示：</p>
+
+<p><img src="/images/android_perf_4_network_frequencies_gcm.png" alt="android_perf_4_network_frequencies_gcm" /></p>
+
+<h2>3)Effective Prefetching</h2>
+
+<p>关于提升网络操作的性能，除了避免频繁的网络同步操作之外，还可以使用捆绑批量访问的方式来减少访问的频率，为了达到这个目的，我们就需要了解Prefetching。</p>
+
+<p>举个例子，在某个场景下，一开始发出了网络请求得到了某张图片，隔了10s之后，发出第二次请求想要拿到另外一张图片，再隔了6s发出第三张图片的网络请求。这会导致设备的无线蜂窝一直处于高消耗的状态。Prefetching就是预先判定那些可能马上就会使用到的网络资源，捆绑一起集中进行网络请求。这样能够极大的减少电量的消耗，提升设备的续航时间。</p>
+
+<p><img src="/images/android_perf_4_prefetching_bundle.png" alt="android_perf_4_prefetching_bundle" /></p>
+
+<p>使用Prefetching的难点在于如何判断事先获取的数据量到底是多少，如果预取的数据量偏少，那么就起不到什么效果，但是如果预取过多，又可能导致访问的时间过长。</p>
+
+<p><img src="/images/android_perf_4_prefetching_tricky.png" alt="android_perf_4_prefetching_tricky" /></p>
+
+<p>那么问题来了，到底预取多少才比较合适呢？一个比较普适的规则是，在3G网络下可以预取1-5Mb的数据量，或者是按照提前预期后续1-2分钟的数据作为基线标准。在实际的操作当中，我们还需要考虑当前的网络速度来决定预取的数据量，例如在同样的时间下，4G网络可以获取到12张图片的数据，而2G网络则只能拿到3张图片的数据。所以，我们还需要把当前的网络环境情况添加到设计预取数据量的策略当中去。判断当前设备的状态与网络情况，可以使用前面提到过的<a href="https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">GCMNetworkManager</a>。</p>
+
+<h2>4)Adapting to Latency</h2>
+
+<p>网络延迟通常来说很容易被用户察觉到，严重的网络延迟会对用户体验造成很大的影响，用户很容易抱怨应用程序写的不好。</p>
+
+<p>一个典型的网络操作行为，通常包含以下几个步骤：首先手机端发起网络请求，到达网络服务运营商的基站，再转移到服务提供者的服务器上，经过解码之后，接着访问本地的存储数据库，获取到数据之后，进行编码，最后按照原来传递的路径逐层返回。如下图所示：</p>
+
+<p><img src="/images/android_perf_4_network_latency.png" alt="android_perf_4_network_latency" /></p>
+
+<p>在上面的网络请求链路当中的任何一个环节都有可能导致严重的延迟，成为性能瓶颈，但是这些环节可能出现的问题，客户端应用是无法进行调节控制的，应用能够做的就只是根据当前的网络环境选择当下最佳的策略来降低出现网络延迟的概率。主要的实施步骤有两步：第1步检测收集当前的网络环境信息，第2步根据当前收集到的信息进行网络请求行为的调整。</p>
+
+<p>关于第1步检测当前的网络环境，我们可以使用系统提供的API来获取到相关的信息，如下图所示：</p>
+
+<p><img src="/images/android_perf_4_network_latency_detect.png" alt="android_perf_4_network_latency_detect" /></p>
+
+<p>通过上面的示例，我们可以获取到移动网络的详细子类型，例如4G(LTE),3G等等，详细分类见下图，获取到详细的移动网络类型之后，我们可以根据当前网络的速率来调整网络请求的行为：</p>
+
+<p><img src="/images/android_perf_4_network_latency_subtype.png" alt="android_perf_4_network_latency_subtype" /></p>
+
+<p>关于第2步根据收集到的信息进行策略的调整，通常来说，我们可以把网络请求延迟划分为三档：例如把网络延迟小于60ms的划分为GOOD，大于220ms的划分为BAD，介于两者之间的划分为OK（这里的60ms，220ms会需要根据不同的场景提前进行预算推测）。如果网络延迟属于GOOD的范畴，我们就可以做更多比较激进的预取数据的操作，如果网络延迟属于BAD的范畴，我们就应该考虑把当下的网络请求操作Hold住等待网络状况恢复到GOOD的状态再进行处理。</p>
+
+<p><img src="/images/android_perf_4_network_latency_three_category.png" alt="android_perf_4_network_latency_three_category" /></p>
+
+<p>前面提到说60ms，220ms是需要提前自己预测的，可是预测的工作相当复杂。首先针对不同的机器与网络环境，网络延迟的三档阈值都不太一样，出现的概率也不尽相同，我们会需要针对这些不同的用户与设备选择不同的阈值进行差异化处理：</p>
+
+<p><img src="/images/android_perf_4_network_latency_three_level.png" alt="android_perf_4_network_latency_three_level" /></p>
+
+<p>Android官方为了帮助我们设计自己的网络请求策略，为我们提供了模拟器的网络流量控制功能来对实际环境进行模拟测量，或者还可以使用AT&amp;T提供的<a href="http://developer.att.com/developer/legalAgreementPage.jsp?passedItemId=14500040">AT&amp;T Network Attenuator</a>来帮助预估网络延迟。</p>
+
+<h2>5)Minimizing Asset Payload</h2>
+
+<p>为了能够减小网络传输的数据量，我们需要对传输的数据做压缩的处理，这样能够提高网络操作的性能。首先不同的网络环境，下载速度以及网络延迟是存在差异的，如下图所示：</p>
+
+<p><img src="/images/android_perf_4_min_asset_load.png" alt="android_perf_4_min_asset_load" /></p>
+
+<p>如果我们选择在网速更低的网络环境下进行数据传输，这就意味着需要执行更长的时间，而更长的网络操作行为，会导致电量消耗更加严重。另外传输的数据如果不做压缩处理，也同样会增加网络传输的时间，消耗更多的电量。不仅如此，未经过压缩的数据，也会消耗更多的流量，使得用户需要付出更多的流量费。</p>
+
+<p>通常来说，网络传输数据量的大小主要由两部分组成：图片与序列化的数据，那么我们需要做的就是减少这两部分的数据传输大小，分下面两个方面来讨论。</p>
+
+<ul>
+<li>A)首先需要做的是减少图片的大小，选择合适的图片保存格式是第一步。下图展示了PNG,JPEG,WEBP三种主流格式在占用空间与图片质量之间的对比：</li>
+</ul>
+
+
+<p><img src="/images/android_perf_4_min_asset_png_jpeg_webp.png" alt="android_perf_4_min_asset_png_jpeg_webp" /></p>
+
+<p>对于JPEG与WEBP格式的图片，不同的清晰度对占用空间的大小也会产生很大的影响，适当的减少JPG Quality，可以大大的缩小图片占用的空间大小。</p>
+
+<p>另外，我们需要为不同的使用场景提供当前场景下最合适的图片大小，例如针对全屏显示的情况我们会需要一张清晰度比较高的图片，而如果只是显示为缩略图的形式，就只需要服务器提供一个相对清晰度低很多的图片即可。服务器应该支持到为不同的使用场景分别准备多套清晰度不一样的图片，以便在对应的场景下能够获取到最适合自己的图片。这虽然会增加服务端的工作量，可是这个付出却十分值得！</p>
+
+<ul>
+<li>B)其次需要做的是减少序列化数据的大小。JSON与XML为了提高可读性，在文件中加入了大量的符号，空格等等字符，而这些字符对于程序来说是没有任何意义的。我们应该使用Protocal Buffers，Nano-Proto-Buffers，FlatBuffer来减小序列化的数据的大小。</li>
+</ul>
+
+
+<p>Android系统为我们提供了工具来查看网络传输的数据情况，打开Android Studio的Monitor，里面有网络访问的模块。或者是打开AT&amp;T提供的<a href="https://developer.att.com/application-resource-optimizer">ARO</a>工具来查看网络请求状态。</p>
+
+<h2>6)Service Performance Patterns</h2>
+
+<p>Service是Android程序里面最常用的基础组件之一，但是使用Service很容易引起电量的过度消耗以及系统资源的未及时释放。学会在何时启用Service以及使用何种方式杀掉Service就显得十分有必要了。</p>
+
+<p>简要过一下Service的特性：Service和UI没有关联，Service的创建，执行，销毁Service都是需要占用系统时间和内存的。另外Service是默认运行在UI线程的，这意味着Service可能会影响到系统的流畅度。</p>
+
+<p>使用Service应该遵循下面的一些规则：</p>
+
+<ul>
+<li>避免错误的使用Service，例如我们不应该使用Service来监听某些事件的变化，不应该搞一个Service在后台对服务器不断的进行轮询(应该使用Google Cloud Messaging)</li>
+<li>如果已经事先知道Service里面的任务应该执行在后台线程(非默认的主线程)的时候，我们应该使用IntentService或者结合HanderThread，AsycnTask Loader实现的Service。</li>
+</ul>
+
+
+<p>Android系统为我们提供了以下的一些异步相关的工具类</p>
+
+<ul>
+<li>GCM</li>
+<li>BroadcastReciever</li>
+<li>LocalBroadcastReciever</li>
+<li>WakefulBroadcastReciver</li>
+<li>HandlerThreads</li>
+<li>AsyncTaskLoaders</li>
+<li>IntentService</li>
+</ul>
+
+
+<p>如果使用上面的诸多方案还是无法替代普通的Service，那么需要注意的就是如何正确的关闭Service。</p>
+
+<ul>
+<li>普通的Started Service，需要通过stopSelf()来停止Service</li>
+</ul>
+
+
+<p><img src="/images/android_perf_4_service_started.png" alt="android_perf_4_service_started" /></p>
+
+<ul>
+<li>另外一种Bound Service，会在其他组件都unBind之后自动关闭自己</li>
+</ul>
+
+
+<p><img src="/images/android_perf_4_service_bound.png" alt="android_perf_4_service_bound" /></p>
+
+<p>把上面两种Service进行合并之后，我们可以得到如下图所示的Service(相关知识，还可以参考<a href="http://hukai.me/android-notes-services/">http://hukai.me/android-notes-services/</a>, <a href="http://hukai.me/android-notes-bound-services/">http://hukai.me/android-notes-bound-services/</a>)</p>
+
+<p><img src="/images/android_perf_4_service_mix.png" alt="android_perf_4_service_mix" /></p>
+
+<h2>7)Removing unused code</h2>
+
+<p>使用第三方库(library)可以在不用自己编写大量代码的前提下帮助我们解决一些难题，节约大量的时间，但是这些引入的第三方库很可能会导致主程序代码臃肿冗余。</p>
+
+<p>如果我们处在人力，财力都相对匮乏的情况下，通常会倾向大量使用第三方库来帮助编写应用程序。这其实是无可厚非的，那些著名的第三方库的可行性早就被很多应用所采用并实践证明过。但是这里面存在的问题是，如果我们因为只需要某个library的一小部分功能而把整个library都导入自己的项目，这就会引起代码臃肿。一旦发生代码臃肿，用户就会下载到安装包偏大的应用程序，另外因为代码臃肿，还很有可能会超过单个编译文件只能有65536个方法的上限。解决这个问题的办法是使用<strong>MultiDex</strong>的方案，可是这实在是无奈之举，原则上，我们还是应该尽量避免出现这种情况。</p>
+
+<p>Android为我们提供了Proguard的工具来帮助应用程序对代码进行瘦身，优化，混淆的处理。它会帮助移除那些没有使用到的代码，还可以对类名，方法名进行混淆处理以避免程序被反编译。举个例子，Google I/O 2015这个应用使用了大量的library，没有经过Proguard处理之前编译出来的包是8.4Mb大小，经过处理之后的包仅仅是4.1Mb大小。</p>
+
+<p>使用Proguard相当的简单，只需要在build.gradle文件中配置minifEnable为true即可，如下图所示：</p>
+
+<p><img src="/images/android_perf_4_remove_unused_code_proguard.png" alt="android_perf_4_remove_unused_code_proguard" /></p>
+
+<p>但是Proguard还是不足够聪明到能够判断哪些类，哪些方法是不能够被混淆的，针对这些情况，我们需要手动的把这些需要保留的类名与方法名添加到Proguard的配置文件中，如下图所示：</p>
+
+<p><img src="/images/android_perf_4_remove_unused_code_proguard_setting.png" alt="android_perf_4_remove_unused_code_proguard_setting" /></p>
+
+<p>在使用library的时候，需要特别注意这些library在proguard配置上的说明文档，我们需要把这些配置信息添加到自己的主项目中。关于Proguard的详细说明，请看官方文档<a href="http://developer.android.com/tools/help/proguard.html">http://developer.android.com/tools/help/proguard.html</a></p>
+
+<h2>8)Removing unused resources</h2>
+
+<p>减少APK安装包的大小也是Android程序优化中很重要的一个方面，我们不应该给用户下载到一个臃肿的安装包。假设这样一个场景，我们引入了Google Play Service的library，是想要使用里面的Maps的功能，但是里面的登入等等其他功能是不需要的，可是这些功能相关的代码与图片资源，布局资源如果也被引入我们的项目，这样就会导致我们的程序安装包臃肿。</p>
+
+<p>所幸的是，我们可以使用Gradle来帮助我们分析代码，分析引用的资源，对于那些没有被引用到的资源，会在编译阶段被排除在APK安装包之外，要实现这个功能，对我们来说仅仅只需要在build.gradle文件中配置shrinkResource为true就好了，如下图所示：</p>
+
+<p><img src="/images/android_perf_4_remove_unused_resource.png" alt="android_perf_4_remove_unused_resource" /></p>
+
+<p>为了辅助gradle对资源进行瘦身，或者是某些时候的特殊需要，我们可以通过tools:keep或者是tools:discard标签来实现对特定资源的保留与废弃，如下图所示：</p>
+
+<p><img src="/images/android_perf_4_remove_unused_resource_tools.png" alt="android_perf_4_remove_unused_resource_tools" /></p>
+
+<p>Gradle目前无法对values，drawable等根据运行时来决定使用的资源进行优化，对于这些资源，需要我们自己来确保资源不会有冗余。</p>
+
+<h2>9)Perf Theory: Caching</h2>
+
+<p>当我们讨论性能优化的时候，缓存是最常见最有效的策略之一。无论是为了提高CPU的计算速度还是提高数据的访问速度，在绝大多数的场景下，我们都会使用到缓存。关于缓存是如何提高效率的，这里就不赘述了。</p>
+
+<p>那么在什么地方，在何时应该利用好缓存来提高效率呢？请看下面的例子，很明显的演示了在某些细节上是如何利用缓存的原理来提高代码的执行效率的：</p>
+
+<p><img src="/images/android_perf_4_cache_1.png" alt="android_perf_4_cache_1" />
+<img src="/images/android_perf_4_cache_2.png" alt="android_perf_4_cache_2" /></p>
+
+<p>类似上面的例子采用缓存原理的地方还有很多，例如缓存到内存里面的图片资源，网络请求返回数据的缓存等等。总之，使用缓存就是为了减少不必要的操作，尽量复用已有的对象来提高效率。</p>
+
+<h2>10)Perf Theory: Approximation(近似法)</h2>
+
+<p>很多时候，我们都需要学会在性能更优与体验更好之间做一定的权衡取舍。为了获取更好的表现性能，我们可能会需要牺牲一些用户体验，例如把某些细节做删除或者是降级处理以便有更好的性能。例如，导航类的应用，如果在导航期间是不停的执行定位的操作，这样能够很及时的获取到最新的位置信息以及当下位置相关的其他提示信息，但是这样会导致网络流量以及手机电量的过度消耗。所以我们可以做一定的降级处理，每隔固定的一段时间才去获取一次位置信息，损失一点及时性来换取更长的续航时间。</p>
+
+<p>还有很多地方都会用到近似法则来优化程序的性能，例如使用一张比较接近实际大小的图片来替代原图，换取更快的加载速度。所以对于那些对计算结果要求不需要十分精确的场景，我们可以使用近似法则来提高程序的性能。</p>
+
+<h2>11)Perf Theory: Culling(遴选，挑选)</h2>
+
+<p>在以前的性能优化课程里面，我们知道可以通过减少Overdraw来提高程序的渲染性能（主要手段有移除非必须的background，减少重叠的布局，使用clipRect来提高自定义View的绘制性能），今天在这里要介绍的另外一个提高性能的方法是逐步对数据进行过滤筛选，减小搜索的数据集，以此提高程序的执行性能。例如我们需要搜索到居住在某个地方，年龄是多少，符合某些特定条件的候选人，就可以通过逐层过滤筛选的方式来提高后续搜索的执行效率。</p>
+
+<h2>12)Perf Theory: Threading</h2>
+
+<p>使用多线程并发处理任务，从某种程度上可以快速提高程序的执行性能。对于Android程序来说，主线程通常也成为UI线程，需要处理UI的渲染，响应用户的操作等等。对于那些可能影响到UI线程的任务都需要特别留意是否有必要放到其他的线程来进行处理。如果处理不当，很有可能引起程序ANR。关于多线程的使用建议，可以参考官方的培训课程<a href="http://developer.android.com/training/best-background.html">http://developer.android.com/training/best-background.html</a></p>
+
+<h2>13)Perf Theory: Batching</h2>
+
+<p>关于Batching，在前几季的性能优化课程里面也不止一次提到，下面使用一张图演示下Batching的原理：</p>
+
+<p><img src="/images/android_perf_4_batching.png" alt="android_perf_4_batching" /></p>
+
+<p>网络请求的批量执行是另外一个比较适合说明batching使用场景的例子，因为每次发起网络请求都相对来说比较耗时耗电，如果能够做到批量一起执行，可以大大的减少电量的消耗。</p>
+
+<p><img src="/images/android_perf_4_batching_network.png" alt="android_perf_4_batching_network" /></p>
+
+<h2>14)Serialization performance</h2>
+
+<p>数据的序列化是程序代码里面必不可少的组成部分，当我们讨论到数据序列化的性能的时候，需要了解有哪些候选的方案，他们各自的优缺点是什么。首先什么是序列化？用下面的图来解释一下：</p>
+
+<p><img src="/images/android_perf_4_serialIzation.png" alt="android_perf_4_serialIzation" /></p>
+
+<p>数据序列化的行为可能发生在数据传递过程中的任何阶段，例如网络传输，不同进程间数据传递，不同类之间的参数传递，把数据存储到磁盘上等等。通常情况下，我们会把那些需要序列化的类实现Serializable接口(如下图所示)，但是这种传统的做法效率不高，实施的过程会消耗更多的内存。</p>
+
+<p><img src="/images/android_perf_4_serialIzation_implement.png" alt="android_perf_4_serialIzation_implement" /></p>
+
+<p>但是我们如果使用GSON库来处理这个序列化的问题，不仅仅执行速度更快，内存的使用效率也更高。Android的XML布局文件会在编译的阶段被转换成更加复杂的格式，具备更加高效的执行性能与更高的内存使用效率。</p>
+
+<p><img src="/images/android_perf_4_serialIzation_gson.png" alt="android_perf_4_serialIzation_gson" /></p>
+
+<p>下面介绍三个数据序列化的候选方案：</p>
+
+<ul>
+<li><strong><a href="https://developers.google.com/protocol-buffers/?utm_campaign=android_series_serialization_performance_101315&amp;utm_source=anddev&amp;utm_medium=yt-annt">Protocal Buffers</a></strong>：强大，灵活，但是对内存的消耗会比较大，并不是移动终端上的最佳选择。</li>
+<li><strong><a href="https://android.googlesource.com/platform/external/protobuf/+/master/java/README.txt?utm_campaign=android_series_serialization_performance_101315&amp;utm_source=anddev&amp;utm_medium=yt-annt">Nano-Proto-Buffers</a></strong>：基于Protocal，为移动终端做了特殊的优化，代码执行效率更高，内存使用效率更佳。</li>
+<li><strong><a href="https://google.github.io/flatbuffers/">FlatBuffers</a></strong>：这个开源库最开始是由Google研发的，专注于提供更优秀的性能。</li>
+</ul>
+
+
+<p>上面这些方案在性能方面的数据对比如下图所示：</p>
+
+<p><img src="/images/android_perf_4_serialIzation_filesize.png" alt="android_perf_4_serialIzation_filesize" />
+<img src="/images/android_perf_4_serialIzation_encode.png" alt="android_perf_4_serialIzation_encode" /></p>
+
+<p>为了避免序列化带来的性能问题，我们其实可以考虑使用SharedPreference或者SQLite来存储那些数据，避免需要先把那些复杂的数据进行序列化的操作。</p>
+
+<h2>15)Smaller Serialized Data</h2>
+
+<p>数据呈现的顺序以及结构会对序列化之后的空间产生不小的影响。通常来说，一般的数据序列化的过程如下图所示：</p>
+
+<p><img src="/images/android_perf_4_serialIzation_java_2_json.png" alt="android_perf_4_serialIzation_java_2_json" /></p>
+
+<p>上面的过程，存在两个弊端，第一个是重复的属性名称：</p>
+
+<p><img src="/images/android_perf_4_serialIzation_java_2_json_dup.png" alt="android_perf_4_serialIzation_java_2_json_dup" /></p>
+
+<p>另外一个是GZIP没有办法对上面的数据进行更加有效的压缩，假如相似数据间隔了32k的数据量，这样GZIP就无法进行更加有效的压缩：</p>
+
+<p><img src="/images/android_perf_4_serialIzation_java_2_json_gzip.png" alt="android_perf_4_serialIzation_java_2_json_gzip" /></p>
+
+<p>但是我们稍微改变下数据的记录方式，就可以得到占用空间更小的数据，如下图所示：</p>
+
+<p><img src="/images/android_perf_4_serialIzation_java_2_json2.png" alt="android_perf_4_serialIzation_java_2_json2" /></p>
+
+<p>通过优化，至少有三方面的性能提升，如下图所示：</p>
+
+<p>1）减少了重复的属性名：</p>
+
+<p><img src="/images/android_perf_4_serialIzation_opt_1.png" alt="android_perf_4_serialIzation_opt_1" /></p>
+
+<p>2）使得GZIP的压缩效率更高：</p>
+
+<p><img src="/images/android_perf_4_serialIzation_opt_2.png" alt="android_perf_4_serialIzation_opt_2" /></p>
+
+<p>3）同样的数据类型可以批量优化：</p>
+
+<p><img src="/images/android_perf_4_serialIzation_opt_3.png" alt="android_perf_4_serialIzation_opt_3" /></p>
+
+<h2>16)Caching UI data</h2>
+
+<p>如今绝大多数的应用界面上呈现的数据都依赖于网络请求返回的结果，如何做到在网络数据返回之前避免呈现一个空白的等待页面呢（当然这里说的是非首次冷启动的情况）？这就会涉及到如何缓存UI界面上的数据。</p>
+
+<p>缓存UI界面上的数据，可以采用方案有存储到文件系统，Preference，SQLite等等，做了缓存之后，这样就可以在请求数据返回结果之前，呈现给用户旧的数据，而不是使用正在加载的方式让用户什么数据都看不到，当然在请求网络最新数据的过程中，需要有正在刷新的提示。至于到底选择哪个方案来对数据进行缓存，就需要根据具体情况来做选择了。</p>
+
+<h2>17)CPU Frequency Scaling</h2>
+
+<p>调节CPU的频率会执行的性能产生较大的影响，为了最大化的延长设备的续航时间，系统会动态调整CPU的频率，频率越高执行代码的速度自然就越快。</p>
+
+<p><img src="/images/android_perf_4_CPU.png" alt="android_perf_4_CPU" /></p>
+
+<p>Android系统会在电量消耗与表现性能之间不断的做权衡，当有需要的时候会迅速调整CPU的频率到一个比较高负荷的状态，当程序不需要高性能的时候就会降低频率来确保更长的续航时间。</p>
+
+<p><img src="/images/android_perf_4_CPU_adjust.png" alt="android_perf_4_CPU_adjust" /></p>
+
+<p>Android系统检测到需要调整CPU的频率到CPU频率真的达到对应频率会需要花费大概20ms的时间，在此期间很有可能会因为CPU频率不够而导致代码执行偏慢。</p>
+
+<p><img src="/images/android_perf_4_CPU_gap.png" alt="android_perf_4_CPU_gap" /></p>
+
+<p>我们可以使用Systrace工具来导出CPU的执行情况，以便帮助定位性能问题。</p>
+
+<hr />
+
+<p>首发于CSDN：<a href="http://geek.csdn.net/news/detail/50692">Android性能优化典范（四）</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Android性能优化典范 - 第4季]]></title>
@@ -1287,372 +1623,6 @@ Android 4.x的系统废除了external的计数器，类似bitmap的分配改到d
 <hr />
 
 <p>首发于CSDN：<a href="http://www.csdn.net/article/2015-08-12/2825447-android-performance-patterns-season-3">Android性能优化典范（三）</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android性能优化典范 - 第2季]]></title>
-    <link href="http://hukai.me/android-performance-patterns-season-2/"/>
-    <updated>2015-04-29T12:32:00+08:00</updated>
-    <id>http://hukai.me/android-performance-patterns-season-2</id>
-    <content type="html"><![CDATA[<p><img src="/images/android_perf_patterns_season_2.png" alt="android_perf_patterns_season_2" /></p>
-
-<p>Google前几天刚发布了<a href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">Android性能优化典范第2季</a>的课程，一共20个短视频，包括的内容大致有：电量优化，网络优化，Wear上如何做优化，使用对象池来提高效率，LRU Cache，Bitmap的缩放，缓存，重用，PNG压缩，自定义View的性能，提升设置alpha之后View的渲染性能，以及Lint，StictMode等等工具的使用技巧。
-下面是对这些课程的总结摘要，认知有限，理解偏差的地方请多多指教！</p>
-
-<h2>1)Battery Drain and Networking</h2>
-
-<p>对于手机程序，网络操作相对来说是比较耗电的行为。优化网络操作能够显著节约电量的消耗。在性能优化第1季里面有提到过，手机硬件的各个模块的耗电量是不一样的，其中移动蜂窝模块对电量消耗是比较大的，另外蜂窝模块在不同工作强度下，对电量的消耗也是有差异的。当程序想要执行某个网络请求之前，需要先唤醒设备，然后发送数据请求，之后等待返回数据，最后才慢慢进入休眠状态。这个流程如下图所示：</p>
-
-<p><img src="/images/android_perf_2_network_request_mode.png" alt="android_perf_2_network_request_mode" /></p>
-
-<!-- More -->
-
-
-<p>在上面那个流程中，蜂窝模块的电量消耗差异如下图所示：</p>
-
-<p><img src="/images/android_perf_2_battery_drain_mode.png" alt="android_perf_2_battery_drain_mode" /></p>
-
-<p>从图示中可以看到，激活瞬间，发送数据的瞬间，接收数据的瞬间都有很大的电量消耗，所以，我们应该从如何传递网络数据以及何时发起网络请求这两个方面来着手优化。</p>
-
-<h4>1.1)何时发起网络请求</h4>
-
-<p>首先我们需要区分哪些网络请求是需要及时返回结果的，哪些是可以延迟执行的。例如，用户主动下拉刷新列表，这种行为需要立即触发网络请求，并等待数据返回。但是对于上传用户操作的数据，同步程序设置等等行为则属于可以延迟的行为。我们可以通过Battery Historian这个工具来查看关于移动蜂窝模块的电量消耗（关于这部分的细节，请点击<a href="http://hukai.me/android-performance-battery/">Android性能优化之电量篇</a>）。在Mobile Radio那一行会显示蜂窝模块的电量消耗情况，红色的部分代表模块正在工作，中间的间隔部分代表模块正在休眠状态，如果看到有一段区间，红色与间隔频繁的出现，那就说明这里有可以优化的行为。如下图所示：</p>
-
-<p><img src="/images/android_perf_2_battery_mobile_radio.png" alt="android_perf_2_battery_mobile_radio" /></p>
-
-<p>对于上面可以优化的部分，我们可以有针对性的把请求行为捆绑起来，延迟到某个时刻统一发起请求。如下图所示：</p>
-
-<p><img src="/images/android_perf_2_battery_batch_delay.png" alt="android_perf_2_battery_batch_delay" /></p>
-
-<p>经过上面的优化之后，我们再回头使用Battery Historian导出电量消耗图，可以看到唤醒状态与休眠状态是连续大块间隔的，这样的话，总体电量的消耗就会变得更少。</p>
-
-<p><img src="/images/android_perf_2_battery_mobile_radio_2.png" alt="android_perf_2_battery_mobile_radio_2" /></p>
-
-<p>当然，我们甚至可以把请求的任务延迟到手机网络切换到WiFi，手机处于充电状态下再执行。在前面的描述过程中，我们会遇到的一个难题是如何把网络请求延迟，并批量进行执行。还好，Android提供了<a href="http://developer.android.com/intl/zh-cn/reference/android/app/job/JobScheduler.html">JobScheduler</a>来帮助我们达成这个目标。</p>
-
-<h4>1.2)如何传递网络数据</h4>
-
-<p>关于这部分主要会涉及到Prefetch(预取)与Compressed(压缩)这两个技术。对于Prefetch的使用，我们需要预先判断用户在此次操作之后，后续零散的请求是否很有可能会马上被触发，可以把后面5分钟有可能会使用到的零散请求都一次集中执行完毕。对于Compressed的使用，在上传与下载数据之前，使用CPU对数据进行压缩与解压，可以很大程度上减少网络传输的时间。</p>
-
-<p>想要知道我们的应用程序中网络请求发生的时间，每次请求的数据量等等信息，可以通过Android Studio中的<a href="http://developer.android.com/intl/zh-cn/tools/debugging/ddms.html#network">Networking Traffic Tool</a>来查看详细的数据，如下图所示：</p>
-
-<p><img src="/images/android_perf_2_battery_network_tracking.png" alt="android_perf_2_battery_network_tracking" /></p>
-
-<h2>2)Wear &amp; Sensors</h2>
-
-<p>在Android Wear上会大量的使用Sensors来实现某些特殊功能，如何在尽量节约电量的前提下利用好Sensor会是我们需要特别注意的问题。下面会介绍一些在Android Wear上的最佳实践典范。</p>
-
-<p>尽量减少刷新请求，例如我们可以在不需要某些数据的时候尽快注销监听，减小刷新频率，对Sensor的数据做批量处理等等。那么如何做到这些优化呢？</p>
-
-<ul>
-<li>首先我们需要尽量使用Android平台提供的既有运动数据，而不是自己去实现监听采集数据，因为大多数Android Watch自身记录Sensor数据的行为是有经过做电量优化的。</li>
-<li>其次在Activity不需要监听某些Sensor数据的时候需要尽快释放监听注册。</li>
-<li>还有我们需要尽量控制更新的频率，仅仅在需要刷新显示数据的时候才触发获取最新数据的操作。</li>
-<li>另外我们可以针对Sensor的数据做批量处理，待数据累积一定次数或者某个程度的时候才更新到UI上。</li>
-<li>最后当Watch与Phone连接起来的时候，可以把某些复杂操作的事情交给Phone来执行，Watch只需要等待返回的结果。</li>
-</ul>
-
-
-<p>更对关于Sensors的知识，可以点击<a href="https://www.youtube.com/watch?v=82M8DmFz4P8&amp;index=2&amp;list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">这里</a></p>
-
-<h2>3)Smooth Android Wear Animation</h2>
-
-<p>Android Material Design风格的应用采用了大量的动画来进行UI切换，优化动画的性能不仅能够提升用户体验还可以减少电量的消耗，下面会介绍一些简单易行的方法。</p>
-
-<p>在Android里面一个相对操作比较繁重的事情是对Bitmap进行旋转，缩放，裁剪等等。例如在一个圆形的钟表图上，我们把时钟的指针抠出来当做单独的图片进行旋转会比旋转一张完整的圆形图的所形成的帧率要高56%。</p>
-
-<p><img src="/images/android_perf_2_waer_animation.png" alt="android_perf_2_waer_animation" /></p>
-
-<p>另外尽量减少每次重绘的元素可以极大的提升性能，假如某个钟表界面上有很多需要显示的复杂组件，我们可以把这些组件做拆分处理，例如把背景图片单独拎出来设置为一个独立的View，通过setLayerType()方法使得这个View强制用Hardware来进行渲染。至于界面上哪些元素需要做拆分，他们各自的更新频率是多少，需要有针对性的单独讨论。</p>
-
-<p>如何使用Systrace等工具来查看某些View的渲染性能，在前面的章节里面有提到过，感兴趣的可以点击<a href="http://hukai.me/android-performance-render/">这里</a></p>
-
-<p>对于大多数应用中的动画，我们会使用PropertyAnimation或者ViewAnimation来操作实现，Android系统会自动对这些Animation做一定的优化处理，在Android上面学习到的大多数性能优化的知识同样也适用于Android Wear。</p>
-
-<p>想要获取更多关于Android Wear中动画效果的优化，请点击<a href="http://developer.android.com/samples/WatchFace/index.html">WatchFace</a>这个范例。</p>
-
-<h2>4)Android Wear Data Batching</h2>
-
-<p>在Android Training里面有关于Wear上面如何利用Wearable API与Phone进行沟通协作的课程(详情请点击<a href="http://developer.android.com/training/wearables/data-layer/index.html">这里</a>)。因为Phone的CPU与电量都比Wear要强大，另外Phone还可以直接接入网络，而Wear要接入网络则相对更加困难，所以我们在开发Wear应用的时候需要尽量做到把复杂的操作交给Phone来执行。例如我们可以让Phone来获取天气信息，然后把数据返回Wear进行显示。更进一步，在之前的性能优化课程里面我们有学习过如何使用JobScheduler来延迟批量处理任务，假设Phone收到来自Wear的其中一个任务是每隔5分钟检查一次天气情况，那么Phone使用JobScheduler执行检查天气任务之后，先判断这次返回的结果和之前是否有差异，仅仅当天气发生变化的时候，才有必要把结果通知到Wear，或者仅仅把变化的某一项数据通知给Wear，这样可以更大程度上减少Wear的电量消耗。</p>
-
-<p>下面我们总结一下如何优化Wear的性能与电量：</p>
-
-<ul>
-<li>仅仅在真正需要刷新界面的时候才发出请求</li>
-<li>尽量把计算复杂操作的任务交给Phone来处理</li>
-<li>Phone仅仅在数据发生变化的时候才通知到Wear</li>
-<li>把零碎的数据请求捆绑一起再进行操作</li>
-</ul>
-
-
-<h2>5)Object Pools</h2>
-
-<p>在程序里面经常会遇到的一个问题是短时间内创建大量的对象，导致内存紧张，从而触发GC导致性能问题。对于这个问题，我们可以使用对象池技术来解决它。通常对象池中的对象可能是bitmaps，views，paints等等。关于对象池的操作原理，不展开述说了，请看下面的图示：</p>
-
-<p><img src="/images/android_perf_2_object_pool.png" alt="android_perf_2_object_pool" /></p>
-
-<p>使用对象池技术有很多好处，它可以避免内存抖动，提升性能，但是在使用的时候有一些内容是需要特别注意的。通常情况下，初始化的对象池里面都是空白的，当使用某个对象的时候先去对象池查询是否存在，如果不存在则创建这个对象然后加入对象池，但是我们也可以在程序刚启动的时候就事先为对象池填充一些即将要使用到的数据，这样可以在需要使用到这些对象的时候提供更快的首次加载速度，这种行为就叫做<strong>预分配</strong>。使用对象池也有不好的一面，程序员需要手动管理这些对象的分配与释放，所以我们需要慎重地使用这项技术，避免发生对象的内存泄漏。为了确保所有的对象能够正确被释放，我们需要保证加入对象池的对象和其他外部对象没有互相引用的关系。</p>
-
-<h2>6)To Index or Iterate?</h2>
-
-<p>遍历容器是编程里面一个经常遇到的场景。在Java语言中，使用Iterate是一个比较常见的方法。可是在Android开发团队中，大家却尽量避免使用Iterator来执行遍历操作。下面我们看下在Android上可能用到的三种不同的遍历方法：</p>
-
-<p><img src="/images/android_perf_2_iterate_1.png" alt="android_perf_2_iterate_1" /></p>
-
-<p><img src="/images/android_perf_2_iterate_for_loop.png" alt="android_perf_2_iterate_for_loop" /></p>
-
-<p><img src="/images/android_perf_2_iterate_simple_loop.png" alt="android_perf_2_iterate_simple_loop" /></p>
-
-<p>使用上面三种方式在同一台手机上，使用相同的数据集做测试，他们的表现性能如下所示：</p>
-
-<p><img src="/images/android_perf_2_iterate_result.png" alt="android_perf_2_iterate_result" /></p>
-
-<p>从上面可以看到for index的方式有更好的效率，但是因为不同平台编译器优化各有差异，我们最好还是针对实际的方法做一下简单的测量比较好，拿到数据之后，再选择效率最高的那个方式。</p>
-
-<h2>7)The Magic of LRU Cache</h2>
-
-<p>这小节我们要讨论的是缓存算法，在Android上面最常用的一个缓存算法是LRU(Least Recently Use)，关于LRU算法，不展开述说，用下面一张图演示下含义：</p>
-
-<p><img src="/images/android_perf_2_lru_mode.png" alt="android_perf_2_lru_mode" /></p>
-
-<p>LRU Cache的基础构建用法如下：</p>
-
-<p><img src="/images/android_perf_2_lru_key_value.png" alt="android_perf_2_lru_key_value" /></p>
-
-<p>为了给LRU Cache设置一个比较合理的缓存大小值，我们通常是用下面的方法来做界定的：</p>
-
-<p><img src="/images/android_perf_2_lru_size.png" alt="android_perf_2_lru_size" /></p>
-
-<p>使用LRU Cache时为了能够让Cache知道每个加入的Item的具体大小，我们需要Override下面的方法：</p>
-
-<p><img src="/images/android_perf_2_lru_sizeof.png" alt="android_perf_2_lru_sizeof" /></p>
-
-<p>使用LRU Cache能够显著提升应用的性能，可是也需要注意LRU Cache中被淘汰对象的回收，否者会引起严重的内存泄露。</p>
-
-<h2>8)Using LINT for Performance Tips</h2>
-
-<p>Lint是Android提供的一个静态扫描应用源码并找出其中的潜在问题的一个强大的工具。</p>
-
-<p><img src="/images/android_perf_2_lint_overview.png" alt="android_perf_2_lint_overview" /></p>
-
-<p>例如，如果我们在onDraw方法里面执行了new对象的操作，Lint就会提示我们这里有性能问题，并提出对应的建议方案。Lint已经集成到Android Studio中了，我们可以手动去触发这个工具，点击工具栏的Analysis -> Inspect Code，触发之后，Lint会开始工作，并把结果输出到底部的工具栏，我们可以逐个查看原因并根据指示做相应的优化修改。</p>
-
-<p>Lint的功能非常强大，他能够扫描各种问题。当然我们可以通过Android Studio设置找到Lint，对Lint做一些定制化扫描的设置，可以选择忽略掉那些不想Lint去扫描的选项，我们还可以针对部分扫描内容修改它的提示优先级。</p>
-
-<p>建议把与内存有关的选项中的严重程度标记为红色的Error，对于Layout的性能问题标记为黄色Warning。</p>
-
-<h2>9)Hidden Cost of Transparency</h2>
-
-<p>这小节会介绍如何减少透明区域对性能的影响。通常来说，对于不透明的View，显示它只需要渲染一次即可，可是如果这个View设置了alpha值，会至少需要渲染两次。原因是包含alpha的view需要事先知道混合View的下一层元素是什么，然后再结合上层的View进行Blend混色处理。</p>
-
-<p>在某些情况下，一个包含alpha的View有可能会触发改View在HierarchyView上的父View都被额外重绘一次。下面我们看一个例子，下图演示的ListView中的图片与二级标题都有设置透明度。</p>
-
-<p><img src="/images/android_perf_2_trans_listview.png" alt="android_perf_2_trans_listview" /></p>
-
-<p>大多数情况下，屏幕上的元素都是由后向前进行渲染的。在上面的图示中，会先渲染背景图(蓝，绿，红)，然后渲染人物头像图。如果后渲染的元素有设置alpha值，那么这个元素就会和屏幕上已经渲染好的元素做blend处理。很多时候，我们会给整个View设置alpha的来达到fading的动画效果，如果我们图示中的ListView做alpha逐渐减小的处理，我们可以看到ListView上的TextView等等组件会逐渐融合到背景色上。但是在这个过程中，我们无法观察到它其实已经触发了额外的绘制任务，我们的目标是让整个View逐渐透明，可是期间ListView在不停的做Blending的操作，这样会导致不少性能问题。</p>
-
-<p>如何渲染才能够得到我们想要的效果呢？我们可以先按照通常的方式把View上的元素按照从后到前的方式绘制出来，但是不直接显示到屏幕上，而是使用GPU预处理之后，再又GPU渲染到屏幕上，GPU可以对界面上的原始数据直接做旋转，设置透明度等等操作。使用GPU进行渲染，虽然第一次操作相比起直接绘制到屏幕上更加耗时，可是一旦原始纹理数据生成之后，接下去的操作就比较省时省力。</p>
-
-<p><img src="/images/android_perf_2_trans_hw_layer.png" alt="android_perf_2_trans_hw_layer" /></p>
-
-<p>如何才能够让GPU来渲染某个View呢？我们可以通过setLayerType的方法来指定View应该如何进行渲染，从SDK 16开始，我们还可以使用ViewPropertyAnimator.alpha().withLayer()来指定。如下图所示：</p>
-
-<p><img src="/images/android_perf_2_trans_setlayertype.png" alt="android_perf_2_trans_setlayertype" /></p>
-
-<p>另外一个例子是包含阴影区域的View，这种类型的View并不会出现我们前面提到的问题，因为他们并不存在层叠的关系。</p>
-
-<p><img src="/images/android_perf_2_trans_overlap.png" alt="android_perf_2_trans_overlap" /></p>
-
-<p>为了能够让渲染器知道这种情况，避免为这种View占用额外的GPU内存空间，我们可以做下面的设置。</p>
-
-<p><img src="/images/android_perf_2_trans_override_lap.png" alt="android_perf_2_trans_override_lap" /></p>
-
-<p>通过上面的设置以后，性能可以得到显著的提升，如下图所示：</p>
-
-<p><img src="/images/android_perf_2_trans_overlap_compare.png" alt="android_perf_2_trans_overlap_compare" /></p>
-
-<h2>10)Avoiding Allocations in onDraw()</h2>
-
-<p>我们都知道应该避免在onDraw()方法里面执行导致内存分配的操作，下面讲解下为何需要这样做。</p>
-
-<p>首先onDraw()方法是执行在UI线程的，在UI线程尽量避免做任何可能影响到性能的操作。虽然分配内存的操作并不需要花费太多系统资源，但是这并不意味着是免费无代价的。设备有一定的刷新频率，导致View的onDraw方法会被频繁的调用，如果onDraw方法效率低下，在频繁刷新累积的效应下，效率低的问题会被扩大，然后会对性能有严重的影响。</p>
-
-<p><img src="/images/android_perf_2_ondraw_gc.png" alt="android_perf_2_ondraw_gc" /></p>
-
-<p>如果在onDraw里面执行内存分配的操作，会容易导致内存抖动，GC频繁被触发，虽然GC后来被改进为执行在另外一个后台线程(GC操作在2.3以前是同步的，之后是并发)，可是频繁的GC的操作还是会影响到CPU，影响到电量的消耗。</p>
-
-<p>那么简单解决频繁分配内存的方法就是把分配操作移动到onDraw()方法外面，通常情况下，我们会把onDraw()里面new Paint的操作移动到外面，如下面所示：</p>
-
-<p><img src="/images/android_perf_2_ondraw_paint.png" alt="android_perf_2_ondraw_paint" /></p>
-
-<h2>11)Tool: Strict Mode</h2>
-
-<p>UI线程被阻塞超过5秒，就会出现ANR，这太糟糕了。防止程序出现ANR是很重要的事情，那么如何找出程序里面潜在的坑，预防ANR呢？很多大部分情况下执行很快的方法，但是他们有可能存在巨大的隐患，这些隐患的爆发就很容易导致ANR。</p>
-
-<p>Android提供了一个叫做Strict Mode的工具，我们可以通过手机设置里面的开发者选项，打开Strict Mode选项，如果程序存在潜在的隐患，屏幕就会闪现红色。我们也可以通过<a href="http://developer.android.com/reference/android/os/StrictMode.html">StrictMode</a> API在代码层面做细化的跟踪，可以设置StrictMode监听那些潜在问题，出现问题时如何提醒开发者，可以对屏幕闪红色，也可以输出错误日志。下面是官方的代码示例：</p>
-
-<p>```java
-public void onCreate() {</p>
-
-<pre><code> if (DEVELOPER_MODE) {
-     StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
-             .detectDiskReads()
-             .detectDiskWrites()
-             .detectNetwork()   // or .detectAll() for all detectable problems
-             .penaltyLog()
-             .build());
-     StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
-             .detectLeakedSqlLiteObjects()
-             .detectLeakedClosableObjects()
-             .penaltyLog()
-             .penaltyDeath()
-             .build());
- }
- super.onCreate();
-</code></pre>
-
-<p>}
-```</p>
-
-<h2>12)Custom Views and Performance</h2>
-
-<p>Android系统有提供超过70多种标准的View，例如TextView，ImageView，Button等等。在某些时候，这些标准的View无法满足我们的需要，那么就需要我们自己来实现一个View，这节会介绍如何优化自定义View的性能。</p>
-
-<p>通常来说，针对自定义View，我们可能犯下面三个错误：</p>
-
-<ul>
-<li><strong>Useless calls to onDraw()：</strong>我们知道调用View.invalidate()会触发View的重绘，有两个原则需要遵守，第1个是仅仅在View的内容发生改变的时候才去触发invalidate方法，第2个是尽量使用ClipRect等方法来提高绘制的性能。</li>
-<li><strong>Useless pixels：</strong>减少绘制时不必要的绘制元素，对于那些不可见的元素，我们需要尽量避免重绘。</li>
-<li><strong>Wasted CPU cycles：</strong>对于不在屏幕上的元素，可以使用Canvas.quickReject把他们给剔除，避免浪费CPU资源。另外尽量使用GPU来进行UI的渲染，这样能够极大的提高程序的整体表现性能。</li>
-</ul>
-
-
-<p>最后请时刻牢记，尽量提高View的绘制性能，这样才能保证界面的刷新帧率尽量的高。更多关于这部分的内容，可以看<a href="http://hukai.me/android-performance-patterns/">这里</a></p>
-
-<h2>13)Batching Background Work Until Later</h2>
-
-<p>优化性能时大多数时候讨论的都是如何减少不必要的操作，但是选择何时去执行某些操作同样也很重要。在<a href="http://hukai.me/android-performance-patterns/">第1季</a>以及上一期的<a href="http://hukai.me/android-performance-battery/">性能优化之电量篇</a>里面，我们有提到过移动蜂窝模块的电量消耗模型。为了避免我们的应用程序过多的频繁消耗电量，我们需要学习如何把后台任务打包批量，并选择一个合适的时机进行触发执行。下图是每个应用程序各自执行后台任务导致的电量消耗示意图：</p>
-
-<p><img src="/images/android_perf_2_batching_bg_1.png" alt="android_perf_2_batching_bg_1" /></p>
-
-<p>因为像上面那样做会导致浪费很多电量，我们需要做的是把部分应用的任务延迟处理，等到一定时机，这些任务一并进行处理。结果如下面的示意图：</p>
-
-<p><img src="/images/android_perf_2_batching_bg_2.png" alt="android_perf_2_batching_bg_2" /></p>
-
-<p>执行延迟任务，通常有下面三种方式：</p>
-
-<h4>1)AlarmManager</h4>
-
-<p>使用AlarmManager设置定时任务，可以选择精确的间隔时间，也可以选择非精确时间作为参数。除非程序有很强烈的需要使用精确的定时唤醒，否者一定要避免使用他，我们应该尽量使用非精确的方式。</p>
-
-<h4>2)SyncAdapter</h4>
-
-<p>我们可以使用SyncAdapter为应用添加设置账户，这样在手机设置的账户列表里面可以找到我们的应用。这种方式功能更多，但是实现起来比较复杂。我们可以从这里看到官方的培训课程：<a href="http://developer.android.com/training/sync-adapters/index.html">http://developer.android.com/training/sync-adapters/index.html</a></p>
-
-<h4>3)JobSchedulor</h4>
-
-<p>这是最简单高效的方法，我们可以设置任务延迟的间隔，执行条件，还可以增加重试机制。</p>
-
-<h2>14)Smaller Pixel Formats</h2>
-
-<p>常见的png,jpeg,webp等格式的图片在设置到UI上之前需要经过解码的过程，而解压时可以选择不同的解码率，不同的解码率对内存的占用是有很大差别的。在不影响到画质的前提下尽量减少内存的占用，这能够显著提升应用程序的性能。</p>
-
-<p>Android的Heap空间是不会自动做兼容压缩的，意思就是如果Heap空间中的图片被收回之后，这块区域并不会和其他已经回收过的区域做重新排序合并处理，那么当一个更大的图片需要放到heap之前，很可能找不到那么大的连续空闲区域，那么就会触发GC，使得heap腾出一块足以放下这张图片的空闲区域，如果无法腾出，就会发生OOM。如下图所示：</p>
-
-<p><img src="/images/android_perf_2_pixel_heap_free.png" alt="android_perf_2_pixel_heap_free" /></p>
-
-<p>所以为了避免加载一张超大的图片，需要尽量减少这张图片所占用的内存大小，Android为图片提供了4种解码格式，他们分别占用的内存大小如下图所示：</p>
-
-<p><img src="/images/android_perf_2_pixel_format.png" alt="android_perf_2_pixel_format" /></p>
-
-<p>随着解码占用内存大小的降低，清晰度也会有损失。我们需要针对不同的应用场景做不同的处理，大图和小图可以采用不同的解码率。在Android里面可以通过下面的代码来设置解码率：</p>
-
-<p><img src="/images/android_perf_2_pixel_decode.png" alt="android_perf_2_pixel_decode" /></p>
-
-<h2>15)Smaller PNG Files</h2>
-
-<p>尽量减少PNG图片的大小是Android里面很重要的一条规范。相比起JPEG，PNG能够提供更加清晰无损的图片，但是PNG格式的图片会更大，占用更多的磁盘空间。到底是使用PNG还是JPEG，需要设计师仔细衡量，对于那些使用JPEG就可以达到视觉效果的，可以考虑采用JPEG即可。我们可以通过Google搜索到很多关于PNG压缩的工具，如下图所示：</p>
-
-<p><img src="/images/android_perf_2_png_tools.png" alt="android_perf_2_png_tools" /></p>
-
-<p>这里要介绍一种新的图片格式：Webp，它是由Google推出的一种既保留png格式的优点，又能够减少图片大小的一种新型图片格式。关于Webp的更多细节，请点击<a href="https://developers.google.com/speed/webp/?csw=1">这里</a></p>
-
-<h2>16)Pre-scaling Bitmaps</h2>
-
-<p>对bitmap做缩放，这也是Android里面最遇到的问题。对bitmap做缩放的意义很明显，提示显示性能，避免分配不必要的内存。Android提供了现成的bitmap缩放的API，叫做createScaledBitmap()，使用这个方法可以获取到一张经过缩放的图片。</p>
-
-<p><img src="/images/android_perf_2_sacle_bitmap_created.png" alt="android_perf_2_sacle_bitmap_created" /></p>
-
-<p>上面的方法能够快速的得到一张经过缩放的图片，可是这个方法能够执行的前提是，原图片需要事先加载到内存中，如果原图片过大，很可能导致OOM。下面介绍其他几种缩放图片的方式。</p>
-
-<p>inSampleSize能够等比的缩放显示图片，同时还避免了需要先把原图加载进内存的缺点。我们会使用类似像下面一样的方法来缩放bitmap：</p>
-
-<p><img src="/images/android_perf_2_sacle_bitmap_code.png" alt="android_perf_2_sacle_bitmap_code" /></p>
-
-<p><img src="/images/android_perf_2_sacle_bitmap_insamplesize.png" alt="android_perf_2_sacle_bitmap_insamplesize" /></p>
-
-<p>另外，我们还可以使用inScaled，inDensity，inTargetDensity的属性来对解码图片做处理，源码如下图所示：</p>
-
-<p><img src="/images/android_perf_2_sacle_bitmap_inscale.png" alt="android_perf_2_sacle_bitmap_inscale" /></p>
-
-<p>还有一个经常使用到的技巧是inJustDecodeBounds，使用这个属性去尝试解码图片，可以事先获取到图片的大小而不至于占用什么内存。如下图所示：</p>
-
-<p><img src="/images/android_perf_2_sacle_bitmap_injust.png" alt="android_perf_2_sacle_bitmap_injust" /></p>
-
-<h2>17)Re-using Bitmaps</h2>
-
-<p>我们知道bitmap会占用大量的内存空间，这节会讲解什么是inBitmap属性，如何利用这个属性来提升bitmap的循环效率。前面我们介绍过使用对象池的技术来解决对象频繁创建再回收的效率问题，使用这种方法，bitmap占用的内存空间会差不多是恒定的数值，每次新创建出来的bitmap都会需要占用一块单独的内存区域，如下图所示：</p>
-
-<p><img src="/images/android_perf_2_inbitmap_old.png" alt="android_perf_2_inbitmap_old" /></p>
-
-<p>为了解决上图所示的效率问题，Android在解码图片的时候引进了<strong>inBitmap</strong>属性，使用这个属性可以得到下图所示的效果：</p>
-
-<p><img src="/images/android_perf_2_inbitmap_new.png" alt="android_perf_2_inbitmap_new" /></p>
-
-<p>使用inBitmap属性可以告知Bitmap解码器去尝试使用已经存在的内存区域，新解码的bitmap会尝试去使用之前那张bitmap在heap中所占据的pixel data内存区域，而不是去问内存重新申请一块区域来存放bitmap。利用这种特性，即使是上千张的图片，也只会仅仅只需要占用屏幕所能够显示的图片数量的内存大小。下面是如何使用inBitmap的代码示例：</p>
-
-<p><img src="/images/android_perf_2_inbitmap_code.png" alt="android_perf_2_inbitmap_code" /></p>
-
-<p>使用inBitmap需要注意几个限制条件：</p>
-
-<ul>
-<li>在SDK 11 -> 18之间，重用的bitmap大小必须是一致的，例如给inBitmap赋值的图片大小为100-100，那么新申请的bitmap必须也为100-100才能够被重用。从SDK 19开始，新申请的bitmap大小必须小于或者等于已经赋值过的bitmap大小。</li>
-<li>新申请的bitmap与旧的bitmap必须有相同的解码格式，例如大家都是8888的，如果前面的bitmap是8888，那么就不能支持4444与565格式的bitmap了。</li>
-</ul>
-
-
-<p>我们可以创建一个包含多种典型可重用bitmap的对象池，这样后续的bitmap创建都能够找到合适的“模板”去进行重用。如下图所示：</p>
-
-<p><img src="/images/android_perf_2_inbitmap_pool.png" alt="android_perf_2_inbitmap_pool" /></p>
-
-<p>Google介绍了一个开源的加载bitmap的库：<a href="https://github.com/bumptech/glide">Glide</a>，这里面包含了各种对bitmap的优化技巧。</p>
-
-<h2>18)The Performance Lifecycle</h2>
-
-<p>大多数开发者在没有发现严重性能问题之前是不会特别花精力去关注性能优化的，通常大家关注的都是功能是否实现。当性能问题真的出现的时候，请不要慌乱。我们通常采用下面三个步骤来解决性能问题。</p>
-
-<h4>Gather：收集数据</h4>
-
-<p>我们可以通过Android SDK里面提供的诸多工具来收集CPU，GPU，内存，电量等等性能数据，</p>
-
-<h4>Insight：分析数据</h4>
-
-<p>通过上面的步骤，我们获取到了大量的数据，下一步就是分析这些数据。工具帮我们生成了很多可读性强的表格，我们需要事先了解如何查看表格的数据，每一项代表的含义，这样才能够快速定位问题。如果分析数据之后还是没有找到问题，那么就只能不停的重新收集数据，再进行分析，如此循环。</p>
-
-<h4>Action：解决问题</h4>
-
-<p>定位到问题之后，我们需要采取行动来解决问题。解决问题之前一定要先有个计划，评估这个解决方案是否可行，是否能够及时的解决问题。</p>
-
-<h2>19)Tools not Rules</h2>
-
-<p>虽然前面介绍了很多调试的方法，处理技巧，规范建议等等，可是这并不意味着所有的情况都适用，我们还是需要根据当时的情景做特定灵活的处理。</p>
-
-<h2>20)Memory Profiling 101</h2>
-
-<p>围绕Android生态系统，不仅仅有Phone，还有Wear，TV，Auto等等。对这些不同形态的程序进行性能优化，都离不开内存调试这个步骤。这节中介绍的内容大部分和<a href="http://hukai.me/android-performance-patterns/">Android性能优化典范</a>与<a href="http://hukai.me/android-performance-memory/">Android性能优化之内存篇</a>重合，不展开了。</p>
-
-<p>首发于CSDN：<a href="http://www.csdn.net/article/2015-04-29/2824583-android-performance-patterns-season-2">Android性能优化典范（二）</a></p>
 ]]></content>
   </entry>
   
