@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Android性能优化典范"
+title: "Android性能优化典范 - 第1季"
 date: 2015-01-17 19:42
 comments: true
 sidebar: false
