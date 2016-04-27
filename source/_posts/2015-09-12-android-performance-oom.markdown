@@ -7,7 +7,7 @@ sidebar: false
 categories: Android Android:Performance
 ---
 
-Android的内存优化是性能优化中很重要的一部分，而避免OOM又是内存优化中比较核心的一点，这是一篇关于内存优化中如何避免OOM的总结性概要文章，内容大多都是和OOM有关的实践总结概要。理解错误或是偏差的地方，还请多包涵指正，谢谢！
+> Android的内存优化是性能优化中很重要的一部分，而避免OOM又是内存优化中比较核心的一点，这是一篇关于内存优化中如何避免OOM的总结性概要文章，内容大多都是和OOM有关的实践总结概要。理解错误或是偏差的地方，还请多包涵指正，谢谢！
 
 ## (一)Android的内存管理机制
 Google在Android的官网上有这样一篇文章，初步介绍了Android是如何管理应用的进程与内存分配：<http://developer.android.com/training/articles/memory.html>。

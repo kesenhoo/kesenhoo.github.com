@@ -9,7 +9,7 @@ categories: Android
 
 ![android_dev_patterns_logo](/images/android_dev_patterns_logo.png)
 
-前段时间，Google公布了[Android开发最佳实践](https://www.youtube.com/playlist?list=PLWz5rJ2EKKc-lJo_RGGXL2Psr8vVCTWjM)的一系列课程，涉及到一些平时开发过程中应该保持的良好习惯以及如何使用最新的[Android Design Support Library](http://android-developers.blogspot.com/2015/05/android-design-support-library.html)来快速实现官方推荐的Material Design样式的应用。下面是个人的学习摘要总结，不对的地方请多多交流指点，谢谢！
+> 前段时间，Google公布了[Android开发最佳实践](https://www.youtube.com/playlist?list=PLWz5rJ2EKKc-lJo_RGGXL2Psr8vVCTWjM)的一系列课程，涉及到一些平时开发过程中应该保持的良好习惯以及如何使用最新的[Android Design Support Library](http://android-developers.blogspot.com/2015/05/android-design-support-library.html)来快速实现官方推荐的Material Design样式的应用。下面是个人的学习摘要总结，不对的地方请多多交流指点，谢谢！
 
 ## 1）注意对隐式Intent的运行时检查保护
 类似打开相机，发送图片等隐式Intent，是并不一定能够在所有的Android设备上都正常运行。例如打开相机的隐式Intent，如果系统相机应用被关闭或者不存在相机应用，又或者是相机应用的某些权限被关闭等等情况都可能导致这个隐式的Intent无法正常工作。一旦发生隐式Intent找不到合适的调用组件的情况，系统就会抛出`ActivityNotFoundException`的异常，如果我们的应用没有对这个异常做任何处理，那应用就会发生Crash。

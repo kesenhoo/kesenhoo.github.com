@@ -9,7 +9,7 @@ categories: Android Android:Performance
 
 ![android_perf_patterns_season_2](/images/android_perf_patterns_season_2.png)
 
-Google前几天刚发布了[Android性能优化典范第2季](https://www.youtube.com/playlist?list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE)的课程，一共20个短视频，包括的内容大致有：电量优化，网络优化，Wear上如何做优化，使用对象池来提高效率，LRU Cache，Bitmap的缩放，缓存，重用，PNG压缩，自定义View的性能，提升设置alpha之后View的渲染性能，以及Lint，StictMode等等工具的使用技巧。
+> Google前几天刚发布了[Android性能优化典范第2季](https://www.youtube.com/playlist?list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE)的课程，一共20个短视频，包括的内容大致有：电量优化，网络优化，Wear上如何做优化，使用对象池来提高效率，LRU Cache，Bitmap的缩放，缓存，重用，PNG压缩，自定义View的性能，提升设置alpha之后View的渲染性能，以及Lint，StictMode等等工具的使用技巧。
 下面是对这些课程的总结摘要，认知有限，理解偏差的地方请多多指教！
 
 ## 1)Battery Drain and Networking
