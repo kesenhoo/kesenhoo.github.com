@@ -245,4 +245,4 @@ Android系统里面的AsyncTask与IntentService已经默认帮助我们设置线
 上面八种不同的颜色区分了不同的操作所耗费的时间，为了便于我们迅速找出那些有问题的步骤，GPU Profiling工具会显示16ms的阈值线，这样就很容易找出那些不合理的性能问题，再仔细看对应具体哪个步骤相对来说耗费时间比例更大，结合上面介绍的细化步骤，从而快速定位问题，修复问题。
 
 ***
-首发于CSDN：[Android性能优化典范（五）](http://geek.csdn.net/news/detail/50692)
+首发于CSDN：[Android性能优化典范（五）](http://ms.csdn.net/geek/71031)
