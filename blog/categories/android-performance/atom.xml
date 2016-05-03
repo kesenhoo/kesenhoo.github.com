@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Android:Performance | 胡凯]]></title>
   <link href="http://hukai.me/blog/categories/android-performance/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2016-03-27T11:31:17+08:00</updated>
+  <updated>2016-05-03T10:52:24+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[HuKai]]></name>
@@ -14,13 +14,295 @@
 
   
   <entry>
+    <title type="html"><![CDATA[Android性能优化典范 - 第5季]]></title>
+    <link href="http://hukai.me/android-performance-patterns-season-5/"/>
+    <updated>2016-04-28T00:08:00+08:00</updated>
+    <id>http://hukai.me/android-performance-patterns-season-5</id>
+    <content type="html"><![CDATA[<p><img src="/images/android_perf_patterns_season_5.png" alt="android_perf_patterns_season_5" /></p>
+
+<blockquote><p>这是<a href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">Android性能优化典范</a>第5季的课程学习笔记，拖拖拉拉很久，记录分享给大家，请多多包涵担待指正！文章共10个段落，涉及的内容有：多线程并发的性能问题，介绍了AsyncTask，HandlerThread，IntentService与ThreadPool分别适合的使用场景以及各自的使用注意事项，这是一篇了解Android多线程编程不可多得的基础文章，清楚的了解这些Android系统提供的多线程基础组件之间的差异以及优缺点，才能够在项目实战中做出最恰当的选择。</p></blockquote>
+
+<h2>1)Threading Performance</h2>
+
+<p>在程序开发的实践当中，为了让程序表现得更加流畅，我们肯定会需要使用到多线程来提升程序的并发执行性能。但是编写多线程并发的代码一直以来都是一个相对棘手的问题，所以想要获得更佳的程序性能，我们非常有必要掌握多线程并发编程的基础技能。</p>
+
+<p>众所周知，Android程序的大多数代码操作都必须执行在主线程，例如系统事件(例如设备屏幕发生旋转)，输入事件(例如用户点击滑动等)，程序回调服务，UI绘制以及闹钟事件等等。那么我们在上述事件或者方法中插入的代码也将执行在主线程。</p>
+
+<p><img src="/images/android_perf_5_threading_main_thread.png" alt="android_perf_5_threading_main_thread" /></p>
+
+<!-- More -->
+
+
+<p>一旦我们在主线程里面添加了操作复杂的代码，这些代码就很可能阻碍主线程去响应点击/滑动事件，阻碍主线程的UI绘制等等。我们知道，为了让屏幕的刷新帧率达到60fps，我们需要确保16ms内完成单次刷新的操作。一旦我们在主线程里面执行的任务过于繁重就可能导致接收到刷新信号的时候因为资源被占用而无法完成这次刷新操作，这样就会产生掉帧的现象，刷新帧率自然也就跟着下降了(一旦刷新帧率降到20fps左右，用户就可以明显感知到卡顿不流畅了)。</p>
+
+<p><img src="/images/android_perf_5_threading_dropframe.png" alt="android_perf_5_threading_dropframe" /></p>
+
+<p>为了避免上面提到的掉帧问题，我们需要使用多线程的技术方案，把那些操作复杂的任务移动到其他线程当中执行，这样就不容易阻塞主线程的操作，也就减小了出现掉帧的可能性。</p>
+
+<p><img src="/images/android_perf_5_threading_workthread.png" alt="android_perf_5_threading_workthread" /></p>
+
+<p>那么问题来了，为主线程减轻负的多线程方案有哪些呢？这些方案分别适合在什么场景下使用？Android系统为我们提供了若干组工具类来帮助解决这个问题。</p>
+
+<ul>
+<li><strong>AsyncTask</strong>: 为UI线程与工作线程之间进行快速的切换提供一种简单便捷的机制。适用于当下立即需要启动，但是异步执行的生命周期短暂的使用场景。</li>
+<li><strong>HandlerThread</strong>: 为某些回调方法或者等待某些任务的执行设置一个专属的线程，并提供线程任务的调度机制。</li>
+<li><strong>ThreadPool</strong>: 把任务分解成不同的单元，分发到各个不同的线程上，进行同时并发处理。</li>
+<li><strong>IntentService</strong>: 适合于执行由UI触发的后台Service任务，并可以把后台任务执行的情况通过一定的机制反馈给UI。</li>
+</ul>
+
+
+<p>了解这些系统提供的多线程工具类分别适合在什么场景下，可以帮助我们选择合适的解决方案，避免出现不可预期的麻烦。虽然使用多线程可以提高程序的并发量，但是我们需要特别注意因为引入多线程而可能伴随而来的内存问题。举个例子，在Activity内部定义的一个AsyncTask，它属于一个内部类，该类本身和外面的Activity是有引用关系的，如果Activity要销毁的时候，AsyncTask还仍然在运行，这会导致Activity没有办法完全释放，从而引发内存泄漏。所以说，多线程是提升程序性能的有效手段之一，但是使用多线程却需要十分谨慎小心，如果不了解背后的执行机制以及使用的注意事项，很可能引起严重的问题。</p>
+
+<h2>2)Understanding Android Threading</h2>
+
+<p>通常来说，一个线程需要经历三个生命阶段：开始，执行，结束。线程会在任务执行完毕之后结束，那么为了确保线程的存活，我们会在执行阶段给线程赋予不同的任务，然后在里面添加退出的条件从而确保任务能够执行完毕后退出。</p>
+
+<p><img src="/images/android_perf_5_thread_lifecycle.png" alt="android_perf_5_thread_lifecycle" /></p>
+
+<p>在很多时候，线程不仅仅是线性执行一系列的任务就结束那么简单的，我们会需要增加一个任务队列，让线程不断的从任务队列中获取任务去进行执行，另外我们还可能在线程执行的任务过程中与其他的线程进行协作。如果这些细节都交给我们自己来处理，这将会是件极其繁琐又容易出错的事情。</p>
+
+<p><img src="/images/android_perf_5_thread_thread.png" alt="android_perf_5_thread_thread" /></p>
+
+<p>所幸的是，Android系统为我们提供了Looper，Handler，MessageQueue来帮助实现上面的线程任务模型：</p>
+
+<p><strong>Looper</strong>: 能够确保线程持续存活并且可以不断的从任务队列中获取任务并进行执行。</p>
+
+<p><img src="/images/android_perf_5_thread_looper.png" alt="android_perf_5_thread_looper" /></p>
+
+<p><strong>Handler</strong>: 能够帮助实现队列任务的管理，不仅仅能够把任务插入到队列的头部，尾部，还可以按照一定的时间延迟来确保任务从队列中能够来得及被取消掉。</p>
+
+<p><img src="/images/android_perf_5_thread_handler.png" alt="android_perf_5_thread_handler" /></p>
+
+<p><strong>MessageQueue</strong>: 使用Intent，Message，Runnable作为任务的载体在不同的线程之间进行传递。</p>
+
+<p><img src="/images/android_perf_5_thread_messagequeue.png" alt="android_perf_5_thread_messagequeue" /></p>
+
+<p>把上面三个组件打包到一起进行协作，这就是<strong>HandlerThread</strong></p>
+
+<p><img src="/images/android_perf_5_thread_handlerthread.png" alt="android_perf_5_thread_handlerthread" /></p>
+
+<p>我们知道，当程序被启动，系统会帮忙创建进程以及相应的主线程，而这个主线程其实就是一个HandlerThread。这个主线程会需要处理系统事件，输入事件，系统回调的任务，UI绘制等等任务，为了避免主线程任务过重，我们就会需要不断的开启新的工作线程来处理那些子任务。</p>
+
+<h2>3)Memory &amp; Threading</h2>
+
+<p>增加并发的线程数会导致内存消耗的增加，平衡好这两者的关系是非常重要的。我们知道，多线程并发访问同一块内存区域有可能带来很多问题，例如读写的权限争夺问题，<a href="https://en.wikipedia.org/wiki/ABA_problem">ABA问题</a>等等。为了解决这些问题，我们会需要引入<strong>锁</strong>的概念。</p>
+
+<p>在Android系统中也无法避免因为多线程的引入而导致出现诸如上文提到的种种问题。Android UI对象的创建，更新，销毁等等操作都默认是执行在主线程，但是如果我们在非主线程对UI对象进行操作，程序将可能出现异常甚至是崩溃。</p>
+
+<p> <img src="/images/android_perf_5_memory_thread_update.png" alt="android_perf_5_memory_thread_update" /></p>
+
+<p>另外，在非UI线程中直接持有UI对象的引用也很可能出现问题。例如Work线程中持有某个UI对象的引用，在Work线程执行完毕之前，UI对象在主线程中被从ViewHierarchy中移除了，这个时候UI对象的任何属性都已经不再可用了，另外对这个UI对象的更新操作也都没有任何意义了，因为它已经从ViewHierarchy中被移除，不再绘制到画面上了。</p>
+
+<p><img src="/images/android_perf_5_memory_view_remove.png" alt="android_perf_5_memory_view_remove" /></p>
+
+<p>不仅如此，View对象本身对所属的Activity是有引用关系的，如果工作线程持续保有View的引用，这就可能导致Activity无法完全释放。除了直接显式的引用关系可能导致内存泄露之外，我们还需要特别留意隐式的引用关系也可能导致泄露。例如通常我们会看到在Activity里面定义的一个AsyncTask，这种类型的AsyncTask与外部的Activity是存在隐式引用关系的，只要Task没有结束，引用关系就会一直存在，这很容易导致Activity的泄漏。更糟糕的情况是，它不仅仅发生了内存泄漏，还可能导致程序异常或者崩溃。</p>
+
+<p><img src="/images/android_perf_5_memory_asynctask.png" alt="android_perf_5_memory_asynctask" /></p>
+
+<p>为了解决上面的问题，我们需要谨记的原则就是：不要在任何非UI线程里面去持有UI对象的引用。系统为了确保所有的UI对象都只会被UI线程所进行创建，更新，销毁的操作，特地设计了对应的工作机制(当Activity被销毁的时候，由该Activity所触发的非UI线程都将无法对UI对象进行操作，否者就会抛出程序执行异常的错误)来防止UI对象被错误的使用。</p>
+
+<h2>4)Good AsyncTask Hunting</h2>
+
+<p>AsyncTask是一个让人既爱又恨的组件，它提供了一种简便的异步处理机制，但是它又同时引入了一些令人厌恶的麻烦。一旦对AsyncTask使用不当，很可能对程序的性能带来负面影响，同时还可能导致内存泄露。</p>
+
+<p>举个例子，常遇到的一个典型的使用场景：用户切换到某个界面，触发了界面上的图片的加载操作，因为图片的加载相对来说耗时比较长，我们需要在子线程中处理图片的加载，当图片在子线程中处理完成之后，再把处理好的图片返回给主线程，交给UI更新到画面上。</p>
+
+<p><img src="/images/android_perf_5_asynctask_main.png" alt="android_perf_5_asynctask_main" /></p>
+
+<p>AsyncTask的出现就是为了快速的实现上面的使用场景，AsyncTask把在主线程里面的准备工作放到<code>onPreExecute()</code>方法里面进行执行，<code>doInBackground()</code>方法执行在工作线程中，用来处理那些繁重的任务，一旦任务执行完毕，就会调用<code>onPostExecute()</code>方法返回到主线程。</p>
+
+<p><img src="/images/android_perf_5_asynctask_mode.png" alt="android_perf_5_asynctask_mode" /></p>
+
+<p>使用AsyncTask需要注意的问题有哪些呢？请关注以下几点：</p>
+
+<ul>
+<li>首先，默认情况下，所有的AsyncTask任务都是被线性调度执行的，他们处在同一个任务队列当中，按顺序逐个执行。假设你按照顺序启动20个AsyncTask，一旦其中的某个AsyncTask执行时间过长，队列中的其他剩余AsyncTask都处于阻塞状态，必须等到该任务执行完毕之后才能够有机会执行下一个任务。情况如下图所示：</li>
+</ul>
+
+
+<p><img src="/images/android_perf_5_asynctask_single_queue.png" alt="android_perf_5_asynctask_single_queue" /></p>
+
+<p>为了解决上面提到的线性队列等待的问题，我们可以使用<code>AsyncTask.executeOnExecutor()</code>强制指定AsyncTask使用线程池并发调度任务。</p>
+
+<p><img src="/images/android_perf_5_asynctask_thread_pool.png" alt="android_perf_5_asynctask_thread_pool" /></p>
+
+<ul>
+<li>其次，如何才能够真正的取消一个AsyncTask的执行呢？我们知道AsyncTaks有提供<code>cancel()</code>的方法，但是这个方法实际上做了什么事情呢？线程本身并不具备中止正在执行的代码的能力，为了能够让一个线程更早的被销毁，我们需要在<code>doInBackground()</code>的代码中不断的添加程序是否被中止的判断逻辑，如下图所示：</li>
+</ul>
+
+
+<p><img src="/images/android_perf_5_asynctask_cancel.png" alt="android_perf_5_asynctask_cancel" /></p>
+
+<p>一旦任务被成功中止，AsyncTask就不会继续调用<code>onPostExecute()</code>，而是通过调用<code>onCancelled()</code>的回调方法反馈任务执行取消的结果。我们可以根据任务回调到哪个方法（是onPostExecute还是onCancelled）来决定是对UI进行正常的更新还是把对应的任务所占用的内存进行销毁等。</p>
+
+<ul>
+<li>最后，使用AsyncTask很容易导致内存泄漏，一旦把AsyncTask写成Activity的内部类的形式就很容易因为AsyncTask生命周期的不确定而导致Activity发生泄漏。</li>
+</ul>
+
+
+<p><img src="/images/android_perf_5_memory_asynctask.png" alt="android_perf_5_memory_asynctask" /></p>
+
+<p>综上所述，AsyncTask虽然提供了一种简单便捷的异步机制，但是我们还是很有必要特别关注到他的缺点，避免出现因为使用错误而导致的严重系统性能问题。</p>
+
+<h2>5）Getting a HandlerThread</h2>
+
+<p>大多数情况下，AsyncTask都能够满足多线程并发的场景需要（在工作线程执行任务并返回结果到主线程），但是它并不是万能的。例如打开相机之后的预览帧数据是通过<code>onPreviewFrame()</code>的方法进行回调的，<code>onPreviewFrame()</code>和<code>open()</code>相机的方法是执行在同一个线程的。</p>
+
+<p><img src="/images/android_perf_5_handlerthread_camera_open.png" alt="android_perf_5_handlerthread_camera_open" /></p>
+
+<p>如果这个回调方法执行在UI线程，那么在onPreviewFrame()里面将要执行的数据转换操作将和主线程的界面绘制，事件传递等操作争抢系统资源，这就有可能影响到主界面的表现性能。</p>
+
+<p><img src="/images/android_perf_5_handlerthread_main_thread2.png" alt="android_perf_5_handlerthread_main_thread2" /></p>
+
+<p>我们需要确保onPreviewFrame()执行在工作线程。如果使用AsyncTask，会因为AsyncTask默认的线性执行的特性(即使换成并发执行)会导致因为无法把任务及时传递给工作线程而导致任务在主线程中被延迟，直到工作线程空闲，才可以把任务切换到工作线程中进行执行。</p>
+
+<p><img src="/images/android_perf_5_handlerthread_asynctask.png" alt="android_perf_5_handlerthread_asynctask" /></p>
+
+<p>所以我们需要的是一个执行在工作线程，同时又能够处理队列中的复杂任务的功能，而HandlerThread的出现就是为了实现这个功能的，它组合了Handler，MessageQueue，Looper实现了一个长时间运行的线程，不断的从队列中获取任务进行执行的功能。</p>
+
+<p><img src="/images/android_perf_5_handlerthread_outline.png" alt="android_perf_5_handlerthread_outline" /></p>
+
+<p>回到刚才的处理相机回调数据的例子，使用HandlerThread我们可以把open()操作与onPreviewFrame()的操作执行在同一个线程，同时还避免了AsyncTask的弊端。如果需要在onPreviewFrame()里面更新UI，只需要调用runOnUiThread()方法把任务回调给主线程就够了。</p>
+
+<p><img src="/images/android_perf_5_handlerthread_camera.png" alt="android_perf_5_handlerthread_camera" /></p>
+
+<p>HandlerThread比较合适处理那些在工作线程执行，需要花费时间偏长的任务。我们只需要把任务发送给HandlerThread，然后就只需要等待任务执行结束的时候通知返回到主线程就好了。</p>
+
+<p>另外很重要的一点是，一旦我们使用了HandlerThread，需要特别注意给HandlerThread设置不同的线程优先级，CPU会根据设置的不同线程优先级对所有的线程进行调度优化。</p>
+
+<p><img src="/images/android_perf_5_handlerthread_priority.png" alt="android_perf_5_handlerthread_priority" /></p>
+
+<p>掌握HandlerThread与AsyncTask之间的优缺点，可以帮助我们选择合适的方案。</p>
+
+<h2>6）Swimming in Threadpools</h2>
+
+<p>线程池适合用在把任务进行分解，并发进行执行的场景。通常来说，系统里面会针对不同的任务设置一个单独的守护线程用来专门处理这项任务。例如使用Networking Thread用来专门处理网络请求的操作，使用IO Thread用来专门处理系统的I\O操作。针对那些场景，这样设计是没有问题的，因为对应的任务单次执行的时间并不长而且可以是顺序执行的。但是这种专属的单线程并不能满足所有的情况，例如我们需要一次性decode 40张图片，每个线程需要执行4ms的时间，如果我们使用专属单线程的方案，所有图片执行完毕会需要花费160ms(40*4)，但是如果我们创建10个线程，每个线程执行4个任务，那么我们就只需要16ms就能够把所有的图片处理完毕。</p>
+
+<p><img src="/images/android_perf_5_threadpool_1.png" alt="android_perf_5_threadpool_1" /></p>
+
+<p>为了能够实现上面的线程池模型，系统为我们提供了<code>ThreadPoolExecutor</code>帮助类来简化实现，剩下需要做的就只是对任务进行分解就好了。</p>
+
+<p><img src="/images/android_perf_5_threadpool_2.png" alt="android_perf_5_threadpool_2" /></p>
+
+<p>使用线程池需要特别注意同时并发线程数量的控制，理论上来说，我们可以设置任意你想要的并发数量，但是这样做非常的不好。因为CPU只能同时执行固定数量的线程数，一旦同时并发的线程数量超过CPU能够同时执行的阈值，CPU就需要花费精力来判断到底哪些线程的优先级比较高，需要在不同的线程之间进行调度切换。</p>
+
+<p><img src="/images/android_perf_5_threadpool_3.png" alt="android_perf_5_threadpool_3" /></p>
+
+<p>一旦同时并发的线程数量达到一定的量级，这个时候CPU在不同线程之间进行调度的时间就可能过长，反而导致性能严重下降。另外需要关注的一点是，每开一个新的线程，都会耗费至少64K+的内存。为了能够方便的对线程数量进行控制，ThreadPoolExecutor为我们提供了初始化的并发线程数量，以及最大的并发数量进行设置。</p>
+
+<p><img src="/images/android_perf_5_threadpool_4.png" alt="android_perf_5_threadpool_4" /></p>
+
+<p>另外需要关注的一个问题是：<code>Runtime.getRuntime().availableProcesser()</code>方法并不可靠，他返回的值并不是真实的CPU核心数，因为CPU会在某些情况下选择对部分核心进行睡眠处理，在这种情况下，返回的数量就只能是激活的CPU核心数。</p>
+
+<h2>7）The Zen of IntentService</h2>
+
+<p>默认的Service是执行在主线程的，可是通常情况下，这很容易影响到程序的绘制性能(抢占了主线程的资源)。除了前面介绍过的AsyncTask与HandlerThread，我们还可以选择使用IntentService来实现异步操作。IntentService继承自普通Service同时又在内部创建了一个HandlerThread，在<code>onHandlerIntent()</code>的回调里面处理扔到IntentService的任务。所以IntentService就不仅仅具备了异步线程的特性，还同时保留了Service不受主页面生命周期影响的特点。</p>
+
+<p><img src="/images/android_perf_5_intentservice_outline.png" alt="android_perf_5_intentservice_outline" /></p>
+
+<p>如此一来，我们可以在IntentService里面通过设置闹钟间隔性的触发异步任务，例如刷新数据，更新缓存的图片或者是分析用户操作行为等等，当然处理这些任务需要小心谨慎。</p>
+
+<p>使用IntentService需要特别留意以下几点：</p>
+
+<ul>
+<li>首先，因为IntentService内置的是HandlerThread作为异步线程，所以每一个交给IntentService的任务都将以队列的方式逐个被执行到，一旦队列中有某个任务执行时间过长，那么就会导致后续的任务都会被延迟处理。</li>
+<li>其次，通常使用到IntentService的时候，我们会结合使用BroadcastReceiver把工作线程的任务执行结果返回给主UI线程。使用广播容易引起性能问题，我们可以使用LocalBroadcastManager来发送只在程序内部传递的广播，从而提升广播的性能。我们也可以使用<code>runOnUiThread()</code>快速回调到主UI线程。</li>
+<li>最后，包含正在运行的IntentService的程序相比起纯粹的后台程序更不容易被系统杀死，该程序的优先级是介于前台程序与纯后台程序之间的。</li>
+</ul>
+
+
+<h2>8）Threading and Loaders</h2>
+
+<p>当启动工作线程的Activity被销毁的时候，我们应该做点什么呢？为了方便的控制工作线程的启动与结束，Android为我们引入了Loader来解决这个问题。我们知道Activity有可能因为用户的主动切换而频繁的被创建与销毁，也有可能是因为类似屏幕发生旋转等被动原因而销毁再重建。在Activity不停的创建与销毁的过程当中，很有可能因为工作线程持有Activity的View而导致内存泄漏(因为工作线程很可能持有View的强引用，另外工作线程的生命周期还无法保证和Activity的生命周期一致，这样就容易发生内存泄漏了)。除了可能引起内存泄漏之外，在Activity被销毁之后，工作线程还继续更新视图是没有意义的，因为此时视图已经不在界面上显示了。</p>
+
+<p><img src="/images/android_perf_5_loader_bad.png" alt="android_perf_5_loader_bad" /></p>
+
+<p>Loader的出现就是为了确保工作线程能够和Activity的生命周期保持一致，同时避免出现前面提到的问题。</p>
+
+<p><img src="/images/android_perf_5_loader_good.png" alt="android_perf_5_loader_good" /></p>
+
+<p>LoaderManager会对查询的操作进行缓存，只要对应Cursor上的数据源没有发生变化，在配置信息发生改变的时候(例如屏幕的旋转)，Loader可以直接把缓存的数据回调到<code>onLoadFinished()</code>，从而避免重新查询数据。另外系统会在Loader不再需要使用到的时候(例如使用Back按钮退出当前页面)回调<code>onLoaderReset()</code>方法，我们可以在这里做数据的清除等等操作。</p>
+
+<p>在Activity或者Fragment中使用Loader可以方便的实现异步加载的框架，Loader有诸多优点。但是实现Loader的这套代码还是稍微有点点复杂，Android官方为我们提供了使用Loader的<a href="http://developer.android.com/intl/zh-cn/reference/android/content/AsyncTaskLoader.html">示例代码</a>进行参考学习。</p>
+
+<h2>9）The Importance of Thread Priority</h2>
+
+<p>理论上来说，我们的程序可以创建出非常多的子线程一起并发执行的，可是基于CPU时间片轮转调度的机制，不可能所有的线程都可以同时被调度执行，CPU需要根据线程的优先级赋予不同的时间片。</p>
+
+<p><img src="/images/android_perf_5_threadpriority_CPU.png" alt="android_perf_5_threadpriority_CPU" /></p>
+
+<p>Android系统会根据当前运行的可见的程序和不可见的后台程序对线程进行归类，划分为forground的那部分线程会大致占用掉CPU的90%左右的时间片，background的那部分线程就总共只能分享到5%-10%左右的时间片。之所以设计成这样是因为forground的程序本身的优先级就更高，理应得到更多的执行时间。</p>
+
+<p><img src="/images/android_perf_5_threadpriority_90.png" alt="android_perf_5_threadpriority_90" /></p>
+
+<p>默认情况下，新创建的线程的优先级默认和创建它的母线程保持一致。如果主UI线程创建出了几十个工作线程，这些工作线程的优先级就默认和主线程保持一致了，为了不让新创建的工作线程和主线程抢占CPU资源，需要把这些线程的优先级进行降低处理，这样才能给帮组CPU识别主次，提高主线程所能得到的系统资源。</p>
+
+<p><img src="/images/android_perf_5_threadpriority_less.png" alt="android_perf_5_threadpriority_less" /></p>
+
+<p>在Android系统里面，我们可以通过<code>android.os.Process.setThreadPriority(int)</code>设置线程的优先级，参数范围从-20到24，数值越小优先级越高。Android系统还为我们提供了以下的一些预设值，我们可以通过给不同的工作线程设置不同数值的优先级来达到更细粒度的控制。</p>
+
+<p><img src="/images/android_perf_5_threadpriority_const.png" alt="android_perf_5_threadpriority_const" /></p>
+
+<p>大多数情况下，新创建的线程优先级会被设置为默认的0，主线程设置为0的时候，新创建的线程还可以利用<code>THREAD_PRIORITY_LESS_FAVORABLE</code>或者<code>THREAD_PRIORITY_MORE_FAVORABLE</code>来控制线程的优先级。</p>
+
+<p><img src="/images/android_perf_5_threadpriority_value.png" alt="android_perf_5_threadpriority_value" /></p>
+
+<p>Android系统里面的AsyncTask与IntentService已经默认帮助我们设置线程的优先级，但是对于那些非官方提供的多线程工具类，我们需要特别留意根据需要自己手动来设置线程的优先级。</p>
+
+<p><img src="/images/android_perf_5_threadpriority_asynctask.png" alt="android_perf_5_threadpriority_asynctask" />
+<img src="/images/android_perf_5_threadpriority_intentservice.png" alt="android_perf_5_threadpriority_intentservice" /></p>
+
+<h2>10）Profile GPU Rendering : M Update</h2>
+
+<p>从Android M系统开始，系统更新了GPU Profiling的工具来帮助我们定位UI的渲染性能问题。早期的CPU Profiling工具只能粗略的显示出Process，Execute，Update三大步骤的时间耗费情况。</p>
+
+<p><img src="/images/android_perf_5_gpu_profiling_old.png" alt="android_perf_5_gpu_profiling_old" /></p>
+
+<p>但是仅仅显示三大步骤的时间耗费情况，还是不太能够清晰帮助我们定位具体的程序代码问题，所以在Android M版本开始，GPU Profiling工具把渲染操作拆解成如下8个详细的步骤进行显示。</p>
+
+<p><img src="/images/android_perf_5_gpu_profiling_8steps.png" alt="android_perf_5_gpu_profiling_8steps" /></p>
+
+<p>旧版本中提到的Proces，Execute，Update还是继续得到了保留，他们的对应关系如下：</p>
+
+<p><img src="/images/android_perf_5_gpu_profiling_3steps.png" alt="android_perf_5_gpu_profiling_3steps" /></p>
+
+<p>接下去我们看下其他五个步骤分别代表了什么含义：</p>
+
+<ul>
+<li><strong>Sync &amp; Upload</strong>：通常表示的是准备当前界面上有待绘制的图片所耗费的时间，为了减少该段区域的执行时间，我们可以减少屏幕上的图片数量或者是缩小图片本身的大小。</li>
+<li><strong>Measure &amp; Layout</strong>：这里表示的是布局的onMeasure与onLayout所花费的时间，一旦时间过长，就需要仔细检查自己的布局是不是存在严重的性能问题。</li>
+<li><strong>Animation</strong>：表示的是计算执行动画所需要花费的时间，包含的动画有ObjectAnimator，ViewPropertyAnimator，Transition等等。一旦这里的执行时间过长，就需要检查是不是使用了非官方的动画工具或者是检查动画执行的过程中是不是触发了读写操作等等。</li>
+<li><strong>Input Handling</strong>：表示的是系统处理输入事件所耗费的时间，粗略等于对于的事件处理方法所执行的时间。一旦执行时间过长，意味着在处理用户的输入事件的地方执行了复杂的操作。</li>
+<li><strong>Misc/Vsync Delay</strong>：如果稍加注意，我们可以在开发应用的Log日志里面看到这样一行提示：I/Choreographer(691): Skipped XXX frames! The application may be doing too much work on its main thread。这意味着我们在主线程执行了太多的任务，导致UI渲染跟不上vSync的信号而出现掉帧的情况。</li>
+</ul>
+
+
+<!-- ![android_perf_5_gpu_profiling_sync_upload](/images/android_perf_5_gpu_profiling_sync_upload.png) -->
+
+
+<!-- ![android_perf_5_gpu_profiling_vsync](/images/android_perf_5_gpu_profiling_vsync.png)
+ -->
+
+
+<!-- ![android_perf_5_gpu_profiling_measure](/images/android_perf_5_gpu_profiling_measure.png) -->
+
+
+<p>上面八种不同的颜色区分了不同的操作所耗费的时间，为了便于我们迅速找出那些有问题的步骤，GPU Profiling工具会显示16ms的阈值线，这样就很容易找出那些不合理的性能问题，再仔细看对应具体哪个步骤相对来说耗费时间比例更大，结合上面介绍的细化步骤，从而快速定位问题，修复问题。</p>
+
+<hr />
+
+<p>首发于CSDN：<a href="http://ms.csdn.net/geek/71031">Android性能优化典范（五）</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Android性能优化典范 - 第4季]]></title>
     <link href="http://hukai.me/android-performance-patterns-season-4/"/>
     <updated>2015-12-31T23:39:00+08:00</updated>
     <id>http://hukai.me/android-performance-patterns-season-4</id>
     <content type="html"><![CDATA[<p><img src="/images/android_perf_patterns_season_4.png" alt="android_perf_patterns_season_4" /></p>
 
-<p><a href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">Android性能优化典范</a>第4季的课程学习笔记终于在2015年的最后一天完成了，文章共17个段落，包含的内容大致有：优化网络请求的行为，优化安装包的资源文件，优化数据传输的效率，性能优化的几大基础原理等等。因为学习认知水平有限，肯定存在不少理解偏差甚至错误的地方，请多多交流指正！</p>
+<blockquote><p><a href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">Android性能优化典范</a>第4季的课程学习笔记终于在2015年的最后一天完成了，文章共17个段落，包含的内容大致有：优化网络请求的行为，优化安装包的资源文件，优化数据传输的效率，性能优化的几大基础原理等等。因为学习认知水平有限，肯定存在不少理解偏差甚至错误的地方，请多多交流指正！</p></blockquote>
 
 <h2>1)Cachematters for networking</h2>
 
@@ -354,7 +636,7 @@
     <link href="http://hukai.me/android-performance-oom/"/>
     <updated>2015-09-12T14:53:00+08:00</updated>
     <id>http://hukai.me/android-performance-oom</id>
-    <content type="html"><![CDATA[<p>Android的内存优化是性能优化中很重要的一部分，而避免OOM又是内存优化中比较核心的一点，这是一篇关于内存优化中如何避免OOM的总结性概要文章，内容大多都是和OOM有关的实践总结概要。理解错误或是偏差的地方，还请多包涵指正，谢谢！</p>
+    <content type="html"><![CDATA[<blockquote><p>Android的内存优化是性能优化中很重要的一部分，而避免OOM又是内存优化中比较核心的一点，这是一篇关于内存优化中如何避免OOM的总结性概要文章，内容大多都是和OOM有关的实践总结概要。理解错误或是偏差的地方，还请多包涵指正，谢谢！</p></blockquote>
 
 <h2>(一)Android的内存管理机制</h2>
 
@@ -757,7 +1039,7 @@ Android 4.x的系统废除了external的计数器，类似bitmap的分配改到d
     <id>http://hukai.me/android-performance-patterns-season-3</id>
     <content type="html"><![CDATA[<p><img src="/images/android_perf_patterns_season_3.png" alt="android_perf_patterns_season_3" /></p>
 
-<p><a href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">Android性能优化典范</a>的课程最近更新到第三季了，这次一共12个短视频课程，包括的内容大致有：更高效的ArrayMap容器，使用Android系统提供的特殊容器来避免自动装箱，避免使用枚举类型，注意onLowMemory与onTrimMemory的回调，避免内存泄漏，高效的位置更新操作，重复layout操作的性能影响，以及使用Batching，Prefetching优化网络请求，压缩传输数据等等使用技巧。下面是对这些课程的总结摘要，认知有限，理解偏差的地方请多多交流指正！</p>
+<blockquote><p><a href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">Android性能优化典范</a>的课程最近更新到第三季了，这次一共12个短视频课程，包括的内容大致有：更高效的ArrayMap容器，使用Android系统提供的特殊容器来避免自动装箱，避免使用枚举类型，注意onLowMemory与onTrimMemory的回调，避免内存泄漏，高效的位置更新操作，重复layout操作的性能影响，以及使用Batching，Prefetching优化网络请求，压缩传输数据等等使用技巧。下面是对这些课程的总结摘要，认知有限，理解偏差的地方请多多交流指正！</p></blockquote>
 
 <h2>1)Fun with ArrayMaps</h2>
 
@@ -1024,8 +1306,8 @@ Android 4.x的系统废除了external的计数器，类似bitmap的分配改到d
     <id>http://hukai.me/android-performance-patterns-season-2</id>
     <content type="html"><![CDATA[<p><img src="/images/android_perf_patterns_season_2.png" alt="android_perf_patterns_season_2" /></p>
 
-<p>Google前几天刚发布了<a href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">Android性能优化典范第2季</a>的课程，一共20个短视频，包括的内容大致有：电量优化，网络优化，Wear上如何做优化，使用对象池来提高效率，LRU Cache，Bitmap的缩放，缓存，重用，PNG压缩，自定义View的性能，提升设置alpha之后View的渲染性能，以及Lint，StictMode等等工具的使用技巧。
-下面是对这些课程的总结摘要，认知有限，理解偏差的地方请多多指教！</p>
+<blockquote><p>Google前几天刚发布了<a href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">Android性能优化典范第2季</a>的课程，一共20个短视频，包括的内容大致有：电量优化，网络优化，Wear上如何做优化，使用对象池来提高效率，LRU Cache，Bitmap的缩放，缓存，重用，PNG压缩，自定义View的性能，提升设置alpha之后View的渲染性能，以及Lint，StictMode等等工具的使用技巧。
+下面是对这些课程的总结摘要，认知有限，理解偏差的地方请多多指教！</p></blockquote>
 
 <h2>1)Battery Drain and Networking</h2>
 
@@ -1380,335 +1662,6 @@ public void onCreate() {</p>
 <p>围绕Android生态系统，不仅仅有Phone，还有Wear，TV，Auto等等。对这些不同形态的程序进行性能优化，都离不开内存调试这个步骤。这节中介绍的内容大部分和<a href="http://hukai.me/android-performance-patterns/">Android性能优化典范</a>与<a href="http://hukai.me/android-performance-memory/">Android性能优化之内存篇</a>重合，不展开了。</p>
 
 <p>首发于CSDN：<a href="http://www.csdn.net/article/2015-04-29/2824583-android-performance-patterns-season-2">Android性能优化典范（二）</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android性能优化之电量篇]]></title>
-    <link href="http://hukai.me/android-performance-battery/"/>
-    <updated>2015-04-12T16:49:00+08:00</updated>
-    <id>http://hukai.me/android-performance-battery</id>
-    <content type="html"><![CDATA[<p><img src="/images/android_performance_course_udacity.jpg" alt="android_performance_course_udacity" /></p>
-
-<p>Google近期在Udacity上发布了<a href="https://www.udacity.com/course/ud825">Android性能优化的在线课程</a>，分别从渲染，运算与内存，电量几个方面介绍了如何去优化性能，这些课程是Google之前在Youtube上发布的<a href="http://hukai.me/android-performance-patterns/">Android性能优化典范</a>专题课程的细化与补充。</p>
-
-<p>下面是电量篇章的学习笔记，部分内容与前面的性能优化典范有重合，欢迎大家一起学习交流！</p>
-
-<h3>1)Understanding Battery Drain</h3>
-
-<p>手机各个硬件模块的耗电量是不一样的，有些模块非常耗电，而有些模块则相对显得耗电量小很多。</p>
-
-<p><img src="/images/android_perf_battery_drain.png" alt="android_perf_battery_drain" /></p>
-
-<p>电量消耗的计算与统计是一件麻烦而且矛盾的事情，记录电量消耗本身也是一个费电量的事情。唯一可行的方案是使用第三方监测电量的设备，这样才能够获取到真实的电量消耗。</p>
-
-<p>当设备处于待机状态时消耗的电量是极少的，以N5为例，打开飞行模式，可以待机接近1个月。可是点亮屏幕，硬件各个模块就需要开始工作，这会需要消耗很多电量。</p>
-
-<p>使用WakeLock或者JobScheduler唤醒设备处理定时的任务之后，一定要及时让设备回到初始状态。每次唤醒蜂窝信号进行数据传递，都会消耗很多电量，它比WiFi等操作更加的耗电。</p>
-
-<!-- More -->
-
-
-<p><img src="/images/battery_drain_radio.png" alt="battery_drain_radio" /></p>
-
-<h3>2)Battery Historian</h3>
-
-<p><a href="https://developer.android.com/about/versions/android-5.0.html#Power">Battery Historian</a>是Android 5.0开始引入的新API。通过下面的指令，可以得到设备上的电量消耗信息：</p>
-
-<p><code>bash
-$ adb shell dumpsys batterystats &gt; xxx.txt  //得到整个设备的电量消耗信息
-$ adb shell dumpsys batterystats &gt; com.package.name &gt; xxx.txt //得到指定app相关的电量消耗信息
-</code></p>
-
-<p>得到了原始的电量消耗数据之后，我们需要通过Google编写的一个<a href="https://github.com/google/battery-historian">python脚本</a>把数据信息转换成可读性更好的html文件：</p>
-
-<p><code>bash
-$ python historian.py xxx.txt &gt; xxx.html
-</code></p>
-
-<p>打开这个转换过后的html文件，可以看到类似TraceView生成的列表数据，这里的数据信息量很大，这里就不展开了。</p>
-
-<p><img src="/images/android_perf_battery_historian.png" alt="android_perf_battery_historian" /></p>
-
-<h3>3)Track Battery Status &amp; Battery Manager</h3>
-
-<p>我们可以通过下面的代码来获取手机的当前充电状态：</p>
-
-<p>```java
-// It is very easy to subscribe to changes to the battery state, but you can get the current
-// state by simply passing null in as your receiver.  Nifty, isn't that?
-IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-Intent batteryStatus = this.registerReceiver(null, filter);
-int chargePlug = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
-boolean acCharge = (chargePlug == BatteryManager.BATTERY_PLUGGED_AC);
-if (acCharge) {</p>
-
-<pre><code>Log.v(LOG_TAG,“The phone is charging!”);
-</code></pre>
-
-<p>}
-```</p>
-
-<p>在上面的例子演示了如何立即获取到手机的充电状态，得到充电状态信息之后，我们可以有针对性的对部分代码做优化。比如我们可以判断只有当前手机为AC充电状态时
-才去执行一些非常耗电的操作。</p>
-
-<p>```java
-/<em>*
- * This method checks for power by comparing the current battery state against all possible
- * plugged in states. In this case, a device may be considered plugged in either by USB, AC, or
- * wireless charge. (Wireless charge was introduced in API Level 17.)
- </em>/
-private boolean checkForPower() {</p>
-
-<pre><code>// It is very easy to subscribe to changes to the battery state, but you can get the current
-// state by simply passing null in as your receiver.  Nifty, isn't that?
-IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-Intent batteryStatus = this.registerReceiver(null, filter);
-
-// There are currently three ways a device can be plugged in. We should check them all.
-int chargePlug = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
-boolean usbCharge = (chargePlug == BatteryManager.BATTERY_PLUGGED_USB);
-boolean acCharge = (chargePlug == BatteryManager.BATTERY_PLUGGED_AC);
-boolean wirelessCharge = false;
-if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-    wirelessCharge = (chargePlug == BatteryManager.BATTERY_PLUGGED_WIRELESS);
-}
-return (usbCharge || acCharge || wirelessCharge);
-</code></pre>
-
-<p>}
-```</p>
-
-<h3>4)Wakelock and Battery Drain</h3>
-
-<p>高效的保留更多的电量与不断促使用户使用你的App会消耗电量，这是矛盾的选择题。不过我们可以使用一些更好的办法来平衡两者。</p>
-
-<p>假设你的手机里面装了大量的社交类应用，即使手机处于待机状态，也会经常被这些应用唤醒用来检查同步新的数据信息。Android会不断关闭各种硬件来延长手机的待机时间，首先屏幕会逐渐变暗直至关闭，然后CPU进入睡眠，这一切操作都是为了节约宝贵的电量资源。但是即使在这种睡眠状态下，大多数应用还是会尝试进行工作，他们将不断的唤醒手机。一个最简单的唤醒手机的方法是使用PowerManager.WakeLock的API来保持CPU工作并防止屏幕变暗关闭。这使得手机可以被唤醒，执行工作，然后回到睡眠状态。知道如何获取WakeLock是简单的，可是及时释放WakeLock也是非常重要的，不恰当的使用WakeLock会导致严重错误。例如网络请求的数据返回时间不确定，导致本来只需要10s的事情一直等待了1个小时，这样会使得电量白白浪费了。这也是为何使用带超时参数的wakelock.acquice()方法是很关键的。</p>
-
-<p>但是仅仅设置超时并不足够解决问题，例如设置多长的超时比较合适？什么时候进行重试等等？解决上面的问题，正确的方式可能是使用非精准定时器。通常情况下，我们会设定一个时间进行某个操作，但是动态修改这个时间也许会更好。例如，如果有另外一个程序需要比你设定的时间晚5分钟唤醒，最好能够等到那个时候，两个任务捆绑一起同时进行，这就是非精确定时器的核心工作原理。我们可以定制计划的任务，可是系统如果检测到一个更好的时间，它可以推迟你的任务，以节省电量消耗。</p>
-
-<p><img src="/images/alarmmanager_inexact_wakelock.png" alt="alarmmanager_inexact_wakelock" /></p>
-
-<p>这正是JobScheduler API所做的事情。它会根据当前的情况与任务，组合出理想的唤醒时间，例如等到正在充电或者连接到WiFi的时候，或者集中任务一起执行。我们可以通过这个API实现很多免费的调度算法。</p>
-
-<h3>5)Network and Battery Drain</h3>
-
-<p>下面内容来自官方Training文档中<a href="http://hukai.me/android-training-course-in-chinese/connectivity/efficient-downloads/efficient-network-access.html">高效下载</a>章节关于手机(Radio)蜂窝信号对电量消耗的介绍。</p>
-
-<p>通常情况下，使用3G移动网络传输数据，电量的消耗有三种状态：</p>
-
-<ul>
-<li><strong>Full power</strong>: 能量最高的状态，移动网络连接被激活，允许设备以最大的传输速率进行操作。</li>
-<li><strong>Low power</strong>: 一种中间状态，对电量的消耗差不多是Full power状态下的50%。</li>
-<li><strong>Standby</strong>: 最低的状态，没有数据连接需要传输，电量消耗最少。</li>
-</ul>
-
-
-<p>下图是一个典型的3G Radio State Machine的图示(来自AT&amp;T，详情请点击<a href="http://www.research.att.com/articles/featured_stories/2011_03/201102_Energy_efficient?fbid=SYuI20FzBum">这里</a>):</p>
-
-<p><img src="/images/mobile_radio_state_machine.png" title="Figure 1. Typical 3G wireless radio state machine." alt="mobile_radio_state_machine.png" /></p>
-
-<p><strong>总之，为了减少电量的消耗，在蜂窝移动网络下，最好做到批量执行网络请求，尽量避免频繁的间隔网络请求。</strong></p>
-
-<p>通过前面学习到的Battery Historian我们可以得到设备的电量消耗数据，如果数据中的移动蜂窝网络(Mobile Radio)电量消耗呈现下面的情况，间隔很小，又频繁断断续续的出现，说明电量消耗性能很不好：</p>
-
-<p><img src="/images/android_perf_battery_bad.png" alt="android_perf_battery_bad.png" /></p>
-
-<p>经过优化之后，如果呈现下面的图示，说明电量消耗的性能是良好的：</p>
-
-<p><img src="/images/android_perf_battery_good.png" alt="android_perf_battery_good" /></p>
-
-<p>另外WiFi连接下，网络传输的电量消耗要比移动网络少很多，应该尽量减少移动网络下的数据传输，多在WiFi环境下传输数据。</p>
-
-<p><img src="/images/android_perf_battery_wifi.png" alt="android_perf_battery_wifi" /></p>
-
-<p>那么如何才能够把任务缓存起来，做到批量化执行呢？下面就轮到Job Scheduler出场了。</p>
-
-<h3>6)Using Job Scheduler</h3>
-
-<p>使用<a href="https://developer.android.com/reference/android/app/job/JobScheduler.html">Job Scheduler</a>，应用需要做的事情就是判断哪些任务是不紧急的，可以交给Job Scheduler来处理，Job Scheduler集中处理收到的任务，选择合适的时间，合适的网络，再一起进行执行。</p>
-
-<p>下面是使用Job Scheduler的一段简要示例，需要先有一个JobService：</p>
-
-<p>```java
-public class MyJobService extends JobService {</p>
-
-<pre><code>private static final String LOG_TAG = "MyJobService";
-
-@Override
-public void onCreate() {
-    super.onCreate();
-    Log.i(LOG_TAG, "MyJobService created");
-}
-
-@Override
-public void onDestroy() {
-    super.onDestroy();
-    Log.i(LOG_TAG, "MyJobService destroyed");
-}
-
-@Override
-public boolean onStartJob(JobParameters params) {
-    // This is where you would implement all of the logic for your job. Note that this runs
-    // on the main thread, so you will want to use a separate thread for asynchronous work
-    // (as we demonstrate below to establish a network connection).
-    // If you use a separate thread, return true to indicate that you need a "reschedule" to
-    // return to the job at some point in the future to finish processing the work. Otherwise,
-    // return false when finished.
-    Log.i(LOG_TAG, "Totally and completely working on job " + params.getJobId());
-    // First, check the network, and then attempt to connect.
-    if (isNetworkConnected()) {
-        new SimpleDownloadTask() .execute(params);
-        return true;
-    } else {
-        Log.i(LOG_TAG, "No connection on job " + params.getJobId() + "; sad face");
-    }
-    return false;
-}
-
-@Override
-public boolean onStopJob(JobParameters params) {
-    // Called if the job must be stopped before jobFinished() has been called. This may
-    // happen if the requirements are no longer being met, such as the user no longer
-    // connecting to WiFi, or the device no longer being idle. Use this callback to resolve
-    // anything that may cause your application to misbehave from the job being halted.
-    // Return true if the job should be rescheduled based on the retry criteria specified
-    // when the job was created or return false to drop the job. Regardless of the value
-    // returned, your job must stop executing.
-    Log.i(LOG_TAG, "Whelp, something changed, so I'm calling it on job " + params.getJobId());
-    return false;
-}
-
-/**
- * Determines if the device is currently online.
- */
-private boolean isNetworkConnected() {
-    ConnectivityManager connectivityManager =
-            (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-    NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-    return (networkInfo != null &amp;&amp; networkInfo.isConnected());
-}
-
-/**
- *  Uses AsyncTask to create a task away from the main UI thread. This task creates a
- *  HTTPUrlConnection, and then downloads the contents of the webpage as an InputStream.
- *  The InputStream is then converted to a String, which is logged by the
- *  onPostExecute() method.
- */
-private class SimpleDownloadTask extends AsyncTask&lt;JobParameters, Void, String&gt; {
-
-    protected JobParameters mJobParam;
-
-    @Override
-    protected String doInBackground(JobParameters... params) {
-        // cache system provided job requirements
-        mJobParam = params[0];
-        try {
-            InputStream is = null;
-            // Only display the first 50 characters of the retrieved web page content.
-            int len = 50;
-
-            URL url = new URL("https://www.google.com");
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setReadTimeout(10000); //10sec
-            conn.setConnectTimeout(15000); //15sec
-            conn.setRequestMethod("GET");
-            //Starts the query
-            conn.connect();
-            int response = conn.getResponseCode();
-            Log.d(LOG_TAG, "The response is: " + response);
-            is = conn.getInputStream();
-
-            // Convert the input stream to a string
-            Reader reader = null;
-            reader = new InputStreamReader(is, "UTF-8");
-            char[] buffer = new char[len];
-            reader.read(buffer);
-            return new String(buffer);
-
-        } catch (IOException e) {
-            return "Unable to retrieve web page.";
-        }
-    }
-
-    @Override
-    protected void onPostExecute(String result) {
-        jobFinished(mJobParam, false);
-        Log.i(LOG_TAG, result);
-    }
-}
-</code></pre>
-
-<p>}
-```</p>
-
-<p>然后模拟通过点击Button触发N个任务，交给JobService来处理</p>
-
-<p>```java
-public class FreeTheWakelockActivity extends ActionBarActivity {</p>
-
-<pre><code>public static final String LOG_TAG = "FreeTheWakelockActivity";
-
-TextView mWakeLockMsg;
-ComponentName mServiceComponent;
-
-@Override
-protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_wakelock);
-
-    mWakeLockMsg = (TextView) findViewById(R.id.wakelock_txt);
-    mServiceComponent = new ComponentName(this, MyJobService.class);
-    Intent startServiceIntent = new Intent(this, MyJobService.class);
-    startService(startServiceIntent);
-
-    Button theButtonThatWakelocks = (Button) findViewById(R.id.wakelock_poll);
-    theButtonThatWakelocks.setText(R.string.poll_server_button);
-
-    theButtonThatWakelocks.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-                pollServer();
-        }
-    });
-}
-
-/**
- * This method polls the server via the JobScheduler API. By scheduling the job with this API,
- * your app can be confident it will execute, but without the need for a wake lock. Rather, the
- * API will take your network jobs and execute them in batch to best take advantage of the
- * initial network connection cost.
- *
- * The JobScheduler API works through a background service. In this sample, we have
- * a simple service in MyJobService to get you started. The job is scheduled here in
- * the activity, but the job itself is executed in MyJobService in the startJob() method. For
- * example, to poll your server, you would create the network connection, send your GET
- * request, and then process the response all in MyJobService. This allows the JobScheduler API
- * to invoke your logic without needed to restart your activity.
- *
- * For brevity in the sample, we are scheduling the same job several times in quick succession,
- * but again, try to consider similar tasks occurring over time in your application that can
- * afford to wait and may benefit from batching.
- */
-public void pollServer() {
-    JobScheduler scheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
-    for (int i=0; i&lt;10; i++) {
-        JobInfo jobInfo = new JobInfo.Builder(i, mServiceComponent)
-                .setMinimumLatency(5000) // 5 seconds
-                .setOverrideDeadline(60000) // 60 seconds (for brevity in the sample)
-                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY) // WiFi or data connections
-                .build();
-
-        mWakeLockMsg.append("Scheduling job " + i + "!\n");
-        scheduler.schedule(jobInfo);
-    }
-}
-</code></pre>
-
-<p>}
-```</p>
-
-<p><strong>Notes:</strong>关于更多电量优化，还有一篇文章，请点击<a href="http://developer.android.com/training/efficient-downloads/index.html">这里</a></p>
 ]]></content>
   </entry>
   
