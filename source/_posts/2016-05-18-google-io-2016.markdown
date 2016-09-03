@@ -17,6 +17,8 @@ categories: Android Google
 
 到达旧金山机场，去提取事先租好的车，自驾
 
+<!-- More -->
+
 ![google_io_2016_02](/images/google_io_2016_02.JPG)
 
 ![google_io_2016_03](/images/google_io_2016_03.JPG)
