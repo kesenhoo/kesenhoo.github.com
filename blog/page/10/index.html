@@ -9,7 +9,7 @@
   <meta name="author" content="HuKai">
 
   
-  <meta name="description" content="自定义view的最重要的一个部分是自定义它的外观。根据你的程序的需求，自定义绘制动作可能简单也可能很复杂。这节课会演示一些最常见的操作。 Override onDraw() 重绘一个自定义的view的最重要的步骤是重写onDraw()方法。onDraw()的参数是一个Canvas对象。 &hellip;">
+  <meta name="description" content="前面的课程学习到了如何创建设计良好的View，并且能够使之在手势与状态切换时得到正确的反馈。下面要介绍的是如何使得view能够执行更快。为了避免UI显得卡顿，你必须确保动画能够保持在60fps以上。 ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +81,96 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-training-creating-custom-views-lesson-4/">Android Training - 创建自定义的Views(Lesson 4 - 优化Views)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-18T17:30:00+08:00" pubdate data-updated="true">Aug 18<span>th</span>, 2013</time>
+        
+         | <a href="/android-training-creating-custom-views-lesson-4/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>前面的课程学习到了如何创建设计良好的View，并且能够使之在手势与状态切换时得到正确的反馈。下面要介绍的是如何使得view能够执行更快。为了避免UI显得卡顿，你必须确保动画能够保持在60fps以上。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-training-creating-custom-views-lesson-4/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-training-creating-custom-views-lesson-3/">Android Training - 创建自定义的Views(Lesson 3 - 处理View的交互性)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-18T15:01:00+08:00" pubdate data-updated="true">Aug 18<span>th</span>, 2013</time>
+        
+         | <a href="/android-training-creating-custom-views-lesson-3/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>绘制UI仅仅是创建自定义View的一部分。你还需要使得你的View能够以模拟现实世界的方式来进行反馈。Objects应该总是与现实情景能够保持一致。例如，图片不应该突然消失又从另外一个地方出现，因为在现实世界里面不会发生那样的事情。正确的应该是，图片从一个地方移动到另外一个地方。</p>
+
+<p>用户应该可以感受到UI上的微小变化，并对这些变化反馈到现实世界中。例如，当用户做fling(迅速滑动)的动作，应该再滑动开始与结束的时候给用户一定的反馈。</p>
+
+<p>这节课会演示如何使用Android framework的功能来为自定义的View添加那些现实世界中的行为。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-training-creating-custom-views-lesson-3/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -184,122 +274,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-creating-custom-views-lesson-0/">Android Training - 创建自定义的Views(Lesson 0 - 章节概览)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-06-30T18:23:00+08:00" pubdate data-updated="true">Jun 30<span>th</span>, 2013</time>
-        
-         | <a href="/android-training-creating-custom-views-lesson-0/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Android的framework有大量的Views用来与用户进行交互并显示不同种类的数据。但是有时候你的程序有个特殊的需求，而Android内置的views组件并不能实现。这一章节会演示如何创建你自己的views，并使得它们是robust与reusable的。</p>
-
-<p><strong>Dependencies and Prerequisites</strong></p>
-
-<p>Android 2.1 (API level 7) or higher</p>
-
-<p><strong>YOU should also read</strong></p>
-
-<ul>
-<li><a href="http://developer.android.com/guide/topics/ui/custom-components.html">Custom Components</a></li>
-<li><a href="http://developer.android.com/guide/topics/ui/ui-events.html">Input Events</a></li>
-<li><a href="http://developer.android.com/guide/topics/graphics/prop-animation.html">Property Animation</a></li>
-<li><a href="http://developer.android.com/guide/topics/graphics/hardware-accel.html">Hardware Acceleration</a></li>
-<li><a href="http://developer.android.com/guide/topics/ui/accessibility/index.html">Accessibility</a> developer guide</li>
-</ul>
-
-
-<p><strong>Try it out</strong></p>
-
-<p>Download the sample<br/>
-<a href="http://developer.android.com/shareables/training/CustomView.zip">CustomView.zip</a></p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-creating-custom-views-lesson-0/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-displaying-bitmaps-efficiently-lesson-4/">Android Training - 高效地显示Bitmap(Lesson 4 - 优化Bitmap的内存使用)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-05-19T14:43:00+08:00" pubdate data-updated="true">May 19<span>th</span>, 2013</time>
-        
-         | <a href="/android-training-displaying-bitmaps-efficiently-lesson-4/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>作为缓存Bitmaps的进一步延伸, 为了促进GC与bitmap的重用，你还有一些特定的事情可以做. 推荐的策略会根据Android的版本不同而有所差异. <a href="http://developer.android.com/shareables/training/BitmapFun.zip">BitmapFun</a>的示例程序会演示如何设计你的程序使得能够在不同的Android平台上高效的运行.</p>
-
-<p>我们首先要知道Android管理bitmap memory的演变进程:</p>
-
-<ul>
-<li>在Android 2.2 (API level 8)以及之前, 当GC发生时, 你的应用的线程是会stopped的. 这导致了一个滞后，它会降低效率. <strong>在Android 2.3上，添加了并发GC的机制, 这意味着在一个bitmap不再被引用到之后，内存会被立即reclaimed.</strong></li>
-<li>在Android 2.3.3 (API level 10)已经之后, 一个bitmap的像素级数据是存放在native内存中的. 这些数据与bitmap本身是隔离的, bitmap本身是被存放在Dalvik heap中. 在native内存中的pixel数据不是以可以预测的方式去释放的, 这意味着有可能导致一个程序容易超过它的内存限制并Crash. <strong>在Android 3.0 (API Level 11), pixel数据则是与bitmap本身一起存放在dalvik heap中.</strong></li>
-</ul>
-
-
-<p>下面会介绍如何在不同的Android版本上优化bitmap内存使用.</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-displaying-bitmaps-efficiently-lesson-4/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/11/">&larr; Older</a>
@@ -315,6 +289,14 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-performance-patterns-season-6/">Android性能优化典范 - 第6季</a>
+      </li>
+    
+      <li class="post">
+        <a href="/google-io-2016/">Google I/O 2016随笔</a>
+      </li>
     
       <li class="post">
         <a href="/android-performance-patterns-season-5/">Android性能优化典范 - 第5季</a>
@@ -340,25 +322,18 @@
         <a href="/android-performance-patterns-season-2/">Android性能优化典范 - 第2季</a>
       </li>
     
-      <li class="post">
-        <a href="/android-performance-battery/">Android性能优化之电量篇</a>
-      </li>
-    
-      <li class="post">
-        <a href="/android-performance-memory/">Android性能优化之内存篇</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (98)</a></li>
+  <li><a href='/blog/categories/android'>Android (100)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
-  <li><a href='/blog/categories/android-performance'>Android:performance (21)</a></li>
+  <li><a href='/blog/categories/android-performance'>Android:performance (22)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
+  <li><a href='/blog/categories/google'>Google (1)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
 </ul>

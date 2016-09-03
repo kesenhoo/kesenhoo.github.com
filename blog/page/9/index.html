@@ -9,16 +9,7 @@
   <meta name="author" content="HuKai">
 
   
-  <meta name="description" content="这里不赘述单例模式的概念了，直接演示几种不同的实现方式。 0)Eager initialization 如果程序一开始就需要某个单例，并且创建这个单例并不那么费时，我们可以考虑用这种方式： 1
-2
-3
-4
-5
-6
-7
-8
-9
-public class Singleton { private &hellip;">
+  <meta name="description" content="写在开始：接下去的一段时间会学习专题《Background Jobs》的几篇文章，演示如何在后台执行任务，以此加速程序的性能并降低能耗的使用。第一章节会学习如何通过发送任务到后台的Service中执行，从而提示UI的表现性能。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -90,6 +81,126 @@ public class Singleton { private &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-training-running-background-service-lesson-1/">Android Training - 使用IntentService执行任务(Lesson 1 - 创建IntentService)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-14T18:30:00+08:00" pubdate data-updated="true">Apr 14<span>th</span>, 2014</time>
+        
+         | <a href="/android-training-running-background-service-lesson-1/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><strong>写在开始：</strong>接下去的一段时间会学习专题《Background Jobs》的几篇文章，演示如何在后台执行任务，以此加速程序的性能并降低能耗的使用。第一章节会学习如何通过发送任务到后台的Service中执行，从而提示UI的表现性能。</p>
+
+<p>IntentService为在单一后台线程中执行任务提供了一种直接的实现方式。它可以处理一个耗时的任务并确保不影响到UI的响应性。另外IntentService的执行还不受UI生命周期的影响，以此来确保AsyncTask能够顺利运行。</p>
+
+<p>但是IntentService有下面几个局限性：</p>
+
+<ul>
+<li>不可以直接和UI做交互。为了把他执行的结果体现在UI上，需要把结果返回给Activity。</li>
+<li>工作任务队列是顺序执行的，如果一个任务正在IntentService中执行，此时你再发送一个新的任务请求，这个新的任务会一直等待直到前面一个任务执行完毕才开始执行。</li>
+<li>正在执行的任务无法打断。</li>
+</ul>
+
+
+<p>虽然有上面那些限制，然而在在大多数情况下，IntentService都是执行简单后台任务操作的理想选择。</p>
+
+<p>这节课会演示如何创建继承的IntentService。同样也会演示如何创建必须的回调方法<code>onHandleIntent()</code>。最后，还会解释如何在manifest文件中定义这个IntentService。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-training-running-background-service-lesson-1/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-deeper-touch-event-dispatch-process/">Android Deeper(00) - Touch事件分发响应机制</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-05T13:13:00+08:00" pubdate data-updated="true">Apr 5<span>th</span>, 2014</time>
+        
+         | <a href="/android-deeper-touch-event-dispatch-process/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>1)概述</h2>
+
+<p>Android的TouchEvent通常包含三个动作,ACTION_DOWN,ACTION_MOVE与ACTION_UP。发出的顺序是DOWN->MOVE->MOVE->&#8230;->UP(注意MOVE事件是否能够被触发取决于操作手势里面是否包含了移动的动作)。</p>
+
+<p>消息分发流程，从上到下，从父到子：Activity->ViewGroup1->ViewGroup1的子ViewGroup2->&#8230;->Target View<br/>
+消息响应流程，从下到上，从子到父：Target View->&#8230;->ViewGroup1的子ViewGroup2->ViewGroup1->Activity</p>
+
+<ul>
+<li><p><strong>public boolean dispatchTouchEvent(MotionEvent ev);</strong><br/>
+事件分发处理函数，通常会在Activity层根据UI的显示情况，把事件传递给相应的ViewGroup。下面的演示代码中，为了方便模拟，会直接return true，解说中称之为“丢弃”。(因为事件实际上没有传递给任何组件，没有被消费，而且是主动的行为，故称之为丢弃)</p></li>
+<li><p><strong>public boolean onInterceptTouchEvent(MotionEvent ev);</strong><br/>
+对分发的事件进行拦截，注意拦截ACION_DOWN与其他ACTION的差异。<br/>
+第1种情况：如果ACTION_DOWN的事件没有被拦截，顺利找到了TargetView，那么后续的MOVE与UP都能够下发。如果后续的MOVE与UP下发时还有继续拦截的话，事件只能传递到拦截层，并且发出ACTION_CANCEL。<br/>
+第2种情况：如果ACITON_DOWN的事件下发时被拦截，导致没有找到TargetView，那么后续的MOVE与UP都无法向下派发了，在Activity层就终止了传递。</p></li>
+<li><p><strong>public boolean onTouchEvent(MotionEvent ev);</strong><br/>
+响应处理函数,如果有设置对应listener的话,这里还会与onTouch,onClick,onLongClick有关联。具体执行顺序是onTouch()->onTouchEvent()->onClick()->onLongClick()。是否能够顺序执行，取决于每个方法的返回值是true还是false。具体这里不展开说。</p></li>
+</ul>
+
+
+<p><strong>强关注点：dispatch与intercept的差异，ACTION_DOWN与其他ACITON会对寻找target组件带来差异，而是否寻找到Target组件对整个流程有着重大的的影响。</strong></p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-deeper-touch-event-dispatch-process/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -216,96 +327,6 @@ public class Singleton { private &hellip;">
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-creating-custom-views-lesson-4/">Android Training - 创建自定义的Views(Lesson 4 - 优化Views)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-08-18T17:30:00+08:00" pubdate data-updated="true">Aug 18<span>th</span>, 2013</time>
-        
-         | <a href="/android-training-creating-custom-views-lesson-4/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>前面的课程学习到了如何创建设计良好的View，并且能够使之在手势与状态切换时得到正确的反馈。下面要介绍的是如何使得view能够执行更快。为了避免UI显得卡顿，你必须确保动画能够保持在60fps以上。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-creating-custom-views-lesson-4/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-training-creating-custom-views-lesson-3/">Android Training - 创建自定义的Views(Lesson 3 - 处理View的交互性)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-08-18T15:01:00+08:00" pubdate data-updated="true">Aug 18<span>th</span>, 2013</time>
-        
-         | <a href="/android-training-creating-custom-views-lesson-3/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>绘制UI仅仅是创建自定义View的一部分。你还需要使得你的View能够以模拟现实世界的方式来进行反馈。Objects应该总是与现实情景能够保持一致。例如，图片不应该突然消失又从另外一个地方出现，因为在现实世界里面不会发生那样的事情。正确的应该是，图片从一个地方移动到另外一个地方。</p>
-
-<p>用户应该可以感受到UI上的微小变化，并对这些变化反馈到现实世界中。例如，当用户做fling(迅速滑动)的动作，应该再滑动开始与结束的时候给用户一定的反馈。</p>
-
-<p>这节课会演示如何使用Android framework的功能来为自定义的View添加那些现实世界中的行为。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-training-creating-custom-views-lesson-3/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/10/">&larr; Older</a>
@@ -321,6 +342,14 @@ public class Singleton { private &hellip;">
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-performance-patterns-season-6/">Android性能优化典范 - 第6季</a>
+      </li>
+    
+      <li class="post">
+        <a href="/google-io-2016/">Google I/O 2016随笔</a>
+      </li>
     
       <li class="post">
         <a href="/android-performance-patterns-season-5/">Android性能优化典范 - 第5季</a>
@@ -346,25 +375,18 @@ public class Singleton { private &hellip;">
         <a href="/android-performance-patterns-season-2/">Android性能优化典范 - 第2季</a>
       </li>
     
-      <li class="post">
-        <a href="/android-performance-battery/">Android性能优化之电量篇</a>
-      </li>
-    
-      <li class="post">
-        <a href="/android-performance-memory/">Android性能优化之内存篇</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (98)</a></li>
+  <li><a href='/blog/categories/android'>Android (100)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
-  <li><a href='/blog/categories/android-performance'>Android:performance (21)</a></li>
+  <li><a href='/blog/categories/android-performance'>Android:performance (22)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
+  <li><a href='/blog/categories/google'>Google (1)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
 </ul>

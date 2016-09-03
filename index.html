@@ -9,7 +9,7 @@
   <meta name="author" content="HuKai">
 
   
-  <meta name="description" content="这是Android性能优化典范第5季的课程学习笔记，拖拖拉拉很久，记录分享给大家，请多多包涵担待指正！文章共10个段落，涉及的内容有：多线程并发的性能问题，介绍了AsyncTask，HandlerThread， &hellip;">
+  <meta name="description" content="这是Android性能优化典范第6季的课程学习笔记，最近个人事情比较多，从被@起，这篇学习笔记就一直被惦记着，现在学习记录分享一下，请多多包涵担待指正！这次才一共6个段落，涉及的内容主要有：程序启动时间相关的三个方面：activity的创建过程，臃肿的application启动对象，主题启动显屏 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +81,242 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-performance-patterns-season-6/">Android性能优化典范 - 第6季</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-08-31T23:12:00+08:00" pubdate data-updated="true">Aug 31<span>st</span>, 2016</time>
+        
+         | <a href="/android-performance-patterns-season-6/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img src="/images/android_perf_patterns_season_5.png" alt="android_perf_patterns_season_5" /></p>
+
+<blockquote><p>这是<a href="https://www.youtube.com/watch?v=Vw1G1s73DsY&amp;index=74&amp;list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">Android性能优化典范</a>第6季的课程学习笔记，最近个人事情比较多，从被@起，这篇学习笔记就一直被惦记着，现在学习记录分享一下，请多多包涵担待指正！这次才一共6个段落，涉及的内容主要有：程序启动时间相关的三个方面：activity的创建过程，臃肿的application启动对象，主题启动显屏。另外还介绍了减少安装包大小的checklist以及如何使用VectorDrawable来减少安装包的大小。</p></blockquote>
+
+<h2>1）App Launch time 101</h2>
+
+<p>提高程序的启动速度意义重大，很显然，启动时间越短，用户才越有耐心等待打开这个APP进行使用，反之启动时间越长，用户则越有可能来不及等到APP打开就已经切换到其他APP了。程序启动过程中的那些复杂错误的操作很可能导致严重的性能问题。Android系统会根据用户的操作行为调整程序的显示策略，用来提高程序的显示性能。例如，一旦用户点击桌面图标，Android系统会立即显示一个启动窗口，这个窗口会一直保持显示直到画面中的元素成功加载并绘制完第一帧。这种行为常见于程序的冷启动，或者程序的热启动场景（程序从后台被唤起或者从其他APP界面切换回来）。那么关键的问题是，用户很可能会因为从启动窗口到显示画面的过程耗时过长而感到厌烦，从而导致用户没有来得及等程序启动完毕就切换到其他APP了。更严重的是，如果启动时间过长，可能导致程序出现ANR。我们应该避免出现这两种糟糕的情况。</p>
+
+<p>从技术角度来说，当用户点击桌面图标开始，系统会立即为这个APP创建独立的专属进程，然后显示启动窗口，直到APP在自己的进程里面完成了程序的创建以及主线程完成了Activity的初始化显示操作，再然后系统进程就会把启动窗口替换成APP的显示窗口。</p>
+
+<p><img src="/images/android_perf_6_launch_time_start_process.png" alt="android_perf_6_launch_time_start_process" /></p>
+
+<p>上述流程里面的绝大多数步骤都是由系统控制的，一般来说不会出现什么问题，可是对于启动速度，我们能够控制并且需要特别关注的地方主要有三处：</p>
+
+<ul>
+<li>1）Activity的onCreate流程，特别是UI的布局与渲染操作，如果布局过于复杂很可能导致严重的启动性能问题。</li>
+<li>2）Application的onCreate流程，对于大型的APP来说，通常会在这里做大量的通用组件的初始化操作。</li>
+<li>3）目前有部分APP会提供自定义的启动窗口，这里可以做成品牌宣传界面或者是给用户提供一种程序已经启动的视觉效果。</li>
+</ul>
+
+
+<p>在正式着手解决问题之前，我们需要掌握一套正确测量评估启动性能的方法。所幸的是，Android系统有提供一些工具来帮助我们定位问题。</p>
+
+<ul>
+<li>1）首先是<strong>display time</strong>：从Android KitKat版本开始，Logcat中会输出从程序启动到某个Activity显示到画面上所花费的时间。这个方法比较适合测量程序的启动时间。</li>
+</ul>
+
+
+<p><img src="/images/android_perf_6_launch_time_display_time.png" alt="android_perf_6_launch_time_display_time" /></p>
+
+<ul>
+<li>2）其次是<strong>reportFullyDrawn</strong>方法：我们通常来说会使用异步懒加载的方式来提升程序画面的显示速度，这通常会导致的一个问题是，程序画面已经显示，可是内容却还在加载中。为了衡量这些异步加载资源所耗费的时间，我们可以在异步加载完毕之后调用<code>activity.reportFullyDrawn()</code>方法来告诉系统此时的状态，以便获取整个加载的耗时。</li>
+</ul>
+
+
+<p><img src="/images/android_perf_6_launch_time_report_fully_drawn.png" alt="android_perf_6_launch_time_report_fully_drawn" /></p>
+
+<ul>
+<li>3）然后是<strong>Method Tracing</strong>：前面两个方法提供了启动耗时的总时间，可是却无法提供具体的耗时细节。为了获取具体的耗时分布情况，我们可以使用Method Tracing工具来进行详细的测量。</li>
+</ul>
+
+
+<p><img src="/images/android_perf_6_launch_time_method_tracing.png" alt="android_perf_6_launch_time_method_tracing" /></p>
+
+<ul>
+<li>4）最后是<strong>Systrace</strong>：我们可以在onCreate方法里面添加trace方法来声明需要跟踪的起止位置，系统会帮忙统计中间经历过的函数调用耗时，并输出报表。</li>
+</ul>
+
+
+<p><img src="/images/android_perf_6_launch_time_systrace.png" alt="android_perf_6_launch_time_systrace" /></p>
+
+<h2>2）</h2>
+
+<p><img src="/images/android_perf_5_threading_main_thread.png" alt="android_perf_5_threading_main_thread" /></p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-performance-patterns-season-6/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/google-io-2016/">Google I/O 2016随笔</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-05-24T05:06:01+08:00" pubdate data-updated="true">May 24<span>th</span>, 2016</time>
+        
+         | <a href="/google-io-2016/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="https://github.com/oasisfeng">冯老师</a>，<a href="https://github.com/liaohuqiu">秋百万</a>，<a href="http://www.race604.com/">吴晶</a>还有我！四人约好从北京转机一起前往旧金山。</p>
+
+<p><img src="/images/google_io_2016_00.JPG" alt="google_io_2016_00" /></p>
+
+<p>在航班上研究KMP算法的同学</p>
+
+<p><img src="/images/google_io_2016_01.JPG" alt="google_io_2016_01" /></p>
+
+<p>到达旧金山机场，去提取事先租好的车，自驾</p>
+
+<p><img src="/images/google_io_2016_02.JPG" alt="google_io_2016_02" /></p>
+
+<p><img src="/images/google_io_2016_03.JPG" alt="google_io_2016_03" /></p>
+
+<p><img src="/images/google_io_2016_04.JPG" alt="google_io_2016_04" /></p>
+
+<p>入住通过Airbnb上找的房子</p>
+
+<p><img src="/images/google_io_2016_05.JPG" alt="google_io_2016_05" /></p>
+
+<p><img src="/images/google_io_2016_06.JPG" alt="google_io_2016_06" /></p>
+
+<p>到美国吃的第一顿（中式餐馆）没预料到这会是之后几天我吃的最满意的一次了</p>
+
+<p><img src="/images/google_io_2016_07.JPG" alt="google_io_2016_07" /></p>
+
+<p>第二天一早清晨，在海边小镇上闲逛</p>
+
+<p><img src="/images/google_io_2016_08.JPG" alt="google_io_2016_08" />
+<img src="/images/google_io_2016_09.JPG" alt="google_io_2016_09" />
+<img src="/images/google_io_2016_10.JPG" alt="google_io_2016_10" />
+<img src="/images/google_io_2016_11.JPG" alt="google_io_2016_11" />
+<img src="/images/google_io_2016_12.JPG" alt="google_io_2016_12" /></p>
+
+<p>之后去了旁边的半月湾海边走走，以及不远处的森林公园爬山</p>
+
+<p><img src="/images/google_io_2016_13.JPG" alt="google_io_2016_13" />
+<img src="/images/google_io_2016_14.JPG" alt="google_io_2016_14" />
+<img src="/images/google_io_2016_15.JPG" alt="google_io_2016_15" /></p>
+
+<p>晚上跑到旧金山最高点，看全市夜景</p>
+
+<p><img src="/images/google_io_2016_16.JPG" alt="google_io_2016_16" /></p>
+
+<p>离开半月湾海边公寓之前的合影（从左至右，依次为吴晶，冯老师，秋百万和我）</p>
+
+<p><img src="/images/google_io_2016_17.JPG" alt="google_io_2016_17" /></p>
+
+<p>窗外的全景</p>
+
+<p><img src="/images/google_io_2016_19.JPG" alt="google_io_2016_19" /></p>
+
+<p>I/O的头一天签到</p>
+
+<p><img src="/images/google_io_2016_21.JPG" alt="google_io_2016_21" />
+<img src="/images/google_io_2016_20.JPG" alt="google_io_2016_20" />
+<img src="/images/google_io_2016_22.JPG" alt="google_io_2016_22" />
+<img src="/images/google_io_2016_23.JPG" alt="google_io_2016_23" />
+<img src="/images/google_io_2016_24.JPG" alt="google_io_2016_24" /></p>
+
+<p>顺便参观了下Google总部</p>
+
+<p><img src="/images/google_io_2016_25.JPG" alt="google_io_2016_25" />
+<img src="/images/google_io_2016_26.JPG" alt="google_io_2016_26" />
+<img src="/images/google_io_2016_27.JPG" alt="google_io_2016_27" />
+<img src="/images/google_io_2016_28.JPG" alt="google_io_2016_28" />
+<img src="/images/google_io_2016_29.JPG" alt="google_io_2016_29" />
+<img src="/images/google_io_2016_30.JPG" alt="google_io_2016_30" /></p>
+
+<p>签到当天晚上，又是一群聚会聊天</p>
+
+<p><img src="/images/google_io_2016_32.JPG" alt="google_io_2016_32" />
+<img src="/images/google_io_2016_31.JPG" alt="google_io_2016_31" /></p>
+
+<p>次日I/O正式开场，主会场，分会场持续三天</p>
+
+<p><img src="/images/google_io_2016_33.JPG" alt="google_io_2016_31" />
+<img src="/images/google_io_2016_34.JPG" alt="google_io_2016_31" />
+<img src="/images/google_io_2016_35.JPG" alt="google_io_2016_31" />
+<img src="/images/google_io_2016_36.JPG" alt="google_io_2016_31" />
+<img src="/images/google_io_2016_37.JPG" alt="google_io_2016_31" />
+<img src="/images/google_io_2016_38.JPG" alt="google_io_2016_31" />
+<img src="/images/google_io_2016_39.JPG" alt="google_io_2016_31" />
+<img src="/images/google_io_2016_40.JPG" alt="google_io_2016_31" />
+<img src="/images/google_io_2016_41.JPG" alt="google_io_2016_31" />
+<img src="/images/google_io_2016_42.JPG" alt="google_io_2016_31" />
+<img src="/images/google_io_2016_43.JPG" alt="google_io_2016_31" />
+<img src="/images/google_io_2016_44.JPG" alt="google_io_2016_31" />
+<img src="/images/google_io_2016_45.JPG" alt="google_io_2016_31" />
+<img src="/images/google_io_2016_46.JPG" alt="google_io_2016_31" />
+<img src="/images/google_io_2016_47.JPG" alt="google_io_2016_31" />
+<img src="/images/google_io_2016_48.JPG" alt="google_io_2016_31" />
+<img src="/images/google_io_2016_49.JPG" alt="google_io_2016_31" />
+<img src="/images/google_io_2016_50.JPG" alt="google_io_2016_31" />
+<img src="/images/google_io_2016_51.JPG" alt="google_io_2016_31" />
+<img src="/images/google_io_2016_52.JPG" alt="google_io_2016_31" />
+<img src="/images/google_io_2016_53.JPG" alt="google_io_2016_31" />
+<img src="/images/google_io_2016_54.JPG" alt="google_io_2016_31" />
+<img src="/images/google_io_2016_55.JPG" alt="google_io_2016_31" /></p>
+
+<p>用一张合影结尾</p>
+
+<p><img src="/images/google_io_2016_18.JPG" alt="google_io_2016_18" /></p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -186,116 +422,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-dev-patterns/">Android开发最佳实践</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-10-02T15:38:00+08:00" pubdate data-updated="true">Oct 2<span>nd</span>, 2015</time>
-        
-         | <a href="/android-dev-patterns/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><img src="/images/android_dev_patterns_logo.png" alt="android_dev_patterns_logo" /></p>
-
-<blockquote><p>前段时间，Google公布了<a href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc-lJo_RGGXL2Psr8vVCTWjM">Android开发最佳实践</a>的一系列课程，涉及到一些平时开发过程中应该保持的良好习惯以及如何使用最新的<a href="http://android-developers.blogspot.com/2015/05/android-design-support-library.html">Android Design Support Library</a>来快速实现官方推荐的Material Design样式的应用。下面是个人的学习摘要总结，不对的地方请多多交流指点，谢谢！</p></blockquote>
-
-<h2>1）注意对隐式Intent的运行时检查保护</h2>
-
-<p>类似打开相机，发送图片等隐式Intent，是并不一定能够在所有的Android设备上都正常运行。例如打开相机的隐式Intent，如果系统相机应用被关闭或者不存在相机应用，又或者是相机应用的某些权限被关闭等等情况都可能导致这个隐式的Intent无法正常工作。一旦发生隐式Intent找不到合适的调用组件的情况，系统就会抛出<code>ActivityNotFoundException</code>的异常，如果我们的应用没有对这个异常做任何处理，那应用就会发生Crash。</p>
-
-<p>预防这个问题的最佳解决方案是在发出这个隐式Intent之前调用<code>resolveActivity</code>做检查，关于这个API的解释以及用法如下：</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-dev-patterns/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-performance-oom/">Android内存优化之OOM</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-09-12T14:53:00+08:00" pubdate data-updated="true">Sep 12<span>th</span>, 2015</time>
-        
-         | <a href="/android-performance-oom/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><blockquote><p>Android的内存优化是性能优化中很重要的一部分，而避免OOM又是内存优化中比较核心的一点，这是一篇关于内存优化中如何避免OOM的总结性概要文章，内容大多都是和OOM有关的实践总结概要。理解错误或是偏差的地方，还请多包涵指正，谢谢！</p></blockquote>
-
-<h2>(一)Android的内存管理机制</h2>
-
-<p>Google在Android的官网上有这样一篇文章，初步介绍了Android是如何管理应用的进程与内存分配：<a href="http://developer.android.com/training/articles/memory.html">http://developer.android.com/training/articles/memory.html</a>。
-Android系统的Dalvik虚拟机扮演了常规的内存垃圾自动回收的角色，Android系统没有为内存提供交换区，它使用<a href="http://en.wikipedia.org/wiki/Paging">paging</a>与<a href="http://en.wikipedia.org/wiki/Memory-mapped_files">memory-mapping(mmapping)</a>的机制来管理内存，下面简要概述一些Android系统中重要的内存管理基础概念。</p>
-
-<h3>1）共享内存</h3>
-
-<p>Android系统通过下面几种方式来实现共享内存：</p>
-
-<ul>
-<li>Android应用的进程都是从一个叫做Zygote的进程fork出来的。Zygote进程在系统启动并且载入通用的framework的代码与资源之后开始启动。为了启动一个新的程序进程，系统会fork Zygote进程生成一个新的进程，然后在新的进程中加载并运行应用程序的代码。这使得大多数的RAM pages被用来分配给framework的代码，同时使得RAM资源能够在应用的所有进程之间进行共享。</li>
-<li>大多数static的数据被mmapped到一个进程中。这不仅仅使得同样的数据能够在进程间进行共享，而且使得它能够在需要的时候被paged out。常见的static数据包括Dalvik Code，app resources，so文件等。</li>
-<li>大多数情况下，Android通过显式的分配共享内存区域(例如ashmem或者gralloc)来实现动态RAM区域能够在不同进程之间进行共享的机制。例如，Window Surface在App与Screen Compositor之间使用共享的内存，Cursor Buffers在Content Provider与Clients之间共享内存。</li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-performance-oom/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -309,6 +435,14 @@ Android系统的Dalvik虚拟机扮演了常规的内存垃圾自动回收的角�
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-performance-patterns-season-6/">Android性能优化典范 - 第6季</a>
+      </li>
+    
+      <li class="post">
+        <a href="/google-io-2016/">Google I/O 2016随笔</a>
+      </li>
     
       <li class="post">
         <a href="/android-performance-patterns-season-5/">Android性能优化典范 - 第5季</a>
@@ -334,25 +468,18 @@ Android系统的Dalvik虚拟机扮演了常规的内存垃圾自动回收的角�
         <a href="/android-performance-patterns-season-2/">Android性能优化典范 - 第2季</a>
       </li>
     
-      <li class="post">
-        <a href="/android-performance-battery/">Android性能优化之电量篇</a>
-      </li>
-    
-      <li class="post">
-        <a href="/android-performance-memory/">Android性能优化之内存篇</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (98)</a></li>
+  <li><a href='/blog/categories/android'>Android (100)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
-  <li><a href='/blog/categories/android-performance'>Android:performance (21)</a></li>
+  <li><a href='/blog/categories/android-performance'>Android:performance (22)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
+  <li><a href='/blog/categories/google'>Google (1)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
 </ul>

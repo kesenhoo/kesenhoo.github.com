@@ -4,7 +4,7 @@
   <title><![CDATA[胡凯]]></title>
   <link href="http://hukai.me/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2016-05-03T10:51:48+08:00</updated>
+  <updated>2016-09-03T16:22:22+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[HuKai]]></name>
@@ -12,6 +12,186 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Android性能优化典范 - 第6季]]></title>
+    <link href="http://hukai.me/android-performance-patterns-season-6/"/>
+    <updated>2016-08-31T23:12:00+08:00</updated>
+    <id>http://hukai.me/android-performance-patterns-season-6</id>
+    <content type="html"><![CDATA[<p><img src="http://hukai.me/images/android_perf_patterns_season_5.png" alt="android_perf_patterns_season_5" /></p>
+
+<blockquote><p>这是<a href="https://www.youtube.com/watch?v=Vw1G1s73DsY&amp;index=74&amp;list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">Android性能优化典范</a>第6季的课程学习笔记，最近个人事情比较多，从被@起，这篇学习笔记就一直被惦记着，现在学习记录分享一下，请多多包涵担待指正！这次才一共6个段落，涉及的内容主要有：程序启动时间相关的三个方面：activity的创建过程，臃肿的application启动对象，主题启动显屏。另外还介绍了减少安装包大小的checklist以及如何使用VectorDrawable来减少安装包的大小。</p></blockquote>
+
+<h2>1）App Launch time 101</h2>
+
+<p>提高程序的启动速度意义重大，很显然，启动时间越短，用户才越有耐心等待打开这个APP进行使用，反之启动时间越长，用户则越有可能来不及等到APP打开就已经切换到其他APP了。程序启动过程中的那些复杂错误的操作很可能导致严重的性能问题。Android系统会根据用户的操作行为调整程序的显示策略，用来提高程序的显示性能。例如，一旦用户点击桌面图标，Android系统会立即显示一个启动窗口，这个窗口会一直保持显示直到画面中的元素成功加载并绘制完第一帧。这种行为常见于程序的冷启动，或者程序的热启动场景（程序从后台被唤起或者从其他APP界面切换回来）。那么关键的问题是，用户很可能会因为从启动窗口到显示画面的过程耗时过长而感到厌烦，从而导致用户没有来得及等程序启动完毕就切换到其他APP了。更严重的是，如果启动时间过长，可能导致程序出现ANR。我们应该避免出现这两种糟糕的情况。</p>
+
+<p>从技术角度来说，当用户点击桌面图标开始，系统会立即为这个APP创建独立的专属进程，然后显示启动窗口，直到APP在自己的进程里面完成了程序的创建以及主线程完成了Activity的初始化显示操作，再然后系统进程就会把启动窗口替换成APP的显示窗口。</p>
+
+<p><img src="http://hukai.me/images/android_perf_6_launch_time_start_process.png" alt="android_perf_6_launch_time_start_process" /></p>
+
+<p>上述流程里面的绝大多数步骤都是由系统控制的，一般来说不会出现什么问题，可是对于启动速度，我们能够控制并且需要特别关注的地方主要有三处：</p>
+
+<ul>
+<li>1）Activity的onCreate流程，特别是UI的布局与渲染操作，如果布局过于复杂很可能导致严重的启动性能问题。</li>
+<li>2）Application的onCreate流程，对于大型的APP来说，通常会在这里做大量的通用组件的初始化操作。</li>
+<li>3）目前有部分APP会提供自定义的启动窗口，这里可以做成品牌宣传界面或者是给用户提供一种程序已经启动的视觉效果。</li>
+</ul>
+
+
+<p>在正式着手解决问题之前，我们需要掌握一套正确测量评估启动性能的方法。所幸的是，Android系统有提供一些工具来帮助我们定位问题。</p>
+
+<ul>
+<li>1）首先是<strong>display time</strong>：从Android KitKat版本开始，Logcat中会输出从程序启动到某个Activity显示到画面上所花费的时间。这个方法比较适合测量程序的启动时间。</li>
+</ul>
+
+
+<p><img src="http://hukai.me/images/android_perf_6_launch_time_display_time.png" alt="android_perf_6_launch_time_display_time" /></p>
+
+<ul>
+<li>2）其次是<strong>reportFullyDrawn</strong>方法：我们通常来说会使用异步懒加载的方式来提升程序画面的显示速度，这通常会导致的一个问题是，程序画面已经显示，可是内容却还在加载中。为了衡量这些异步加载资源所耗费的时间，我们可以在异步加载完毕之后调用<code>activity.reportFullyDrawn()</code>方法来告诉系统此时的状态，以便获取整个加载的耗时。</li>
+</ul>
+
+
+<p><img src="http://hukai.me/images/android_perf_6_launch_time_report_fully_drawn.png" alt="android_perf_6_launch_time_report_fully_drawn" /></p>
+
+<ul>
+<li>3）然后是<strong>Method Tracing</strong>：前面两个方法提供了启动耗时的总时间，可是却无法提供具体的耗时细节。为了获取具体的耗时分布情况，我们可以使用Method Tracing工具来进行详细的测量。</li>
+</ul>
+
+
+<p><img src="http://hukai.me/images/android_perf_6_launch_time_method_tracing.png" alt="android_perf_6_launch_time_method_tracing" /></p>
+
+<ul>
+<li>4）最后是<strong>Systrace</strong>：我们可以在onCreate方法里面添加trace方法来声明需要跟踪的起止位置，系统会帮忙统计中间经历过的函数调用耗时，并输出报表。</li>
+</ul>
+
+
+<p><img src="http://hukai.me/images/android_perf_6_launch_time_systrace.png" alt="android_perf_6_launch_time_systrace" /></p>
+
+<h2>2）</h2>
+
+<p><img src="http://hukai.me/images/android_perf_5_threading_main_thread.png" alt="android_perf_5_threading_main_thread" /></p>
+
+<!-- More -->
+
+
+<hr />
+
+<p>首发于CSDN：<a href="http://ms.csdn.net/geek/71031">Android性能优化典范（五）</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Google I/O 2016随笔]]></title>
+    <link href="http://hukai.me/google-io-2016/"/>
+    <updated>2016-05-24T05:06:01+08:00</updated>
+    <id>http://hukai.me/google-io-2016</id>
+    <content type="html"><![CDATA[<p><a href="https://github.com/oasisfeng">冯老师</a>，<a href="https://github.com/liaohuqiu">秋百万</a>，<a href="http://www.race604.com/">吴晶</a>还有我！四人约好从北京转机一起前往旧金山。</p>
+
+<p><img src="http://hukai.me/images/google_io_2016_00.JPG" alt="google_io_2016_00" /></p>
+
+<p>在航班上研究KMP算法的同学</p>
+
+<p><img src="http://hukai.me/images/google_io_2016_01.JPG" alt="google_io_2016_01" /></p>
+
+<p>到达旧金山机场，去提取事先租好的车，自驾</p>
+
+<p><img src="http://hukai.me/images/google_io_2016_02.JPG" alt="google_io_2016_02" /></p>
+
+<p><img src="http://hukai.me/images/google_io_2016_03.JPG" alt="google_io_2016_03" /></p>
+
+<p><img src="http://hukai.me/images/google_io_2016_04.JPG" alt="google_io_2016_04" /></p>
+
+<p>入住通过Airbnb上找的房子</p>
+
+<p><img src="http://hukai.me/images/google_io_2016_05.JPG" alt="google_io_2016_05" /></p>
+
+<p><img src="http://hukai.me/images/google_io_2016_06.JPG" alt="google_io_2016_06" /></p>
+
+<p>到美国吃的第一顿（中式餐馆）没预料到这会是之后几天我吃的最满意的一次了</p>
+
+<p><img src="http://hukai.me/images/google_io_2016_07.JPG" alt="google_io_2016_07" /></p>
+
+<p>第二天一早清晨，在海边小镇上闲逛</p>
+
+<p><img src="http://hukai.me/images/google_io_2016_08.JPG" alt="google_io_2016_08" />
+<img src="http://hukai.me/images/google_io_2016_09.JPG" alt="google_io_2016_09" />
+<img src="http://hukai.me/images/google_io_2016_10.JPG" alt="google_io_2016_10" />
+<img src="http://hukai.me/images/google_io_2016_11.JPG" alt="google_io_2016_11" />
+<img src="http://hukai.me/images/google_io_2016_12.JPG" alt="google_io_2016_12" /></p>
+
+<p>之后去了旁边的半月湾海边走走，以及不远处的森林公园爬山</p>
+
+<p><img src="http://hukai.me/images/google_io_2016_13.JPG" alt="google_io_2016_13" />
+<img src="http://hukai.me/images/google_io_2016_14.JPG" alt="google_io_2016_14" />
+<img src="http://hukai.me/images/google_io_2016_15.JPG" alt="google_io_2016_15" /></p>
+
+<p>晚上跑到旧金山最高点，看全市夜景</p>
+
+<p><img src="http://hukai.me/images/google_io_2016_16.JPG" alt="google_io_2016_16" /></p>
+
+<p>离开半月湾海边公寓之前的合影（从左至右，依次为吴晶，冯老师，秋百万和我）</p>
+
+<p><img src="http://hukai.me/images/google_io_2016_17.JPG" alt="google_io_2016_17" /></p>
+
+<p>窗外的全景</p>
+
+<p><img src="http://hukai.me/images/google_io_2016_19.JPG" alt="google_io_2016_19" /></p>
+
+<p>I/O的头一天签到</p>
+
+<p><img src="http://hukai.me/images/google_io_2016_21.JPG" alt="google_io_2016_21" />
+<img src="http://hukai.me/images/google_io_2016_20.JPG" alt="google_io_2016_20" />
+<img src="http://hukai.me/images/google_io_2016_22.JPG" alt="google_io_2016_22" />
+<img src="http://hukai.me/images/google_io_2016_23.JPG" alt="google_io_2016_23" />
+<img src="http://hukai.me/images/google_io_2016_24.JPG" alt="google_io_2016_24" /></p>
+
+<p>顺便参观了下Google总部</p>
+
+<p><img src="http://hukai.me/images/google_io_2016_25.JPG" alt="google_io_2016_25" />
+<img src="http://hukai.me/images/google_io_2016_26.JPG" alt="google_io_2016_26" />
+<img src="http://hukai.me/images/google_io_2016_27.JPG" alt="google_io_2016_27" />
+<img src="http://hukai.me/images/google_io_2016_28.JPG" alt="google_io_2016_28" />
+<img src="http://hukai.me/images/google_io_2016_29.JPG" alt="google_io_2016_29" />
+<img src="http://hukai.me/images/google_io_2016_30.JPG" alt="google_io_2016_30" /></p>
+
+<p>签到当天晚上，又是一群聚会聊天</p>
+
+<p><img src="http://hukai.me/images/google_io_2016_32.JPG" alt="google_io_2016_32" />
+<img src="http://hukai.me/images/google_io_2016_31.JPG" alt="google_io_2016_31" /></p>
+
+<p>次日I/O正式开场，主会场，分会场持续三天</p>
+
+<p><img src="http://hukai.me/images/google_io_2016_33.JPG" alt="google_io_2016_31" />
+<img src="http://hukai.me/images/google_io_2016_34.JPG" alt="google_io_2016_31" />
+<img src="http://hukai.me/images/google_io_2016_35.JPG" alt="google_io_2016_31" />
+<img src="http://hukai.me/images/google_io_2016_36.JPG" alt="google_io_2016_31" />
+<img src="http://hukai.me/images/google_io_2016_37.JPG" alt="google_io_2016_31" />
+<img src="http://hukai.me/images/google_io_2016_38.JPG" alt="google_io_2016_31" />
+<img src="http://hukai.me/images/google_io_2016_39.JPG" alt="google_io_2016_31" />
+<img src="http://hukai.me/images/google_io_2016_40.JPG" alt="google_io_2016_31" />
+<img src="http://hukai.me/images/google_io_2016_41.JPG" alt="google_io_2016_31" />
+<img src="http://hukai.me/images/google_io_2016_42.JPG" alt="google_io_2016_31" />
+<img src="http://hukai.me/images/google_io_2016_43.JPG" alt="google_io_2016_31" />
+<img src="http://hukai.me/images/google_io_2016_44.JPG" alt="google_io_2016_31" />
+<img src="http://hukai.me/images/google_io_2016_45.JPG" alt="google_io_2016_31" />
+<img src="http://hukai.me/images/google_io_2016_46.JPG" alt="google_io_2016_31" />
+<img src="http://hukai.me/images/google_io_2016_47.JPG" alt="google_io_2016_31" />
+<img src="http://hukai.me/images/google_io_2016_48.JPG" alt="google_io_2016_31" />
+<img src="http://hukai.me/images/google_io_2016_49.JPG" alt="google_io_2016_31" />
+<img src="http://hukai.me/images/google_io_2016_50.JPG" alt="google_io_2016_31" />
+<img src="http://hukai.me/images/google_io_2016_51.JPG" alt="google_io_2016_31" />
+<img src="http://hukai.me/images/google_io_2016_52.JPG" alt="google_io_2016_31" />
+<img src="http://hukai.me/images/google_io_2016_53.JPG" alt="google_io_2016_31" />
+<img src="http://hukai.me/images/google_io_2016_54.JPG" alt="google_io_2016_31" />
+<img src="http://hukai.me/images/google_io_2016_55.JPG" alt="google_io_2016_31" /></p>
+
+<p>用一张合影结尾</p>
+
+<p><img src="http://hukai.me/images/google_io_2016_18.JPG" alt="google_io_2016_18" /></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Android性能优化典范 - 第5季]]></title>
@@ -3823,214 +4003,6 @@ adb -d forward tcp:5601 tcp:5601
 <p>这是一个非官方正式的library，它包含了为可穿戴设备设计的UI组件。我们鼓励你在你的应用中使用他们。因为这些组件是最佳实践的例证。但是他们可能随时发生变化。然而，如果library有更新，你的应用并不会发送崩溃，因为那些代码已经编译到你的应用中了。为了获取更新包中新的功能，你只需要更新链接到新的版本并相应的更新你的应用就好了。这个library只是在你需要创建可穿戴应用时才会使用到。</p></li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Training - 创建可穿戴应用(0 - 序言)]]></title>
-    <link href="http://hukai.me/android-training-wearable-app-index/"/>
-    <updated>2014-07-14T12:20:00+08:00</updated>
-    <id>http://hukai.me/android-training-wearable-app-index</id>
-    <content type="html"><![CDATA[<h1>创建可穿戴的应用</h1>
-
-<p>可穿戴应用直接运行在穿戴设备上，应用可以直接访问例如传感器与GPU这样的硬件。这些应用和一般的Android应用的基础部分是一致的，只是在设计与可用性还有一些特殊功能上有比较大差异。手持设备与可穿戴设备上的应用主要有下面的一些差异：</p>
-
-<ul>
-<li>系统会强制执行超时机制。如果你显示了一个Activity，用户并没有进行操作，设备会进入睡眠状态。当设备唤醒时，穿戴设备会显示主界面而不是你刚才的activity。如果你想要持续的显示一些东西，请使用notification来替代。</li>
-<li>相比起手持设备的应用，可穿戴应用的界面相对更小，功能也相对更少。他仅仅包含了那些对于可穿戴有意义的功能，这些功能通常是手持设备的一个子集。通常来说，你应该尽可能的把运行操作搬到手持设备上，然后发送操作结果到可穿戴设备。</li>
-<li>用户不能直接给可穿戴设备安装应用。你需要给手持设备的应用绑定一个可穿戴设备的应用。当用户安装手持设备的应用时，系统会自动安装可穿戴应用。然而，为了开发便利，你还是可以直接安装应用到可穿戴设备。</li>
-<li>可穿戴应用可以使用大多数的标准Android APIs，除了下面的以外：
-
-<ul>
-<li><a href="http://developer.android.com/reference/android/webkit/package-summary.html">android.webkit</a></li>
-<li><a href="http://developer.android.com/reference/android/print/package-summary.html">android.print</a></li>
-<li><a href="http://developer.android.com/reference/android/app/backup/package-summary.html">android.app.backup</a></li>
-<li><a href="http://developer.android.com/reference/android/appwidget/package-summary.html">android.appwidget</a></li>
-<li><a href="http://developer.android.com/reference/android/hardware/usb/package-summary.html">android.hardware.usb</a></li>
-</ul>
-
-
-<p>在使用某个API之前，你可以通过执行<a href="http://developer.android.com/reference/android/content/pm/PackageManager.html#hasSystemFeature(java.lang.String">hasSystemFeature()</a>) 来判断功能是否可用。</p></li>
-</ul>
-
-
-<blockquote><p><strong>Note:</strong> 我们推荐使用Android Studio来开发Android Wear的应用，因为它提供了建立工程，添加库依赖，打包程序等等在ADT上没有的功能。下面的培训课程的前提是假设你已经在使用Android Studio了。</p></blockquote>
-
-<!-- More -->
-
-
-<h2>Lessons</h2>
-
-<ul>
-<li><p><a href="http://hukai.me/blog/android-training-wearable-app-creating/">创建并执行可穿戴应用(Creating and Running a Wearable App)</a></p>
-
-<p>学习如何创建一个包含了可穿戴与手持应用的Android Studio工程。学习如何在设备或者模拟器上执行程序。</p></li>
-<li><p><a href="http://hukai.me/blog/android-training-wearable-app-layouts/">创建自定义的布局(Creating Custom Layouts)</a></p>
-
-<p>学习如何为notification与activiyt，创建并显示一个自定义的布局</p></li>
-<li><p><a href="http://hukai.me/blog/android-training-wearable-app-voice-input/">添加语言能力(Adding Voice Capabilities)</a></p>
-
-<p>学习如何使用语音指令启动一个activity，学习如何启动系统语音识别应用来获取用户的语音输入。</p></li>
-<li><p><a href="http://hukai.me/blog/android-training-wearable-app-packaging/">打包可穿戴应用(Packaging Wearable Apps)</a></p>
-
-<p>学习如何把可穿戴应用打包到手持应用上。这使得系统能够在安装Google Play上的手持应用时自动安装可穿戴应用。</p></li>
-<li><p><a href="http://hukai.me/blog/android-training-wearable-bt-debug/">通过蓝牙进行调试(Debugging over Bluetooth)</a></p>
-
-<p>学习如何通过蓝牙而不是USB来调试你的可穿戴应用。</p></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Notes - 添加Copy to Clipboard的选项到分享列表中]]></title>
-    <link href="http://hukai.me/android-notes-add-copy-text-option-to-share-list/"/>
-    <updated>2014-07-12T15:26:00+08:00</updated>
-    <id>http://hukai.me/android-notes-add-copy-text-option-to-share-list</id>
-    <content type="html"><![CDATA[<p>偶然被人问到如何添加复制到剪切板的选项到分享列表，如下图所示：</p>
-
-<p><img src="http://hukai.me/images/copy_link_option_at_share_list.png" alt="copy_link_option_at_share_list" /></p>
-
-<p>一般情况下，分享一段文字或者图片，我们会使用如下Android默认的方式：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">shareText</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="n">String</span> <span class="n">text</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>    <span class="n">Intent</span> <span class="n">sendIntent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">();</span>
-</span><span class='line'>    <span class="n">sendIntent</span><span class="o">.</span><span class="na">setAction</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_SEND</span><span class="o">);</span>
-</span><span class='line'>    <span class="n">sendIntent</span><span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">EXTRA_TEXT</span><span class="o">,</span> <span class="n">text</span><span class="o">);</span>
-</span><span class='line'>    <span class="n">sendIntent</span><span class="o">.</span><span class="na">setType</span><span class="o">(</span><span class="s">&quot;text/plain&quot;</span><span class="o">);</span>
-</span><span class='line'>    <span class="n">context</span><span class="o">.</span><span class="na">startActivity</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">createChooser</span><span class="o">(</span><span class="n">sendIntent</span><span class="o">,</span> <span class="s">&quot;Share via...&quot;</span><span class="o">));</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这样系统能够帮忙筛选出那些符合这个Intent的所有Activity，生成分享列表，呈现给用户。因为分享列表的信息是由系统过滤生成的，UI界面也是交给系统进行绘制的，我们的应用无法给这个分享列表设置点击监听器，那么如何才能实现添加一个<strong>&#8220;Copy to Clipboard&#8221;</strong>的选项到分享列表中，并在点击该选项之后执行对应的动作呢？当然，自己去实现这个分享列表的效果，UI完全交给自己的应用来控制，是可以轻松做到的，可是自己去过滤符合条件的应用，并绘制分享列表的代码量会大很多，实现起来更加复杂？下面介绍一个虽然写法有点奇怪却相对简便很多的方法。</p>
-
-<!-- More -->
-
-
-<p>实现步骤如下：</p>
-
-<h3>1)创建一个新的Intent</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">ACTION_SEND</span><span class="o">);</span>
-</span><span class='line'><span class="n">intent</span><span class="o">.</span><span class="na">setType</span><span class="o">(</span><span class="s">&quot;text/plain&quot;</span><span class="o">);</span>
-</span><span class='line'><span class="n">intent</span><span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">EXTRA_SUBJECT</span><span class="o">,</span> <span class="n">title</span><span class="o">);</span>
-</span><span class='line'><span class="n">intent</span><span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">EXTRA_TEXT</span><span class="o">,</span> <span class="n">body</span><span class="o">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">Intent</span> <span class="n">clipboardIntent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="s">&quot;ACTION_COPY_TO_CLIPBOARD&quot;</span><span class="o">);</span>
-</span><span class='line'><span class="n">clipboardIntent</span><span class="o">.</span><span class="na">addFlags</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">FLAG_ACTIVITY_CLEAR_TOP</span><span class="o">);</span>
-</span><span class='line'><span class="n">clipboardIntent</span><span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="s">&quot;KEY_SHARE_TITLE&quot;</span><span class="o">,</span> <span class="n">title</span><span class="o">);</span>
-</span><span class='line'><span class="n">clipboardIntent</span><span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="s">&quot;KEY_SHARE_BODY&quot;</span><span class="o">,</span> <span class="n">body</span><span class="o">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">try</span> <span class="o">{</span>
-</span><span class='line'>    <span class="n">Intent</span> <span class="n">chooserIntent</span> <span class="o">=</span> <span class="n">Intent</span><span class="o">.</span><span class="na">createChooser</span><span class="o">(</span><span class="n">intent</span><span class="o">,</span> <span class="s">&quot;Share via&quot;</span><span class="o">);</span>
-</span><span class='line'>    <span class="n">chooserIntent</span><span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="n">Intent</span><span class="o">.</span><span class="na">EXTRA_INITIAL_INTENTS</span><span class="o">,</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">[]</span> <span class="o">{</span><span class="n">clipboardIntent</span><span class="o">});</span>
-</span><span class='line'>    <span class="n">context</span><span class="o">.</span><span class="na">startActivity</span><span class="o">(</span><span class="n">chooserIntent</span><span class="o">);</span>
-</span><span class='line'><span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">android</span><span class="o">.</span><span class="na">content</span><span class="o">.</span><span class="na">ActivityNotFoundException</span> <span class="n">ex</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>    <span class="n">Toast</span><span class="o">.</span><span class="na">makeText</span><span class="o">(</span><span class="n">context</span><span class="o">,</span> <span class="s">&quot;There are no share clients installed.&quot;</span><span class="o">,</span> <span class="n">Toast</span><span class="o">.</span><span class="na">LENGTH_SHORT</span><span class="o">).</span><span class="na">show</span><span class="o">();</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>请注意：Action与Flag。</p>
-
-<h3>2)在manifest文件中为当前的actiivty添加Intent Filter</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;activity</span>
-</span><span class='line'>    <span class="na">android:name=</span><span class="s">&quot;.TestActivity&quot;</span>
-</span><span class='line'>    <span class="na">android:label=</span><span class="s">&quot;Copy to clipboard&quot;</span>
-</span><span class='line'>    <span class="na">android:icon=</span><span class="s">&quot;@drawable/ic_action_copy&quot;</span>
-</span><span class='line'>    <span class="na">android:launchMode=</span><span class="s">&quot;singleTop&quot;</span>
-</span><span class='line'>    <span class="na">android:screenOrientation=</span><span class="s">&quot;portrait&quot;</span>
-</span><span class='line'>    <span class="na">android:windowSoftInputMode=</span><span class="s">&quot;adjustPan&quot;</span><span class="nt">&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;intent-filter&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;action</span> <span class="na">android:name=</span><span class="s">&quot;ACTION_COPY_TO_CLIPBOARD&quot;</span><span class="nt">/&gt;</span>
-</span><span class='line'>        <span class="nt">&lt;category</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.category.DEFAULT&quot;</span><span class="nt">/&gt;</span>
-</span><span class='line'>    <span class="nt">&lt;/intent-filter&gt;</span>
-</span><span class='line'><span class="nt">&lt;/activity&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>icon与label组成了分享列表中的&#8221;复制到剪切板&#8221;。launchMode定义为singleTop是因为当前activity已经在栈顶，没有必要因为intent的到来而重新创建一个，所以维持目前的activity，使得点击”复制到剪切板“之后，activity会直接执行onNewIntent()的回调，在这里获取到之前定义的intent，从这个intent获取后续操作的数据。</p>
-
-<h3>3)在onNewIntent()中执行把文字复制到剪切板的任务</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
-</span><span class='line'><span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onNewIntent</span><span class="o">(</span><span class="n">Intent</span> <span class="n">intent</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>    <span class="kd">super</span><span class="o">.</span><span class="na">onNewIntent</span><span class="o">(</span><span class="n">intent</span><span class="o">);</span>
-</span><span class='line'>    <span class="n">Log</span><span class="o">.</span><span class="na">i</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span> <span class="s">&quot;[onNewIntent] intent = &quot;</span> <span class="o">+</span> <span class="n">intent</span><span class="o">);</span>
-</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">intent</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">intent</span><span class="o">.</span><span class="na">getAction</span><span class="o">().</span><span class="na">equalsIgnoreCase</span><span class="o">(</span><span class="s">&quot;ACTION_COPY_TO_CLIPBOARD&quot;</span><span class="o">))</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">String</span> <span class="n">title</span> <span class="o">=</span> <span class="n">intent</span><span class="o">.</span><span class="na">getStringExtra</span><span class="o">(</span><span class="s">&quot;KEY_SHARE_TITLE&quot;</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">String</span> <span class="n">body</span> <span class="o">=</span> <span class="n">intent</span><span class="o">.</span><span class="na">getStringExtra</span><span class="o">(</span><span class="s">&quot;KEY_SHARE_BODY&quot;</span><span class="o">);</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="n">ClipboardManager</span> <span class="n">clipboard</span> <span class="o">=</span> <span class="o">(</span><span class="n">ClipboardManager</span><span class="o">)</span> <span class="n">getSystemService</span><span class="o">(</span><span class="n">Context</span><span class="o">.</span><span class="na">CLIPBOARD_SERVICE</span><span class="o">);</span>
-</span><span class='line'>        <span class="c1">// clipboard.setText(title + body);</span>
-</span><span class='line'>        <span class="c1">// Creates a new text clip to put on the clipboard</span>
-</span><span class='line'>        <span class="n">ClipData</span> <span class="n">clip</span> <span class="o">=</span> <span class="n">ClipData</span><span class="o">.</span><span class="na">newPlainText</span><span class="o">(</span><span class="n">title</span><span class="o">,</span> <span class="n">body</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">clipboard</span><span class="o">.</span><span class="na">setPrimaryClip</span><span class="o">(</span><span class="n">clip</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">Log</span><span class="o">.</span><span class="na">d</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span> <span class="s">&quot;[onNewIntent] copy text title = &quot;</span> <span class="o">+</span> <span class="n">title</span> <span class="o">+</span> <span class="s">&quot;, body = &quot;</span> <span class="o">+</span> <span class="n">body</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">Toast</span><span class="o">.</span><span class="na">makeText</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="s">&quot;Copy Succussed!&quot;</span><span class="o">,</span> <span class="n">Toast</span><span class="o">.</span><span class="na">LENGTH_SHORT</span><span class="o">).</span><span class="na">show</span><span class="o">();</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<hr />
-
-<p>至此，这个功能就实现了，这种写法还给了我们更多的启发：可以使用类似的方式添加其他的选项到分享列表中，在activity的onNewIntent回调里面处理这个选项要求实现的任务。这种方式相比起自己去过滤并绘制分享列表要简单很多！欢迎有其他实现方法的同学留言交流！</p>
 ]]></content>
   </entry>
   

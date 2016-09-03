@@ -9,7 +9,7 @@
   <meta name="author" content="HuKai">
 
   
-  <meta name="description" content="Android性能优化典范的课程最近更新到第三季了，这次一共12个短视频课程，包括的内容大致有：更高效的ArrayMap容器，使用Android系统提供的特殊容器来避免自动装箱，避免使用枚举类型，注意onLowMemory与onTrimMemory的回调，避免内存泄漏，高效的位置更新操作， &hellip;">
+  <meta name="description" content="前段时间，Google公布了Android开发最佳实践的一系列课程，涉及到一些平时开发过程中应该保持的良好习惯以及如何使用最新的Android Design Support Library来快速实现官方推荐的Material Design样式的应用。下面是个人的学习摘要总结， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +81,116 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-dev-patterns/">Android开发最佳实践</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-10-02T15:38:00+08:00" pubdate data-updated="true">Oct 2<span>nd</span>, 2015</time>
+        
+         | <a href="/android-dev-patterns/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img src="/images/android_dev_patterns_logo.png" alt="android_dev_patterns_logo" /></p>
+
+<blockquote><p>前段时间，Google公布了<a href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc-lJo_RGGXL2Psr8vVCTWjM">Android开发最佳实践</a>的一系列课程，涉及到一些平时开发过程中应该保持的良好习惯以及如何使用最新的<a href="http://android-developers.blogspot.com/2015/05/android-design-support-library.html">Android Design Support Library</a>来快速实现官方推荐的Material Design样式的应用。下面是个人的学习摘要总结，不对的地方请多多交流指点，谢谢！</p></blockquote>
+
+<h2>1）注意对隐式Intent的运行时检查保护</h2>
+
+<p>类似打开相机，发送图片等隐式Intent，是并不一定能够在所有的Android设备上都正常运行。例如打开相机的隐式Intent，如果系统相机应用被关闭或者不存在相机应用，又或者是相机应用的某些权限被关闭等等情况都可能导致这个隐式的Intent无法正常工作。一旦发生隐式Intent找不到合适的调用组件的情况，系统就会抛出<code>ActivityNotFoundException</code>的异常，如果我们的应用没有对这个异常做任何处理，那应用就会发生Crash。</p>
+
+<p>预防这个问题的最佳解决方案是在发出这个隐式Intent之前调用<code>resolveActivity</code>做检查，关于这个API的解释以及用法如下：</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-dev-patterns/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-performance-oom/">Android内存优化之OOM</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-09-12T14:53:00+08:00" pubdate data-updated="true">Sep 12<span>th</span>, 2015</time>
+        
+         | <a href="/android-performance-oom/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><blockquote><p>Android的内存优化是性能优化中很重要的一部分，而避免OOM又是内存优化中比较核心的一点，这是一篇关于内存优化中如何避免OOM的总结性概要文章，内容大多都是和OOM有关的实践总结概要。理解错误或是偏差的地方，还请多包涵指正，谢谢！</p></blockquote>
+
+<h2>(一)Android的内存管理机制</h2>
+
+<p>Google在Android的官网上有这样一篇文章，初步介绍了Android是如何管理应用的进程与内存分配：<a href="http://developer.android.com/training/articles/memory.html">http://developer.android.com/training/articles/memory.html</a>。
+Android系统的Dalvik虚拟机扮演了常规的内存垃圾自动回收的角色，Android系统没有为内存提供交换区，它使用<a href="http://en.wikipedia.org/wiki/Paging">paging</a>与<a href="http://en.wikipedia.org/wiki/Memory-mapped_files">memory-mapping(mmapping)</a>的机制来管理内存，下面简要概述一些Android系统中重要的内存管理基础概念。</p>
+
+<h3>1）共享内存</h3>
+
+<p>Android系统通过下面几种方式来实现共享内存：</p>
+
+<ul>
+<li>Android应用的进程都是从一个叫做Zygote的进程fork出来的。Zygote进程在系统启动并且载入通用的framework的代码与资源之后开始启动。为了启动一个新的程序进程，系统会fork Zygote进程生成一个新的进程，然后在新的进程中加载并运行应用程序的代码。这使得大多数的RAM pages被用来分配给framework的代码，同时使得RAM资源能够在应用的所有进程之间进行共享。</li>
+<li>大多数static的数据被mmapped到一个进程中。这不仅仅使得同样的数据能够在进程间进行共享，而且使得它能够在需要的时候被paged out。常见的static数据包括Dalvik Code，app resources，so文件等。</li>
+<li>大多数情况下，Android通过显式的分配共享内存区域(例如ashmem或者gralloc)来实现动态RAM区域能够在不同进程之间进行共享的机制。例如，Window Surface在App与Screen Compositor之间使用共享的内存，Cursor Buffers在Content Provider与Clients之间共享内存。</li>
+</ul>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-performance-oom/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -189,120 +299,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-performance-battery/">Android性能优化之电量篇</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-04-12T16:49:00+08:00" pubdate data-updated="true">Apr 12<span>th</span>, 2015</time>
-        
-         | <a href="/android-performance-battery/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><img src="/images/android_performance_course_udacity.jpg" alt="android_performance_course_udacity" /></p>
-
-<blockquote><p>Google近期在Udacity上发布了<a href="https://www.udacity.com/course/ud825">Android性能优化的在线课程</a>，分别从渲染，运算与内存，电量几个方面介绍了如何去优化性能，这些课程是Google之前在Youtube上发布的<a href="http://hukai.me/android-performance-patterns/">Android性能优化典范</a>专题课程的细化与补充。</p></blockquote>
-
-<p>下面是电量篇章的学习笔记，部分内容与前面的性能优化典范有重合，欢迎大家一起学习交流！</p>
-
-<h3>1)Understanding Battery Drain</h3>
-
-<p>手机各个硬件模块的耗电量是不一样的，有些模块非常耗电，而有些模块则相对显得耗电量小很多。</p>
-
-<p><img src="/images/android_perf_battery_drain.png" alt="android_perf_battery_drain" /></p>
-
-<p>电量消耗的计算与统计是一件麻烦而且矛盾的事情，记录电量消耗本身也是一个费电量的事情。唯一可行的方案是使用第三方监测电量的设备，这样才能够获取到真实的电量消耗。</p>
-
-<p>当设备处于待机状态时消耗的电量是极少的，以N5为例，打开飞行模式，可以待机接近1个月。可是点亮屏幕，硬件各个模块就需要开始工作，这会需要消耗很多电量。</p>
-
-<p>使用WakeLock或者JobScheduler唤醒设备处理定时的任务之后，一定要及时让设备回到初始状态。每次唤醒蜂窝信号进行数据传递，都会消耗很多电量，它比WiFi等操作更加的耗电。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-performance-battery/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-performance-memory/">Android性能优化之内存篇</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-04-12T14:51:00+08:00" pubdate data-updated="true">Apr 12<span>th</span>, 2015</time>
-        
-         | <a href="/android-performance-memory/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><img src="/images/android_performance_course_udacity.jpg" alt="" /></p>
-
-<blockquote><p>Google近期在Udacity上发布了<a href="https://www.udacity.com/course/ud825">Android性能优化的在线课程</a>，分别从渲染，运算与内存，电量几个方面介绍了如何去优化性能，这些课程是Google之前在Youtube上发布的<a href="http://hukai.me/android-performance-patterns/">Android性能优化典范</a>专题课程的细化与补充。</p></blockquote>
-
-<p>下面是内存篇章的学习笔记，部分内容与前面的性能优化典范有重合，欢迎大家一起学习交流！</p>
-
-<h3>1)Memory, GC, and Performance</h3>
-
-<p>众所周知，与C/C++需要通过手动编码来申请以及释放内存有所不同，Java拥有GC的机制。Android系统里面有一个<strong>Generational Heap Memory</strong>的模型，系统会根据内存中不同的内存数据类型分别执行不同的GC操作。例如，最近刚分配的对象会放在Young Generation区域，这个区域的对象通常都是会快速被创建并且很快被销毁回收的，同时这个区域的GC操作速度也是比Old Generation区域的GC操作速度更快的。</p>
-
-<p><img src="/images/memory_mode_generation.png" alt="" /></p>
-
-<p>除了速度差异之外，执行GC操作的时候，所有线程的任何操作都会需要暂停，等待GC操作完成之后，其他操作才能够继续运行。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-performance-memory/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -318,6 +314,14 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-performance-patterns-season-6/">Android性能优化典范 - 第6季</a>
+      </li>
+    
+      <li class="post">
+        <a href="/google-io-2016/">Google I/O 2016随笔</a>
+      </li>
     
       <li class="post">
         <a href="/android-performance-patterns-season-5/">Android性能优化典范 - 第5季</a>
@@ -343,25 +347,18 @@
         <a href="/android-performance-patterns-season-2/">Android性能优化典范 - 第2季</a>
       </li>
     
-      <li class="post">
-        <a href="/android-performance-battery/">Android性能优化之电量篇</a>
-      </li>
-    
-      <li class="post">
-        <a href="/android-performance-memory/">Android性能优化之内存篇</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (98)</a></li>
+  <li><a href='/blog/categories/android'>Android (100)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
-  <li><a href='/blog/categories/android-performance'>Android:performance (21)</a></li>
+  <li><a href='/blog/categories/android-performance'>Android:performance (22)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
+  <li><a href='/blog/categories/google'>Google (1)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
 </ul>
