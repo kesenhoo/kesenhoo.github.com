@@ -9,7 +9,7 @@
   <meta name="author" content="HuKai">
 
   
-  <meta name="description" content="这是Android性能优化典范第6季的课程学习笔记，最近个人事情比较多，从被@起，这篇学习笔记就一直被惦记着，现在学习记录分享一下，请多多包涵担待指正！这次才一共6个段落，涉及的内容主要有：程序启动时间相关的三个方面：activity的创建过程，臃肿的application启动对象，主题启动显屏 &hellip;">
+  <meta name="description" content="这里是Android性能优化典范第6季的课程学习笔记，从被@知会到有连载更新，这篇学习笔记就一直被惦记着，现在学习记录分享一下，请多多指教包涵！这次一共才6个小段落，涉及的内容主要有：程序启动时间性能优化的三个方面：优化activity的创建过程，优化application对象的启动过程， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -103,7 +103,7 @@
   
 
 
-<time datetime="2016-08-31T23:12:00+08:00" pubdate data-updated="true">Aug 31<span>st</span>, 2016</time>
+<time datetime="2016-10-04T23:12:00+08:00" pubdate data-updated="true">Oct 4<span>th</span>, 2016</time>
         
          | <a href="/android-performance-patterns-season-6/#disqus_thread">Comments</a>
         
@@ -112,9 +112,9 @@
   </header>
 
 
-  <div class="entry-content"><p><img src="/images/android_perf_patterns_season_5.png" alt="android_perf_patterns_season_5" /></p>
+  <div class="entry-content"><p><img src="/images/android_perf_patterns_season_common.png" alt="android_perf_patterns_season_common" /></p>
 
-<blockquote><p>这是<a href="https://www.youtube.com/watch?v=Vw1G1s73DsY&amp;index=74&amp;list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">Android性能优化典范</a>第6季的课程学习笔记，最近个人事情比较多，从被@起，这篇学习笔记就一直被惦记着，现在学习记录分享一下，请多多包涵担待指正！这次才一共6个段落，涉及的内容主要有：程序启动时间相关的三个方面：activity的创建过程，臃肿的application启动对象，主题启动显屏。另外还介绍了减少安装包大小的checklist以及如何使用VectorDrawable来减少安装包的大小。</p></blockquote>
+<blockquote><p>这里是<a href="https://www.youtube.com/watch?v=Vw1G1s73DsY&amp;index=74&amp;list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">Android性能优化典范</a>第6季的课程学习笔记，从被@知会到有连载更新，这篇学习笔记就一直被惦记着，现在学习记录分享一下，请多多指教包涵！这次一共才6个小段落，涉及的内容主要有：程序启动时间性能优化的三个方面：优化activity的创建过程，优化application对象的启动过程，正确使用启动显屏达到优化程序启动性能的目的。另外还介绍了减少安装包大小的checklist以及如何使用VectorDrawable来减少安装包的大小。</p></blockquote>
 
 <h2>1）App Launch time 101</h2>
 
@@ -123,49 +123,6 @@
 <p>从技术角度来说，当用户点击桌面图标开始，系统会立即为这个APP创建独立的专属进程，然后显示启动窗口，直到APP在自己的进程里面完成了程序的创建以及主线程完成了Activity的初始化显示操作，再然后系统进程就会把启动窗口替换成APP的显示窗口。</p>
 
 <p><img src="/images/android_perf_6_launch_time_start_process.png" alt="android_perf_6_launch_time_start_process" /></p>
-
-<p>上述流程里面的绝大多数步骤都是由系统控制的，一般来说不会出现什么问题，可是对于启动速度，我们能够控制并且需要特别关注的地方主要有三处：</p>
-
-<ul>
-<li>1）Activity的onCreate流程，特别是UI的布局与渲染操作，如果布局过于复杂很可能导致严重的启动性能问题。</li>
-<li>2）Application的onCreate流程，对于大型的APP来说，通常会在这里做大量的通用组件的初始化操作。</li>
-<li>3）目前有部分APP会提供自定义的启动窗口，这里可以做成品牌宣传界面或者是给用户提供一种程序已经启动的视觉效果。</li>
-</ul>
-
-
-<p>在正式着手解决问题之前，我们需要掌握一套正确测量评估启动性能的方法。所幸的是，Android系统有提供一些工具来帮助我们定位问题。</p>
-
-<ul>
-<li>1）首先是<strong>display time</strong>：从Android KitKat版本开始，Logcat中会输出从程序启动到某个Activity显示到画面上所花费的时间。这个方法比较适合测量程序的启动时间。</li>
-</ul>
-
-
-<p><img src="/images/android_perf_6_launch_time_display_time.png" alt="android_perf_6_launch_time_display_time" /></p>
-
-<ul>
-<li>2）其次是<strong>reportFullyDrawn</strong>方法：我们通常来说会使用异步懒加载的方式来提升程序画面的显示速度，这通常会导致的一个问题是，程序画面已经显示，可是内容却还在加载中。为了衡量这些异步加载资源所耗费的时间，我们可以在异步加载完毕之后调用<code>activity.reportFullyDrawn()</code>方法来告诉系统此时的状态，以便获取整个加载的耗时。</li>
-</ul>
-
-
-<p><img src="/images/android_perf_6_launch_time_report_fully_drawn.png" alt="android_perf_6_launch_time_report_fully_drawn" /></p>
-
-<ul>
-<li>3）然后是<strong>Method Tracing</strong>：前面两个方法提供了启动耗时的总时间，可是却无法提供具体的耗时细节。为了获取具体的耗时分布情况，我们可以使用Method Tracing工具来进行详细的测量。</li>
-</ul>
-
-
-<p><img src="/images/android_perf_6_launch_time_method_tracing.png" alt="android_perf_6_launch_time_method_tracing" /></p>
-
-<ul>
-<li>4）最后是<strong>Systrace</strong>：我们可以在onCreate方法里面添加trace方法来声明需要跟踪的起止位置，系统会帮忙统计中间经历过的函数调用耗时，并输出报表。</li>
-</ul>
-
-
-<p><img src="/images/android_perf_6_launch_time_systrace.png" alt="android_perf_6_launch_time_systrace" /></p>
-
-<h2>2）</h2>
-
-<p><img src="/images/android_perf_5_threading_main_thread.png" alt="android_perf_5_threading_main_thread" /></p>
 
 </div>
   
