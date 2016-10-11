@@ -149,4 +149,4 @@ categories: Android Android:Performance
 ![android_perf_6_vectordrawable_path](/images/android_perf_6_vectordrawable_path.png)
 
 ***
-首发于CSDN：[Android性能优化典范（六）](http://ms.csdn.net/xxxx)
+首发于CSDN：[Android性能优化典范（六）](http://geek.csdn.net/news/detail/106513)
