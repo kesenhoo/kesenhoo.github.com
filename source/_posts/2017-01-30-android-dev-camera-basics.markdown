@@ -9,7 +9,7 @@ categories: Android
 
 在Android平台上面实现自定义相机，根据业务的复杂度，涉及到的知识范畴大致如下，开篇优先描述下基础概览的部分:
 
-![android_dev_custom_camera_basic.jpg](/images/android_dev_custom_camera_basic.jpg)
+![android_dev_custom_camera_basic.jpeg](/images/android_dev_custom_camera_basic.jpeg)
 
 ## 0)开始之前
 在应用中开启Android设备的相机功能之前，应该考虑如下几个问题：
