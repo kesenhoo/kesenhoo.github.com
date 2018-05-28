@@ -9,7 +9,7 @@
   <meta name="author" content="HuKai">
 
   
-  <meta name="description" content="前段时间，Google公布了Android开发最佳实践的一系列课程，涉及到一些平时开发过程中应该保持的良好习惯以及如何使用最新的Android Design Support Library来快速实现官方推荐的Material Design样式的应用。下面是个人的学习摘要总结， &hellip;">
+  <meta name="description" content="Android性能优化典范第4季的课程学习笔记终于在2015年的最后一天完成了，文章共17个段落，包含的内容大致有：优化网络请求的行为，优化安装包的资源文件，优化数据传输的效率，性能优化的几大基础原理等等。因为学习认知水平有限，肯定存在不少理解偏差甚至错误的地方，请多多交流指正！ 1) &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +81,57 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-performance-patterns-season-4/">Android性能优化典范 - 第4季</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-12-31T23:39:00+08:00" pubdate data-updated="true">Dec 31<span>st</span>, 2015</time>
+        
+         | <a href="/android-performance-patterns-season-4/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img src="/images/android_perf_patterns_season_4.png" alt="android_perf_patterns_season_4" /></p>
+
+<blockquote><p><a href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">Android性能优化典范</a>第4季的课程学习笔记终于在2015年的最后一天完成了，文章共17个段落，包含的内容大致有：优化网络请求的行为，优化安装包的资源文件，优化数据传输的效率，性能优化的几大基础原理等等。因为学习认知水平有限，肯定存在不少理解偏差甚至错误的地方，请多多交流指正！</p></blockquote>
+
+<h2>1)Cachematters for networking</h2>
+
+<p>想要使得Android系统上的网络访问操作更加的高效就必须做好网络数据的缓存。这是提高网络访问性能最基础的步骤之一。从手机的缓存中直接读取数据肯定比从网络上获取数据要更加的便捷高效，特别是对于那些会被频繁访问到的数据，需要把这些数据缓存到设备上，以便更加快速的进行访问。</p>
+
+<p>Android系统上关于网络请求的Http Response Cache是默认关闭的，这样会导致每次即使请求的数据内容是一样的也会需要重复被调用执行，效率低下。我们可以通过下面的代码示例开启<a href="http://developer.android.com/reference/android/net/http/HttpResponseCache.html">HttpResponseCache</a>。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-performance-patterns-season-4/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -247,58 +298,6 @@ Android系统的Dalvik虚拟机扮演了常规的内存垃圾自动回收的角�
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-performance-patterns-season-2/">Android性能优化典范 - 第2季</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-04-29T12:32:00+08:00" pubdate data-updated="true">Apr 29<span>th</span>, 2015</time>
-        
-         | <a href="/android-performance-patterns-season-2/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><img src="/images/android_perf_patterns_season_2.png" alt="android_perf_patterns_season_2" /></p>
-
-<blockquote><p>Google前几天刚发布了<a href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">Android性能优化典范第2季</a>的课程，一共20个短视频，包括的内容大致有：电量优化，网络优化，Wear上如何做优化，使用对象池来提高效率，LRU Cache，Bitmap的缩放，缓存，重用，PNG压缩，自定义View的性能，提升设置alpha之后View的渲染性能，以及Lint，StictMode等等工具的使用技巧。
-下面是对这些课程的总结摘要，认知有限，理解偏差的地方请多多指教！</p></blockquote>
-
-<h2>1)Battery Drain and Networking</h2>
-
-<p>对于手机程序，网络操作相对来说是比较耗电的行为。优化网络操作能够显著节约电量的消耗。在性能优化第1季里面有提到过，手机硬件的各个模块的耗电量是不一样的，其中移动蜂窝模块对电量消耗是比较大的，另外蜂窝模块在不同工作强度下，对电量的消耗也是有差异的。当程序想要执行某个网络请求之前，需要先唤醒设备，然后发送数据请求，之后等待返回数据，最后才慢慢进入休眠状态。这个流程如下图所示：</p>
-
-<p><img src="/images/android_perf_2_network_request_mode.png" alt="android_perf_2_network_request_mode" /></p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-performance-patterns-season-2/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -314,6 +313,10 @@ Android系统的Dalvik虚拟机扮演了常规的内存垃圾自动回收的角�
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/android-dev-camera-basics/">Android相机开发 - 1)基础概览篇</a>
+      </li>
     
       <li class="post">
         <a href="/android-performance-patterns-season-6/">Android性能优化典范 - 第6季</a>
@@ -343,17 +346,13 @@ Android系统的Dalvik虚拟机扮演了常规的内存垃圾自动回收的角�
         <a href="/android-performance-patterns-season-3/">Android性能优化典范 - 第3季</a>
       </li>
     
-      <li class="post">
-        <a href="/android-performance-patterns-season-2/">Android性能优化典范 - 第2季</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (100)</a></li>
+  <li><a href='/blog/categories/android'>Android (101)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
   <li><a href='/blog/categories/android-performance'>Android:performance (22)</a></li>
@@ -401,7 +400,7 @@ Android系统的Dalvik虚拟机扮演了常规的内存垃圾自动回收的角�
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2016 - HuKai -
+  Copyright &copy; 2018 - HuKai -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> - 本站作品采用 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 许可协议</a>进行许可.</span> 
   
   <script src="/javascripts/modernizr-2.0.js"></script>

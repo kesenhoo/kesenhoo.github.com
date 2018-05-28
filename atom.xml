@@ -4,7 +4,7 @@
   <title><![CDATA[胡凯]]></title>
   <link href="http://hukai.me/atom.xml" rel="self"/>
   <link href="http://hukai.me/"/>
-  <updated>2016-10-11T16:07:43+08:00</updated>
+  <updated>2018-05-28T21:33:13+08:00</updated>
   <id>http://hukai.me/</id>
   <author>
     <name><![CDATA[HuKai]]></name>
@@ -12,6 +12,957 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Android相机开发 - 1)基础概览篇]]></title>
+    <link href="http://hukai.me/android-dev-camera-basics/"/>
+    <updated>2017-01-30T21:24:00+08:00</updated>
+    <id>http://hukai.me/android-dev-camera-basics</id>
+    <content type="html"><![CDATA[<p>在Android平台上面实现自定义相机，根据业务的复杂度，涉及到的知识范畴大致如下，开篇优先描述下基础概览的部分:</p>
+
+<p><img src="http://hukai.me/images/android_dev_custom_camera_basic.jpeg" alt="android_dev_custom_camera_basic.jpeg" /></p>
+
+<h2>0)开始之前</h2>
+
+<p>在应用中开启Android设备的相机功能之前，应该考虑如下几个问题：</p>
+
+<ul>
+<li><strong>必须的相机硬件</strong> - 当然不能把一个包含相机功能的应用安装到一个连相机硬件都没有的设备上。因此，应该在mainfest文件中声明需要使用到相机。</li>
+<li><strong>快速获取图片还是自定义相机</strong> - 应用将如何使用相机？是想实现一个快速的抓拍功能还是录制一小段视频剪辑？还是说想提供一种全新的相机使用方式？如果是快速的获取一张抓拍图片或者是一小段视频剪辑，建议查看下面的<strong>3)使用已经存在的相机应用。</strong>如果是为了开发一个自定义的相机功能的应用，查看下面的<strong>4)创建自定义相机应用</strong>。</li>
+<li><strong>存储位置</strong> - 生成的图片与视频是只对自己的应用可见还是其它相册Gallery类的应用也可以访问？即使自己的应用被卸载后也不能被其他应用访问吗？建议查看<strong>5)保存媒体文件</strong></li>
+</ul>
+
+
+<h2>1)简要概述</h2>
+
+<p>Android framework通过提供Camera API来支持拍照与录制视频的功能。下面是相关的类：</p>
+
+<ul>
+<li><a href="https://developer.android.com/reference/android/hardware/camera2/package-summary.html"><strong>android.hardware.camera2</strong></a><br/>
+这里列举了控制相机的核心API，使用它可以实现拍照和录制视频的功能。</li>
+<li><a href="https://developer.android.com/reference/android/hardware/Camera.html"><strong>Camera</strong></a><br/>
+该类是已经被废弃的控制相机的基础的API。</li>
+<li><a href="http://developer.android.com/reference/android/view/SurfaceView.html"><strong>SurfaceView</strong></a><br/>
+该类用来呈现一个动态的相机预览界面。</li>
+<li><a href="http://developer.android.com/reference/android/media/MediaRecorder.html"><strong>MediaRecorder</strong></a><br/>
+该类用来使用相机录制视频(后续的文章中都不会对视频录制的部分进行过多描述，不属于该系列文章的主要讨论范畴)</li>
+<li><a href="http://developer.android.com/reference/android/content/Intent.html"><strong>Intent</strong></a><br/>
+使用<a href="http://developer.android.com/reference/android/provider/MediaStore.html#ACTION_IMAGE_CAPTURE">MediaStore.ACTION_IMAGE_CAPTURE</a> 或者 <a href="http://developer.android.com/reference/android/provider/MediaStore.html#ACTION_VIDEO_CAPTURE">MediaStore.ACTION_VIDEO_CAPTURE</a>作为Intent的action可以用来拍照与录制视频。</li>
+</ul>
+
+
+<!-- More -->
+
+
+<h2>2)AndroidManifest.xml声明</h2>
+
+<p>在使用Camera API开发应用之前，应该确保应用的mainfest中有做恰当的权限声明，表明此应用需要使用相机或者是相机的相关功能。</p>
+
+<ul>
+<li><strong>Camera Permission</strong> - 为了使用相机硬件，你的应用必须请求使用Camera的权限。</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;uses-permission</span> <span class="na">android:name=</span><span class="s">&quot;android.permission.CAMERA&quot;</span> <span class="nt">/&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>
+<strong>Note:</strong>如果你是通过Intent来调用其他已经存在的Camera应用，自己的应用程序是不需要声明这个权限的。</p>
+
+<ul>
+<li><strong>Camera Features</strong> - 你的应用还必须声明使用相机功能，例如：</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;uses-feature</span> <span class="na">android:name=</span><span class="s">&quot;android.hardware.camera&quot;</span> <span class="nt">/&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>
+关于相机功能列表，请参考<a href="https://developer.android.com/guide/topics/manifest/uses-feature-element.html#hw-features">功能引用</a>。增加相机功能到你的mainfest文件，这样Google Play可以阻止那些没有相机硬件或者没有相机特定功能的设备安装你的应用。关于Google Play如何做过滤的信息，请参考<a href="http://developer.android.com/guide/topics/manifest/uses-feature-element.html#market-feature-filtering">Google Play and Feature-Based Filtering</a>(关于这一点，国内的分发市场暂时都没有做一条的过滤)。你还可以为每个相机特性设置<code>android:required</code>的属性，表示这个功能是否为必须的。</p>
+
+<ul>
+<li><strong>Storage Permission</strong> - 如果你的应用需要保存图片或者视频到设备的外置存储空间(SDCard)上，你也需要在manifest中指定存储的读写权限。</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;uses-permission</span> <span class="na">android:name=</span><span class="s">&quot;android.permission.WRITE_EXTERNAL_STORAGE&quot;</span> <span class="nt">/&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><strong>Location Permission</strong> - 如果你的应用需要为图片添加位置信息，你还需要请求location permission，如果应用需要执行在Android 5.0及更高的的版本上，还需要声明GPS权限。</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;uses-permission</span> <span class="na">android:name=</span><span class="s">&quot;android.permission.ACCESS_FINE_LOCATION&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>...
+</span><span class='line'><span class="c">&lt;!-- Needed only if your app targets Android 5.0 (API level 21) or higher. --&gt;</span>
+</span><span class='line'><span class="nt">&lt;uses-feature</span> <span class="na">android:name=</span><span class="s">&quot;android.hardware.location.gps&quot;</span> <span class="nt">/&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>关于获取用户位置信息的更多细节信息，请参考<a href="https://developer.android.com/guide/topics/location/strategies.html">Location Strategies</a>。</p>
+
+<h2>3)使用已经存在的相机应用</h2>
+
+<p>在你的应用中快速的实现拍照与录制视频的方法是使用一个Intent来调用已经存在系统中的相机程序。通过已经存在的相机程序拍照或者录制视频，然后返回数据给请求方。这一部分会演示如何使用这种技术。</p>
+
+<p>触发Camera Intent需要遵守如下几个步骤：</p>
+
+<ul>
+<li><p><strong>Compose a Camera Intent</strong> - 创建一个请求拍照或者录像的Intent，使用下面的intent类型：</p>
+
+<ul>
+<li><a href="http://developer.android.com/reference/android/provider/MediaStore.html#ACTION_IMAGE_CAPTURE">MediaStore.ACTION_IMAGE_CAPTURE</a> - 请求拍照的Intent。</li>
+<li><a href="http://developer.android.com/reference/android/provider/MediaStore.html#ACTION_VIDEO_CAPTURE">MediaStore.ACTION_VIDEO_CAPTURE</a> - 请求录像的Intent。</li>
+</ul>
+</li>
+<li><p><strong>Start the Camera Intent</strong> - 使用<a href="http://developer.android.com/reference/android/app/Activity.html#startActivityForResult(android.content.Intent,%20int">startActivityForResult()</a>)方法来执行这个Intent。在启动这个Intent之后，相机程序会被唤起并提供拍照或者录像的功能。</p></li>
+<li><p><strong>Receive the Intent Result</strong> - 在你的程序里面实现<a href="http://developer.android.com/reference/android/app/Activity.html#onActivityResult(int,%20int,%20android.content.Intent">onActivityResult()</a>)的方法用来接收相机程序返回的数据。当用户结束拍照或者录像之后，系统会调用到这个方法。</p></li>
+</ul>
+
+
+<h3>3.1)Image capture intent</h3>
+
+<p>使用Camera Intent是一种使用最少的代码为你的程序开启拍照功能的一种简便的方法。一个拍照程序可以包含下面的附加信息：</p>
+
+<p><strong><a href="http://developer.android.com/reference/android/provider/MediaStore.html#EXTRA_OUTPUT">MediaStore.EXTRA_OUTPUT</a></strong> - 这定义了一个Uri对象来指定存放图片的路径与文件名。这个设置信息是可选的，但是强烈建议添加。如果你不指定这个值，相机程序会使用默认的文件名保存图片到默认的位置，这个值可以从Intent.getData()的字段中获取到。</p>
+
+<p>下面的示例代码演示了如何构建一个拍照Intent并执行它。<code>getOutputMediaFileUri()</code>方法可以从<strong>Saving Media Files</strong>的段落中涉及到。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE</span> <span class="o">=</span> <span class="mi">100</span><span class="o">;</span>
+</span><span class='line'><span class="kd">private</span> <span class="n">Uri</span> <span class="n">fileUri</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">super</span><span class="o">.</span><span class="na">onCreate</span><span class="o">(</span><span class="n">savedInstanceState</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">setContentView</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">layout</span><span class="o">.</span><span class="na">main</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// create Intent to take a picture and return control to the calling application</span>
+</span><span class='line'>    <span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">MediaStore</span><span class="o">.</span><span class="na">ACTION_IMAGE_CAPTURE</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">fileUri</span> <span class="o">=</span> <span class="n">getOutputMediaFileUri</span><span class="o">(</span><span class="n">MEDIA_TYPE_IMAGE</span><span class="o">);</span> <span class="c1">// create a file to save the image</span>
+</span><span class='line'>    <span class="n">intent</span><span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="n">MediaStore</span><span class="o">.</span><span class="na">EXTRA_OUTPUT</span><span class="o">,</span> <span class="n">fileUri</span><span class="o">);</span> <span class="c1">// set the image file name</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// start the image capture Intent</span>
+</span><span class='line'>    <span class="n">startActivityForResult</span><span class="o">(</span><span class="n">intent</span><span class="o">,</span> <span class="n">CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>当startActivityForResult()方法被执行，用户会看到一个相机拍照的界面。用户执行了拍照(或者取消操作)，用户界面会回退到你的程序，你必须在onActivityResult()方法里面接收返回的数据。关于如何接受完整的intent，可以参考下面的<strong>Receiving camera intent result</strong>段落。</p>
+
+<h3>3.2)Video capture intent</h3>
+
+<p>视频录制的原理和拍照一致。一个视频录制的Intent可以包含如下的参数信息：</p>
+
+<ul>
+<li><a href="http://developer.android.com/reference/android/provider/MediaStore.html#EXTRA_OUTPUT">MediaStore.EXTRA_OUTPUT</a> - 和拍照类似，这里指定保存视频的位置。同样这个字段是可选的，但是也被强烈建议进行填写。如果没有传递这个参数，相机程序会使用默认的文件名保存文件到默认的存储位置。你可以通过在返回的Intent.getData()字段中获取到这个值。</li>
+<li><a href="http://developer.android.com/reference/android/provider/MediaStore.html#EXTRA_VIDEO_QUALITY">MediaStore.EXTRA_VIDEO_QUALITY</a> - 这里的值可以为0或者1，分别表示低质量与高质量。</li>
+<li><a href="http://developer.android.com/reference/android/provider/MediaStore.html#EXTRA_DURATION_LIMIT">MediaStore.EXTRA_DURATION_LIMIT</a> - 设置这个值用来限制视频的长度，用毫秒计算。</li>
+<li><a href="http://developer.android.com/reference/android/provider/MediaStore.html#EXTRA_SIZE_LIMIT">MediaStore.EXTRA_SIZE_LIMIT</a> - 设置这个值用来限制文件的大小，用btye做单位。</li>
+</ul>
+
+
+<p>下面演示了如何构建一个Video Intent并执行：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE</span> <span class="o">=</span> <span class="mi">200</span><span class="o">;</span>
+</span><span class='line'><span class="kd">private</span> <span class="n">Uri</span> <span class="n">fileUri</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">super</span><span class="o">.</span><span class="na">onCreate</span><span class="o">(</span><span class="n">savedInstanceState</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">setContentView</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">layout</span><span class="o">.</span><span class="na">main</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">//create new Intent</span>
+</span><span class='line'>    <span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">MediaStore</span><span class="o">.</span><span class="na">ACTION_VIDEO_CAPTURE</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">fileUri</span> <span class="o">=</span> <span class="n">getOutputMediaFileUri</span><span class="o">(</span><span class="n">MEDIA_TYPE_VIDEO</span><span class="o">);</span>  <span class="c1">// create a file to save the video</span>
+</span><span class='line'>    <span class="n">intent</span><span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="n">MediaStore</span><span class="o">.</span><span class="na">EXTRA_OUTPUT</span><span class="o">,</span> <span class="n">fileUri</span><span class="o">);</span>  <span class="c1">// set the image file name</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">intent</span><span class="o">.</span><span class="na">putExtra</span><span class="o">(</span><span class="n">MediaStore</span><span class="o">.</span><span class="na">EXTRA_VIDEO_QUALITY</span><span class="o">,</span> <span class="mi">1</span><span class="o">);</span> <span class="c1">// set the video image quality to high</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// start the Video Capture Intent</span>
+</span><span class='line'>    <span class="n">startActivityForResult</span><span class="o">(</span><span class="n">intent</span><span class="o">,</span> <span class="n">CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>和拍照类似，也需要在activity的onActivityResult里面去接收数据并做处理。</p>
+
+<h3>3.3)Receiving camera intent result</h3>
+
+<p>一旦你构建并执行了一个拍照或者录像的Intent，你的程序必须确保能够正确接收返回的数据。为了正确的接收到Intent，你必须重写onActivityResult()的方法，下面会演示如何获取到上面示例代码返回的数据。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE</span> <span class="o">=</span> <span class="mi">100</span><span class="o">;</span>
+</span><span class='line'><span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE</span> <span class="o">=</span> <span class="mi">200</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onActivityResult</span><span class="o">(</span><span class="kt">int</span> <span class="n">requestCode</span><span class="o">,</span> <span class="kt">int</span> <span class="n">resultCode</span><span class="o">,</span> <span class="n">Intent</span> <span class="n">data</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">requestCode</span> <span class="o">==</span> <span class="n">CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">resultCode</span> <span class="o">==</span> <span class="n">RESULT_OK</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="c1">// Image captured and saved to fileUri specified in the Intent</span>
+</span><span class='line'>            <span class="n">Toast</span><span class="o">.</span><span class="na">makeText</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="s">&quot;Image saved to:\n&quot;</span> <span class="o">+</span>
+</span><span class='line'>                     <span class="n">data</span><span class="o">.</span><span class="na">getData</span><span class="o">(),</span> <span class="n">Toast</span><span class="o">.</span><span class="na">LENGTH_LONG</span><span class="o">).</span><span class="na">show</span><span class="o">();</span>
+</span><span class='line'>        <span class="o">}</span> <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">resultCode</span> <span class="o">==</span> <span class="n">RESULT_CANCELED</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="c1">// User cancelled the image capture</span>
+</span><span class='line'>        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>            <span class="c1">// Image capture failed, advise user</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">requestCode</span> <span class="o">==</span> <span class="n">CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">resultCode</span> <span class="o">==</span> <span class="n">RESULT_OK</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="c1">// Video captured and saved to fileUri specified in the Intent</span>
+</span><span class='line'>            <span class="n">Toast</span><span class="o">.</span><span class="na">makeText</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="s">&quot;Video saved to:\n&quot;</span> <span class="o">+</span>
+</span><span class='line'>                     <span class="n">data</span><span class="o">.</span><span class="na">getData</span><span class="o">(),</span> <span class="n">Toast</span><span class="o">.</span><span class="na">LENGTH_LONG</span><span class="o">).</span><span class="na">show</span><span class="o">();</span>
+</span><span class='line'>        <span class="o">}</span> <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">resultCode</span> <span class="o">==</span> <span class="n">RESULT_CANCELED</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="c1">// User cancelled the video capture</span>
+</span><span class='line'>        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>            <span class="c1">// Video capture failed, advise user</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>一旦你的activity成功接收了数据，那么你的程序就可以在指定的位置获取到图片或者视频了。</p>
+
+<h2>4)创建自定义相机应用</h2>
+
+<p>很多时候，我们都会需要开发自定义的相机应用，它能够提供更多特殊的相机功能并带来不同的用户体验。创建一个自定义的相机应用比起使用Intent调用已经存在的相机应用会复杂许多，后续我们都会基于自定义的相机扩展描述其他的相关内容。</p>
+
+<p>通常来说创建一个自定义的相机有如下几个步骤：</p>
+
+<ul>
+<li><strong>Detect and Access Camera</strong> - 检查相机是否存在并可访问。</li>
+<li><strong>Create a Preview Class</strong> - 创建一个继承自SurfaceView的preview类，并实现SurfaceHolder的接口，用这个类用来预览相机的画面。</li>
+<li><strong>Build a Preview Layout</strong> - 一旦你拥有了预览组件。创建一个Layout用来承载preview并提供交互控制界面。</li>
+<li><strong>Setup Listeners for Capture</strong> - 为控制界面建立监听器，用来启动拍照或者录像。</li>
+<li><strong>Capture and Save Files</strong> - 建立拍照录像的代码并进行保存。</li>
+<li><strong>Release the Camera</strong> - 使用完相机之后，你的程序必须正确的释放它，以便其他程序使用。</li>
+</ul>
+
+
+<p>相机硬件是一个共享资源，必须谨慎正确的使用，我们的程序不应该和其他可能使用相机硬件的程序有冲突。下面的段落会介绍如何检测相机硬件，如何请求获取权限，如何拍照录像以及如何在使用完毕时释放相机。</p>
+
+<p><strong>注意:</strong> 当你的程序执行完任务之后，切记需要通过执行Camera.release()来释放相机对象。如果你的相机没有合理的释放相机，后续包括你自己的应用在内的所有的相机应用，都将无法正常打开相机并且可能导致程序崩溃。</p>
+
+<h3>4.1)Detecting camera hardware</h3>
+
+<p>如果你的程序没有在manifest中声明需要使用相机，你应该在运行时去检查相机是否可用。为了执行这个检查，需要使用到<a href="http://developer.android.com/reference/android/content/pm/PackageManager.html#hasSystemFeature(java.lang.String">PackageManager.hasSystemFeature()</a>) 方法，如下所示：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="cm">/** Check if this device has a camera */</span>
+</span><span class='line'><span class="kd">private</span> <span class="kt">boolean</span> <span class="nf">checkCameraHardware</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">context</span><span class="o">.</span><span class="na">getPackageManager</span><span class="o">().</span><span class="na">hasSystemFeature</span><span class="o">(</span><span class="n">PackageManager</span><span class="o">.</span><span class="na">FEATURE_CAMERA</span><span class="o">)){</span>
+</span><span class='line'>        <span class="c1">// this device has a camera</span>
+</span><span class='line'>        <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// no camera on this device</span>
+</span><span class='line'>        <span class="k">return</span> <span class="kc">false</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Android设备可以拥有多个摄像头，例如前置与后置摄像头。从Android 2.3 (API level 9)开始，可以通过<a href="http://developer.android.com/reference/android/hardware/Camera.html#getNumberOfCameras(">Camera.getNumberOfCameras()</a>)方法获取到摄像头的个数。</p>
+
+<h3>4.2)Accessing cameras</h3>
+
+<p>如果已经判断到程序运行的设备上存在摄像头，接下去想要获取到某个具体的摄像头实例，需要通过先打开这个摄像头的实例来进行访问操作。</p>
+
+<p>为了访问到主摄像头，如下所示，使用<a href="http://developer.android.com/reference/android/hardware/Camera.html#open(">Camera.open()</a>)方法。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="cm">/** A safe way to get an instance of the Camera object. */</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">static</span> <span class="n">Camera</span> <span class="nf">getCameraInstance</span><span class="o">(){</span>
+</span><span class='line'>    <span class="n">Camera</span> <span class="n">c</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>    <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">c</span> <span class="o">=</span> <span class="n">Camera</span><span class="o">.</span><span class="na">open</span><span class="o">();</span> <span class="c1">// attempt to get a Camera instance</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">e</span><span class="o">){</span>
+</span><span class='line'>        <span class="c1">// Camera is not available (in use or does not exist)</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">c</span><span class="o">;</span> <span class="c1">// returns null if camera is unavailable</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>注意:</strong>当使用<code>Camera.open()</code>方法时总是需要做异常捕获。如果没有进行检查捕获，很有可能会因为相机正在使用或者相机不存在而使得程序崩溃。</p>
+
+<p>在Android 2.3 (API level 9)开始, 可以使用通过<a href="http://developer.android.com/reference/android/hardware/Camera.html#open(int">Camera.open(int)</a>)方法来访问指定的摄像头。上面演示的代码会优先获取主摄像头。</p>
+
+<h3>4.3)Checking camera features</h3>
+
+<p>一旦获取到相机实例，可以使用<a href="http://developer.android.com/reference/android/hardware/Camera.html#getParameters(">Camera.getParameters()</a>)方法来获取到更多的相机信息。也可以通过获取到的相机参数对象得到相机能够支持的功能。从android 2.3开始，使用<a href="http://developer.android.com/reference/android/hardware/Camera.html#getCameraInfo(int,%20android.hardware.Camera.CameraInfo">Camera.getCameraInfo()</a>)可以获取到相机是前置还是后置摄像头以及将要拍摄出来的图片角度。</p>
+
+<h3>4.4)Creating a preview class</h3>
+
+<p>为了给用户提供有效的拍照与录像体验，用户需要能够对摄像头捕获的数据进行预览。相机预览是使用SurfaceView，它用来显示来自摄像头硬件传递过来的画面数据。</p>
+
+<p>下面的示例代码演示了如何创建一个基础的相机预览类，该类可以included到另外一个layout中。为了捕获拍照事件的回调，需要实现<a href="http://developer.android.com/reference/android/view/SurfaceHolder.Callback.html">SurfaceHolder.Callback</a>，之后可以在这些回调里面进行创建与销毁View的操作。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="cm">/** A basic Camera preview class */</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">CameraPreview</span> <span class="kd">extends</span> <span class="n">SurfaceView</span> <span class="kd">implements</span> <span class="n">SurfaceHolder</span><span class="o">.</span><span class="na">Callback</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">SurfaceHolder</span> <span class="n">mHolder</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">Camera</span> <span class="n">mCamera</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">CameraPreview</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="n">Camera</span> <span class="n">camera</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">(</span><span class="n">context</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">mCamera</span> <span class="o">=</span> <span class="n">camera</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c1">// Install a SurfaceHolder.Callback so we get notified when the</span>
+</span><span class='line'>        <span class="c1">// underlying surface is created and destroyed.</span>
+</span><span class='line'>        <span class="n">mHolder</span> <span class="o">=</span> <span class="n">getHolder</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">mHolder</span><span class="o">.</span><span class="na">addCallback</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+</span><span class='line'>        <span class="c1">// deprecated setting, but required on Android versions prior to 3.0</span>
+</span><span class='line'>        <span class="n">mHolder</span><span class="o">.</span><span class="na">setType</span><span class="o">(</span><span class="n">SurfaceHolder</span><span class="o">.</span><span class="na">SURFACE_TYPE_PUSH_BUFFERS</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">surfaceCreated</span><span class="o">(</span><span class="n">SurfaceHolder</span> <span class="n">holder</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// The Surface has been created, now tell the camera where to draw the preview.</span>
+</span><span class='line'>        <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">mCamera</span><span class="o">.</span><span class="na">setPreviewDisplay</span><span class="o">(</span><span class="n">holder</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">mCamera</span><span class="o">.</span><span class="na">startPreview</span><span class="o">();</span>
+</span><span class='line'>        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">Log</span><span class="o">.</span><span class="na">d</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span> <span class="s">&quot;Error setting camera preview: &quot;</span> <span class="o">+</span> <span class="n">e</span><span class="o">.</span><span class="na">getMessage</span><span class="o">());</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">surfaceDestroyed</span><span class="o">(</span><span class="n">SurfaceHolder</span> <span class="n">holder</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// empty. Take care of releasing the Camera preview in your activity.</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">surfaceChanged</span><span class="o">(</span><span class="n">SurfaceHolder</span> <span class="n">holder</span><span class="o">,</span> <span class="kt">int</span> <span class="n">format</span><span class="o">,</span> <span class="kt">int</span> <span class="n">w</span><span class="o">,</span> <span class="kt">int</span> <span class="n">h</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// If your preview can change or rotate, take care of those events here.</span>
+</span><span class='line'>        <span class="c1">// Make sure to stop the preview before resizing or reformatting it.</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">mHolder</span><span class="o">.</span><span class="na">getSurface</span><span class="o">()</span> <span class="o">==</span> <span class="kc">null</span><span class="o">){</span>
+</span><span class='line'>          <span class="c1">// preview surface does not exist</span>
+</span><span class='line'>          <span class="k">return</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c1">// stop preview before making changes</span>
+</span><span class='line'>        <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">mCamera</span><span class="o">.</span><span class="na">stopPreview</span><span class="o">();</span>
+</span><span class='line'>        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">e</span><span class="o">){</span>
+</span><span class='line'>          <span class="c1">// ignore: tried to stop a non-existent preview</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c1">// set preview size and make any resize, rotate or</span>
+</span><span class='line'>        <span class="c1">// reformatting changes here</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c1">// start preview with new settings</span>
+</span><span class='line'>        <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">mCamera</span><span class="o">.</span><span class="na">setPreviewDisplay</span><span class="o">(</span><span class="n">mHolder</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">mCamera</span><span class="o">.</span><span class="na">startPreview</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">e</span><span class="o">){</span>
+</span><span class='line'>            <span class="n">Log</span><span class="o">.</span><span class="na">d</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span> <span class="s">&quot;Error starting camera preview: &quot;</span> <span class="o">+</span> <span class="n">e</span><span class="o">.</span><span class="na">getMessage</span><span class="o">());</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果你想为你的相机预览界面设置特定的预览大小，可以在<code>surfaceChanged()</code>的回调里面进行操作(注意上面演示代码的注释)。设置预览大小时，你<strong>必须</strong>使用从<a href="http://developer.android.com/reference/android/hardware/Camera.Parameters.html#getSupportedPreviewSizes(">getSupportedPreviewSizes()</a>)方法获取到的预览值，不能在<a href="http://developer.android.com/reference/android/hardware/Camera.Parameters.html#setPreviewSize(int,%20int">setPreviewSize()</a>)方法里设置随意的预览值。</p>
+
+<p><strong>Notes:</strong>请注意这里只是为了演示操作相机的基础步骤，实际项目中很少用下面这么简单的结构来进行操作。</p>
+
+<h3>4.5)Placing preview in a layout</h3>
+
+<p>在上一段落演示的Camera Preview Class，必须放置在一个activity的layout中。这一段落会演示为了预览如何创建一个基础的layout与activity。</p>
+
+<p>下面的代码提供了一个能够显示相机预览界面的基础layout。在这段代码中，FrameLayout是相机预览类的container。使用framelayout可以在相机预览界面上叠加额外的图片信息或者是操作控制组件。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
+</span><span class='line'><span class="nt">&lt;LinearLayout</span> <span class="na">xmlns:android=</span><span class="s">&quot;http://schemas.android.com/apk/res/android&quot;</span>
+</span><span class='line'>    <span class="na">android:orientation=</span><span class="s">&quot;horizontal&quot;</span>
+</span><span class='line'>    <span class="na">android:layout_width=</span><span class="s">&quot;fill_parent&quot;</span>
+</span><span class='line'>    <span class="na">android:layout_height=</span><span class="s">&quot;fill_parent&quot;</span>
+</span><span class='line'>    <span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;FrameLayout</span>
+</span><span class='line'>    <span class="na">android:id=</span><span class="s">&quot;@+id/camera_preview&quot;</span>
+</span><span class='line'>    <span class="na">android:layout_width=</span><span class="s">&quot;fill_parent&quot;</span>
+</span><span class='line'>    <span class="na">android:layout_height=</span><span class="s">&quot;fill_parent&quot;</span>
+</span><span class='line'>    <span class="na">android:layout_weight=</span><span class="s">&quot;1&quot;</span>
+</span><span class='line'>    <span class="nt">/&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nt">&lt;Button</span>
+</span><span class='line'>    <span class="na">android:id=</span><span class="s">&quot;@+id/button_capture&quot;</span>
+</span><span class='line'>    <span class="na">android:text=</span><span class="s">&quot;Capture&quot;</span>
+</span><span class='line'>    <span class="na">android:layout_width=</span><span class="s">&quot;wrap_content&quot;</span>
+</span><span class='line'>    <span class="na">android:layout_height=</span><span class="s">&quot;wrap_content&quot;</span>
+</span><span class='line'>    <span class="na">android:layout_gravity=</span><span class="s">&quot;center&quot;</span>
+</span><span class='line'>    <span class="nt">/&gt;</span>
+</span><span class='line'><span class="nt">&lt;/LinearLayout&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在大多数设备上，相机预览的角度默认是横屏的。演示的layout指定了horizontal，并且下面的代码使得activity固定成横屏的模式。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;activity</span> <span class="na">android:name=</span><span class="s">&quot;.CameraActivity&quot;</span>
+</span><span class='line'>          <span class="na">android:label=</span><span class="s">&quot;@string/app_name&quot;</span>
+</span><span class='line'>
+</span><span class='line'>          <span class="na">android:screenOrientation=</span><span class="s">&quot;landscape&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>          <span class="c">&lt;!-- configure this activity to use landscape orientation --&gt;</span>
+</span><span class='line'>
+</span><span class='line'>          <span class="nt">&lt;intent-filter&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;action</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.action.MAIN&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;category</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.category.LAUNCHER&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/intent-filter&gt;</span>
+</span><span class='line'><span class="nt">&lt;/activity&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>Note:</strong> 相机预览界面不一定是要横屏的。从android 2.2开始，你可以使用<a href="http://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation(int">setDisplayOrientation()</a>)方法来设置预览图片的角度。为了在用户旋转手机时改变相机预览的角度，在<code>surfaceChanged()</code>方法里面，首先要使用<a href="http://developer.android.com/reference/android/hardware/Camera.html#stopPreview(">Camera.stopPreview()</a>)停止预览，然后再使用<a href="http://developer.android.com/reference/android/hardware/Camera.html#startPreview(">Camera.startPreview()</a>)方法来重新开启相机预览，后面会新写文章展开来讲这一部分的细节。</p>
+
+<p>为了在activity中添加相机界面，你的Camera Activity必须确保在activity pause或者是destory的时候释放相机资源。下面的代码演示了如何添加camera preview class到camera activity中。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">CameraActivity</span> <span class="kd">extends</span> <span class="n">Activity</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">Camera</span> <span class="n">mCamera</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">CameraPreview</span> <span class="n">mPreview</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">onCreate</span><span class="o">(</span><span class="n">savedInstanceState</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">setContentView</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">layout</span><span class="o">.</span><span class="na">main</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c1">// Create an instance of Camera</span>
+</span><span class='line'>        <span class="n">mCamera</span> <span class="o">=</span> <span class="n">getCameraInstance</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c1">// Create our Preview view and set it as the content of our activity.</span>
+</span><span class='line'>        <span class="n">mPreview</span> <span class="o">=</span> <span class="k">new</span> <span class="n">CameraPreview</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">mCamera</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">FrameLayout</span> <span class="n">preview</span> <span class="o">=</span> <span class="o">(</span><span class="n">FrameLayout</span><span class="o">)</span> <span class="n">findViewById</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">camera_preview</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">preview</span><span class="o">.</span><span class="na">addView</span><span class="o">(</span><span class="n">mPreview</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>Note:</strong> 上面演示的<code>getCameraInstance()</code>方法出现在4.2)Accessing camera段落中。</p>
+
+<h3>4.6)触发拍照行为</h3>
+
+<p>一旦你建立了preview class并且创建好了显示的layout。那么就可以开始做拍照的动作了。</p>
+
+<p>为了获取到一张图片，需要使用<a href="http://developer.android.com/reference/android/hardware/Camera.html#takePicture(android.hardware.Camera.ShutterCallback,%20android.hardware.Camera.PictureCallback,%20android.hardware.Camera.PictureCallback">Camera.takePicture()</a>)方法。为了获取到JPEG格式的图片数据，你必须implement一个<a href="http://developer.android.com/reference/android/hardware/Camera.PictureCallback.html">Camera.PictureCallback</a>接口来接收图片数据并把它写到文件中。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="n">PictureCallback</span> <span class="n">mPicture</span> <span class="o">=</span> <span class="k">new</span> <span class="n">PictureCallback</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onPictureTaken</span><span class="o">(</span><span class="kt">byte</span><span class="o">[]</span> <span class="n">data</span><span class="o">,</span> <span class="n">Camera</span> <span class="n">camera</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">File</span> <span class="n">pictureFile</span> <span class="o">=</span> <span class="n">getOutputMediaFile</span><span class="o">(</span><span class="n">MEDIA_TYPE_IMAGE</span><span class="o">);</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">pictureFile</span> <span class="o">==</span> <span class="kc">null</span><span class="o">){</span>
+</span><span class='line'>            <span class="n">Log</span><span class="o">.</span><span class="na">d</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span> <span class="s">&quot;Error creating media file, check storage permissions: &quot;</span> <span class="o">+</span>
+</span><span class='line'>                <span class="n">e</span><span class="o">.</span><span class="na">getMessage</span><span class="o">());</span>
+</span><span class='line'>            <span class="k">return</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">FileOutputStream</span> <span class="n">fos</span> <span class="o">=</span> <span class="k">new</span> <span class="n">FileOutputStream</span><span class="o">(</span><span class="n">pictureFile</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">fos</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">data</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">fos</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+</span><span class='line'>        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">FileNotFoundException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">Log</span><span class="o">.</span><span class="na">d</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span> <span class="s">&quot;File not found: &quot;</span> <span class="o">+</span> <span class="n">e</span><span class="o">.</span><span class="na">getMessage</span><span class="o">());</span>
+</span><span class='line'>        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">Log</span><span class="o">.</span><span class="na">d</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span> <span class="s">&quot;Error accessing file: &quot;</span> <span class="o">+</span> <span class="n">e</span><span class="o">.</span><span class="na">getMessage</span><span class="o">());</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>触发拍照的动作，需要使用下面演示到的方法。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="c1">// Add a listener to the Capture button</span>
+</span><span class='line'><span class="n">Button</span> <span class="n">captureButton</span> <span class="o">=</span> <span class="o">(</span><span class="n">Button</span><span class="o">)</span> <span class="n">findViewById</span><span class="o">(</span><span class="n">id</span><span class="o">.</span><span class="na">button_capture</span><span class="o">);</span>
+</span><span class='line'><span class="n">captureButton</span><span class="o">.</span><span class="na">setOnClickListener</span><span class="o">(</span>
+</span><span class='line'>    <span class="k">new</span> <span class="n">View</span><span class="o">.</span><span class="na">OnClickListener</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="nd">@Override</span>
+</span><span class='line'>        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onClick</span><span class="o">(</span><span class="n">View</span> <span class="n">v</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="c1">// get an image from the camera</span>
+</span><span class='line'>            <span class="n">mCamera</span><span class="o">.</span><span class="na">takePicture</span><span class="o">(</span><span class="kc">null</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="n">mPicture</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>4.7)释放相机实例</h3>
+
+<p>相机实例是被共享的系统资源。获取到相机实例之后，程序才可以使用相机，但是，在使用完相机的时候，程序必须谨慎的释放它。建议在程序进入到pause状态时，立即释放相机资源。如果你的程序没有合理的释放相机资源，包括自己程序本身在内，后续所有的相机请求都将失败，甚至可能会导致程序崩溃。下面的代码演示了如何释放相机资源。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">CameraActivity</span> <span class="kd">extends</span> <span class="n">Activity</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">Camera</span> <span class="n">mCamera</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">SurfaceView</span> <span class="n">mPreview</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">MediaRecorder</span> <span class="n">mMediaRecorder</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="o">...</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onPause</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">onPause</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">releaseMediaRecorder</span><span class="o">();</span>       <span class="c1">// if you are using MediaRecorder, release it first</span>
+</span><span class='line'>        <span class="n">releaseCamera</span><span class="o">();</span>              <span class="c1">// release the camera immediately on pause event</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">releaseMediaRecorder</span><span class="o">(){</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">mMediaRecorder</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">mMediaRecorder</span><span class="o">.</span><span class="na">reset</span><span class="o">();</span>   <span class="c1">// clear recorder configuration</span>
+</span><span class='line'>            <span class="n">mMediaRecorder</span><span class="o">.</span><span class="na">release</span><span class="o">();</span> <span class="c1">// release the recorder object</span>
+</span><span class='line'>            <span class="n">mMediaRecorder</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>            <span class="n">mCamera</span><span class="o">.</span><span class="na">lock</span><span class="o">();</span>           <span class="c1">// lock camera for later use</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">releaseCamera</span><span class="o">(){</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">mCamera</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">){</span>
+</span><span class='line'>            <span class="n">mCamera</span><span class="o">.</span><span class="na">release</span><span class="o">();</span>        <span class="c1">// release the camera for other applications</span>
+</span><span class='line'>            <span class="n">mCamera</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>5)保存媒体文件</h2>
+
+<p>前面介绍了自定义相机，使用相机拍摄的照片或者视频都需要保存到设备的external storage目录下(SDCard)。可以有多种可能的位置用来保存文件，但是作为一个开发人员，建议使用下面两种标准的路径进行保存。</p>
+
+<ul>
+<li><a href="http://developer.android.com/reference/android/os/Environment.html#getExternalStoragePublicDirectory(java.lang.String">Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)</a>) - 这个方法会返回用来保存图片与视频所推荐使用的标准共享目录。这个目录是共享开放的，所有其他的程序都可以轻易的访问，读取并删除这个目录下的文件。如果你的程序被用户卸载，在这个目录下的文件不会被移除。为了避免干扰到用户已经存在的图片与视频目录，你应该为你的程序创建一个子目录。如下面的代码所示。这个方法从Android 2.2 (API level 8)开始就可以使用。</li>
+<li><a href="http://developer.android.com/reference/android/content/Context.html#getExternalFilesDir(java.lang.String">Context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)</a>) - 这个方法会返回一个和你的程序相关联的，用来保存图片与视频的，标准目录。如果你的程序被卸载，在这个目录下的文件也会被一起移除。这个目录并不能阻止其他程序的读写。</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">MEDIA_TYPE_IMAGE</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">MEDIA_TYPE_VIDEO</span> <span class="o">=</span> <span class="mi">2</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/** Create a file Uri for saving an image or video */</span>
+</span><span class='line'><span class="kd">private</span> <span class="kd">static</span> <span class="n">Uri</span> <span class="nf">getOutputMediaFileUri</span><span class="o">(</span><span class="kt">int</span> <span class="n">type</span><span class="o">){</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">Uri</span><span class="o">.</span><span class="na">fromFile</span><span class="o">(</span><span class="n">getOutputMediaFile</span><span class="o">(</span><span class="n">type</span><span class="o">));</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/** Create a File for saving an image or video */</span>
+</span><span class='line'><span class="kd">private</span> <span class="kd">static</span> <span class="n">File</span> <span class="nf">getOutputMediaFile</span><span class="o">(</span><span class="kt">int</span> <span class="n">type</span><span class="o">){</span>
+</span><span class='line'>    <span class="c1">// To be safe, you should check that the SDCard is mounted</span>
+</span><span class='line'>    <span class="c1">// using Environment.getExternalStorageState() before doing this.</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">File</span> <span class="n">mediaStorageDir</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">Environment</span><span class="o">.</span><span class="na">getExternalStoragePublicDirectory</span><span class="o">(</span>
+</span><span class='line'>              <span class="n">Environment</span><span class="o">.</span><span class="na">DIRECTORY_PICTURES</span><span class="o">),</span> <span class="s">&quot;MyCameraApp&quot;</span><span class="o">);</span>
+</span><span class='line'>    <span class="c1">// This location works best if you want the created images to be shared</span>
+</span><span class='line'>    <span class="c1">// between applications and persist after your app has been uninstalled.</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Create the storage directory if it does not exist</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(!</span> <span class="n">mediaStorageDir</span><span class="o">.</span><span class="na">exists</span><span class="o">()){</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(!</span> <span class="n">mediaStorageDir</span><span class="o">.</span><span class="na">mkdirs</span><span class="o">()){</span>
+</span><span class='line'>            <span class="n">Log</span><span class="o">.</span><span class="na">d</span><span class="o">(</span><span class="s">&quot;MyCameraApp&quot;</span><span class="o">,</span> <span class="s">&quot;failed to create directory&quot;</span><span class="o">);</span>
+</span><span class='line'>            <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Create a media file name</span>
+</span><span class='line'>    <span class="n">String</span> <span class="n">timeStamp</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SimpleDateFormat</span><span class="o">(</span><span class="s">&quot;yyyyMMdd_HHmmss&quot;</span><span class="o">).</span><span class="na">format</span><span class="o">(</span><span class="k">new</span> <span class="n">Date</span><span class="o">());</span>
+</span><span class='line'>    <span class="n">File</span> <span class="n">mediaFile</span><span class="o">;</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">type</span> <span class="o">==</span> <span class="n">MEDIA_TYPE_IMAGE</span><span class="o">){</span>
+</span><span class='line'>        <span class="n">mediaFile</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">mediaStorageDir</span><span class="o">.</span><span class="na">getPath</span><span class="o">()</span> <span class="o">+</span> <span class="n">File</span><span class="o">.</span><span class="na">separator</span> <span class="o">+</span>
+</span><span class='line'>        <span class="s">&quot;IMG_&quot;</span><span class="o">+</span> <span class="n">timeStamp</span> <span class="o">+</span> <span class="s">&quot;.jpg&quot;</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span> <span class="k">else</span> <span class="k">if</span><span class="o">(</span><span class="n">type</span> <span class="o">==</span> <span class="n">MEDIA_TYPE_VIDEO</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mediaFile</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">mediaStorageDir</span><span class="o">.</span><span class="na">getPath</span><span class="o">()</span> <span class="o">+</span> <span class="n">File</span><span class="o">.</span><span class="na">separator</span> <span class="o">+</span>
+</span><span class='line'>        <span class="s">&quot;VID_&quot;</span><span class="o">+</span> <span class="n">timeStamp</span> <span class="o">+</span> <span class="s">&quot;.mp4&quot;</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">mediaFile</span><span class="o">;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>6)相机相关特性</h2>
+
+<p>Android提供了控制相机特性的方法，例如图片格式，闪光灯模式，聚焦模式等等。这一段落列出了大部分相机共有的功能并简短的介绍如何使用这些功能。大多数相机特性可以通过<strong>Camera.Parameters</strong>对象来获取并进行相关的设置。然而，有几个重要的功能不仅仅是通过<strong>Camera.Parameters</strong>能够实现的。请看下面的内容介绍：</p>
+
+<ul>
+<li>Metering and focus areas：测光并进行聚焦</li>
+<li>Face detection：人脸检测</li>
+</ul>
+
+
+<p>关于上面2个常用的功能会在以后的文章中进行更加详细的介绍，除此之外的其他相机特性功能，请参考下面这张表：</p>
+
+<p><img src="http://hukai.me/images/articles/camera_features_table.png" title="Camera Common Features" alt="camera_features_table.png" /></p>
+
+<p><strong>Note:</strong> 因为软硬件的差异性，那些功能并不一定都是支持的。对于检查功能是否可用，请参考下面的Checking feature availability.</p>
+
+<h3>6.1)Checking feature availability</h3>
+
+<p>相机的有些功能在所有手机上并不一定是都支持的。在开发相机应用时就需要提前考虑应该适配到哪个level。然后开发的时候需要动态的去根据功能是否支持来做不同的处理。</p>
+
+<p>你可以通过获取到相机参数的对象来做检测。下面的例子演示了如何检查autofocus功能是否可用：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="c1">// get Camera parameters</span>
+</span><span class='line'><span class="n">Camera</span><span class="o">.</span><span class="na">Parameters</span> <span class="n">params</span> <span class="o">=</span> <span class="n">mCamera</span><span class="o">.</span><span class="na">getParameters</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">focusModes</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="na">getSupportedFocusModes</span><span class="o">();</span>
+</span><span class='line'><span class="k">if</span> <span class="o">(</span><span class="n">focusModes</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="n">Camera</span><span class="o">.</span><span class="na">Parameters</span><span class="o">.</span><span class="na">FOCUS_MODE_AUTO</span><span class="o">))</span> <span class="o">{</span>
+</span><span class='line'>  <span class="c1">// Autofocus mode is supported</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>对于大多数的相机特性，都可以使用类型上面的代码来处理。Camera.Parameters对象提供了一系列的类似<code>getSupported...()</code>, <code>is...Supported()</code> 与 <code>getMax...()</code> 方法来判断某个功能是否可用的。</p>
+
+<p>如果你的程序确定需要相机的某个特性，你可以在mainfest文件中就进声明。例如你声明了flash与auto-focus的功能，那么Google Play会阻止那些不支持这些功能的设备安装这个应用。关于相机功能的声明列表，请参考<a href="http://developer.android.com/guide/topics/manifest/uses-feature-element.html#hw-features">Features Reference.</a></p>
+
+<h3>6.2)Using camera features</h3>
+
+<p>前面已经提到过，通过Camera.Parameters对象来操控相机。如下所示：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="c1">// get Camera parameters</span>
+</span><span class='line'><span class="n">Camera</span><span class="o">.</span><span class="na">Parameters</span> <span class="n">params</span> <span class="o">=</span> <span class="n">mCamera</span><span class="o">.</span><span class="na">getParameters</span><span class="o">();</span>
+</span><span class='line'><span class="c1">// set the focus mode</span>
+</span><span class='line'><span class="n">params</span><span class="o">.</span><span class="na">setFocusMode</span><span class="o">(</span><span class="n">Camera</span><span class="o">.</span><span class="na">Parameters</span><span class="o">.</span><span class="na">FOCUS_MODE_AUTO</span><span class="o">);</span>
+</span><span class='line'><span class="c1">// set Camera parameters</span>
+</span><span class='line'><span class="n">mCamera</span><span class="o">.</span><span class="na">setParameters</span><span class="o">(</span><span class="n">params</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面这种方法对大多数相机功能都是可用的，在你获取到相机的实例之后，大多数参数都是在任意时间均可以修改的。参数修改的效果在相机预览的界面是可以立即看到效果的。在软件层面，实际上可能是需要花几帧的时间来产生效果的，因为需要发送指令给相机硬件产生效果。</p>
+
+<p><strong>Important:</strong> 有部分相机特性不是想要修改的时候就可以直接修改的。尤其是，修改相机预览的角度与相机预览大小，很多时候是需要先停止预览，设置参数，再重启预览的。从Android Android 4.0(API level 14)开始，预览角度可以不用重启预览就可以进行修改。</p>
+
+<hr />
+
+<p><strong>后记:</strong>这篇概览大致介绍了Android平台上相机开发相关的基础概念，上面的演示代码仅仅是为了说明问题，在真实项目的实践中，相机实例的相关操作都会放在单独的线程中，很多基础的操作都可能遇到复杂的兼容性问题，为了解决兼容性的问题，提高性能等等的需要，会做很大的调整，更多细节请期待后续的文章，谢谢！</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Android性能优化典范 - 第6季]]></title>
@@ -4003,142 +4954,6 @@ Android 4.x的系统废除了external的计数器，类似bitmap的分配改到d
 * <strong>WearableListView</strong> - 一个针对可穿戴设备优化过后的ListView。它会垂直的显示列表内容，并在用户停止滑动时自动显示最靠近的Item。</p>
 
 <blockquote><p><a href="http://developer.android.com/shareables/training/wearable-support-docs.zip">点击下载完整的API说明文档</a> 这个文档会详细的介绍每一个UI组件。</p></blockquote>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Training - 创建可穿戴应用(1 - 创建并执行可穿戴应用)]]></title>
-    <link href="http://hukai.me/android-training-wearable-app-creating/"/>
-    <updated>2014-07-14T19:26:00+08:00</updated>
-    <id>http://hukai.me/android-training-wearable-app-creating</id>
-    <content type="html"><![CDATA[<p>可穿戴应用可以直接运行在可穿戴的设备上。拥有访问类似传感器的硬件权限，还有操作activity，services等权限。</p>
-
-<p>你无法直接发布可穿戴应用到Google Play商城，需要利用手持应用来达到目的。因为可穿戴的设备不支持Google Play商城，所以当用户下载手持设备应用的时候，，会自动安装可穿戴应用到可穿戴设备上。手持应用还可以用来处理一些复杂繁重的任务，网络指令，或者其他的任务，最好发送操作结果返回给可穿戴设备。</p>
-
-<p>这节课会介绍如何创建一个包含了手持应用与可穿戴应用的工程。</p>
-
-<h2>搭建Android Wear模拟器或者真机设备。</h2>
-
-<p>我们推荐在真机上进行开发，这样可以更好的评估用户体验。然而，模拟器可以使得你在不同类型的设备屏幕上进行模拟，这对测试来说更加有用。</p>
-
-<h3>搭建Android Wear虚拟设备</h3>
-
-<p>建立Android Wear虚拟设备需要下面几个步骤：</p>
-
-<!-- More -->
-
-
-<ol>
-<li>点击<strong>Tools</strong> > <strong>Android</strong> > <strong>AVD Manager</strong>.</li>
-<li>点击<strong>Create</strong>&#8230;.</li>
-<li>填写下面几项详细的设置，其余选项保留默认：
-
-<ul>
-<li><strong>AVD Name</strong> - AVD的名字</li>
-<li><strong>Device</strong> - Android Wear圆形还是方形</li>
-<li><strong>Target</strong> - Android 4.4W - API Level 20</li>
-<li><strong>CPU/ABI</strong> - Android Wear ARM (armeabi-v7a)</li>
-<li><strong>Keyboard</strong> - 选择Hardware keyboard present</li>
-<li><strong>Skin</strong> - 圆形还是方形取决于选择的设备类型</li>
-<li><strong>Snapshot</strong> - 不勾选 selected</li>
-<li><strong>Use Host GPU</strong> - 勾选，为了支持自定义的activity能够显示可穿戴的notification。</li>
-</ul>
-</li>
-<li>点击<strong>OK.</strong></li>
-<li>启动模拟器:
-
-<ul>
-<li>选择你刚才创建的虚拟设备</li>
-<li>点击<strong>Start</strong>&#8230;，然后选择<strong>Launch.</strong></li>
-<li>等待模拟器初始化直到显示Android Wear的主界面。</li>
-</ul>
-</li>
-<li>匹配你的手持和模拟器:
-
-<ul>
-<li>在你的手持设备上，从Google Play安装<code>Android Wear</code>应用(这是一个由Google公司写的用来匹配的应用)</li>
-<li>通过USB连接你的手持设备到你的电脑。</li>
-<li>切换AVD的接口到手持设备(这个步骤需要每次连接都执行)
-<code>git
-adb -d forward tcp:5601 tcp:5601
-</code></li>
-<li>启动手持设备上的<code>Android Wear</code>应用，并连接到模拟器。</li>
-<li>点击右上角的菜单，选择Demo Cards。</li>
-<li>你选择的卡片呈现在模拟器上会类似一个Notification。</li>
-</ul>
-</li>
-</ol>
-
-
-<h3>搭建Android Wear真机</h3>
-
-<p>建立Android Wear真机，需要下面几个步骤：</p>
-
-<ul>
-<li>在你的手持设备的Google Play上安装<code>Android Wear</code>应用。</li>
-<li>按照应用的命令指示与你的可穿戴设备进行匹对。如果你有做建立notification的操作，这个步骤刚好可以测试这一功能。</li>
-<li>保持<code>Android Wear</code>应用在手机上的打开状态。</li>
-<li>通过USB连接可穿戴设备到电脑上，这样你能够直接安装应用到可穿戴设备上。在可穿戴设备与<code>Android Wear</code>应用上会显示一个消息提示，是否允许进行调试。</li>
-<li>在<code>Android Wear</code>应用上，总是选择允许连接。</li>
-</ul>
-
-
-<p>Android Studio上的Tool的窗口可以显示可穿戴设备的日志。当你执行<code>adb devices</code>命令的时候，也可以看到wearable的存在。</p>
-
-<h2>创建Wear项目</h2>
-
-<p>在开始开发之前，需要创建一个项目包含可穿戴应用与手持应用这两个模块。在Android Studio中，点击<strong>File</strong> > <strong>New Project</strong> 然后按照<a href="http://developer.android.com/sdk/installing/create-project.html">创建项目</a>的指引进行操作。如果你按照安装向导操作，需要输入下面的信息：</p>
-
-<ol>
-<li>在确认项目的窗口，输入你的应用的名称与包名。</li>
-<li>在应用参数选择窗口:
-
-<ul>
-<li>勾选Phone 与 Tablet 并选择API 8: Android 2.2 (Froyo) 作为Minimum SDK.</li>
-<li>勾选可穿戴并选择API 20: Android 4.4 (KitKat Wear) 作为Minimum SDK.</li>
-</ul>
-</li>
-<li>在第一个添加activity的窗口，选择为Mobile模块添加一个空白的activity。</li>
-<li>在第二个添加activity的窗口，选择为Wear模块添加一个空白的activity。</li>
-</ol>
-
-
-<p>当安装向导完成后，Andorid Studio创建了一个包含Mobile与Wear两个模块的项目。你可以在这2个模块中各自创建activity，service，layout等等。在手持应用里面，需要承担大部分繁重的任务，例如网络请求，密集计算任务或者是需要大量用户交互的任务。待这些任务完成之后，再通常把任务结果通过notification发送给可穿戴设备上，或者是通过同步机制发送数据给可穿戴设备。</p>
-
-<blockquote><p><strong>Note:</strong> 可穿戴模块包含了一个&#8221;Hello World&#8221;的activity，它是使用<code>WatchViewStub</code>的布局。WatchViewStub是可穿戴support library中的一个UI组件。</p></blockquote>
-
-<h2>安装可穿戴应用</h2>
-
-<p>在开发过程中，你可以像安装手持应用一样直接安装可穿戴应用。可以使用<code>adb install</code>命令也可以使用Android Studio上面的Play按钮。</p>
-
-<p>当需要把应用发布给用户的时候，你需要把可穿戴应用打包到手持应用中。当用户从Google Play安装手持应用时，连接上得可穿戴设备会自动收到可穿戴应用。</p>
-
-<blockquote><p><strong>Note:</strong> 如果你给应用签名是Debug Key，是无法完成自动安装可穿戴应用的。请参考<a href="packaging.html">打包可穿戴应用</a>获取更多信息，学习如何正确的打包。</p></blockquote>
-
-<p>为了安装&#8221;Hello World&#8221;应用到可穿戴设备，在Android Studiod的Run/Debug的下拉选项中选中Wear模块，点击Play按钮即可。在可穿戴设备上会显示activity并打印&#8221;Hello world!&#8221;</p>
-
-<h2>include需要的libraries</h2>
-
-<p>项目安装向导会自动把合适的模块依赖添加到对应的build.gradle文件中。然而，这些依赖并不是必须得，请阅读下面描述判断你是否需要这些依赖。</p>
-
-<ul>
-<li><p><strong>Notifications</strong></p>
-
-<p><a href="http://developer.android.com/tools/support-library/features.html#v4">The Android v4 support library</a> (or v13)能够支持运行在手持应用的notification也能够在可穿戴设备上显示。</p></li>
-</ul>
-
-
-<p> 对于只显示在可穿戴设备上得notification(这意味着，他们是由直接执行在可穿戴设备上得app进行处理的)，你可以在Wear模块仅仅使用标准APIs (API Level 20) 并且把Mobile模块的依赖support library移除。</p>
-
-<ul>
-<li><p><strong>Wearable Data Layer</strong></p>
-
-<p>可穿戴与手持设备之间进行同步与发送数据需要使用Wearable Data Layer APIs, 你需要最新版本的<a href="http://developer.android.com/google/play-services/setup.html">Google Play Services</a>。如果你不需要这些APIs，可以从这两个模块中把这部分的依赖移除。</p></li>
-<li><p><strong>Wearable UI support library</strong></p>
-
-<p>这是一个非官方正式的library，它包含了为可穿戴设备设计的UI组件。我们鼓励你在你的应用中使用他们。因为这些组件是最佳实践的例证。但是他们可能随时发生变化。然而，如果library有更新，你的应用并不会发送崩溃，因为那些代码已经编译到你的应用中了。为了获取更新包中新的功能，你只需要更新链接到新的版本并相应的更新你的应用就好了。这个library只是在你需要创建可穿戴应用时才会使用到。</p></li>
-</ul>
-
 ]]></content>
   </entry>
   
