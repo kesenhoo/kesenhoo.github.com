@@ -9,7 +9,7 @@
   <meta name="author" content="HuKai">
 
   
-  <meta name="description" content="Google前几天刚发布了Android性能优化典范第2季的课程，一共20个短视频，包括的内容大致有：电量优化，网络优化，Wear上如何做优化，使用对象池来提高效率，LRU Cache，Bitmap的缩放，缓存，重用，PNG压缩，自定义View的性能，提升设置alpha之后View的渲染性能， &hellip;">
+  <meta name="description" content="Android性能优化典范的课程最近更新到第三季了，这次一共12个短视频课程，包括的内容大致有：更高效的ArrayMap容器，使用Android系统提供的特殊容器来避免自动装箱，避免使用枚举类型，注意onLowMemory与onTrimMemory的回调，避免内存泄漏，高效的位置更新操作， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +81,61 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-performance-patterns-season-3/">Android性能优化典范 - 第3季</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-11T23:53:00+08:00" pubdate data-updated="true">Aug 11<span>th</span>, 2015</time>
+        
+         | <a href="/android-performance-patterns-season-3/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img src="/images/android_perf_patterns_season_3.png" alt="android_perf_patterns_season_3" /></p>
+
+<blockquote><p><a href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">Android性能优化典范</a>的课程最近更新到第三季了，这次一共12个短视频课程，包括的内容大致有：更高效的ArrayMap容器，使用Android系统提供的特殊容器来避免自动装箱，避免使用枚举类型，注意onLowMemory与onTrimMemory的回调，避免内存泄漏，高效的位置更新操作，重复layout操作的性能影响，以及使用Batching，Prefetching优化网络请求，压缩传输数据等等使用技巧。下面是对这些课程的总结摘要，认知有限，理解偏差的地方请多多交流指正！</p></blockquote>
+
+<h2>1)Fun with ArrayMaps</h2>
+
+<p>程序内存的管理是否合理高效对应用的性能有着很大的影响，有的时候对容器的使用不当也会导致内存管理效率低下。Android为移动操作系统特意编写了一些更加高效的容器，例如SparseArray，今天要介绍的是一个新的容器，叫做<strong><a href="https://android.googlesource.com/platform/frameworks/base.git/+/master/core/java/android/util/ArrayMap.java">ArrayMap</a></strong>。</p>
+
+<p>我们经常会使用到HashMap这个容器，它非常好用，但是却很占用内存。下图演示了HashMap的简要工作原理：</p>
+
+<p><img src="/images/android_perf_3_arraymap_key_value.png" alt="android_perf_3_arraymap_key_value" /></p>
+
+<p>为了解决HashMap更占内存的弊端，Android提供了内存效率更高的<strong>ArrayMap</strong>。它内部使用两个数组进行工作，其中一个数组记录key hash过后的顺序列表，另外一个数组按key的顺序记录Key-Value值，如下图所示：</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-performance-patterns-season-3/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -248,65 +303,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-performance-compute/">Android性能优化之运算篇</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-04-12T13:50:00+08:00" pubdate data-updated="true">Apr 12<span>th</span>, 2015</time>
-        
-         | <a href="/android-performance-compute/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><img src="/images/android_performance_course_udacity.jpg" alt="" /></p>
-
-<blockquote><p>Google近期在Udacity上发布了<a href="https://www.udacity.com/course/ud825">Android性能优化的在线课程</a>，分别从渲染，运算与内存，电量几个方面介绍了如何去优化性能，这些课程是Google之前在Youtube上发布的<a href="http://hukai.me/android-performance-patterns/">Android性能优化典范</a>专题课程的细化与补充。</p></blockquote>
-
-<p>下面是运算篇章的学习笔记，部分内容与前面的性能优化典范有重合，欢迎大家一起学习交流！</p>
-
-<h3>1)Intro to Compute and Memory Problems</h3>
-
-<p>Android中的Java代码会需要经过编译优化再执行的过程。代码的不同写法会影响到Java编译器的优化效率。例如for循环的不同写法就会对编译器优化这段代码产生不同的效率，当程序中包含大量这种可优化的代码的时候，运算性能就会出现问题。想要知道如何优化代码的运算性能就需要知道代码在硬件层的执行差异。</p>
-
-<h3>2)Slow Function Performance</h3>
-
-<p>如果你写了一段代码，它的执行效率比想象中的要差很多。我们需要知道有哪些因素有可能影响到这段代码的执行效率。例如：比较两个float数值大小的执行时间是int数值的4倍左右。这是因为CPU的运算架构导致的，如下图所示：</p>
-
-<p><img src="/images/android_perf_compute_float_int.png" alt="" /></p>
-
-<p>虽然现代的CPU架构得到了很大的提升，也许并不存在上面所示的那么大的差异，但是这个例子说明了代码写法上的差异会对运算性能产生很大的影响。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-performance-compute/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/4/">&larr; Older</a>
@@ -322,6 +318,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/google-io-2018-android-jetpack-workmanager/">Android Jetpack - 使用WorkManager处理简单的后台任务</a>
+      </li>
     
       <li class="post">
         <a href="/android-dev-camera-basics/">Android相机开发 - 1)基础概览篇</a>
@@ -351,23 +351,20 @@
         <a href="/android-performance-oom/">Android内存优化之OOM</a>
       </li>
     
-      <li class="post">
-        <a href="/android-performance-patterns-season-3/">Android性能优化典范 - 第3季</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (101)</a></li>
+  <li><a href='/blog/categories/android'>Android (102)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
   <li><a href='/blog/categories/android-performance'>Android:performance (22)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
-  <li><a href='/blog/categories/google'>Google (1)</a></li>
+  <li><a href='/blog/categories/google'>Google (2)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
+  <li><a href='/blog/categories/jetpack'>Jetpack (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
 </ul>
 </section>

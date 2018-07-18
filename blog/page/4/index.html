@@ -9,7 +9,7 @@
   <meta name="author" content="HuKai">
 
   
-  <meta name="description" content="Google近期在Udacity上发布了Android性能优化的在线课程，分别从渲染，运算与内存，电量几个方面介绍了如何去优化性能，这些课程是Google之前在Youtube上发布的Android性能优化典范专题课程的细化与补充。 下面是渲染篇章的学习笔记，部分内容和前面的性能优化典范有重合， &hellip;">
+  <meta name="description" content="Google近期在Udacity上发布了Android性能优化的在线课程，分别从渲染，运算与内存，电量几个方面介绍了如何去优化性能，这些课程是Google之前在Youtube上发布的Android性能优化典范专题课程的细化与补充。 下面是运算篇章的学习笔记，部分内容与前面的性能优化典范有重合， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +81,65 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-performance-compute/">Android性能优化之运算篇</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-04-12T13:50:00+08:00" pubdate data-updated="true">Apr 12<span>th</span>, 2015</time>
+        
+         | <a href="/android-performance-compute/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img src="/images/android_performance_course_udacity.jpg" alt="" /></p>
+
+<blockquote><p>Google近期在Udacity上发布了<a href="https://www.udacity.com/course/ud825">Android性能优化的在线课程</a>，分别从渲染，运算与内存，电量几个方面介绍了如何去优化性能，这些课程是Google之前在Youtube上发布的<a href="http://hukai.me/android-performance-patterns/">Android性能优化典范</a>专题课程的细化与补充。</p></blockquote>
+
+<p>下面是运算篇章的学习笔记，部分内容与前面的性能优化典范有重合，欢迎大家一起学习交流！</p>
+
+<h3>1)Intro to Compute and Memory Problems</h3>
+
+<p>Android中的Java代码会需要经过编译优化再执行的过程。代码的不同写法会影响到Java编译器的优化效率。例如for循环的不同写法就会对编译器优化这段代码产生不同的效率，当程序中包含大量这种可优化的代码的时候，运算性能就会出现问题。想要知道如何优化代码的运算性能就需要知道代码在硬件层的执行差异。</p>
+
+<h3>2)Slow Function Performance</h3>
+
+<p>如果你写了一段代码，它的执行效率比想象中的要差很多。我们需要知道有哪些因素有可能影响到这段代码的执行效率。例如：比较两个float数值大小的执行时间是int数值的4倍左右。这是因为CPU的运算架构导致的，如下图所示：</p>
+
+<p><img src="/images/android_perf_compute_float_int.png" alt="" /></p>
+
+<p>虽然现代的CPU架构得到了很大的提升，也许并不存在上面所示的那么大的差异，但是这个例子说明了代码写法上的差异会对运算性能产生很大的影响。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-performance-compute/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -257,70 +316,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-activitylifecycle-onsaveinstancestate/">Android Notes - Activity生命周期中的onSaveInstanceState</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-31T17:01:00+08:00" pubdate data-updated="true">Aug 31<span>st</span>, 2014</time>
-        
-         | <a href="/android-activitylifecycle-onsaveinstancestate/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>记录下Activity生命周期中的<a href="http://developer.android.com/reference/android/app/Activity.html">onSaveInstanceState(Bundle outState)</a></p>
-
-<h2>onSaveInstanceState与onRestoreInstanceState的作用：</h2>
-
-<p>在资源紧张的情况下，系统会选择杀死一些处于非栈顶的Activity来回收资源。
-为了能够让这些可能被杀死的Activity能够在恢复显示的时候状态不丢失，所以需要在Activity从栈顶往下压的时候提供onSaveInstanceState的回调用来提前保存状态信息。</p>
-
-<p>而onRestoreInstanceState则是在这个Activity真的回收掉之后的恢复显示阶段用来恢复之前保存的数据。</p>
-
-<h2>onSaveInstanceState与onRestoreInstanceState的调用时机：</h2>
-
-<p>只要某个Activity是做入栈并且非栈顶时（启动跳转其他Activity或者点击Home按钮），此Activity是需要调用onSaveInstanceState的，
-如果Activity是做出栈的动作（点击back或者执行finish），是不会调用onSaveInstanceState的。</p>
-
-<p>只有在Activity真的被系统非正常杀死过，恢复显示Activity的时候，就会调用onRestoreInstanceState。</p>
-
-<h2><a href="https://github.com/kesenhoo/ActivityLifeCycle">Sample Code</a></h2>
-
-<ul>
-<li>从ActivityA启动ActivityB执行顺序是：A：onCreate -> A：onStart -> A：onResume -> B：onCreate -> B：onStart -> B：onResume -> A：onSaveInstanceState –> A：onStop。</li>
-<li>正常流程从ActivityB点击Back按钮或者是触发finish方法回退到ActivityA，执行顺序是：B：finish –> B：onPause –> A： onRestart –> A：onStart  -> A：onResume -> B： onStop –> B：onDestroy。</li>
-<li>若启动ActivityB之后，选择点击Home按钮，程序退到后台，那么执行顺序是：B：onPause -> B：onSaveInstanceState -> B：onStop。</li>
-<li>程序在后台的时候，选择主动杀死程序进程，然后再从桌面点击应用启动，会显示之前的ActivityB，执行顺序是：B：onCreate -> B：onStart –> B：onRestoreInstanceState - > B：onResume。</li>
-<li>点击Back按钮或者是执行Activity B里面提供的finish方法：B：finish –> B：onPause –> A：onCreate  -> A：onStart -> A：onRestoreInstanceState -> A：onResume -> B：onStop -> B：onDestory。</li>
-<li>最后再点击Back按钮或是执行Activity A里面的finish方法退出程序：A：finish -> A：onPause –> A：onStop -> A：onDestory。</li>
-</ul>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/5/">&larr; Older</a>
@@ -336,6 +331,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/google-io-2018-android-jetpack-workmanager/">Android Jetpack - 使用WorkManager处理简单的后台任务</a>
+      </li>
     
       <li class="post">
         <a href="/android-dev-camera-basics/">Android相机开发 - 1)基础概览篇</a>
@@ -365,23 +364,20 @@
         <a href="/android-performance-oom/">Android内存优化之OOM</a>
       </li>
     
-      <li class="post">
-        <a href="/android-performance-patterns-season-3/">Android性能优化典范 - 第3季</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (101)</a></li>
+  <li><a href='/blog/categories/android'>Android (102)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
   <li><a href='/blog/categories/android-performance'>Android:performance (22)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
-  <li><a href='/blog/categories/google'>Google (1)</a></li>
+  <li><a href='/blog/categories/google'>Google (2)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
+  <li><a href='/blog/categories/jetpack'>Jetpack (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
 </ul>
 </section>

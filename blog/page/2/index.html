@@ -9,7 +9,7 @@
   <meta name="author" content="HuKai">
 
   
-  <meta name="description" content="Android性能优化典范第4季的课程学习笔记终于在2015年的最后一天完成了，文章共17个段落，包含的内容大致有：优化网络请求的行为，优化安装包的资源文件，优化数据传输的效率，性能优化的几大基础原理等等。因为学习认知水平有限，肯定存在不少理解偏差甚至错误的地方，请多多交流指正！ 1) &hellip;">
+  <meta name="description" content="这是Android性能优化典范第5季的课程学习笔记，拖拖拉拉很久，记录分享给大家，请多多包涵担待指正！文章共10个段落，涉及的内容有：多线程并发的性能问题，介绍了AsyncTask，HandlerThread， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +81,59 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/android-performance-patterns-season-5/">Android性能优化典范 - 第5季</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-04-28T00:08:00+08:00" pubdate data-updated="true">Apr 28<span>th</span>, 2016</time>
+        
+         | <a href="/android-performance-patterns-season-5/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><img src="/images/android_perf_patterns_season_5.png" alt="android_perf_patterns_season_5" /></p>
+
+<blockquote><p>这是<a href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">Android性能优化典范</a>第5季的课程学习笔记，拖拖拉拉很久，记录分享给大家，请多多包涵担待指正！文章共10个段落，涉及的内容有：多线程并发的性能问题，介绍了AsyncTask，HandlerThread，IntentService与ThreadPool分别适合的使用场景以及各自的使用注意事项，这是一篇了解Android多线程编程不可多得的基础文章，清楚的了解这些Android系统提供的多线程基础组件之间的差异以及优缺点，才能够在项目实战中做出最恰当的选择。</p></blockquote>
+
+<h2>1)Threading Performance</h2>
+
+<p>在程序开发的实践当中，为了让程序表现得更加流畅，我们肯定会需要使用到多线程来提升程序的并发执行性能。但是编写多线程并发的代码一直以来都是一个相对棘手的问题，所以想要获得更佳的程序性能，我们非常有必要掌握多线程并发编程的基础技能。</p>
+
+<p>众所周知，Android程序的大多数代码操作都必须执行在主线程，例如系统事件(例如设备屏幕发生旋转)，输入事件(例如用户点击滑动等)，程序回调服务，UI绘制以及闹钟事件等等。那么我们在上述事件或者方法中插入的代码也将执行在主线程。</p>
+
+<p><img src="/images/android_perf_5_threading_main_thread.png" alt="android_perf_5_threading_main_thread" /></p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/android-performance-patterns-season-5/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -243,61 +296,6 @@ Android系统的Dalvik虚拟机扮演了常规的内存垃圾自动回收的角�
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/android-performance-patterns-season-3/">Android性能优化典范 - 第3季</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-08-11T23:53:00+08:00" pubdate data-updated="true">Aug 11<span>th</span>, 2015</time>
-        
-         | <a href="/android-performance-patterns-season-3/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><img src="/images/android_perf_patterns_season_3.png" alt="android_perf_patterns_season_3" /></p>
-
-<blockquote><p><a href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">Android性能优化典范</a>的课程最近更新到第三季了，这次一共12个短视频课程，包括的内容大致有：更高效的ArrayMap容器，使用Android系统提供的特殊容器来避免自动装箱，避免使用枚举类型，注意onLowMemory与onTrimMemory的回调，避免内存泄漏，高效的位置更新操作，重复layout操作的性能影响，以及使用Batching，Prefetching优化网络请求，压缩传输数据等等使用技巧。下面是对这些课程的总结摘要，认知有限，理解偏差的地方请多多交流指正！</p></blockquote>
-
-<h2>1)Fun with ArrayMaps</h2>
-
-<p>程序内存的管理是否合理高效对应用的性能有着很大的影响，有的时候对容器的使用不当也会导致内存管理效率低下。Android为移动操作系统特意编写了一些更加高效的容器，例如SparseArray，今天要介绍的是一个新的容器，叫做<strong><a href="https://android.googlesource.com/platform/frameworks/base.git/+/master/core/java/android/util/ArrayMap.java">ArrayMap</a></strong>。</p>
-
-<p>我们经常会使用到HashMap这个容器，它非常好用，但是却很占用内存。下图演示了HashMap的简要工作原理：</p>
-
-<p><img src="/images/android_perf_3_arraymap_key_value.png" alt="android_perf_3_arraymap_key_value" /></p>
-
-<p>为了解决HashMap更占内存的弊端，Android提供了内存效率更高的<strong>ArrayMap</strong>。它内部使用两个数组进行工作，其中一个数组记录key hash过后的顺序列表，另外一个数组按key的顺序记录Key-Value值，如下图所示：</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/android-performance-patterns-season-3/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -313,6 +311,10 @@ Android系统的Dalvik虚拟机扮演了常规的内存垃圾自动回收的角�
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/google-io-2018-android-jetpack-workmanager/">Android Jetpack - 使用WorkManager处理简单的后台任务</a>
+      </li>
     
       <li class="post">
         <a href="/android-dev-camera-basics/">Android相机开发 - 1)基础概览篇</a>
@@ -342,23 +344,20 @@ Android系统的Dalvik虚拟机扮演了常规的内存垃圾自动回收的角�
         <a href="/android-performance-oom/">Android内存优化之OOM</a>
       </li>
     
-      <li class="post">
-        <a href="/android-performance-patterns-season-3/">Android性能优化典范 - 第3季</a>
-      </li>
-    
   </ul>
 </section>
 
 <section>
 <h1>Categories</h1>
 <ul>
-  <li><a href='/blog/categories/android'>Android (101)</a></li>
+  <li><a href='/blog/categories/android'>Android (102)</a></li>
   <li><a href='/blog/categories/android-deeper'>Android:deeper (2)</a></li>
   <li><a href='/blog/categories/android-notes'>Android:notes (10)</a></li>
   <li><a href='/blog/categories/android-performance'>Android:performance (22)</a></li>
   <li><a href='/blog/categories/android-training'>Android:training (75)</a></li>
-  <li><a href='/blog/categories/google'>Google (1)</a></li>
+  <li><a href='/blog/categories/google'>Google (2)</a></li>
   <li><a href='/blog/categories/java'>Java (1)</a></li>
+  <li><a href='/blog/categories/jetpack'>Jetpack (1)</a></li>
   <li><a href='/blog/categories/life'>Life (1)</a></li>
 </ul>
 </section>
