@@ -25,6 +25,8 @@ categories: Android Jetpack Google
 
 ![google_io_2018_android_jetpack_workmanager_02](/images/google_io_2018_android_jetpack_workmanager_02.png)
 
+<!-- More -->
+
 ## 1）WorkManager Features
 下面是WorkManager的一些突出特点：
 
